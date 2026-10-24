@@ -59,7 +59,7 @@ jobs:
           if (-not (Select-String -Path $log -SimpleMatch 'Installation process succeeded.' -Quiet)) { Get-Content $log -Tail 40; throw 'Inno Setup 6.2.2 did not install' }
           # The 6.2.2 banner carries no minor version, only its copyright year: the
           # runner's 6.7.x reads 1997-2026. Every file in 6.2.2's own installer is
-          # flagged ignoreversion, so none of the newer files survive the downgrade.
+          # flagged ignoreversion, so every file 6.2.2 ships replaces the newer one.
           $banner = (& (Join-Path $dir 'ISCC.exe') 2>&1 | Select-Object -First 3) -join ' '
           Write-Output $banner
           if ($banner -notmatch 'Copyright \(C\) 1997-2023 Jordan Russell') { throw 'ISCC is not 6.2.2' }

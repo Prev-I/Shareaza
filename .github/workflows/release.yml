@@ -61,7 +61,7 @@ jobs:
                 if (-not (Select-String -Path $log -SimpleMatch 'Installation process succeeded.' -Quiet)) { Get-Content $log -Tail 40; throw 'Inno Setup 6.2.2 did not install' }
                 # The 6.2.2 banner carries no minor version, only its copyright year: the
                 # runner's 6.7.x reads 1997-2026. Every file in 6.2.2's own installer is
-                # flagged ignoreversion, so none of the newer files survive the downgrade.
+                # flagged ignoreversion, so every file 6.2.2 ships replaces the newer one.
                 $banner = (& (Join-Path $dir 'ISCC.exe') 2>&1 | Select-Object -First 3) -join ' '
                 Write-Output $banner
                 if ($banner -notmatch 'Copyright \(C\) 1997-2023 Jordan Russell') { throw 'ISCC is not 6.2.2' }
@@ -108,14 +108,20 @@ jobs:
 
     publish:
         needs: workflow_matrix
-        # Only a tag push publishes. A workflow_dispatch run stops at the artifacts.
-        if: startsWith(github.ref, 'refs/tags/')
+        # Only a tag push publishes. A workflow_dispatch run stops at the artifacts,
+        # even when it is dispatched against a tag.
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
         runs-on: ubuntu-latest
         permissions:
             contents: write
+        defaults:
+            run:
+                # bash, not the default bash -e: adds pipefail.
+                shell: bash
         env:
-            # Secrets cannot be referenced in a step's if:, so it is exposed here.
-            VIRUS_TOTAL_API_KEY: ${{ secrets.VIRUS_TOTAL_API_KEY }}
+            # Secrets cannot be referenced in a step's if:. Expose only whether the
+            # key is set, so the key itself reaches the VirusTotal step alone.
+            HAS_VT_KEY: ${{ secrets.VIRUS_TOTAL_API_KEY != '' }}
         steps:
         - name: Download All Artifacts
           uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
@@ -130,13 +136,16 @@ jobs:
             for d in artifacts/*/; do (cd "$d" && sha256sum -c SHA256SUMS.txt); done
             mkdir dist
             cp artifacts/*/*.exe dist/
+            # Two artifacts with the same installer name would overwrite each other.
+            src=(artifacts/*/*.exe) dst=(dist/*.exe)
+            [ "${#src[@]}" -eq "${#dst[@]}" ] || { echo "::error::duplicate installer names"; exit 1; }
             (cd dist && sha256sum -- *.exe | tee SHA256SUMS.txt)
         - name: VirusTotal Scan
           id: virustotal
-          if: env.VIRUS_TOTAL_API_KEY != ''
+          if: env.HAS_VT_KEY == 'true'
           uses: crazy-max/ghaction-virustotal@936d8c5c00afe97d3d9a1af26d017cfdf26800a2 # v5.0.0
           with:
-            vt_api_key: ${{ env.VIRUS_TOTAL_API_KEY }}
+            vt_api_key: ${{ secrets.VIRUS_TOTAL_API_KEY }}
             files: |
               dist/*.exe
         - name: Write release body
@@ -145,12 +154,16 @@ jobs:
           env:
             ANALYSIS: ${{ steps.virustotal.outputs.analysis }}
           run: |
+            if [ "$HAS_VT_KEY" = true ] && [ -z "$ANALYSIS" ]; then
+              echo "::error::VirusTotal ran but produced no analysis output"; exit 1
+            fi
             : > body.md
             if [ -n "$ANALYSIS" ]; then
               echo "🛡 VirusTotal analysis:" >> body.md
               # Entries are file=url. Split on the first '=' only: analysis ids are
               # base64 and can end in '='.
               echo "$ANALYSIS" | tr ',' '\n' | while read -r entry; do
+                [ -n "$entry" ] || continue
                 echo "* [\`$(basename "${entry%%=*}")\`](${entry#*=})" >> body.md
               done
             fi
@@ -162,6 +175,7 @@ jobs:
             make_latest: true
             generate_release_notes: true
             body_path: body.md
+            fail_on_unmatched_files: true
             files: |
               dist/*.exe
               dist/SHA256SUMS.txt
