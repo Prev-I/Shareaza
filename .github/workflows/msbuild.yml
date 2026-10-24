@@ -38,6 +38,27 @@ jobs:
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v2
 
+    - name: Install Inno Setup 6.2.2
+      # Inno Setup 6.3.0 dropped Windows Vista, so the runner's 6.7.x rejects
+      # setup/scripts/main.iss (MinVersion=6.0). 6.2.2 is the last release that
+      # accepts it. setup/Installer_143.vcxproj calls ISCC by a fixed path, so the
+      # old version is installed over the new one, from the official release,
+      # hash-pinned.
+      shell: pwsh
+      run: |
+          $url = 'https://github.com/jrsoftware/issrc/releases/download/is-6_2_2/innosetup-6.2.2.exe'
+          $sha256 = '8117D10D00A2AD33A1390978EA3872861C330E087914410A6377B22C4C5B8563'
+          $dir = Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6'
+          $exe = Join-Path $env:RUNNER_TEMP 'innosetup-6.2.2.exe'
+          Invoke-WebRequest -Uri $url -OutFile $exe
+          $actual = (Get-FileHash -Path $exe -Algorithm SHA256).Hash
+          if ($actual -ne $sha256) { throw "innosetup-6.2.2.exe hash $actual does not match $sha256" }
+          $p = Start-Process -FilePath $exe -Wait -PassThru -ArgumentList '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/SP-', '/ALLUSERS', "/DIR=`"$dir`""
+          if ($p.ExitCode -ne 0) { throw "Inno Setup installer exited with $($p.ExitCode)" }
+          $version = (Get-Item (Join-Path $dir 'ISCC.exe')).VersionInfo.ProductVersion
+          Write-Output "ISCC.exe $version"
+          if (-not $version.StartsWith('6.2.2')) { throw "expected ISCC 6.2.2, found $version" }
+
     - name: Restore NuGet packages (zlibwapi)
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: nuget restore zlibwapi/zlibwapi_143.vcxproj -PackagesDirectory zlibwapi/packages
