@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   workflow_matrix:
-    runs-on: windows-latest
+    runs-on: windows-2022
     strategy:
       matrix:
         platform: [ Win32, x64 ]
@@ -38,6 +38,34 @@ jobs:
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v2
 
+    - name: Install Inno Setup 6.2.2
+      # Inno Setup 6.3.0 dropped Windows Vista, so the runner's 6.7.x rejects
+      # setup/scripts/main.iss (MinVersion=6.0). 6.2.2 is the last release that
+      # accepts it. setup/Installer_143.vcxproj calls ISCC by a fixed path, so the
+      # old version is installed over the new one, from the official release,
+      # hash-pinned.
+      shell: pwsh
+      run: |
+          $url = 'https://github.com/jrsoftware/issrc/releases/download/is-6_2_2/innosetup-6.2.2.exe'
+          $sha256 = '8117D10D00A2AD33A1390978EA3872861C330E087914410A6377B22C4C5B8563'
+          $dir = Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6'
+          $exe = Join-Path $env:RUNNER_TEMP 'innosetup-6.2.2.exe'
+          $log = Join-Path $env:RUNNER_TEMP 'innosetup-6.2.2.log'
+          Invoke-WebRequest -Uri $url -OutFile $exe
+          $actual = (Get-FileHash -Path $exe -Algorithm SHA256).Hash
+          if ($actual -ne $sha256) { throw "innosetup-6.2.2.exe hash $actual does not match $sha256" }
+          $p = Start-Process -FilePath $exe -Wait -PassThru -ArgumentList '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/SP-', '/ALLUSERS', "/DIR=`"$dir`"", "/LOG=`"$log`""
+          if ($p.ExitCode -ne 0) { throw "Inno Setup installer exited with $($p.ExitCode)" }
+          if (-not (Select-String -Path $log -SimpleMatch 'Installation process succeeded.' -Quiet)) { Get-Content $log -Tail 40; throw 'Inno Setup 6.2.2 did not install' }
+          # The 6.2.2 banner carries no minor version, only its copyright year: the
+          # runner's 6.7.x reads 1997-2026. Every file in 6.2.2's own installer is
+          # flagged ignoreversion, so every file 6.2.2 ships replaces the newer one.
+          $banner = (& (Join-Path $dir 'ISCC.exe') 2>&1 | Select-Object -First 3) -join ' '
+          Write-Output $banner
+          if ($banner -notmatch 'Copyright \(C\) 1997-2023 Jordan Russell') { throw 'ISCC is not 6.2.2' }
+          # ISCC exits non-zero when given no script; do not let that fail the step.
+          $global:LASTEXITCODE = 0
+
     - name: Restore NuGet packages (zlibwapi)
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: nuget restore zlibwapi/zlibwapi_143.vcxproj -PackagesDirectory zlibwapi/packages
@@ -52,6 +80,11 @@ jobs:
 
     - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
+      # VS 2022 17.8+ deprecates stdext::make_checked_array_iterator (STL4043),
+      # which SDLCheck turns into error C4996 in shareaza/BTInfo.cpp. cl.exe
+      # appends CL to every compile, so this opts out without a source change.
+      env:
+          CL: /D_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       run: msbuild ${{env.SOLUTION_FILE_PATH}} /nologo /v:m /t:Rebuild /p:ForceImportBeforeCppTargets=${{env.RELEASEBUILD_FILE_PATH}} /p:Configuration=${{ matrix.type }} /p:Platform=${{ matrix.platform }} /p:DefineConstants=BUILDFROMMSBUILD /p:RevisionSHA=${{ steps.gitversion.outputs.ShortSha }} /p:RevisionDate=${{ steps.gitversion.outputs.commitDate }} /fl /flp:Summary
