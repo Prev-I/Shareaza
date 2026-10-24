@@ -52,6 +52,11 @@ jobs:
 
     - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
+      # VS 2022 17.8+ deprecates stdext::make_checked_array_iterator (STL4043),
+      # which SDLCheck turns into error C4996 in shareaza/BTInfo.cpp. cl.exe
+      # appends CL to every compile, so this opts out without a source change.
+      env:
+          CL: /D_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       run: msbuild ${{env.SOLUTION_FILE_PATH}} /nologo /v:m /t:Rebuild /p:ForceImportBeforeCppTargets=${{env.RELEASEBUILD_FILE_PATH}} /p:Configuration=${{ matrix.type }} /p:Platform=${{ matrix.platform }} /p:DefineConstants=BUILDFROMMSBUILD /p:RevisionSHA=${{ steps.gitversion.outputs.ShortSha }} /p:RevisionDate=${{ steps.gitversion.outputs.commitDate }} /fl /flp:Summary
