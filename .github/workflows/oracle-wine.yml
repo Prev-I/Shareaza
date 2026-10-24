@@ -146,12 +146,15 @@ jobs:
                 wine reg add "$k\BitTorrent" /v EnableAlways /t REG_DWORD /d 0 /f
                 wine reg add "$k\BitTorrent" /v EnableDHT /t REG_DWORD /d 0 /f
                 wine reg add "$k\Connection" /v EnableUPnP /t REG_DWORD /d 0 /f
-                # Listen on loopback only.
-                wine reg add "$k\Connection" /v InBind /t REG_DWORD /d 1 /f
-                wine reg add "$k\Connection" /v InHost /t REG_SZ /d 127.0.0.1 /f
-                # An empty key, to test whether Shareaza's own settings save fills in a
-                # section it did not create (the first runs never wrote Discovery).
-                wine reg add "$k\Discovery" /f
+                # Under Wine, Shareaza saves a setting only into a section key that already
+                # exists: Wine's SHRegSetUSValueW opens the subkey instead of creating it.
+                # Create every section (Settings.cpp) so its own saves persist.
+                for sec in Bandwidth BitTorrent Community Connection DC Discovery Downloads \
+                           Experimental Fonts Gnutella Gnutella1 Gnutella2 IRC Interface Library \
+                           MediaPlayer Remote Search Settings Toolbars Uploads VersionCheck WINE \
+                           Web Windows eDonkey; do
+                  wine reg add "$k\\$sec" /f
+                done
                 wineserver --wait
 
         -   name: Run Shareaza against the stub cache
@@ -235,14 +238,11 @@ jobs:
                 # HostCache.dat is written only at exit when no hosts were learnt.
                 grep -q 'HostCache.dat' out/data-files.txt || fail "HostCache.dat was not written"
                 grep -q 'Discovery.dat' out/data-files.txt || fail "Discovery.dat was not written"
-                # Report, without failing, where it listened and whether the pre-created
-                # Discovery key was filled in.
+                # With the section keys created, Shareaza's own save fills in sections
+                # nothing else wrote, such as Gnutella2.
+                awk '/^\[/{sec=$0} sec ~ /Shareaza\\Gnutella2\]$/ && /^"HostCount"/{found=1} END{exit !found}' out/shareaza.utf8.reg \
+                  || fail "Shareaza did not save its Gnutella2 settings"
                 grep -E 'Accepting incoming TCP|Listening for UDP' "$log" || true
-                if awk '/^\[/{sec=$0} sec ~ /Shareaza\\Discovery\]$/ && /^"FailureLimit"/{found=1} END{exit !found}' out/shareaza.utf8.reg; then
-                  echo "registry: Discovery section filled in by Shareaza"
-                else
-                  echo "registry: Discovery section NOT filled in by Shareaza"
-                fi
 
         -   name: Upload the evidence
             if: always()
