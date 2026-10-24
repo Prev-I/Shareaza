@@ -3,43 +3,43 @@ name: Build and release
 on:
     workflow_dispatch:
     push:
-      tags:        
+      tags:
         - v*.*.*
 
 env:
     # Path to the solution file relative to the root of the project.
     SOLUTION_FILE_PATH: vc143/Shareaza.sln
     RELEASEBUILD_FILE_PATH: vc143/ReleaseBuild.props
-    
+
 permissions:
     contents: read
-    
+
 jobs:
     workflow_matrix:
+        # windows-latest and windows-2025 are Visual Studio 2026 images: they carry
+        # the v143 compiler but not the v143 ATL/MFC libraries this solution needs.
         runs-on: windows-2022
         strategy:
+            # Let the other platform finish when one fails, so a run always says
+            # which legs are broken rather than only the first one.
+            fail-fast: false
             matrix:
                 platform: [ Win32, x64 ]
-                type: [ Release, Debug ]
+                type: [ Release ]
         steps:
         -   name: Checkout GIT sources
-            uses: actions/checkout@v4
+            uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
             with:
                 fetch-depth: 0
-    
+
         -   name: Install GitVersion
-            uses: gittools/actions/gitversion/setup@v1
+            uses: gittools/actions/gitversion/setup@7417b1089e2c7de93510f1901d656ddf60bb024f # v4.7.0
             with:
-                versionSpec: '5.x'
-    
-        -   name: Install GitVersion
-            uses: gittools/actions/gitversion/setup@v1
-            with:
-                versionSpec: '5.x'
-        
+                versionSpec: '6.8.2'
+
         -   name: Add MSBuild to PATH
-            uses: microsoft/setup-msbuild@v2
-    
+            uses: microsoft/setup-msbuild@30375c66a4eea26614e0d39710365f22f8b0af57 # v3.0.0
+
         -   name: Install Inno Setup 6.2.2
             # Inno Setup 6.3.0 dropped Windows Vista, so the runner's 6.7.x rejects
             # setup/scripts/main.iss (MinVersion=6.0). 6.2.2 is the last release that
@@ -71,15 +71,15 @@ jobs:
         -   name: Restore NuGet packages (zlibwapi)
             working-directory: ${{env.GITHUB_WORKSPACE}}
             run: nuget restore zlibwapi/zlibwapi_143.vcxproj -PackagesDirectory zlibwapi/packages
-        
+
         -   name: Restore NuGet packages (Shareaza)
             working-directory: ${{env.GITHUB_WORKSPACE}}
             run: nuget restore ${{env.SOLUTION_FILE_PATH}}
-        
+
         -   name: Determine Version
             id:   gitversion
-            uses: gittools/actions/gitversion/execute@v1
-        
+            uses: gittools/actions/gitversion/execute@7417b1089e2c7de93510f1901d656ddf60bb024f # v4.7.0
+
         -   name: Build
             working-directory: ${{env.GITHUB_WORKSPACE}}
             # VS 2022 17.8+ deprecates stdext::make_checked_array_iterator (STL4043),
@@ -89,39 +89,79 @@ jobs:
                 CL: /D_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING
             # Add additional options to the MSBuild command line here (like platform or verbosity level).
             # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
-            run: msbuild ${{env.SOLUTION_FILE_PATH}} /nologo /v:m /t:Rebuild /p:ForceImportBeforeCppTargets=${{env.RELEASEBUILD_FILE_PATH}} /p:Configuration=${{ matrix.type }} /p:Platform=${{ matrix.platform }} /p:DefineConstants=BUILDFROMMSBUILD /p:RevisionSHA=${{ steps.gitversion.outputs.ShortSha }} /p:RevisionDate=${{ steps.gitversion.outputs.commitDate }} /fl /flp:Summary
-        
+            run: msbuild ${{env.SOLUTION_FILE_PATH}} /nologo /v:m /t:Rebuild /p:ForceImportBeforeCppTargets=${{env.RELEASEBUILD_FILE_PATH}} /p:Configuration=${{ matrix.type }} /p:Platform=${{ matrix.platform }} /p:DefineConstants=BUILDFROMMSBUILD /p:RevisionSHA=${{ steps.gitversion.outputs.shortSha }} /p:RevisionDate=${{ steps.gitversion.outputs.commitDate }} /fl /flp:Summary
+
+        -   name: Compute SHA-256 manifest
+            shell: bash
+            working-directory: setup/builds
+            run: |
+                sha256sum -- *.exe | tee SHA256SUMS.txt
+
         -   name: Archive Shareaza Release
-            uses: actions/upload-artifact@v4
+            uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
             with:
                 name: Shareaza Windows ${{ matrix.platform }} ${{ matrix.type }}
-                path: setup/builds/*.exe
-        
+                path: |
+                    setup/builds/*.exe
+                    setup/builds/SHA256SUMS.txt
+                if-no-files-found: error
+
     publish:
         needs: workflow_matrix
+        # Only a tag push publishes. A workflow_dispatch run stops at the artifacts.
+        if: startsWith(github.ref, 'refs/tags/')
         runs-on: ubuntu-latest
+        permissions:
+            contents: write
+        env:
+            # Secrets cannot be referenced in a step's if:, so it is exposed here.
+            VIRUS_TOTAL_API_KEY: ${{ secrets.VIRUS_TOTAL_API_KEY }}
         steps:
         - name: Download All Artifacts
-          uses: actions/download-artifact@v4
+          uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
           with:
-            path: .
-            github-token: ${{ secrets.GH_PAT }} # token with actions:read permissions on target repo
-            merge-multiple: true
+            path: artifacts
         - name: Display structure of downloaded files
-          run: ls -R .
-        - name: Release
-          uses: softprops/action-gh-release@v2
+          run: ls -R artifacts
+        - name: Verify and merge SHA-256 manifests
+          # Each build job hashed its own installer; check those hashes survived the
+          # artifact round trip, then write one manifest for the release.
+          run: |
+            for d in artifacts/*/; do (cd "$d" && sha256sum -c SHA256SUMS.txt); done
+            mkdir dist
+            cp artifacts/*/*.exe dist/
+            (cd dist && sha256sum -- *.exe | tee SHA256SUMS.txt)
+        - name: VirusTotal Scan
+          id: virustotal
+          if: env.VIRUS_TOTAL_API_KEY != ''
+          uses: crazy-max/ghaction-virustotal@936d8c5c00afe97d3d9a1af26d017cfdf26800a2 # v5.0.0
           with:
-            token: ${{ secrets.RELEASE_PAT }}
+            vt_api_key: ${{ env.VIRUS_TOTAL_API_KEY }}
+            files: |
+              dist/*.exe
+        - name: Write release body
+          # The action only edits a release body on a release event, so the
+          # analysis links are written into the body here instead.
+          env:
+            ANALYSIS: ${{ steps.virustotal.outputs.analysis }}
+          run: |
+            : > body.md
+            if [ -n "$ANALYSIS" ]; then
+              echo "🛡 VirusTotal analysis:" >> body.md
+              # Entries are file=url. Split on the first '=' only: analysis ids are
+              # base64 and can end in '='.
+              echo "$ANALYSIS" | tr ',' '\n' | while read -r entry; do
+                echo "* [\`$(basename "${entry%%=*}")\`](${entry#*=})" >> body.md
+              done
+            fi
+            cat body.md
+        - name: Release
+          uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
+          with:
             draft: true
             make_latest: true
             generate_release_notes: true
+            body_path: body.md
             files: |
-              *.exe
-        - name: VirusTotal Scan
-          uses: crazy-max/ghaction-virustotal@v4
-          with:
-            vt_api_key: ${{ secrets.VIRUS_TOTAL_API_KEY }}
-            update_release_body: true
-            files: |
-              *.exe
+              dist/*.exe
+              dist/SHA256SUMS.txt
