@@ -116,8 +116,14 @@ jobs:
                 printf '2 http://127.0.0.1:8080/gwc/\r\n' > "$WINEPREFIX/drive_c/Program Files/Shareaza/Data/DefaultServices.dat"
                 # Settings live in the registry, not a file.
                 k='HKCU\Software\Shareaza\Shareaza'
-                wine reg add "$k\Settings" /v FirstRun /t REG_DWORD /d 0 /f
+                # Windows\RunWizard, not Settings\FirstRun, keeps the QuickStart wizard away
+                # (WndMain.cpp); RunWarnings skips the warnings dialog that follows it.
+                wine reg add "$k\Windows" /v RunWizard /t REG_DWORD /d 1 /f
+                wine reg add "$k\Windows" /v RunWarnings /t REG_DWORD /d 1 /f
+                # Exit on close instead of asking, so taskkill shuts it down cleanly.
                 wine reg add "$k\Settings" /v CloseMode /t REG_DWORD /d 1 /f
+                # 2.7.10.2 checks shareaza.sourceforge.net for updates on start by default.
+                wine reg add "$k\VersionCheck" /v UpdateCheck /t REG_DWORD /d 0 /f
                 wine reg add "$k" /v DebugLog /t REG_DWORD /d 1 /f
                 wine reg add "$k" /v LogLevel /t REG_DWORD /d 4 /f
                 # G1, eD2k and DC are off by default; BitTorrent, its DHT and UPnP are
@@ -183,6 +189,10 @@ jobs:
                 [ -s out/gwc-requests.jsonl ] || { echo "::error::Shareaza never queried the stub cache"; exit 1; }
                 grep -F -- "$EXPECT" out/gwc-requests.jsonl || { echo "::error::no request carried $EXPECT"; exit 1; }
                 grep -q 'Discovery.dat' out/data-files.txt || { echo "::error::Discovery.dat was not written"; exit 1; }
+                # The log is UTF-16; it must show no update check once UpdateCheck is off.
+                if iconv -f UTF-16 -t UTF-8 out/Shareaza.log | grep -q 'VersionChecker\] Request'; then
+                  echo "::error::the client still checked for updates"; exit 1
+                fi
 
         -   name: Upload the evidence
             if: always()
