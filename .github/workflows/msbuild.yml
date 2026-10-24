@@ -50,14 +50,18 @@ jobs:
           $sha256 = '8117D10D00A2AD33A1390978EA3872861C330E087914410A6377B22C4C5B8563'
           $dir = Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6'
           $exe = Join-Path $env:RUNNER_TEMP 'innosetup-6.2.2.exe'
+          $log = Join-Path $env:RUNNER_TEMP 'innosetup-6.2.2.log'
           Invoke-WebRequest -Uri $url -OutFile $exe
           $actual = (Get-FileHash -Path $exe -Algorithm SHA256).Hash
           if ($actual -ne $sha256) { throw "innosetup-6.2.2.exe hash $actual does not match $sha256" }
-          $p = Start-Process -FilePath $exe -Wait -PassThru -ArgumentList '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/SP-', '/ALLUSERS', "/DIR=`"$dir`""
+          $p = Start-Process -FilePath $exe -Wait -PassThru -ArgumentList '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/SP-', '/ALLUSERS', "/DIR=`"$dir`"", "/LOG=`"$log`""
           if ($p.ExitCode -ne 0) { throw "Inno Setup installer exited with $($p.ExitCode)" }
-          $version = (Get-Item (Join-Path $dir 'ISCC.exe')).VersionInfo.ProductVersion
-          Write-Output "ISCC.exe $version"
-          if (-not $version.StartsWith('6.2.2')) { throw "expected ISCC 6.2.2, found $version" }
+          # ISCC prints its version banner when run without arguments.
+          $banner = (& (Join-Path $dir 'ISCC.exe') 2>&1 | Select-Object -First 3) -join ' '
+          Write-Output $banner
+          if ($banner -notmatch 'Inno Setup 6\.2\.2 ') { Get-Content $log -Tail 40; throw 'ISCC is not 6.2.2' }
+          # ISCC exits non-zero when given no script; do not let that fail the step.
+          $global:LASTEXITCODE = 0
 
     - name: Restore NuGet packages (zlibwapi)
       working-directory: ${{env.GITHUB_WORKSPACE}}
