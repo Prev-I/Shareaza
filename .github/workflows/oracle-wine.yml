@@ -24,6 +24,7 @@ permissions:
 jobs:
     oracle:
         runs-on: ubuntu-24.04
+        timeout-minutes: 45
         strategy:
             fail-fast: false
             matrix:
@@ -45,6 +46,9 @@ jobs:
                 shell: bash
         steps:
         -   name: Install Wine, winetricks and X tools
+            timeout-minutes: 15
+            env:
+                DEBIAN_FRONTEND: noninteractive
             run: |
                 sudo dpkg --add-architecture i386
                 sudo apt-get update -q
@@ -116,10 +120,15 @@ jobs:
                 printf '2 http://127.0.0.1:8080/gwc/\r\n' > "$WINEPREFIX/drive_c/Program Files/Shareaza/Data/DefaultServices.dat"
                 # Settings live in the registry, not a file.
                 k='HKCU\Software\Shareaza\Shareaza'
-                # Windows\RunWizard, not Settings\FirstRun, keeps the QuickStart wizard away
-                # (WndMain.cpp); RunWarnings skips the warnings dialog that follows it.
+                # On its first run Shareaza connects only from the QuickStart wizard
+                # (WndMain.cpp, AutoConnect && !FirstRun), and Windows\RunWizard, not
+                # FirstRun, decides whether the wizard opens. Both are needed to start
+                # unattended and connected. RunWarnings and RunPromote skip the two
+                # dialogs that follow the wizard.
+                wine reg add "$k\Settings" /v FirstRun /t REG_DWORD /d 0 /f
                 wine reg add "$k\Windows" /v RunWizard /t REG_DWORD /d 1 /f
                 wine reg add "$k\Windows" /v RunWarnings /t REG_DWORD /d 1 /f
+                wine reg add "$k\Windows" /v RunPromote /t REG_DWORD /d 1 /f
                 # Exit on close instead of asking, so taskkill shuts it down cleanly.
                 wine reg add "$k\Settings" /v CloseMode /t REG_DWORD /d 1 /f
                 # 2.7.10.2 checks shareaza.sourceforge.net for updates on start by default.
