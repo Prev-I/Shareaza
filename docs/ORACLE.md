@@ -4,7 +4,7 @@ How to run two Shareaza clients under Wine on Linux or WSL2: the official 2.7.10
 G2 network runs, and this fork's 2.7.10.6 build. With both installed, a GWebCache such as
 [`rs-gwc-edge`](https://github.com/Prev-I/rs-gwc-edge) can be exercised against real clients.
 
-`.github/workflows/oracle-wine.yml` checks these steps on `ubuntu-24.04`. Last green run: [40137712433](https://github.com/Prev-I/Shareaza/actions/runs/40137712433), 2026-10-24, Wine 9.0 (`9.0~repack-4build3`), winetricks 20240105.
+`.github/workflows/oracle-wine.yml` checks these steps on `ubuntu-24.04` ([its runs](https://github.com/Prev-I/Shareaza/actions/workflows/oracle-wine.yml)). The results below come from runs on 2026-10-24 with Wine 9.0 (`9.0~repack-4build3`) and winetricks 20240105. [Run 40138506381](https://github.com/Prev-I/Shareaza/actions/runs/40138506381) is the first that ran `docs/oracle-prepare.sh` itself.
 
 | | Status |
 |---|---|
