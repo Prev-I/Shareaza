@@ -30,9 +30,11 @@ jobs:
             matrix:
                 include:
                   - client: sf
-                    expect: client=RAZA2.7.10.2
+                    expect: client=RAZA2.7.10.2&
+                    agent: Shareaza 2.7.10.2
                   - client: previ
-                    expect: client=RAZI2.7.10.6
+                    expect: client=RAZI2.7.10.6&
+                    agent: iShareaza 2.7.10.6
         env:
             WINEPREFIX: /home/runner/.wine-shareaza-${{ matrix.client }}
             WINEARCH: win64
@@ -71,7 +73,7 @@ jobs:
                 RUN_ID: ${{ inputs.release_run_id }}
             run: |
                 if [ -z "$RUN_ID" ]; then
-                  RUN_ID=$(gh run list -R "$GITHUB_REPOSITORY" --workflow release.yml --event push --status success -L 1 --json databaseId --jq '.[0].databaseId')
+                  RUN_ID=$(gh run list -R "$GITHUB_REPOSITORY" --workflow release.yml --event push --status success -L 1 --json databaseId --jq '.[0].databaseId // empty')
                 fi
                 [ -n "$RUN_ID" ] || { echo "::error::no successful tag build of release.yml"; exit 1; }
                 echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
@@ -115,8 +117,10 @@ jobs:
 
         -   name: Point discovery at a local stub cache only
             run: |
-                # DefaultServices.dat is read from the install folder on first run,
-                # when no Discovery.dat exists yet. Format: "<type> <url>", 2 = G2 GWC.
+                # DefaultServices.dat (format "<type> <url>", 2 = G2 GWC) is reloaded
+                # whenever the service list is below its minimum (DiscoveryServices.cpp,
+                # EnoughServices), which for a one-entry list is every start. Replacing it
+                # is what keeps the client on the stub.
                 printf '2 http://127.0.0.1:8080/gwc/\r\n' > "$WINEPREFIX/drive_c/Program Files/Shareaza/Data/DefaultServices.dat"
                 # Settings live in the registry, not a file.
                 k='HKCU\Software\Shareaza\Shareaza'
@@ -129,9 +133,11 @@ jobs:
                 wine reg add "$k\Windows" /v RunWizard /t REG_DWORD /d 1 /f
                 wine reg add "$k\Windows" /v RunWarnings /t REG_DWORD /d 1 /f
                 wine reg add "$k\Windows" /v RunPromote /t REG_DWORD /d 1 /f
-                # Exit on close instead of asking, so taskkill shuts it down cleanly.
+                # Exit instead of asking when the window's X is clicked. (taskkill below
+                # posts WM_CLOSE, which never asks.)
                 wine reg add "$k\Settings" /v CloseMode /t REG_DWORD /d 1 /f
-                # 2.7.10.2 checks shareaza.sourceforge.net for updates on start by default.
+                # Update checks are on by default in 2.7.10.2, and a reply can add
+                # discovery services (VersionChecker.cpp).
                 wine reg add "$k\VersionCheck" /v UpdateCheck /t REG_DWORD /d 0 /f
                 wine reg add "$k" /v DebugLog /t REG_DWORD /d 1 /f
                 wine reg add "$k" /v LogLevel /t REG_DWORD /d 4 /f
@@ -140,12 +146,18 @@ jobs:
                 wine reg add "$k\BitTorrent" /v EnableAlways /t REG_DWORD /d 0 /f
                 wine reg add "$k\BitTorrent" /v EnableDHT /t REG_DWORD /d 0 /f
                 wine reg add "$k\Connection" /v EnableUPnP /t REG_DWORD /d 0 /f
+                # Listen on loopback only.
+                wine reg add "$k\Connection" /v InBind /t REG_DWORD /d 1 /f
+                wine reg add "$k\Connection" /v InHost /t REG_SZ /d 127.0.0.1 /f
+                # An empty key, to test whether Shareaza's own settings save fills in a
+                # section it did not create (the first runs never wrote Discovery).
+                wine reg add "$k\Discovery" /f
                 wineserver --wait
 
         -   name: Run Shareaza against the stub cache
             run: |
                 cat > stub.py <<'EOF'
-                import http.server, json, sys, time
+                import http.server, json, time
                 class H(http.server.BaseHTTPRequestHandler):
                     def do_GET(self):
                         with open('gwc-requests.jsonl', 'a') as f:
@@ -163,6 +175,12 @@ jobs:
                 EOF
                 python3 -I stub.py &
                 STUB=$!
+                for _ in $(seq 1 20); do
+                  curl -sf -o /dev/null http://127.0.0.1:8080/ready && break
+                  sleep 0.5
+                done
+                # The readiness probe is not a client request.
+                : > gwc-requests.jsonl
                 wine "C:\\Program Files\\Shareaza\\Shareaza.exe" &
                 for _ in $(seq 1 36); do
                   sleep 5
@@ -176,31 +194,54 @@ jobs:
                   sleep 5
                   pgrep -f 'Shareaza.exe' >/dev/null || break
                 done
+                if pgrep -f 'Shareaza.exe' >/dev/null; then echo still-running > exit-state.txt; else echo exited > exit-state.txt; fi
                 import -window root screenshot-closing.png || true
+                # Let wineserver write the registry to disk before anything reads it.
+                wineserver --wait || true
                 wineserver -k || true
                 kill "$STUB" || true
-                cat gwc-requests.jsonl || true
+                cat gwc-requests.jsonl
 
         -   name: Collect what the client left behind
+            if: always()
             run: |
                 mkdir -p out
                 user_data="$WINEPREFIX/drive_c/users/$USER/AppData/Roaming/Shareaza"
                 find "$WINEPREFIX/drive_c" \( -name 'Discovery.dat' -o -name 'HostCache.dat' -o -name 'Shareaza.log' \) -printf '%s\t%p\n' | sed "s|$WINEPREFIX|\$WINEPREFIX|" | tee out/data-files.txt
                 cp "$user_data/Data/Shareaza.log" out/ 2>/dev/null || true
+                [ -f out/Shareaza.log ] && iconv -f UTF-16 -t UTF-8 out/Shareaza.log | tr -d '\r' > out/Shareaza.utf8.log
                 wine reg export 'HKCU\Software\Shareaza' out/shareaza.reg /y || true
                 wineserver --wait
-                cp gwc-requests.jsonl setup.log wine-version.txt screenshot-*.png out/ 2>/dev/null || true
+                [ -f out/shareaza.reg ] && iconv -f UTF-16 -t UTF-8 out/shareaza.reg | tr -d '\r' > out/shareaza.utf8.reg
+                cp gwc-requests.jsonl exit-state.txt setup.log wine-version.txt screenshot-*.png out/ 2>/dev/null || true
 
-        -   name: Check the client string the cache saw
+        -   name: Check what the client did
             env:
                 EXPECT: ${{ matrix.expect }}
+                AGENT: ${{ matrix.agent }}
             run: |
-                [ -s out/gwc-requests.jsonl ] || { echo "::error::Shareaza never queried the stub cache"; exit 1; }
-                grep -F -- "$EXPECT" out/gwc-requests.jsonl || { echo "::error::no request carried $EXPECT"; exit 1; }
-                grep -q 'Discovery.dat' out/data-files.txt || { echo "::error::Discovery.dat was not written"; exit 1; }
-                # The log is UTF-16; it must show no update check once UpdateCheck is off.
-                if iconv -f UTF-16 -t UTF-8 out/Shareaza.log | grep -q 'VersionChecker\] Request'; then
-                  echo "::error::the client still checked for updates"; exit 1
+                fail() { echo "::error::$*"; exit 1; }
+                [ -s out/gwc-requests.jsonl ] || fail "Shareaza never queried the stub cache"
+                grep -F -- "$EXPECT" out/gwc-requests.jsonl || fail "no request carried $EXPECT"
+                grep -F -- "\"user_agent\": \"$AGENT\"" out/gwc-requests.jsonl || fail "no request came from $AGENT"
+                [ -s out/Shareaza.utf8.log ] || fail "no Shareaza.log"
+                log=out/Shareaza.utf8.log
+                # Isolation: the only discovery service queried is the stub.
+                grep 'Querying discovery service' "$log" | grep -v '"http://127.0.0.1:8080/gwc/"' && fail "queried a discovery service other than the stub"
+                grep -q 'VersionChecker\] Request' "$log" && fail "the client still checked for updates"
+                # A clean shutdown: the process exited by itself and saved its data.
+                [ "$(cat out/exit-state.txt)" = exited ] || fail "Shareaza did not exit after WM_CLOSE"
+                grep -q 'Shutting down Shareaza network core' "$log" || fail "no network shutdown in the log"
+                # HostCache.dat is written only at exit when no hosts were learnt.
+                grep -q 'HostCache.dat' out/data-files.txt || fail "HostCache.dat was not written"
+                grep -q 'Discovery.dat' out/data-files.txt || fail "Discovery.dat was not written"
+                # Report, without failing, where it listened and whether the pre-created
+                # Discovery key was filled in.
+                grep -E 'Accepting incoming TCP|Listening for UDP' "$log" || true
+                if awk '/^\[/{sec=$0} sec ~ /Shareaza\\Discovery\]$/ && /^"FailureLimit"/{found=1} END{exit !found}' out/shareaza.utf8.reg; then
+                  echo "registry: Discovery section filled in by Shareaza"
+                else
+                  echo "registry: Discovery section NOT filled in by Shareaza"
                 fi
 
         -   name: Upload the evidence
