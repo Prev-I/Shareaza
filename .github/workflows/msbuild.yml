@@ -3,6 +3,12 @@ name: MSBuild
 on:
   workflow_dispatch:
   pull_request:
+    # A full four-leg build takes about an hour of runner time; skip it when a
+    # pull request touches only documentation or the Wine oracle test.
+    paths-ignore:
+      - '*.md'
+      - 'docs/**'
+      - '.github/workflows/oracle-wine.yml'
 
 env:
   # Path to the solution file relative to the root of the project.
