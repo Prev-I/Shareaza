@@ -226,6 +226,8 @@ jobs:
                 if ($out -notmatch 'nothing to restore') { Fail "a second Restore-Oracle.ps1 failed for another reason: $out" }
                 if ((Get-ItemProperty $k).OracleMarker -ne 'mine') { Fail 'the second restore damaged the setup' }
                 Write-Host 'All checks passed.'
+                # The refused restore above left $LASTEXITCODE at 1, which the step would report.
+                exit 0
 
         -   name: Gather the evidence into the workspace
             # upload-artifact takes files from under the workspace only.
