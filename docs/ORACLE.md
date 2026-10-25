@@ -2,7 +2,7 @@
 
 How to run two Shareaza clients under Wine on Linux or WSL2: the official 2.7.10.2 that most of the
 G2 network runs, and this fork's 2.7.10.6 build. With both installed, a GWebCache such as
-[`rs-gwc-edge`](https://github.com/Prev-I/rs-gwc-edge) can be exercised against real clients.
+[`gwc-edge`](https://github.com/Prev-I/gwc-edge) can be exercised against real clients.
 
 `.github/workflows/oracle-wine.yml` checks these steps on `ubuntu-24.04` ([its runs](https://github.com/Prev-I/Shareaza/actions/workflows/oracle-wine.yml)). The results below come from runs on 2026-10-24 and 2026-10-25 with Wine 9.0 (`9.0~repack-4build3`) and winetricks 20240105. [Run 40138506381](https://github.com/Prev-I/Shareaza/actions/runs/40138506381) is the first that ran `docs/oracle-prepare.sh` itself.
 
@@ -104,7 +104,7 @@ wineserver --wait
 - **It also refuses a prefix with no Shareaza installed**, so it doesn't create an empty one.
 
 ```bash
-CACHE=http://127.0.0.1:8787/          # your rs-gwc-edge; see "Adding a GWebCache" for URL rules
+CACHE=http://127.0.0.1:8787/          # your gwc-edge; see "Adding a GWebCache" for URL rules
 for p in sf previ; do
   docs/oracle-prepare.sh ~/.wine-shareaza-$p "$CACHE"
 done
@@ -178,7 +178,7 @@ closes it cleanly, so it saves `Discovery.dat` and `HostCache.dat`.
 
 **What this does not isolate.**
 - **The cache's hosts.** Once the cache under test returns hosts, the client connects to them. A
-  live `rs-gwc-edge` returns real G2 hosts, so the client joins the live network. To stay off it,
+  live `gwc-edge` returns real G2 hosts, so the client joins the live network. To stay off it,
   the cache must hand out only hosts you control, behind a host firewall.
 - **Crash reports.** Both clients ship one: BugSplat in the fork, BugTrap in 2.7.10.2. After a crash
   or hang it can offer to upload a report. Whether it asks first was not checked.
@@ -268,7 +268,7 @@ A G2 GWebCache request carries `client=` with the four-letter vendor code follow
 
 **The fork is `RAZI`, not `RAZA`.** ivan386's 2017 "Soft name change", which ansani/Shareaza
 inherited, renamed the vendor code, so ansani's own 2.7.10.6 builds send `RAZI` as well. When
-correlating with `rs-gwc-edge`'s `/stats`, count `RAZI` as Shareaza too.
+correlating with `gwc-edge`'s `/stats`, count `RAZI` as Shareaza too.
 
 A full request from either client looks like this, with only `client=` differing:
 
