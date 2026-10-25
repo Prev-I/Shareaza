@@ -1458,7 +1458,7 @@ BOOL CG2Neighbour::OnQueryAck(CG2Packet* pPacket)
 		HostCache.Gnutella2.Add( &m_pHost.sin_addr, htons( m_pHost.sin_port ) );
 
 	Hashes::Guid oGuid;
-	SearchManager.OnQueryAck( pPacket, (SOCKADDR*) &m_pHost, oGuid );
+	SearchManager.OnQueryAck( pPacket, IsIPv6Host() ? (SOCKADDR*) &m_pHostIPv6 : (SOCKADDR*) &m_pHost, oGuid );
 	return TRUE;
 }
 
