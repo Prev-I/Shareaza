@@ -9,8 +9,8 @@ name: Oracle under Wine
 on:
     workflow_dispatch:
       inputs:
-        release_run_id:
-          description: 'Run id of a "Build and release" tag run to take the fork installer from (default: latest successful one)'
+        release_tag:
+          description: 'Published release tag to take the fork installer from (default: the latest release; drafts are not visible)'
           required: false
     pull_request:
       paths:
@@ -20,7 +20,6 @@ on:
 
 permissions:
     contents: read
-    actions: read
 
 jobs:
     oracle:
@@ -72,34 +71,28 @@ jobs:
                 curl -sSfL -o installer/setup.exe "$SF_URL"
                 echo "$SF_SHA256  installer/setup.exe" | sha256sum -c
 
-        -   name: Find the fork's release build
+        -   name: Fetch the fork's x64 installer from its release
             if: matrix.client == 'previ'
-            id: release
             env:
                 GH_TOKEN: ${{ github.token }}
-                RUN_ID: ${{ inputs.release_run_id }}
+                TAG: ${{ inputs.release_tag }}
             run: |
-                if [ -z "$RUN_ID" ]; then
-                  RUN_ID=$(gh run list -R "$GITHUB_REPOSITORY" --workflow release.yml --event push --status success -L 1 --json databaseId --jq '.[0].databaseId // empty')
-                fi
-                [ -n "$RUN_ID" ] || { echo "::error::no successful tag build of release.yml"; exit 1; }
-                echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
-
-        -   name: Fetch the fork's x64 installer
-            if: matrix.client == 'previ'
-            uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
-            with:
-                name: Shareaza Windows x64 Release
-                run-id: ${{ steps.release.outputs.run_id }}
-                github-token: ${{ github.token }}
-                path: installer
-
-        -   name: Verify the fork's installer against its manifest
-            if: matrix.client == 'previ'
-            working-directory: installer
-            run: |
-                sha256sum -c SHA256SUMS.txt
-                mv -- *.exe setup.exe
+                [ -n "$TAG" ] || TAG=$(gh release view -R "$GITHUB_REPOSITORY" --json tagName --jq .tagName) \
+                  || { echo "::error::no published release in $GITHUB_REPOSITORY"; exit 1; }
+                exe=$(gh release view "$TAG" -R "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name | select(test("_x64_Release_.*\\.exe$"))') \
+                  || { echo "::error::no published release $TAG"; exit 1; }
+                [ "$(echo "$exe" | grep -c .)" = 1 ] || { echo "::error::expected one x64 installer in $TAG, found: ${exe//$'\n'/, }"; exit 1; }
+                echo "release $TAG, installer $exe"
+                # The same public downloads and check that docs/ORACLE.md gives.
+                base="https://github.com/$GITHUB_REPOSITORY/releases/download/$TAG"
+                mkdir -p installer && cd installer
+                curl -sSfLo "$exe" "$base/$exe"
+                curl -sSfLo SHA256SUMS.txt "$base/SHA256SUMS.txt"
+                sha256sum -c --ignore-missing SHA256SUMS.txt | tee check.txt
+                # --ignore-missing can pass without verifying the installer (older coreutils, or
+                # other listed files present), so require exactly one verified file.
+                [ "$(grep -c ': OK$' check.txt)" = 1 ] || { echo "::error::$exe was not verified against SHA256SUMS.txt"; exit 1; }
+                mv -- "$exe" setup.exe
 
         -   name: Start a virtual display
             run: |
