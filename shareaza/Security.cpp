@@ -694,7 +694,8 @@ BOOL CSecurity::IsDenied(const IN6_ADDR* pAddress)
 	// If the IP is clean, add it to the miss cache
 	m_CacheIPv6.insert( *pAddress );
 
-	return FALSE;
+	// In this case, return our default policy
+	return m_bDenyPolicy;
 }
 
 BOOL CSecurity::IsDenied(LPCTSTR pszContent)
