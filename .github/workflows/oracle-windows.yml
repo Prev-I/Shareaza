@@ -163,7 +163,13 @@ jobs:
             run: |
                 $ErrorActionPreference = 'Stop'
                 if (Get-Process -Name Shareaza -ErrorAction SilentlyContinue) { Stop-Process -Name Shareaza -Force; Start-Sleep 5 }
-                & "$env:KIT\Restore-Oracle.ps1" -WorkDir $env:WORK
+                if (Test-Path "$env:WORK\session\manifest.json") {
+                    & "$env:KIT\Restore-Oracle.ps1" -WorkDir $env:WORK
+                } else {
+                    # Nothing was saved, so nothing to restore (an earlier step failed first).
+                    & "$env:KIT\Restore-Oracle.ps1" -CollectOnly -WorkDir $env:WORK
+                    throw 'no saved setup to restore: an earlier step failed before the backup'
+                }
 
         -   name: Check what the client did and what the kit restored
             env:

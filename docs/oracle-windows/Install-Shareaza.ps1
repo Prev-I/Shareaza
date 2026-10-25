@@ -50,21 +50,20 @@ if ($Client -eq 'Official') {
     Write-Host "Downloading $name from SourceForge"
     Invoke-WebRequest -UseBasicParsing -UserAgent $agent -Uri $url -OutFile $exe
 } else {
-    $api = "https://api.github.com/repos/$Repository/releases/tags/$ReleaseTag"
-    $release = Invoke-RestMethod -UseBasicParsing -Uri $api -Headers @{ 'User-Agent' = 'shareaza-oracle' }
-    $assets = @($release.assets | Where-Object { $_.name -match '_x64_Release_.*\.exe$' })
-    if ($assets.Count -ne 1) { throw "Expected one x64 installer in $ReleaseTag, found $($assets.Count)." }
-    $name = $assets[0].name
+    # The release's own SHA256SUMS.txt names its installers, so no GitHub API call
+    # is needed: the API's anonymous limit is easily reached on a shared address.
     $base = "https://github.com/$Repository/releases/download/$ReleaseTag"
-    $exe = Join-Path $downloads $name
     $sums = Join-Path $downloads 'SHA256SUMS.txt'
-    Write-Host "Downloading $name and SHA256SUMS.txt from $ReleaseTag"
-    Invoke-WebRequest -UseBasicParsing -UserAgent $agent -Uri "$base/$name" -OutFile $exe
+    Write-Host "Downloading SHA256SUMS.txt from $ReleaseTag"
     Invoke-WebRequest -UseBasicParsing -UserAgent $agent -Uri "$base/SHA256SUMS.txt" -OutFile $sums
     # Lines are "<hash> <name>" or "<hash> *<name>".
-    $line = Get-Content $sums | Where-Object { $_ -match "^([0-9a-fA-F]{64}) [ *]$([regex]::Escape($name))$" } | Select-Object -First 1
-    if (-not $line) { throw "$name is not listed in SHA256SUMS.txt." }
-    $expected = ($line -split ' ')[0].ToUpperInvariant()
+    $lines = @(Get-Content $sums | Where-Object { $_ -match '^[0-9a-fA-F]{64} [ *]\S+_x64_Release_\S+\.exe$' })
+    if ($lines.Count -ne 1) { throw "Expected one x64 installer in $ReleaseTag's SHA256SUMS.txt, found $($lines.Count)." }
+    $expected = ($lines[0] -split ' ')[0].ToUpperInvariant()
+    $name = ($lines[0] -replace '^[0-9a-fA-F]{64} [ *]', '')
+    $exe = Join-Path $downloads $name
+    Write-Host "Downloading $name from $ReleaseTag"
+    Invoke-WebRequest -UseBasicParsing -UserAgent $agent -Uri "$base/$name" -OutFile $exe
 }
 
 $actual = (Get-FileHash -Algorithm SHA256 -Path $exe).Hash
