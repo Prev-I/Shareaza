@@ -192,7 +192,8 @@ BOOL CSearchManager::OnQueryAck(CG2Packet* pPacket, const SOCKADDR* pAddress, Ha
 				if ( nLength == 4 + 2 )
 				{
 					WORD nPort = pPacket->ReadShortBE();
-					if ( nAddress )
+					// Only add hosts of the sender's own family: the other pointer is NULL
+					if ( nAddress && pAddressIPv4 )
 						HostCache.Gnutella2.Add( (IN_ADDR*)&nAddress, nPort, &pAddressIPv4->sin_addr, tNow );
 				}
 
@@ -212,7 +213,8 @@ BOOL CSearchManager::OnQueryAck(CG2Packet* pPacket, const SOCKADDR* pAddress, Ha
 				{
 					WORD nPort = pPacket->ReadShortBE();
 
-					HostCache.Gnutella2.AddIPv6( &nAddress, nPort, &pAddressIPv6->sin6_addr, tNow );
+					if ( pAddressIPv6 )
+						HostCache.Gnutella2.AddIPv6( &nAddress, nPort, &pAddressIPv6->sin6_addr, tNow );
 				}
 
 				if ( nLength == 16 + 2 + 2 )
@@ -230,7 +232,7 @@ BOOL CSearchManager::OnQueryAck(CG2Packet* pPacket, const SOCKADDR* pAddress, Ha
 				WORD nPort		= pPacket->ReadShortBE();
 				DWORD tSeen		= ( nLength == 6 + 4 || nLength == 6 + 4 + 18 || nLength == 6 + 4 + 18 + 4  ) ?
 					(DWORD)( (LONG)pPacket->ReadLongBE() + tAdjust ) : tNow;
-				if ( nAddress )
+				if ( nAddress && pAddressIPv4 )
 					HostCache.Gnutella2.Add( (IN_ADDR*)&nAddress, nPort, &pAddressIPv4->sin_addr, min( tNow, tSeen ) );
 			}
 			
@@ -242,7 +244,8 @@ BOOL CSearchManager::OnQueryAck(CG2Packet* pPacket, const SOCKADDR* pAddress, Ha
 				WORD nPort = pPacket->ReadShortBE();
 				DWORD tSeen		= ( nLength == 18 + 4 || nLength == 6 + 4 + 18 + 4 ) ?
 					(DWORD)( (LONG)pPacket->ReadLongBE() + tAdjust ) : tNow;
-				HostCache.Gnutella2.AddIPv6( &nAddressIPv6, nPort, &pAddressIPv6->sin6_addr, min( tNow, tSeen ) );
+				if ( pAddressIPv6 )
+					HostCache.Gnutella2.AddIPv6( &nAddressIPv6, nPort, &pAddressIPv6->sin6_addr, min( tNow, tSeen ) );
 			}
 
 			nSuggestedHubs ++;
@@ -281,7 +284,7 @@ BOOL CSearchManager::OnQueryAck(CG2Packet* pPacket, const SOCKADDR* pAddress, Ha
 
 	theApp.Message( MSG_DEBUG | MSG_FACILITY_SEARCH,
 		_T("Processing query acknowledge from %s (time adjust %+d seconds): %d hubs, %d leaves, %d suggested hubs, retry after %d seconds."),
-		(LPCTSTR)CString( inet_ntoa( pAddressIPv4->sin_addr ) ), tAdjust,
+		(LPCTSTR)HostToString( pAddress ), tAdjust,
 		nHubs, nLeaves, nSuggestedHubs, nRetryAfter );
 
 	// Update host cache
