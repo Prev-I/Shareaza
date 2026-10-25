@@ -112,7 +112,15 @@ jobs:
                 $ErrorActionPreference = 'Stop'
                 $before = if (Test-Path gwc-requests.jsonl) { @(Get-Content gwc-requests.jsonl).Count } else { 0 }
                 $app = (Get-ItemProperty 'HKCU:\Software\Shareaza\Shareaza').Path
-                Start-Process -FilePath "$app\Shareaza.exe" -WorkingDirectory $app
+                # As the README does: through Explorer, so Shareaza runs unelevated.
+                Start-Process -FilePath explorer.exe -ArgumentList "`"$app\Shareaza.exe`""
+                foreach ($i in 1..15) { if (Get-Process -Name Shareaza -ErrorAction SilentlyContinue) { break }; Start-Sleep 2 }
+                if (Get-Process -Name Shareaza -ErrorAction SilentlyContinue) {
+                    'started through explorer.exe'
+                } else {
+                    '::warning::explorer.exe did not start Shareaza on this runner; starting it directly, elevated'
+                    Start-Process -FilePath "$app\Shareaza.exe" -WorkingDirectory $app
+                }
                 foreach ($i in 1..36) { if ((Test-Path gwc-requests.jsonl) -and @(Get-Content gwc-requests.jsonl).Count -gt $before) { break }; Start-Sleep 5 }
                 & "$env:KIT\Watch-Oracle.ps1" -CacheUrl 'http://127.0.0.1:8080/gwc/' -Hours 0.015 -StatsEveryMinutes 1 -WorkDir $env:WORK
                 # While running: nothing visible in the shared folders.
@@ -158,6 +166,17 @@ jobs:
             timeout-minutes: 10
             run: .\run-client.ps1 -Name hub
 
+        -   name: Prepare must refuse while a restore is unfinished
+            run: |
+                $marker = "$env:WORK\session\restoring"
+                Set-Content $marker 'test'
+                $ErrorActionPreference = 'Continue'
+                $out = & powershell -NoProfile -File "$env:KIT\Prepare-Oracle.ps1" -CacheUrl 'http://127.0.0.1:8080/gwc/' -WorkDir $env:WORK 2>&1 | Out-String
+                $code = $LASTEXITCODE
+                Remove-Item $marker
+                if ($code -eq 0 -or $out -notmatch 'did not finish') { Write-Host "::error::Prepare did not refuse during a restore: $out"; exit 1 }
+                exit 0
+
         -   name: Collect and restore with the kit
             if: always()
             run: |
@@ -195,6 +214,7 @@ jobs:
                 $other = $log | Select-String -SimpleMatch 'Querying discovery service' | Where-Object { $_ -notmatch '"http://127\.0\.0\.1:8080/gwc/"' }
                 if ($other) { Fail "queried another discovery service: $other" }
                 if ($log | Select-String -SimpleMatch '[VersionChecker] Request') { Fail 'the client still checked for updates' }
+                if ($log | Select-String -SimpleMatch 'Failed to load security rules') { Fail 'the client ran without security rules' }
                 if (-not ($log | Select-String -SimpleMatch 'port 6347.')) { Fail 'the hub run did not listen on the prepared port 6347' }
                 if ($log | Select-String -SimpleMatch 'MyTorrents') { Fail 'the client touched the private torrent folder' }
                 $reg = Get-Content "$ev\shareaza.reg"

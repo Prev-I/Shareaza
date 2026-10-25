@@ -28,6 +28,7 @@ param(
     [string] $WorkDir = (Join-Path $env:USERPROFILE 'ShareazaOracle')
 )
 . (Join-Path $PSScriptRoot 'OracleCommon.ps1')
+$WorkDir = Resolve-WorkDir $WorkDir
 
 $log = Join-Path $script:UserData 'Data\Shareaza.log'
 $run = Join-Path $WorkDir 'run'

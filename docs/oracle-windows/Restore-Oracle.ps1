@@ -27,9 +27,14 @@ param(
     [string] $WorkDir = (Join-Path $env:USERPROFILE 'ShareazaOracle')
 )
 . (Join-Path $PSScriptRoot 'OracleCommon.ps1')
+$WorkDir = Resolve-WorkDir $WorkDir
 Assert-NotRunning
 $session = Join-Path $WorkDir 'session'
 $manifest = Get-Session $WorkDir
+$marker = Join-Path $session 'restoring'
+# An earlier restore stopped partway: %APPDATA%\Shareaza may already hold your own
+# data again, so collect nothing from it and only finish the restore.
+$resuming = Test-Path $marker
 if (-not $CollectOnly) {
     Assert-Admin
     Assert-SameVolume $WorkDir
@@ -40,6 +45,9 @@ if (-not $CollectOnly) {
 $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
 
 # 1. Evidence.
+if ($resuming) {
+    Write-Host 'Finishing an interrupted restore; no evidence is collected this time.'
+} else {
 $staging = Join-Path $WorkDir "evidence-$stamp"
 New-Item -ItemType Directory -Force -Path $staging | Out-Null
 foreach ($f in 'Shareaza.log', 'Shareaza.old.log', 'Discovery.dat', 'HostCache.dat') {
@@ -57,7 +65,10 @@ $zip = "$staging.zip"
 Compress-Archive -Path (Join-Path $staging '*') -DestinationPath $zip -Force
 Remove-Item -Recurse -Force $staging
 Write-Host "Evidence: $zip"
+}
 if ($CollectOnly) { return }
+# From here on, nothing else may run until this restore has finished.
+Set-Content -Encoding ASCII $marker "at=$(Get-Date -Format o)"
 
 # 2. Firewall rules and the IPv6/IPv4 preference.
 Get-NetFirewallRule -DisplayName 'Shareaza oracle *' -ErrorAction SilentlyContinue | Remove-NetFirewallRule
@@ -71,20 +82,27 @@ if (Test-Path $policyFile) {
     Write-Host "Windows IPv6/IPv4 preference put back (precedence $($saved[0]))."
 }
 
-# 3. Your own setup.
-$app = Get-ShareazaApp
+# 3. Your own setup. Every step can be repeated if an earlier run stopped partway.
+$target = $null
+if ($manifest.PSObject.Properties['defaultsPath']) { $target = $manifest.defaultsPath }
+if (-not $target) { $target = Join-Path (Get-ShareazaApp) 'Data\DefaultServices.dat' }
 $savedDefaults = Join-Path $session 'DefaultServices.dat'
-if ((Test-Path $savedDefaults) -and (Test-Path (Join-Path $app 'Data'))) {
-    Copy-Item $savedDefaults (Join-Path $app 'Data\DefaultServices.dat') -Force
-}
+if ((Test-Path $savedDefaults) -and (Test-Path (Split-Path $target))) { Copy-Item $savedDefaults $target -Force }
+
 $runs = Join-Path $WorkDir "runs\$stamp"
-if (Test-Path $script:UserData) { Move-Folder $script:UserData (Join-Path $runs 'AppData-Shareaza') }
 foreach ($d in 'shared', 'run') {
     $p = Join-Path $WorkDir $d
     if (Test-Path $p) { Move-Folder $p (Join-Path $runs $d) }
 }
 $savedData = Join-Path $session 'AppData-Shareaza'
-if ($manifest.hadAppData) { Move-Folder $savedData $script:UserData }
+if ($manifest.hadAppData -and -not (Test-Path $savedData)) {
+    # An interrupted restore already moved your data back: leave it where it is.
+    Write-Host "Your data folder is already back in $script:UserData."
+} else {
+    # Whatever is there now belongs to the oracle runs.
+    if (Test-Path $script:UserData) { Move-Folder $script:UserData (Join-Path $runs 'AppData-Shareaza') }
+    if ($manifest.hadAppData) { Move-Folder $savedData $script:UserData }
+}
 
 if (Test-Path 'HKCU:\Software\Shareaza') { Remove-Item -Recurse -Force 'HKCU:\Software\Shareaza' }
 if ($manifest.hadRegistry) {
@@ -100,8 +118,14 @@ if ($manifest.hadRegistry) {
 $now = Get-InstalledVersion
 if ($manifest.previousVersion -and $manifest.previousVersion -ne $now) {
     Write-Host "Note: you had Shareaza $($manifest.previousVersion) before the test; $now is installed now. Reinstall your own version before using it." -ForegroundColor Yellow
-} elseif (-not $manifest.previousVersion) {
-    Write-Host 'Shareaza was not installed before the test. Uninstall it from Settings > Apps if you no longer want it.'
+} elseif ($manifest.hadRegistry -or $manifest.hadAppData) {
+    # Uninstalling deletes %APPDATA%\Shareaza\Data and HKCU\Software\Shareaza: the data just restored.
+    if (-not $manifest.previousVersion) {
+        Write-Host 'Note: your Shareaza version before the test could not be read; reinstall your own version if it differs.' -ForegroundColor Yellow
+    }
+    Write-Host 'Do not uninstall Shareaza to clean up: the uninstaller deletes the settings and data that were just put back.' -ForegroundColor Yellow
+} else {
+    Write-Host 'Shareaza was not on this PC before the test. Uninstall it from Settings > Apps if you no longer want it.'
 }
 # Everything is back; only now is the saved copy deleted.
 Remove-Item -Recurse -Force $session

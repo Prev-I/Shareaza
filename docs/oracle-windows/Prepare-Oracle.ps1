@@ -46,11 +46,13 @@ param(
     [string] $WorkDir = (Join-Path $env:USERPROFILE 'ShareazaOracle')
 )
 . (Join-Path $PSScriptRoot 'OracleCommon.ps1')
+$WorkDir = Resolve-WorkDir $WorkDir
 
 # Every check first, before anything changes.
 Assert-Admin
 Assert-NotRunning
 Assert-SameVolume $WorkDir
+Assert-NotRestoring $WorkDir
 # The client's own URL check (DiscoveryServices.cpp, CheckWebCacheValid): at least
 # 12 characters, a dot after the scheme and a slash after that dot. http:// only:
 # HTTPS in these builds checks no certificate.
@@ -61,6 +63,8 @@ $app = Get-ShareazaApp
 $exe = Join-Path $app 'Shareaza.exe'
 if (-not (Test-Path $exe)) { throw "Shareaza is not installed in $app. Run Install-Shareaza.ps1." }
 $defaults = Join-Path $app 'Data\DefaultServices.dat'
+$securityDefaults = Join-Path $app 'Data\DefaultSecurity.dat'
+if (-not (Test-Path $securityDefaults)) { throw "$securityDefaults is missing; reinstall with Install-Shareaza.ps1." }
 
 # 1. Your own setup, saved once; then this run's starting point.
 Backup-UserSetup $WorkDir
@@ -78,11 +82,22 @@ $folders = [ordered]@{
     TorrentPath    = Join-Path $shared 'Torrents'
 }
 foreach ($d in @($folders.Values) + $run) { New-Item -ItemType Directory -Force -Path $d | Out-Null }
+# The installer seeds the security rules (ban list) into the data folder that was
+# just set aside, and Shareaza has no fallback: without this it runs with no rules.
+New-Item -ItemType Directory -Force -Path (Join-Path $script:UserData 'Data') | Out-Null
+Copy-Item $securityDefaults (Join-Path $script:UserData 'Data\Security.dat')
 
-# 2. A clean settings key. Only Shareaza's own section is replaced; the backup has
-#    the whole HKCU\Software\Shareaza.
-if (Test-Path $script:ShareazaKey) { Remove-Item -Recurse -Force $script:ShareazaKey }
-New-Item -Path $script:ShareazaKey -Force | Out-Null
+# 2. A clean settings key; the backup has the whole HKCU\Software\Shareaza. Two
+#    subkeys stay: Plugins, which the installer's elevated plugin registration
+#    wrote and the unelevated client cannot write again, and Skins (theme, language).
+if (Test-Path $script:ShareazaKey) {
+    Get-ChildItem $script:ShareazaKey | Where-Object { $_.PSChildName -notin 'Plugins', 'Skins' } | Remove-Item -Recurse -Force
+    foreach ($v in @((Get-Item $script:ShareazaKey).Property | Where-Object { $_ -ne '(default)' })) {
+        Remove-ItemProperty -Path $script:ShareazaKey -Name $v
+    }
+} else {
+    New-Item -Path $script:ShareazaKey -Force | Out-Null
+}
 
 function Set-Setting([string] $Section, [string] $Name, $Value) {
     $path = if ($Section) { "$script:ShareazaKey\$Section" } else { $script:ShareazaKey }
@@ -147,7 +162,7 @@ Set-Content -Encoding UTF8 (Join-Path $run 'prepared.txt') `
     "cache=$CacheUrl mode=$Mode port=$Port preferipv4=$PreferIPv4 client=$(Get-InstalledVersion) at=$(Get-Date -Format o)"
 Write-Host ''
 Write-Host "Prepared: $Mode on port $Port, discovering only through $CacheUrl."
-Write-Host "Shared: only the empty folders under $shared."
+Write-Host "Shared: only the empty folders under $shared. Security rules: the installer's defaults."
 if ($Mode -eq 'Hub') { Write-Host "Forward TCP and UDP $Port on your router to this PC before starting." }
 Write-Host 'Start Shareaza from the Start menu, NOT from this elevated window, or run:'
 Write-Host "  explorer.exe `"$exe`""

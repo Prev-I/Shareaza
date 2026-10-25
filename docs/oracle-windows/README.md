@@ -10,7 +10,7 @@ covers stages 2 and 3 of gwc-edge's `docs/field-test-plan.md`. On Linux, use
 | `Install-Shareaza.ps1` | Saves your own Shareaza setup, then downloads the official 2.7.10.2 or this fork's build, checks its SHA-256 and installs it silently |
 | `Prepare-Oracle.ps1` | Sets the installed client to share nothing and to talk only to the cache under test, as a leaf or as a hub |
 | `Watch-Oracle.ps1` | Follows the client's debug log and saves the cache's `/stats` |
-| `Restore-Oracle.ps1` | Zips the evidence, then puts your own setup back exactly as it was before the test |
+| `Restore-Oracle.ps1` | Zips the evidence, then puts your own Shareaza settings and data back as they were before the test |
 | `OracleCommon.ps1` | Shared by the others; not run directly |
 
 `.github/workflows/oracle-windows.yml` runs the kit end to end on a Windows runner, against a
@@ -19,8 +19,13 @@ stub cache:
 - prepare again as a hub, run;
 - restore, then a second restore, which must refuse.
 
-It plants a fake "own setup" first, including a private torrent folder. It checks that the folder
-is never shared, and that the setup comes back unchanged.
+It plants a fake "own setup" first, including a private torrent folder. It checks:
+- the folder is never shared, and the setup comes back unchanged;
+- the client runs with its security rules;
+- Prepare refuses while a restore is unfinished.
+
+It starts Shareaza through `explorer.exe` as you would, unelevated. If the runner gives Explorer
+no desktop, it falls back to starting it elevated and says so in a warning.
 
 ## Before you start
 
@@ -38,6 +43,10 @@ is never shared, and that the setup comes back unchanged.
   - `Restore-Oracle.ps1` puts all of it back, and only then deletes the saved copy.
   - The test does replace your installed Shareaza. If it was a different version, reinstall
     yours afterwards; `Restore-Oracle.ps1` tells you when.
+  - **Don't uninstall Shareaza to clean up** if you had it before. The uninstaller deletes the
+    settings and data that `Restore-Oracle.ps1` has just put back.
+  - **If your own Shareaza starts with Windows,** turn that off for the test. A reboot during the
+    hub test would otherwise start the oracle client.
 - **Nothing is shared.**
   - On its first start Shareaza shares its download, incomplete, collection and torrent folders.
     The kit points all four at new, empty folders under `ShareazaOracle\shared`.
@@ -118,8 +127,9 @@ explorer.exe "$env:ProgramFiles\Shareaza\Shareaza.exe"     # starts it as you, n
 - **It only queries when it runs short of hosts.** A G2 query goes out only while the client knows
   25 hosts or fewer (`HostCache`, `EnoughServers`). A leaf that learns hosts from its hubs may
   never query again.
-- **There is a floor between queries.** It never queries the same cache more often than every
-  30 minutes (`Discovery\AccessPeriod`).
+- **There is a floor between queries.** By default it never queries the same cache more often
+  than every 30 minutes (`Discovery\AccessPeriod`). A cache can change that for itself with an
+  `I|access|period|<seconds>` line in its reply.
 - **To force one,** right-click `gwc-edge.net` in the Discovery window and choose **Query Now**.
   Do it after 30 minutes or more.
 
@@ -230,7 +240,8 @@ Other ways to run it:
 |---|---|
 | SmartScreen warns about the installer, or Defender flags it as a potentially unwanted app | Normal for an unsigned P2P installer. The scripts have already checked its SHA-256; allow it, or stop here |
 | `session.partial exists` | An earlier run died while saving your setup. The message says how to put your data back; nothing has been lost |
-| No `Querying discovery service` line at all | Shareaza wasn't closed when you prepared it, so it saved its own settings on exit. Close it, run `Prepare-Oracle.ps1` again, then start it |
+| `An earlier Restore-Oracle.ps1 did not finish` | Run `Restore-Oracle.ps1` again: it finishes the restore. The other scripts refuse until it has |
+| No `Querying discovery service` line at all | Shareaza isn't connected to G2 yet (status bar), or it was reinstalled after preparing: close it and run `Prepare-Oracle.ps1` again |
 | The QuickStart wizard opens | `Prepare-Oracle.ps1` wasn't run after the last install. Close Shareaza and run it |
 | `failed, fail count 1` after a query | The cache's reply didn't satisfy Shareaza: run `scripts/smoke.sh --prod http://gwc-edge.net/` from the gwc-edge repository |
 | Connected, but to no hub the cache listed | The first hub it reached handed it others (`X-Try-Hubs`), and it moved on. Check the first connection after the cache query in `Shareaza.log` |

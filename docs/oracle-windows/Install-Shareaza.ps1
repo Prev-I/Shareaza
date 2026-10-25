@@ -32,9 +32,11 @@ param(
     [string] $WorkDir = (Join-Path $env:USERPROFILE 'ShareazaOracle')
 )
 . (Join-Path $PSScriptRoot 'OracleCommon.ps1')
+$WorkDir = Resolve-WorkDir $WorkDir
 Assert-Admin
 Assert-NotRunning
 Assert-SameVolume $WorkDir
+Assert-NotRestoring $WorkDir
 
 $downloads = Join-Path $WorkDir 'installers'
 New-Item -ItemType Directory -Force -Path $downloads | Out-Null
@@ -57,10 +59,16 @@ if ($Client -eq 'Official') {
     Write-Host "Downloading SHA256SUMS.txt from $ReleaseTag"
     Invoke-WebRequest -UseBasicParsing -UserAgent $agent -Uri "$base/SHA256SUMS.txt" -OutFile $sums
     # Lines are "<hash> <name>" or "<hash> *<name>".
-    $lines = @(Get-Content $sums | Where-Object { $_ -match '^[0-9a-fA-F]{64} [ *]\S+_x64_Release_\S+\.exe$' })
+    $lines = @(Get-Content $sums | Where-Object { $_ -match '^[0-9a-fA-F]{64} [ *][^\\/:*?"<>|\s]+_x64_Release_[^\\/:*?"<>|\s]+\.exe$' })
     if ($lines.Count -ne 1) { throw "Expected one x64 installer in $ReleaseTag's SHA256SUMS.txt, found $($lines.Count)." }
     $expected = ($lines[0] -split ' ')[0].ToUpperInvariant()
     $name = ($lines[0] -replace '^[0-9a-fA-F]{64} [ *]', '')
+    if ([IO.Path]::GetFileName($name) -ne $name) { throw "Unexpected installer name in SHA256SUMS.txt: $name" }
+    # The default release's hash is pinned here as well, so a replaced release is caught.
+    $pinned = @{ 'v2.7.10.6-previ.1' = '731FCA2A95BEF41F2A3EFC83837B8FA164C7482D82896ED6CA32F8F36EF8DEDF' }
+    if ($pinned.ContainsKey($ReleaseTag) -and $pinned[$ReleaseTag] -ne $expected) {
+        throw "SHA256SUMS.txt of $ReleaseTag lists $expected, not the pinned $($pinned[$ReleaseTag]). Not installing."
+    }
     $exe = Join-Path $downloads $name
     Write-Host "Downloading $name from $ReleaseTag"
     Invoke-WebRequest -UseBasicParsing -UserAgent $agent -Uri "$base/$name" -OutFile $exe
@@ -88,4 +96,4 @@ if (-not (Test-Path (Join-Path $app 'Shareaza.exe'))) { throw "Shareaza.exe not 
 $stock = Join-Path $WorkDir 'session\DefaultServices.dat'
 if (-not (Test-Path $stock)) { Copy-Item (Join-Path $app 'Data\DefaultServices.dat') $stock }
 Write-Host "Installed $Client $(Get-InstalledVersion) in $app"
-Write-Host 'Next: .\Prepare-Oracle.ps1'
+Write-Host 'Next: .\Prepare-Oracle.ps1. Do not start Shareaza before it: the install has just reset part of its settings.'
