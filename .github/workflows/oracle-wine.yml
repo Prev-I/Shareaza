@@ -1,0 +1,228 @@
+name: Oracle under Wine
+
+# Checks the steps in docs/ORACLE.md end to end on a Linux runner: install the
+# official 2.7.10.2 and this fork's x64 build into their own Wine prefixes,
+# start each one against a local stub GWebCache, and record what it sends.
+# Nothing here contacts the live G2 network: DefaultServices.dat is replaced so
+# the only discovery service either client knows is the stub.
+
+on:
+    workflow_dispatch:
+      inputs:
+        release_run_id:
+          description: 'Run id of a "Build and release" tag run to take the fork installer from (default: latest successful one)'
+          required: false
+    pull_request:
+      paths:
+        - docs/ORACLE.md
+        - docs/oracle-prepare.sh
+        - .github/workflows/oracle-wine.yml
+
+permissions:
+    contents: read
+    actions: read
+
+jobs:
+    oracle:
+        runs-on: ubuntu-24.04
+        timeout-minutes: 45
+        strategy:
+            fail-fast: false
+            matrix:
+                include:
+                  - client: sf
+                    expect: client=RAZA2.7.10.2&
+                    agent: Shareaza 2.7.10.2
+                  - client: previ
+                    expect: client=RAZI2.7.10.6&
+                    agent: iShareaza 2.7.10.6
+        env:
+            WINEPREFIX: /home/runner/.wine-shareaza-${{ matrix.client }}
+            WINEARCH: win64
+            WINEDEBUG: -all
+            DISPLAY: ':99'
+            SF_URL: https://downloads.sourceforge.net/project/shareaza/Shareaza/Shareaza-2.7.10.2/Shareaza_2.7.10.2_x64.exe
+            # Published by SourceForge for Shareaza_2.7.10.2_x64.exe.
+            SF_SHA256: d6ff141d69a3af53f8f7547b40e308a4e2aa4818eeb28da827d7545165ef3051
+        defaults:
+            run:
+                shell: bash
+        steps:
+        -   name: Checkout docs/oracle-prepare.sh
+            uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+            with:
+                sparse-checkout: docs
+                persist-credentials: false
+
+        -   name: Install Wine, winetricks and X tools
+            timeout-minutes: 15
+            env:
+                DEBIAN_FRONTEND: noninteractive
+            run: |
+                sudo dpkg --add-architecture i386
+                sudo apt-get update -q
+                sudo apt-get install -y -q --no-install-recommends wine wine64 wine32:i386 winetricks cabextract xvfb x11-apps imagemagick
+                wine --version | tee wine-version.txt
+                winetricks --version | tee -a wine-version.txt
+
+        -   name: Fetch the official 2.7.10.2 installer
+            if: matrix.client == 'sf'
+            run: |
+                mkdir -p installer
+                curl -sSfL -o installer/setup.exe "$SF_URL"
+                echo "$SF_SHA256  installer/setup.exe" | sha256sum -c
+
+        -   name: Find the fork's release build
+            if: matrix.client == 'previ'
+            id: release
+            env:
+                GH_TOKEN: ${{ github.token }}
+                RUN_ID: ${{ inputs.release_run_id }}
+            run: |
+                if [ -z "$RUN_ID" ]; then
+                  RUN_ID=$(gh run list -R "$GITHUB_REPOSITORY" --workflow release.yml --event push --status success -L 1 --json databaseId --jq '.[0].databaseId // empty')
+                fi
+                [ -n "$RUN_ID" ] || { echo "::error::no successful tag build of release.yml"; exit 1; }
+                echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
+
+        -   name: Fetch the fork's x64 installer
+            if: matrix.client == 'previ'
+            uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+            with:
+                name: Shareaza Windows x64 Release
+                run-id: ${{ steps.release.outputs.run_id }}
+                github-token: ${{ github.token }}
+                path: installer
+
+        -   name: Verify the fork's installer against its manifest
+            if: matrix.client == 'previ'
+            working-directory: installer
+            run: |
+                sha256sum -c SHA256SUMS.txt
+                mv -- *.exe setup.exe
+
+        -   name: Start a virtual display
+            run: |
+                Xvfb :99 -screen 0 1280x800x24 &
+                sleep 3
+
+        -   name: Create the prefix and install the VC++ 2022 runtime
+            run: |
+                wineboot --init
+                wineserver --wait
+                winetricks -q vcrun2022
+                wineserver --wait
+
+        -   name: Install Shareaza silently
+            run: |
+                wine installer/setup.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP- /LOG="C:\\shareaza-setup.log"
+                wineserver --wait
+                cp "$WINEPREFIX/drive_c/shareaza-setup.log" setup.log
+                tail -5 setup.log
+                grep -q 'Installation process succeeded' setup.log
+                ls "$WINEPREFIX/drive_c/Program Files/Shareaza/Shareaza.exe"
+
+        -   name: Prepare the prefix as docs/ORACLE.md describes
+            run: bash docs/oracle-prepare.sh "$WINEPREFIX" http://127.0.0.1:8080/gwc/
+
+        -   name: Run Shareaza against the stub cache
+            timeout-minutes: 10
+            run: |
+                cat > stub.py <<'EOF'
+                import http.server, json, time
+                class H(http.server.BaseHTTPRequestHandler):
+                    def do_GET(self):
+                        with open('gwc-requests.jsonl', 'a') as f:
+                            f.write(json.dumps({'t': time.time(), 'path': self.path,
+                                                'user_agent': self.headers.get('User-Agent')}) + '\n')
+                        body = b'I|pong|oracle-stub 0.1|gnutella2\n'
+                        self.send_response(200)
+                        self.send_header('Content-Type', 'text/plain')
+                        self.send_header('Content-Length', str(len(body)))
+                        self.end_headers()
+                        self.wfile.write(body)
+                    def log_message(self, *a):
+                        pass
+                http.server.ThreadingHTTPServer(('127.0.0.1', 8080), H).serve_forever()
+                EOF
+                python3 -I stub.py &
+                STUB=$!
+                for _ in $(seq 1 20); do
+                  curl -sf -o /dev/null http://127.0.0.1:8080/ready && break
+                  sleep 0.5
+                done
+                curl -sf -o /dev/null http://127.0.0.1:8080/ready || { echo "::error::the stub cache did not start"; exit 1; }
+                # The readiness probe is not a client request.
+                : > gwc-requests.jsonl
+                wine "C:\\Program Files\\Shareaza\\Shareaza.exe" &
+                for _ in $(seq 1 36); do
+                  sleep 5
+                  [ -s gwc-requests.jsonl ] && break
+                done
+                sleep 20
+                import -window root screenshot-running.png || true
+                # The exit check below means something only if this pattern finds the client.
+                if pgrep -f 'Shareaza.exe' >/dev/null; then echo seen > running-state.txt; else echo not-seen > running-state.txt; fi
+                # taskkill without /F posts WM_CLOSE, so Shareaza shuts down and saves its data.
+                wine taskkill /IM Shareaza.exe || true
+                for _ in $(seq 1 24); do
+                  sleep 5
+                  pgrep -f 'Shareaza.exe' >/dev/null || break
+                done
+                if pgrep -f 'Shareaza.exe' >/dev/null; then echo still-running > exit-state.txt; else echo exited > exit-state.txt; fi
+                import -window root screenshot-closing.png || true
+                # Let wineserver write the registry to disk before anything reads it, unless
+                # the client is still up, in which case waiting would only hang.
+                if [ "$(cat exit-state.txt)" = exited ]; then wineserver --wait || true; else wineserver -k || true; fi
+                kill "$STUB" || true
+                cat gwc-requests.jsonl
+
+        -   name: Collect what the client left behind
+            if: always()
+            run: |
+                mkdir -p out
+                user_data="$WINEPREFIX/drive_c/users/$USER/AppData/Roaming/Shareaza"
+                find "$WINEPREFIX/drive_c" \( -name 'Discovery.dat' -o -name 'HostCache.dat' -o -name 'Shareaza.log' \) -printf '%s\t%p\n' | sed "s|$WINEPREFIX|\$WINEPREFIX|" | tee out/data-files.txt
+                cp gwc-requests.jsonl running-state.txt exit-state.txt setup.log wine-version.txt screenshot-*.png out/ 2>/dev/null || true
+                cp "$user_data/Data/Shareaza.log" out/ 2>/dev/null || true
+                if [ -f out/Shareaza.log ]; then iconv -f UTF-16 -t UTF-8 out/Shareaza.log | tr -d '\r' > out/Shareaza.utf8.log || true; fi
+                wine reg export 'HKCU\Software\Shareaza' out/shareaza.reg /y || true
+                wineserver --wait || true
+                if [ -f out/shareaza.reg ]; then iconv -f UTF-16 -t UTF-8 out/shareaza.reg | tr -d '\r' > out/shareaza.utf8.reg || true; fi
+
+        -   name: Check what the client did
+            env:
+                EXPECT: ${{ matrix.expect }}
+                AGENT: ${{ matrix.agent }}
+            run: |
+                fail() { echo "::error::$*"; exit 1; }
+                [ -s out/gwc-requests.jsonl ] || fail "Shareaza never queried the stub cache"
+                grep -F -- "$EXPECT" out/gwc-requests.jsonl || fail "no request carried $EXPECT"
+                grep -F -- "\"user_agent\": \"$AGENT\"" out/gwc-requests.jsonl || fail "no request came from $AGENT"
+                [ -s out/Shareaza.utf8.log ] || fail "no Shareaza.log"
+                log=out/Shareaza.utf8.log
+                # The debug log level took effect, so the absence checks below mean something.
+                grep -q '\[DiscoveryServices\] Request:' "$log" || fail "the log has no debug-level discovery lines"
+                # Isolation: the only discovery service queried is the stub.
+                grep 'Querying discovery service' "$log" | grep -v '"http://127.0.0.1:8080/gwc/"' && fail "queried a discovery service other than the stub"
+                grep -q 'VersionChecker\] Request' "$log" && fail "the client still checked for updates"
+                # A clean shutdown: the process exited by itself and saved its data.
+                [ "$(cat out/running-state.txt)" = seen ] || fail "pgrep never saw Shareaza.exe, so the exit check proves nothing"
+                [ "$(cat out/exit-state.txt)" = exited ] || fail "Shareaza did not exit after WM_CLOSE"
+                grep -q 'Shutting down Shareaza network core' "$log" || fail "no network shutdown in the log"
+                # HostCache.dat is written only at exit when no hosts were learnt.
+                grep -q 'HostCache.dat' out/data-files.txt || fail "HostCache.dat was not written"
+                grep -q 'Discovery.dat' out/data-files.txt || fail "Discovery.dat was not written"
+                # With the section keys created, Shareaza's own save fills in sections
+                # nothing else wrote, such as Gnutella2.
+                awk '/^\[/{sec=$0} sec ~ /Shareaza\\Gnutella2\]$/ && /^"HostCount"/{found=1} END{exit !found}' out/shareaza.utf8.reg \
+                  || fail "Shareaza did not save its Gnutella2 settings"
+                grep -E 'Accepting incoming TCP|Listening for UDP' "$log" || true
+
+        -   name: Upload the evidence
+            if: always()
+            uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+            with:
+                name: oracle-${{ matrix.client }}
+                path: out/
+                if-no-files-found: warn
