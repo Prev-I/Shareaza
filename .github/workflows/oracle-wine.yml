@@ -99,14 +99,16 @@ jobs:
                 Xvfb :99 -screen 0 1280x800x24 &
                 sleep 3
 
-        -   name: Make the download folder $HOME, as on a desktop without ~/Downloads
-            # Reproduces the case docs/ORACLE.md guards against: Wine links the prefix's
-            # Downloads folder to the XDG download folder, and Shareaza shares it.
+        -   name: Make the download folder $HOME, the worst case docs/ORACLE.md guards against
+            # Wine links the prefix's Downloads folder to XDG_DOWNLOAD_DIR when that
+            # folder exists (dlls/shell32/shellpath.c, dlls/mountmgr.sys/unixlib.c), and
+            # Shareaza shares it. xdg-user-dirs writes "$HOME/" when the download folder
+            # is the home folder itself; Wine accepts only "/..." or "$HOME/..." values.
             run: |
                 mkdir -p ~/.config
-                # user-dirs.dirs takes "$HOME" literally and expands it itself.
+                # user-dirs.dirs holds "$HOME/" literally; Wine and xdg expand it.
                 # shellcheck disable=SC2016
-                echo 'XDG_DOWNLOAD_DIR="$HOME"' > ~/.config/user-dirs.dirs
+                echo 'XDG_DOWNLOAD_DIR="$HOME/"' > ~/.config/user-dirs.dirs
                 echo 'private' > ~/oracle-canary-private.txt
 
         -   name: Create the prefix, isolate it from $HOME, install the VC++ 2022 runtime

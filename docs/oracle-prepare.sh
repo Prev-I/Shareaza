@@ -21,9 +21,10 @@ if pgrep -x 'Shareaza.exe' >/dev/null; then
     exit 1
 fi
 
-# Shareaza shares its download folder on its first run, and under Wine that folder
-# is usually a link into your home directory: for the official 2.7.10.2, which
-# uses the whole Downloads folder, it can be $HOME itself. Wine never lets Shareaza
+# Shareaza shares its download folder on its first run, and the official 2.7.10.2
+# uses the whole Downloads folder. Wine links the prefix's Downloads to your own
+# when it exists (~/Downloads, or what ~/.config/user-dirs.dirs names, which can be
+# "$HOME/": your whole home). Wine never lets Shareaza
 # read a different folder from its settings (they are strings), so the prefix
 # itself must hold no links out of it: `winetricks isolate_home` makes them real,
 # empty folders inside the prefix.

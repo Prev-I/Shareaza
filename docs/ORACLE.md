@@ -92,14 +92,17 @@ wineserver --wait
   - **The danger:** Wine links the prefix's Downloads, Documents and similar folders to your own.
     On its first start Shareaza **shares its download folder**, and the official 2.7.10.2 uses
     the whole Downloads folder.
-  - **Why it can be your whole home:** on a machine with no `~/Downloads`, the XDG download
-    folder, and so the link, is `$HOME` itself.
+  - **Where the link points:** Wine links each of these folders only when the target exists.
+    Usually that's `~/Downloads`, so your real downloads would be shared. If
+    `~/.config/user-dirs.dirs` sets `XDG_DOWNLOAD_DIR="$HOME/"`, the target is your whole home
+    folder. With neither, Wine makes a real folder inside the prefix.
+    (`dlls/shell32/shellpath.c`, `dlls/mountmgr.sys/unixlib.c`)
   - **What it does:** `winetricks isolate_home` turns those links into real, empty folders inside
     the prefix.
   - **Why settings can't fix it:** a different download folder can't be set instead, because Wine
     never lets Shareaza read string settings (see [Settings and Wine](#settings-and-wine)).
   - **Checked both ways:** `oracle-prepare.sh` refuses a prefix that still links out. CI
-    reproduces the `$HOME` case and checks that nothing is indexed.
+    reproduces the whole-home case and checks that nothing is indexed.
 - **Install `vcrun2022` first.** Without it the fork's installer fetches the VC++ runtime itself,
   from go.microsoft.com (`vc143/vcredist/vcredist.iss`). The 2.7.10.2 installer most likely does the
   same: it carries the same download helper (`idp.dll`), but no run has shown it downloading.
