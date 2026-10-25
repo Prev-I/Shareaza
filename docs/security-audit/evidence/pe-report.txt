@@ -1,0 +1,648 @@
+== BugSplat/Win32/Debug/BsSndRpt.exe 1362560 32173a162dc5d82c072f1f85bf51cedd42e9cb766e8505adcb509ead986cd6b7
+  machine 0x14c ts 2024-04-25T22:29:25 exe subsys 2 linker 14
+  ver: {'CompanyName': 'BugSplat, LLC', 'FileDescription': 'Crash Reporting Send Utility, BsSndRpt.exe', 'FileVersion': '5, 0, 1, 0', 'LegalCopyright': 'Copyright BugSplat. All rights reserved.', 'OriginalFilename': 'BsSndRpt.exe', 'ProductName': 'BugSplat Crash Report Send Utility', 'ProductVersion': '5, 0, 1, 0'}
+  pdb ['C:\\TeamCity\\buildAgent\\work\\b925adac8dc2e423\\BugSplat\\Win32\\Debug\\BsSndRpt.pdb']
+  cert subj: Common Name: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1; Organization: DigiCert, Inc.; Country: US | issuer: Common Name: DigiCert Trusted Root G4, Organizational Unit: www.digicert.com, Organization: DigiCert Inc, Country: US | 2021-04-29 -> 2036-04-28
+  cert subj: Common Name: BugSplat, LLC; Organization: BugSplat, LLC; Locality: Boulder; State/Province: Colorado; Country: US; Serial Number: 449046; Business Category: Private Organization; Incorporation State/Province: New Hampshire; Incorporation Country: US | issuer: Common Name: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1; Organization: DigiCert, Inc.; Country: US | 2024-04-11 -> 2025-04-10
+  spc digest sha256 98caafa42ffcaeb4b2a00cc04773cc7eef379630965f1b7ef0db4c458bb2015e computed 98caafa42ffcaeb4b2a00cc04773cc7eef379630965f1b7ef0db4c458bb2015e MATCH
+  signer serial 15330617294156544436764458640947730558
+  unsigned attr microsoft_time_stamp_token
+  timestamp 2024-04-25 22:49:10+00:00
+  signature over signed attrs: VALID against BugSplat, LLC
+  leaf issued by embedded cert: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\atlmfc\include\atlexcept.h
+  path-string D:\a\_work\1\s\src\vctools\crt\github\stl\src\locale0.cpp
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\atlmfc\include\cstringt.h
+  path-string C:\TeamCity\buildAgent\work\b925adac8dc2e423\BsSndRpt\BsSndRptLib\ReportFilesDlg.h
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\vector
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\xtree
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\xlocale
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\xmemory
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\atlmfc\include\atlhost.h
+  path-string X:\:`:d:h:
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\xutility
+  path-string C:\TeamCity\buildAgent\work\b925adac8dc2e423\ThirdParty\Wtl\include\atlctrlx.h
+  path-string C:\TeamCity\buildAgent\work\b925adac8dc2e423\BsSndRpt\BsSndRptLib\CrashDlg.h
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\atlmfc\include\atlwin.h
+  path-string C:\TeamCity\buildAgent\work\b925adac8dc2e423\ThirdParty\Wtl\include\atlddx.h
+  path-string C:\TeamCity\buildAgent\work\b925adac8dc2e423\BsSndRpt\BsSndRptLib\ReportDetailsDlg.h
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\atlmfc\include\statreg.h
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\array
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\atlmfc\include\atlbase.h
+  path-string C:\TeamCity\buildAgent\work\b925adac8dc2e423\BsSndRpt\BsSndRptLib\SendReportProgress.h
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\xstring
+  path-string C:\TeamCity\buildAgent\work\b925adac8dc2e423\BugSplat\Win32\Debug\BsSndRpt.pdb
+  url http://cacerts.digicert.com/DigiCertTrustedG4RSA4096SHA256TimeStampingCA.crt0
+  url http://ocsp.digicert.com0C
+  url http://ocsp.digicert.com0\
+  url http://crl3.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crl0S
+  url http://crl3.digicert.com/DigiCertTrustedG4RSA4096SHA256TimeStampingCA.crl0
+  url http://crl3.digicert.com/DigiCertTrustedRootG4.crl0
+  url http://cacerts.digicert.com/DigiCertTrustedRootG4.crt0C
+  url http://crl4.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crl0
+  url http://ocsp.digicert.com0X
+  url http://crl3.digicert.com/DigiCertTrustedRootG4.crl0 
+  url http://cacerts.digicert.com/DigiCertAssuredIDRootCA.crt0E
+  url http://www.digicert.com/CPS0
+  url http://crl3.digicert.com/DigiCertAssuredIDRootCA.crl0
+  url http://ocsp.digicert.com0A
+  url http://cacerts.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crt0
+== BugSplat/Win32/Debug/BugSplat.dll 1083520 ddc65b6de67e18b09b2dd8d2b4ed359717d0c65c9303f3a4f2e6053b1e3bf9b5
+  machine 0x14c ts 2024-04-25T22:29:43 dll subsys 2 linker 14
+  ver: {'CompanyName': 'BugSplat', 'FileDescription': 'Windows native crash reporting', 'FileVersion': '5, 2, 0, 0', 'LegalCopyright': 'Copyright BugSplat, All Rights Reserved', 'OriginalFilename': 'BugSplatNative.dll', 'ProductName': 'BugSplat Windows Native Library', 'ProductVersion': '5, 2, 0, 0'}
+  pdb ['C:\\TeamCity\\buildAgent\\work\\b925adac8dc2e423\\BugSplat\\Win32\\Debug\\BugSplat.pdb']
+  cert subj: Common Name: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1; Organization: DigiCert, Inc.; Country: US | issuer: Common Name: DigiCert Trusted Root G4, Organizational Unit: www.digicert.com, Organization: DigiCert Inc, Country: US | 2021-04-29 -> 2036-04-28
+  cert subj: Common Name: BugSplat, LLC; Organization: BugSplat, LLC; Locality: Boulder; State/Province: Colorado; Country: US; Serial Number: 449046; Business Category: Private Organization; Incorporation State/Province: New Hampshire; Incorporation Country: US | issuer: Common Name: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1; Organization: DigiCert, Inc.; Country: US | 2024-04-11 -> 2025-04-10
+  spc digest sha256 f9f63757098b9c5d9cced90f61959311b54ea27867899b75e86f5be2e02fd53d computed f9f63757098b9c5d9cced90f61959311b54ea27867899b75e86f5be2e02fd53d MATCH
+  signer serial 15330617294156544436764458640947730558
+  unsigned attr microsoft_time_stamp_token
+  timestamp 2024-04-25 22:49:11+00:00
+  signature over signed attrs: VALID against BugSplat, LLC
+  leaf issued by embedded cert: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\atlmfc\include\statreg.h
+  path-string D:\a\_work\1\s\src\vctools\crt\vcruntime\src\eh\std_type_info.cpp
+  path-string P:\:h:t:
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\atlmfc\include\atlexcept.h
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\xmemory
+  path-string C:\TeamCity\buildAgent\work\b925adac8dc2e423\ThirdParty\Wtl\include\atlapp.h
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\atlmfc\include\cstringt.h
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\atlmfc\include\atlhost.h
+  path-string D:\a\_work\1\s\src\vctools\crt\vcruntime\src\internal\per_thread_data.cpp
+  path-string D:\a\_work\1\s\src\vctools\crt\github\stl\inc\optional
+  path-string C:\TeamCity\buildAgent\work\b925adac8dc2e423\BugSplat\Win32\Debug\BugSplat.pdb
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\atlmfc\include\atlbase.h
+  path-string X:\:`:d:h:l:
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\atlmfc\include\atlwin.h
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\vector
+  url http://cacerts.digicert.com/DigiCertTrustedG4RSA4096SHA256TimeStampingCA.crt0
+  url http://ocsp.digicert.com0C
+  url http://ocsp.digicert.com0\
+  url http://crl3.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crl0S
+  url http://crl3.digicert.com/DigiCertTrustedG4RSA4096SHA256TimeStampingCA.crl0
+  url http://crl3.digicert.com/DigiCertTrustedRootG4.crl0
+  url http://cacerts.digicert.com/DigiCertTrustedRootG4.crt0C
+  url http://crl4.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crl0
+  url http://ocsp.digicert.com0X
+  url http://crl3.digicert.com/DigiCertTrustedRootG4.crl0 
+  url http://cacerts.digicert.com/DigiCertAssuredIDRootCA.crt0E
+  url http://www.digicert.com/CPS0
+  url http://crl3.digicert.com/DigiCertAssuredIDRootCA.crl0
+  url http://ocsp.digicert.com0A
+  url http://cacerts.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crt0
+== BugSplat/Win32/Debug/BugSplatHD.exe 1266816 1db25ea2d652a45bc4ae2d7e9087089d098f6aad70b2b11655d45b8e00d4925e
+  machine 0x14c ts 2024-04-25T22:29:46 exe subsys 2 linker 14
+  ver: {'CompanyName': 'BugSplat, LLC', 'FileDescription': 'Hang detection module, BugSplatHD.EXE', 'FileVersion': '5, 2, 0, 0', 'LegalCopyright': 'Copyright BugSplat, All Rights Reserved', 'OriginalFilename': 'BugSplatHD.EXE', 'ProductName': 'BugSplat Hang Detection Module', 'ProductVersion': '5, 2, 0, 0'}
+  pdb ['C:\\TeamCity\\buildAgent\\work\\b925adac8dc2e423\\BugSplat\\Win32\\Debug\\BugSplatHD.pdb']
+  cert subj: Common Name: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1; Organization: DigiCert, Inc.; Country: US | issuer: Common Name: DigiCert Trusted Root G4, Organizational Unit: www.digicert.com, Organization: DigiCert Inc, Country: US | 2021-04-29 -> 2036-04-28
+  cert subj: Common Name: BugSplat, LLC; Organization: BugSplat, LLC; Locality: Boulder; State/Province: Colorado; Country: US; Serial Number: 449046; Business Category: Private Organization; Incorporation State/Province: New Hampshire; Incorporation Country: US | issuer: Common Name: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1; Organization: DigiCert, Inc.; Country: US | 2024-04-11 -> 2025-04-10
+  spc digest sha256 41fa7473c0a7d61c960ad686d880efab82a7567c8ce5e077b0bebd23be8418d8 computed 41fa7473c0a7d61c960ad686d880efab82a7567c8ce5e077b0bebd23be8418d8 MATCH
+  signer serial 15330617294156544436764458640947730558
+  unsigned attr microsoft_time_stamp_token
+  timestamp 2024-04-25 22:49:13+00:00
+  signature over signed attrs: VALID against BugSplat, LLC
+  leaf issued by embedded cert: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1
+  path-string D:\a\_work\1\s\src\vctools\crt\github\stl\src\locale0.cpp
+  path-string C:\TeamCity\buildAgent\work\b925adac8dc2e423\BugSplat\Win32\Debug\BugSplatHD.pdb
+  path-string D:\a\_work\1\s\src\vctools\crt\github\stl\src\xstrcoll.cpp
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\vector
+  path-string T:\:d:l:t:|:
+  path-string D:\a\_work\1\s\src\vctools\crt\github\stl\inc\xlocale
+  path-string D:\a\_work\1\s\src\vctools\crt\vcruntime\src\eh\std_type_info.cpp
+  path-string D:\a\_work\1\s\src\vctools\crt\github\stl\src\_tolower.cpp
+  path-string D:\a\_work\1\s\src\vctools\crt\github\stl\src\locale.cpp
+  path-string D:\a\_work\1\s\src\vctools\crt\github\stl\inc\optional
+  path-string X:\:`:d:h:l:p:t:x:|:
+  path-string D:\a\_work\1\s\src\vctools\crt\github\stl\inc\xutility
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\xmemory
+  path-string D:\a\_work\1\s\src\vctools\crt\github\stl\inc\xmemory
+  path-string D:\a\_work\1\s\src\vctools\crt\github\stl\inc\xlocnum
+  path-string D:\a\_work\1\s\src\vctools\crt\github\stl\inc\xlocinfo
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\xutility
+  path-string D:\a\_work\1\s\src\vctools\crt\github\stl\inc\xstring
+  path-string D:\a\_work\1\s\src\vctools\crt\github\stl\inc\iterator
+  path-string D:\a\_work\1\s\src\vctools\crt\github\stl\src\xwcsxfrm.cpp
+  path-string D:\a\_work\1\s\src\vctools\crt\vcruntime\src\internal\per_thread_data.cpp
+  path-string D:\a\_work\1\s\src\vctools\crt\github\stl\src\StlLCMapStringA.cpp
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\xlocale
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\xstring
+  path-string D:\a\_work\1\s\src\vctools\crt\github\stl\src\StlCompareStringA.cpp
+  url http://cacerts.digicert.com/DigiCertTrustedG4RSA4096SHA256TimeStampingCA.crt0
+  url http://ocsp.digicert.com0C
+  url http://ocsp.digicert.com0\
+  url http://crl3.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crl0S
+  url http://crl3.digicert.com/DigiCertTrustedG4RSA4096SHA256TimeStampingCA.crl0
+  url http://crl3.digicert.com/DigiCertTrustedRootG4.crl0
+  url http://cacerts.digicert.com/DigiCertTrustedRootG4.crt0C
+  url http://crl4.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crl0
+  url http://ocsp.digicert.com0X
+  url http://crl3.digicert.com/DigiCertTrustedRootG4.crl0 
+  url http://cacerts.digicert.com/DigiCertAssuredIDRootCA.crt0E
+  url http://www.digicert.com/CPS0
+  url http://crl3.digicert.com/DigiCertAssuredIDRootCA.crl0
+  url http://ocsp.digicert.com0A
+  url http://cacerts.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crt0
+== BugSplat/Win32/Debug/BugSplatRc.dll 287872 963b25712ce143628ebd3777c343eb3dcebf59c36e07fe59fa052d53835df473
+  machine 0x14c ts 2024-04-25T22:28:32 dll subsys 2 linker 14
+  ver: {'CompanyName': 'BugSplat', 'FileDescription': 'Crash reporting module, BugSplatRc', 'FileVersion': '5.0.3.0', 'LegalCopyright': 'Copyright BugSplat, LLC (C)', 'OriginalFilename': 'BugSplatRc.DLL', 'ProductName': 'BugSplatRc Dynamic Link Library', 'ProductVersion': '5.0.3.0'}
+  pdb []
+  cert subj: Common Name: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1; Organization: DigiCert, Inc.; Country: US | issuer: Common Name: DigiCert Trusted Root G4, Organizational Unit: www.digicert.com, Organization: DigiCert Inc, Country: US | 2021-04-29 -> 2036-04-28
+  cert subj: Common Name: BugSplat, LLC; Organization: BugSplat, LLC; Locality: Boulder; State/Province: Colorado; Country: US; Serial Number: 449046; Business Category: Private Organization; Incorporation State/Province: New Hampshire; Incorporation Country: US | issuer: Common Name: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1; Organization: DigiCert, Inc.; Country: US | 2024-04-11 -> 2025-04-10
+  spc digest sha256 b408414b663d861c5635005a485a63b2c93e6d487a1804cef6476967c5e90c06 computed b408414b663d861c5635005a485a63b2c93e6d487a1804cef6476967c5e90c06 MATCH
+  signer serial 15330617294156544436764458640947730558
+  unsigned attr microsoft_time_stamp_token
+  timestamp 2024-04-25 22:49:15+00:00
+  signature over signed attrs: VALID against BugSplat, LLC
+  leaf issued by embedded cert: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1
+  url http://cacerts.digicert.com/DigiCertTrustedG4RSA4096SHA256TimeStampingCA.crt0
+  url http://ocsp.digicert.com0C
+  url http://ocsp.digicert.com0\
+  url http://crl3.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crl0S
+  url http://crl3.digicert.com/DigiCertTrustedG4RSA4096SHA256TimeStampingCA.crl0
+  url http://crl3.digicert.com/DigiCertTrustedRootG4.crl0
+  url http://cacerts.digicert.com/DigiCertTrustedRootG4.crt0C
+  url http://crl4.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crl0
+  url http://ocsp.digicert.com0X
+  url http://crl3.digicert.com/DigiCertTrustedRootG4.crl0 
+  url http://cacerts.digicert.com/DigiCertAssuredIDRootCA.crt0E
+  url http://schemas.microsoft.com/SMI/2005/WindowsSettings">true</dpiAware></windowsSettings></application></ass
+  url http://www.digicert.com/CPS0
+  url http://crl3.digicert.com/DigiCertAssuredIDRootCA.crl0
+  url http://ocsp.digicert.com0A
+  url http://cacerts.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crt0
+== BugSplat/Win32/Release/BsSndRpt.exe 410240 a2e62540bb6ac0685888f2bcb32c0ac8218dbd59294ecae93f5d1d217c50f721
+  machine 0x14c ts 2024-04-25T22:27:10 exe subsys 2 linker 14
+  ver: {'CompanyName': 'BugSplat, LLC', 'FileDescription': 'Crash Reporting Send Utility, BsSndRpt.exe', 'FileVersion': '5, 0, 1, 0', 'LegalCopyright': 'Copyright BugSplat. All rights reserved.', 'OriginalFilename': 'BsSndRpt.exe', 'ProductName': 'BugSplat Crash Report Send Utility', 'ProductVersion': '5, 0, 1, 0'}
+  pdb ['C:\\TeamCity\\buildAgent\\work\\b925adac8dc2e423\\BugSplat\\Win32\\Release\\BsSndRpt.pdb']
+  cert subj: Common Name: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1; Organization: DigiCert, Inc.; Country: US | issuer: Common Name: DigiCert Trusted Root G4, Organizational Unit: www.digicert.com, Organization: DigiCert Inc, Country: US | 2021-04-29 -> 2036-04-28
+  cert subj: Common Name: BugSplat, LLC; Organization: BugSplat, LLC; Locality: Boulder; State/Province: Colorado; Country: US; Serial Number: 449046; Business Category: Private Organization; Incorporation State/Province: New Hampshire; Incorporation Country: US | issuer: Common Name: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1; Organization: DigiCert, Inc.; Country: US | 2024-04-11 -> 2025-04-10
+  spc digest sha256 c1b3dc56c6ededaebba979724f73063b35736a5a3eb0f7a803b3633a8f2b80b9 computed c1b3dc56c6ededaebba979724f73063b35736a5a3eb0f7a803b3633a8f2b80b9 MATCH
+  signer serial 15330617294156544436764458640947730558
+  unsigned attr microsoft_time_stamp_token
+  timestamp 2024-04-25 22:49:17+00:00
+  signature over signed attrs: VALID against BugSplat, LLC
+  leaf issued by embedded cert: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1
+  path-string C:\TeamCity\buildAgent\work\b925adac8dc2e423\BugSplat\Win32\Release\BsSndRpt.pdb
+  url http://cacerts.digicert.com/DigiCertTrustedG4RSA4096SHA256TimeStampingCA.crt0
+  url http://ocsp.digicert.com0C
+  url http://ocsp.digicert.com0\
+  url http://crl3.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crl0S
+  url http://crl3.digicert.com/DigiCertTrustedG4RSA4096SHA256TimeStampingCA.crl0
+  url http://crl3.digicert.com/DigiCertTrustedRootG4.crl0
+  url http://cacerts.digicert.com/DigiCertTrustedRootG4.crt0C
+  url http://crl4.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crl0
+  url http://ocsp.digicert.com0X
+  url http://crl3.digicert.com/DigiCertTrustedRootG4.crl0 
+  url http://cacerts.digicert.com/DigiCertAssuredIDRootCA.crt0E
+  url http://www.digicert.com/CPS0
+  url http://crl3.digicert.com/DigiCertAssuredIDRootCA.crl0
+  url http://ocsp.digicert.com0A
+  url http://cacerts.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crt0
+== BugSplat/Win32/Release/BugSplat.dll 482432 66ba151f549b58c7d5ea675b3530a224b7349ca1633542f74d1ba2f083de1c22
+  machine 0x14c ts 2024-04-25T22:27:31 dll subsys 2 linker 14
+  ver: {'CompanyName': 'BugSplat', 'FileDescription': 'Windows native crash reporting', 'FileVersion': '5, 2, 0, 0', 'LegalCopyright': 'Copyright BugSplat, All Rights Reserved', 'OriginalFilename': 'BugSplatNative.dll', 'ProductName': 'BugSplat Windows Native Library', 'ProductVersion': '5, 2, 0, 0'}
+  pdb ['C:\\TeamCity\\buildAgent\\work\\b925adac8dc2e423\\BugSplat\\Win32\\Release\\BugSplat.pdb']
+  cert subj: Common Name: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1; Organization: DigiCert, Inc.; Country: US | issuer: Common Name: DigiCert Trusted Root G4, Organizational Unit: www.digicert.com, Organization: DigiCert Inc, Country: US | 2021-04-29 -> 2036-04-28
+  cert subj: Common Name: BugSplat, LLC; Organization: BugSplat, LLC; Locality: Boulder; State/Province: Colorado; Country: US; Serial Number: 449046; Business Category: Private Organization; Incorporation State/Province: New Hampshire; Incorporation Country: US | issuer: Common Name: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1; Organization: DigiCert, Inc.; Country: US | 2024-04-11 -> 2025-04-10
+  spc digest sha256 268c334083f11f22e0956a617bdcf6003d32b72c3cb1c61df9441da1987ade6d computed 268c334083f11f22e0956a617bdcf6003d32b72c3cb1c61df9441da1987ade6d MATCH
+  signer serial 15330617294156544436764458640947730558
+  unsigned attr microsoft_time_stamp_token
+  timestamp 2024-04-25 22:49:19+00:00
+  signature over signed attrs: VALID against BugSplat, LLC
+  leaf issued by embedded cert: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1
+  path-string C:\TeamCity\buildAgent\work\b925adac8dc2e423\BugSplat\Win32\Release\BugSplat.pdb
+  url http://cacerts.digicert.com/DigiCertTrustedG4RSA4096SHA256TimeStampingCA.crt0
+  url http://ocsp.digicert.com0C
+  url http://ocsp.digicert.com0\
+  url http://crl3.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crl0S
+  url http://crl3.digicert.com/DigiCertTrustedG4RSA4096SHA256TimeStampingCA.crl0
+  url http://crl3.digicert.com/DigiCertTrustedRootG4.crl0
+  url http://cacerts.digicert.com/DigiCertTrustedRootG4.crt0C
+  url http://crl4.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crl0
+  url http://ocsp.digicert.com0X
+  url http://crl3.digicert.com/DigiCertTrustedRootG4.crl0 
+  url http://cacerts.digicert.com/DigiCertAssuredIDRootCA.crt0E
+  url http://www.digicert.com/CPS0
+  url http://crl3.digicert.com/DigiCertAssuredIDRootCA.crl0
+  url http://ocsp.digicert.com0A
+  url http://cacerts.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crt0
+== BugSplat/Win32/Release/BugSplatHD.exe 281728 8b19037bb0c6e8c7ae14da65ec80b21c74d99dc0b3cddb1ba4a78d75b1320c30
+  machine 0x14c ts 2024-04-25T22:27:35 exe subsys 2 linker 14
+  ver: {'CompanyName': 'BugSplat, LLC', 'FileDescription': 'Hang detection module, BugSplatHD.EXE', 'FileVersion': '5, 2, 0, 0', 'LegalCopyright': 'Copyright BugSplat, All Rights Reserved', 'OriginalFilename': 'BugSplatHD.EXE', 'ProductName': 'BugSplat Hang Detection Module', 'ProductVersion': '5, 2, 0, 0'}
+  pdb ['C:\\TeamCity\\buildAgent\\work\\b925adac8dc2e423\\BugSplat\\Win32\\Release\\BugSplatHD.pdb']
+  cert subj: Common Name: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1; Organization: DigiCert, Inc.; Country: US | issuer: Common Name: DigiCert Trusted Root G4, Organizational Unit: www.digicert.com, Organization: DigiCert Inc, Country: US | 2021-04-29 -> 2036-04-28
+  cert subj: Common Name: BugSplat, LLC; Organization: BugSplat, LLC; Locality: Boulder; State/Province: Colorado; Country: US; Serial Number: 449046; Business Category: Private Organization; Incorporation State/Province: New Hampshire; Incorporation Country: US | issuer: Common Name: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1; Organization: DigiCert, Inc.; Country: US | 2024-04-11 -> 2025-04-10
+  spc digest sha256 f16608303ad3039c624d64a7b60f18138ccc8d5bc35da31b2afc854735d975d8 computed f16608303ad3039c624d64a7b60f18138ccc8d5bc35da31b2afc854735d975d8 MATCH
+  signer serial 15330617294156544436764458640947730558
+  unsigned attr microsoft_time_stamp_token
+  timestamp 2024-04-25 22:49:20+00:00
+  signature over signed attrs: VALID against BugSplat, LLC
+  leaf issued by embedded cert: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1
+  path-string C:\TeamCity\buildAgent\work\b925adac8dc2e423\BugSplat\Win32\Release\BugSplatHD.pdb
+  url http://cacerts.digicert.com/DigiCertTrustedG4RSA4096SHA256TimeStampingCA.crt0
+  url http://ocsp.digicert.com0C
+  url http://ocsp.digicert.com0\
+  url http://crl3.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crl0S
+  url http://crl3.digicert.com/DigiCertTrustedG4RSA4096SHA256TimeStampingCA.crl0
+  url http://crl3.digicert.com/DigiCertTrustedRootG4.crl0
+  url http://cacerts.digicert.com/DigiCertTrustedRootG4.crt0C
+  url http://crl4.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crl0
+  url http://ocsp.digicert.com0X
+  url http://crl3.digicert.com/DigiCertTrustedRootG4.crl0 
+  url http://cacerts.digicert.com/DigiCertAssuredIDRootCA.crt0E
+  url http://www.digicert.com/CPS0
+  url http://crl3.digicert.com/DigiCertAssuredIDRootCA.crl0
+  url http://ocsp.digicert.com0A
+  url http://cacerts.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crt0
+== BugSplat/Win32/Release/BugSplatRc.dll 287872 6d9a31acdf9240fc922dbd329f7988d5d4358f8987eace9c84ffb7e36cd1d0b7
+  machine 0x14c ts 2024-04-25T22:26:46 dll subsys 2 linker 14
+  ver: {'CompanyName': 'BugSplat', 'FileDescription': 'Crash reporting module, BugSplatRc', 'FileVersion': '5.0.3.0', 'LegalCopyright': 'Copyright BugSplat, LLC (C)', 'OriginalFilename': 'BugSplatRc.DLL', 'ProductName': 'BugSplatRc Dynamic Link Library', 'ProductVersion': '5.0.3.0'}
+  pdb []
+  cert subj: Common Name: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1; Organization: DigiCert, Inc.; Country: US | issuer: Common Name: DigiCert Trusted Root G4, Organizational Unit: www.digicert.com, Organization: DigiCert Inc, Country: US | 2021-04-29 -> 2036-04-28
+  cert subj: Common Name: BugSplat, LLC; Organization: BugSplat, LLC; Locality: Boulder; State/Province: Colorado; Country: US; Serial Number: 449046; Business Category: Private Organization; Incorporation State/Province: New Hampshire; Incorporation Country: US | issuer: Common Name: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1; Organization: DigiCert, Inc.; Country: US | 2024-04-11 -> 2025-04-10
+  spc digest sha256 388b53030fb7785ad1ddf61e6b7b076d7050d1fcab7f26b6a4b18b198ed9d335 computed 388b53030fb7785ad1ddf61e6b7b076d7050d1fcab7f26b6a4b18b198ed9d335 MATCH
+  signer serial 15330617294156544436764458640947730558
+  unsigned attr microsoft_time_stamp_token
+  timestamp 2024-04-25 22:49:22+00:00
+  signature over signed attrs: VALID against BugSplat, LLC
+  leaf issued by embedded cert: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1
+  url http://cacerts.digicert.com/DigiCertTrustedG4RSA4096SHA256TimeStampingCA.crt0
+  url http://ocsp.digicert.com0C
+  url http://ocsp.digicert.com0\
+  url http://crl3.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crl0S
+  url http://crl3.digicert.com/DigiCertTrustedG4RSA4096SHA256TimeStampingCA.crl0
+  url http://crl3.digicert.com/DigiCertTrustedRootG4.crl0
+  url http://cacerts.digicert.com/DigiCertTrustedRootG4.crt0C
+  url http://crl4.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crl0
+  url http://ocsp.digicert.com0X
+  url http://crl3.digicert.com/DigiCertTrustedRootG4.crl0 
+  url http://cacerts.digicert.com/DigiCertAssuredIDRootCA.crt0E
+  url http://schemas.microsoft.com/SMI/2005/WindowsSettings">true</dpiAware></windowsSettings></application></ass
+  url http://www.digicert.com/CPS0
+  url http://crl3.digicert.com/DigiCertAssuredIDRootCA.crl0
+  url http://ocsp.digicert.com0A
+  url http://cacerts.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crt0
+== BugSplat/x64/Debug/BsSndRpt64.exe 1246848 d1d8d952d6da038ea6204339d99479860557bea989d8dfd71257b1f813a691bf
+  machine 0x8664 ts 2024-04-25T22:33:17 exe subsys 2 linker 14
+  ver: {'CompanyName': 'BugSplat, LLC', 'FileDescription': 'Crash Reporting Send Utility, BsSndRpt.exe', 'FileVersion': '5, 0, 1, 0', 'LegalCopyright': 'Copyright BugSplat. All rights reserved.', 'OriginalFilename': 'BsSndRpt.exe', 'ProductName': 'BugSplat Crash Report Send Utility', 'ProductVersion': '5, 0, 1, 0'}
+  pdb ['C:\\TeamCity\\buildAgent\\work\\b925adac8dc2e423\\BugSplat\\x64\\Debug\\BsSndRpt64.pdb']
+  cert subj: Common Name: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1; Organization: DigiCert, Inc.; Country: US | issuer: Common Name: DigiCert Trusted Root G4, Organizational Unit: www.digicert.com, Organization: DigiCert Inc, Country: US | 2021-04-29 -> 2036-04-28
+  cert subj: Common Name: BugSplat, LLC; Organization: BugSplat, LLC; Locality: Boulder; State/Province: Colorado; Country: US; Serial Number: 449046; Business Category: Private Organization; Incorporation State/Province: New Hampshire; Incorporation Country: US | issuer: Common Name: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1; Organization: DigiCert, Inc.; Country: US | 2024-04-11 -> 2025-04-10
+  spc digest sha256 3130f19b6fc7c42b07630fe6c71883199a24e28b6f665d7dc947215add29bb31 computed 3130f19b6fc7c42b07630fe6c71883199a24e28b6f665d7dc947215add29bb31 MATCH
+  signer serial 15330617294156544436764458640947730558
+  unsigned attr microsoft_time_stamp_token
+  timestamp 2024-04-25 22:49:23+00:00
+  signature over signed attrs: VALID against BugSplat, LLC
+  leaf issued by embedded cert: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\atlmfc\include\atlexcept.h
+  path-string D:\a\_work\1\s\src\vctools\crt\github\stl\src\locale0.cpp
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\atlmfc\include\cstringt.h
+  path-string C:\TeamCity\buildAgent\work\b925adac8dc2e423\BsSndRpt\BsSndRptLib\ReportFilesDlg.h
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\vector
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\xtree
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\xlocale
+  path-string C:\TeamCity\buildAgent\work\b925adac8dc2e423\BugSplat\x64\Debug\BsSndRpt64.pdb
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\xmemory
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\atlmfc\include\atlhost.h
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\xutility
+  path-string C:\TeamCity\buildAgent\work\b925adac8dc2e423\ThirdParty\Wtl\include\atlctrlx.h
+  path-string C:\TeamCity\buildAgent\work\b925adac8dc2e423\BsSndRpt\BsSndRptLib\CrashDlg.h
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\atlmfc\include\atlwin.h
+  path-string C:\TeamCity\buildAgent\work\b925adac8dc2e423\ThirdParty\Wtl\include\atlddx.h
+  path-string C:\TeamCity\buildAgent\work\b925adac8dc2e423\BsSndRpt\BsSndRptLib\ReportDetailsDlg.h
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\atlmfc\include\statreg.h
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\array
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\atlmfc\include\atlbase.h
+  path-string C:\TeamCity\buildAgent\work\b925adac8dc2e423\BsSndRpt\BsSndRptLib\SendReportProgress.h
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\xstring
+  url http://cacerts.digicert.com/DigiCertTrustedG4RSA4096SHA256TimeStampingCA.crt0
+  url http://ocsp.digicert.com0C
+  url http://ocsp.digicert.com0\
+  url http://crl3.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crl0S
+  url http://crl3.digicert.com/DigiCertTrustedG4RSA4096SHA256TimeStampingCA.crl0
+  url http://crl3.digicert.com/DigiCertTrustedRootG4.crl0
+  url http://cacerts.digicert.com/DigiCertTrustedRootG4.crt0C
+  url http://crl4.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crl0
+  url http://ocsp.digicert.com0X
+  url http://crl3.digicert.com/DigiCertTrustedRootG4.crl0 
+  url http://cacerts.digicert.com/DigiCertAssuredIDRootCA.crt0E
+  url http://www.digicert.com/CPS0
+  url http://crl3.digicert.com/DigiCertAssuredIDRootCA.crl0
+  url http://ocsp.digicert.com0A
+  url http://cacerts.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crt0
+== BugSplat/x64/Debug/BugSplat64.dll 1386112 fd409c2c37e9bad25075d1714e15f319760c15d205410a2d75c0f2531fd64b9f
+  machine 0x8664 ts 2024-04-25T22:33:34 dll subsys 2 linker 14
+  ver: {'CompanyName': 'BugSplat', 'FileDescription': 'Windows native crash reporting', 'FileVersion': '5, 2, 0, 0', 'LegalCopyright': 'Copyright BugSplat, All Rights Reserved', 'OriginalFilename': 'BugSplatNative.dll', 'ProductName': 'BugSplat Windows Native Library', 'ProductVersion': '5, 2, 0, 0'}
+  pdb ['C:\\TeamCity\\buildAgent\\work\\b925adac8dc2e423\\BugSplat\\x64\\Debug\\BugSplat64.pdb']
+  cert subj: Common Name: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1; Organization: DigiCert, Inc.; Country: US | issuer: Common Name: DigiCert Trusted Root G4, Organizational Unit: www.digicert.com, Organization: DigiCert Inc, Country: US | 2021-04-29 -> 2036-04-28
+  cert subj: Common Name: BugSplat, LLC; Organization: BugSplat, LLC; Locality: Boulder; State/Province: Colorado; Country: US; Serial Number: 449046; Business Category: Private Organization; Incorporation State/Province: New Hampshire; Incorporation Country: US | issuer: Common Name: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1; Organization: DigiCert, Inc.; Country: US | 2024-04-11 -> 2025-04-10
+  spc digest sha256 40b67babf35a00a3e443c97b42e09147e9ed03caaa15dc9736da1d9d0d4ba3c0 computed 40b67babf35a00a3e443c97b42e09147e9ed03caaa15dc9736da1d9d0d4ba3c0 MATCH
+  signer serial 15330617294156544436764458640947730558
+  unsigned attr microsoft_time_stamp_token
+  timestamp 2024-04-25 22:49:24+00:00
+  signature over signed attrs: VALID against BugSplat, LLC
+  leaf issued by embedded cert: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\atlmfc\include\statreg.h
+  path-string D:\a\_work\1\s\src\vctools\crt\vcruntime\src\eh\std_type_info.cpp
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\atlmfc\include\atlexcept.h
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\xmemory
+  path-string C:\TeamCity\buildAgent\work\b925adac8dc2e423\BugSplat\x64\Debug\BugSplat64.pdb
+  path-string C:\TeamCity\buildAgent\work\b925adac8dc2e423\ThirdParty\Wtl\include\atlapp.h
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\atlmfc\include\cstringt.h
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\atlmfc\include\atlhost.h
+  path-string D:\a\_work\1\s\src\vctools\crt\vcruntime\src\internal\per_thread_data.cpp
+  path-string D:\a\_work\1\s\src\vctools\crt\github\stl\inc\optional
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\atlmfc\include\atlbase.h
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\atlmfc\include\atlwin.h
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\vector
+  url http://cacerts.digicert.com/DigiCertTrustedG4RSA4096SHA256TimeStampingCA.crt0
+  url http://ocsp.digicert.com0C
+  url http://ocsp.digicert.com0\
+  url http://crl3.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crl0S
+  url http://crl3.digicert.com/DigiCertTrustedG4RSA4096SHA256TimeStampingCA.crl0
+  url http://crl3.digicert.com/DigiCertTrustedRootG4.crl0
+  url http://cacerts.digicert.com/DigiCertTrustedRootG4.crt0C
+  url http://crl4.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crl0
+  url http://ocsp.digicert.com0X
+  url http://crl3.digicert.com/DigiCertTrustedRootG4.crl0 
+  url http://cacerts.digicert.com/DigiCertAssuredIDRootCA.crt0E
+  url http://www.digicert.com/CPS0
+  url http://crl3.digicert.com/DigiCertAssuredIDRootCA.crl0
+  url http://ocsp.digicert.com0A
+  url http://cacerts.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crt0
+== BugSplat/x64/Debug/BugSplatHD64.exe 1647744 38fd2224fd25f3fcbb08ca252ab20f0df1b4a217c0a04066597ec7054cfc0e48
+  machine 0x8664 ts 2024-04-25T22:33:38 exe subsys 2 linker 14
+  ver: {'CompanyName': 'BugSplat, LLC', 'FileDescription': 'Hang detection module, BugSplatHD.EXE', 'FileVersion': '5, 2, 0, 0', 'LegalCopyright': 'Copyright BugSplat, All Rights Reserved', 'OriginalFilename': 'BugSplatHD.EXE', 'ProductName': 'BugSplat Hang Detection Module', 'ProductVersion': '5, 2, 0, 0'}
+  pdb ['C:\\TeamCity\\buildAgent\\work\\b925adac8dc2e423\\BugSplat\\x64\\Debug\\BugSplatHD64.pdb']
+  cert subj: Common Name: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1; Organization: DigiCert, Inc.; Country: US | issuer: Common Name: DigiCert Trusted Root G4, Organizational Unit: www.digicert.com, Organization: DigiCert Inc, Country: US | 2021-04-29 -> 2036-04-28
+  cert subj: Common Name: BugSplat, LLC; Organization: BugSplat, LLC; Locality: Boulder; State/Province: Colorado; Country: US; Serial Number: 449046; Business Category: Private Organization; Incorporation State/Province: New Hampshire; Incorporation Country: US | issuer: Common Name: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1; Organization: DigiCert, Inc.; Country: US | 2024-04-11 -> 2025-04-10
+  spc digest sha256 e5b9669ff2ec23bab95146652fd6809a3abbadd4ecc0dbd1faabac99a3ab88f6 computed e5b9669ff2ec23bab95146652fd6809a3abbadd4ecc0dbd1faabac99a3ab88f6 MATCH
+  signer serial 15330617294156544436764458640947730558
+  unsigned attr microsoft_time_stamp_token
+  timestamp 2024-04-25 22:49:26+00:00
+  signature over signed attrs: VALID against BugSplat, LLC
+  leaf issued by embedded cert: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1
+  path-string D:\a\_work\1\s\src\vctools\crt\github\stl\src\locale0.cpp
+  path-string D:\a\_work\1\s\src\vctools\crt\github\stl\src\xstrcoll.cpp
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\vector
+  path-string D:\a\_work\1\s\src\vctools\crt\github\stl\inc\xlocale
+  path-string D:\a\_work\1\s\src\vctools\crt\vcruntime\src\eh\std_type_info.cpp
+  path-string C:\TeamCity\buildAgent\work\b925adac8dc2e423\BugSplat\x64\Debug\BugSplatHD64.pdb
+  path-string D:\a\_work\1\s\src\vctools\crt\github\stl\src\_tolower.cpp
+  path-string D:\a\_work\1\s\src\vctools\crt\github\stl\src\locale.cpp
+  path-string D:\a\_work\1\s\src\vctools\crt\github\stl\inc\optional
+  path-string D:\a\_work\1\s\src\vctools\crt\github\stl\inc\xutility
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\xmemory
+  path-string D:\a\_work\1\s\src\vctools\crt\github\stl\inc\xmemory
+  path-string D:\a\_work\1\s\src\vctools\crt\github\stl\inc\xlocnum
+  path-string D:\a\_work\1\s\src\vctools\crt\github\stl\inc\xlocinfo
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\xutility
+  path-string D:\a\_work\1\s\src\vctools\crt\github\stl\inc\xstring
+  path-string D:\a\_work\1\s\src\vctools\crt\github\stl\inc\iterator
+  path-string D:\a\_work\1\s\src\vctools\crt\github\stl\src\xwcsxfrm.cpp
+  path-string D:\a\_work\1\s\src\vctools\crt\vcruntime\src\internal\per_thread_data.cpp
+  path-string D:\a\_work\1\s\src\vctools\crt\github\stl\src\StlLCMapStringA.cpp
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\xlocale
+  path-string C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\xstring
+  path-string D:\a\_work\1\s\src\vctools\crt\github\stl\src\StlCompareStringA.cpp
+  url http://cacerts.digicert.com/DigiCertTrustedG4RSA4096SHA256TimeStampingCA.crt0
+  url http://ocsp.digicert.com0C
+  url http://ocsp.digicert.com0\
+  url http://crl3.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crl0S
+  url http://crl3.digicert.com/DigiCertTrustedG4RSA4096SHA256TimeStampingCA.crl0
+  url http://crl3.digicert.com/DigiCertTrustedRootG4.crl0
+  url http://cacerts.digicert.com/DigiCertTrustedRootG4.crt0C
+  url http://crl4.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crl0
+  url http://ocsp.digicert.com0X
+  url http://crl3.digicert.com/DigiCertTrustedRootG4.crl0 
+  url http://cacerts.digicert.com/DigiCertAssuredIDRootCA.crt0E
+  url http://www.digicert.com/CPS0
+  url http://crl3.digicert.com/DigiCertAssuredIDRootCA.crl0
+  url http://ocsp.digicert.com0A
+  url http://cacerts.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crt0
+== BugSplat/x64/Debug/BugSplatRc64.dll 288384 b50a7b90067f41d09f78ea8705fd0390abbb89992bb24b14106eac5c5b224e42
+  machine 0x8664 ts 2024-04-25T22:32:28 dll subsys 2 linker 14
+  ver: {'CompanyName': 'BugSplat', 'FileDescription': 'Crash reporting module, BugSplatRc', 'FileVersion': '5.0.3.0', 'LegalCopyright': 'Copyright BugSplat, LLC (C)', 'OriginalFilename': 'BugSplatRc.DLL', 'ProductName': 'BugSplatRc Dynamic Link Library', 'ProductVersion': '5.0.3.0'}
+  pdb []
+  cert subj: Common Name: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1; Organization: DigiCert, Inc.; Country: US | issuer: Common Name: DigiCert Trusted Root G4, Organizational Unit: www.digicert.com, Organization: DigiCert Inc, Country: US | 2021-04-29 -> 2036-04-28
+  cert subj: Common Name: BugSplat, LLC; Organization: BugSplat, LLC; Locality: Boulder; State/Province: Colorado; Country: US; Serial Number: 449046; Business Category: Private Organization; Incorporation State/Province: New Hampshire; Incorporation Country: US | issuer: Common Name: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1; Organization: DigiCert, Inc.; Country: US | 2024-04-11 -> 2025-04-10
+  spc digest sha256 b477c2d4aa1805c9d0faae50b0ff34982c3f2dd095804ec34b7373894340e4ed computed b477c2d4aa1805c9d0faae50b0ff34982c3f2dd095804ec34b7373894340e4ed MATCH
+  signer serial 15330617294156544436764458640947730558
+  unsigned attr microsoft_time_stamp_token
+  timestamp 2024-04-25 22:49:27+00:00
+  signature over signed attrs: VALID against BugSplat, LLC
+  leaf issued by embedded cert: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1
+  url http://cacerts.digicert.com/DigiCertTrustedG4RSA4096SHA256TimeStampingCA.crt0
+  url http://ocsp.digicert.com0C
+  url http://ocsp.digicert.com0\
+  url http://crl3.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crl0S
+  url http://crl3.digicert.com/DigiCertTrustedG4RSA4096SHA256TimeStampingCA.crl0
+  url http://crl3.digicert.com/DigiCertTrustedRootG4.crl0
+  url http://cacerts.digicert.com/DigiCertTrustedRootG4.crt0C
+  url http://crl4.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crl0
+  url http://ocsp.digicert.com0X
+  url http://crl3.digicert.com/DigiCertTrustedRootG4.crl0 
+  url http://cacerts.digicert.com/DigiCertAssuredIDRootCA.crt0E
+  url http://schemas.microsoft.com/SMI/2005/WindowsSettings">true</dpiAware></windowsSettings></application></ass
+  url http://www.digicert.com/CPS0
+  url http://crl3.digicert.com/DigiCertAssuredIDRootCA.crl0
+  url http://ocsp.digicert.com0A
+  url http://cacerts.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crt0
+== BugSplat/x64/Release/BsSndRpt64.exe 470656 89173e25d5844562fdb40f276ec7e551abea62b772984f239f3f061e805e2713
+  machine 0x8664 ts 2024-04-25T22:31:07 exe subsys 2 linker 14
+  ver: {'CompanyName': 'BugSplat, LLC', 'FileDescription': 'Crash Reporting Send Utility, BsSndRpt.exe', 'FileVersion': '5, 0, 1, 0', 'LegalCopyright': 'Copyright BugSplat. All rights reserved.', 'OriginalFilename': 'BsSndRpt.exe', 'ProductName': 'BugSplat Crash Report Send Utility', 'ProductVersion': '5, 0, 1, 0'}
+  pdb ['C:\\TeamCity\\buildAgent\\work\\b925adac8dc2e423\\BugSplat\\x64\\Release\\BsSndRpt64.pdb']
+  cert subj: Common Name: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1; Organization: DigiCert, Inc.; Country: US | issuer: Common Name: DigiCert Trusted Root G4, Organizational Unit: www.digicert.com, Organization: DigiCert Inc, Country: US | 2021-04-29 -> 2036-04-28
+  cert subj: Common Name: BugSplat, LLC; Organization: BugSplat, LLC; Locality: Boulder; State/Province: Colorado; Country: US; Serial Number: 449046; Business Category: Private Organization; Incorporation State/Province: New Hampshire; Incorporation Country: US | issuer: Common Name: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1; Organization: DigiCert, Inc.; Country: US | 2024-04-11 -> 2025-04-10
+  spc digest sha256 dec0e671379ecda8509982e1b6d5702817cfdc68cfee3060f67f42235c82cff5 computed dec0e671379ecda8509982e1b6d5702817cfdc68cfee3060f67f42235c82cff5 MATCH
+  signer serial 15330617294156544436764458640947730558
+  unsigned attr microsoft_time_stamp_token
+  timestamp 2024-04-25 22:49:29+00:00
+  signature over signed attrs: VALID against BugSplat, LLC
+  leaf issued by embedded cert: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1
+  path-string C:\TeamCity\buildAgent\work\b925adac8dc2e423\BugSplat\x64\Release\BsSndRpt64.pdb
+  url http://cacerts.digicert.com/DigiCertTrustedG4RSA4096SHA256TimeStampingCA.crt0
+  url http://ocsp.digicert.com0C
+  url http://ocsp.digicert.com0\
+  url http://crl3.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crl0S
+  url http://crl3.digicert.com/DigiCertTrustedG4RSA4096SHA256TimeStampingCA.crl0
+  url http://crl3.digicert.com/DigiCertTrustedRootG4.crl0
+  url http://cacerts.digicert.com/DigiCertTrustedRootG4.crt0C
+  url http://crl4.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crl0
+  url http://ocsp.digicert.com0X
+  url http://crl3.digicert.com/DigiCertTrustedRootG4.crl0 
+  url http://cacerts.digicert.com/DigiCertAssuredIDRootCA.crt0E
+  url http://www.digicert.com/CPS0
+  url http://crl3.digicert.com/DigiCertAssuredIDRootCA.crl0
+  url http://ocsp.digicert.com0A
+  url http://cacerts.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crt0
+== BugSplat/x64/Release/BugSplat64.dll 645760 a913f8c5b7a08acb015e13fdddb0d953ccfd9f393f391a14b336f4831d18f40f
+  machine 0x8664 ts 2024-04-25T22:31:27 dll subsys 2 linker 14
+  ver: {'CompanyName': 'BugSplat', 'FileDescription': 'Windows native crash reporting', 'FileVersion': '5, 2, 0, 0', 'LegalCopyright': 'Copyright BugSplat, All Rights Reserved', 'OriginalFilename': 'BugSplatNative.dll', 'ProductName': 'BugSplat Windows Native Library', 'ProductVersion': '5, 2, 0, 0'}
+  pdb ['C:\\TeamCity\\buildAgent\\work\\b925adac8dc2e423\\BugSplat\\x64\\Release\\BugSplat64.pdb']
+  cert subj: Common Name: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1; Organization: DigiCert, Inc.; Country: US | issuer: Common Name: DigiCert Trusted Root G4, Organizational Unit: www.digicert.com, Organization: DigiCert Inc, Country: US | 2021-04-29 -> 2036-04-28
+  cert subj: Common Name: BugSplat, LLC; Organization: BugSplat, LLC; Locality: Boulder; State/Province: Colorado; Country: US; Serial Number: 449046; Business Category: Private Organization; Incorporation State/Province: New Hampshire; Incorporation Country: US | issuer: Common Name: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1; Organization: DigiCert, Inc.; Country: US | 2024-04-11 -> 2025-04-10
+  spc digest sha256 6a44ddd9af7278ab066100cef1878485bf018964b15320d5c929e410dd3b915e computed 6a44ddd9af7278ab066100cef1878485bf018964b15320d5c929e410dd3b915e MATCH
+  signer serial 15330617294156544436764458640947730558
+  unsigned attr microsoft_time_stamp_token
+  timestamp 2024-04-25 22:49:30+00:00
+  signature over signed attrs: VALID against BugSplat, LLC
+  leaf issued by embedded cert: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1
+  path-string C:\TeamCity\buildAgent\work\b925adac8dc2e423\BugSplat\x64\Release\BugSplat64.pdb
+  url http://cacerts.digicert.com/DigiCertTrustedG4RSA4096SHA256TimeStampingCA.crt0
+  url http://ocsp.digicert.com0C
+  url http://ocsp.digicert.com0\
+  url http://crl3.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crl0S
+  url http://crl3.digicert.com/DigiCertTrustedG4RSA4096SHA256TimeStampingCA.crl0
+  url http://crl3.digicert.com/DigiCertTrustedRootG4.crl0
+  url http://cacerts.digicert.com/DigiCertTrustedRootG4.crt0C
+  url http://crl4.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crl0
+  url http://ocsp.digicert.com0X
+  url http://crl3.digicert.com/DigiCertTrustedRootG4.crl0 
+  url http://cacerts.digicert.com/DigiCertAssuredIDRootCA.crt0E
+  url http://www.digicert.com/CPS0
+  url http://crl3.digicert.com/DigiCertAssuredIDRootCA.crl0
+  url http://ocsp.digicert.com0A
+  url http://cacerts.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crt0
+== BugSplat/x64/Release/BugSplatHD64.exe 340608 68be135b891d127591dc1698fc62f194d8f032df72371ecf26ae2a32b50cb614
+  machine 0x8664 ts 2024-04-25T22:31:32 exe subsys 2 linker 14
+  ver: {'CompanyName': 'BugSplat, LLC', 'FileDescription': 'Hang detection module, BugSplatHD.EXE', 'FileVersion': '5, 2, 0, 0', 'LegalCopyright': 'Copyright BugSplat, All Rights Reserved', 'OriginalFilename': 'BugSplatHD.EXE', 'ProductName': 'BugSplat Hang Detection Module', 'ProductVersion': '5, 2, 0, 0'}
+  pdb ['C:\\TeamCity\\buildAgent\\work\\b925adac8dc2e423\\BugSplat\\x64\\Release\\BugSplatHD64.pdb']
+  cert subj: Common Name: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1; Organization: DigiCert, Inc.; Country: US | issuer: Common Name: DigiCert Trusted Root G4, Organizational Unit: www.digicert.com, Organization: DigiCert Inc, Country: US | 2021-04-29 -> 2036-04-28
+  cert subj: Common Name: BugSplat, LLC; Organization: BugSplat, LLC; Locality: Boulder; State/Province: Colorado; Country: US; Serial Number: 449046; Business Category: Private Organization; Incorporation State/Province: New Hampshire; Incorporation Country: US | issuer: Common Name: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1; Organization: DigiCert, Inc.; Country: US | 2024-04-11 -> 2025-04-10
+  spc digest sha256 e517aedcf32932aca6f399c5309d9a2309fd01d424f2264281706a0148f26ce5 computed e517aedcf32932aca6f399c5309d9a2309fd01d424f2264281706a0148f26ce5 MATCH
+  signer serial 15330617294156544436764458640947730558
+  unsigned attr microsoft_time_stamp_token
+  timestamp 2024-04-25 22:49:32+00:00
+  signature over signed attrs: VALID against BugSplat, LLC
+  leaf issued by embedded cert: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1
+  path-string C:\TeamCity\buildAgent\work\b925adac8dc2e423\BugSplat\x64\Release\BugSplatHD64.pdb
+  url http://cacerts.digicert.com/DigiCertTrustedG4RSA4096SHA256TimeStampingCA.crt0
+  url http://ocsp.digicert.com0C
+  url http://ocsp.digicert.com0\
+  url http://crl3.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crl0S
+  url http://crl3.digicert.com/DigiCertTrustedG4RSA4096SHA256TimeStampingCA.crl0
+  url http://crl3.digicert.com/DigiCertTrustedRootG4.crl0
+  url http://cacerts.digicert.com/DigiCertTrustedRootG4.crt0C
+  url http://crl4.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crl0
+  url http://ocsp.digicert.com0X
+  url http://crl3.digicert.com/DigiCertTrustedRootG4.crl0 
+  url http://cacerts.digicert.com/DigiCertAssuredIDRootCA.crt0E
+  url http://www.digicert.com/CPS0
+  url http://crl3.digicert.com/DigiCertAssuredIDRootCA.crl0
+  url http://ocsp.digicert.com0A
+  url http://cacerts.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crt0
+== BugSplat/x64/Release/BugSplatRc64.dll 288384 2244bfb76878e254ca20259c6eabe4c3699d758f40e698af6131bc658b7c7723
+  machine 0x8664 ts 2024-04-25T22:30:42 dll subsys 2 linker 14
+  ver: {'CompanyName': 'BugSplat', 'FileDescription': 'Crash reporting module, BugSplatRc', 'FileVersion': '5.0.3.0', 'LegalCopyright': 'Copyright BugSplat, LLC (C)', 'OriginalFilename': 'BugSplatRc.DLL', 'ProductName': 'BugSplatRc Dynamic Link Library', 'ProductVersion': '5.0.3.0'}
+  pdb []
+  cert subj: Common Name: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1; Organization: DigiCert, Inc.; Country: US | issuer: Common Name: DigiCert Trusted Root G4, Organizational Unit: www.digicert.com, Organization: DigiCert Inc, Country: US | 2021-04-29 -> 2036-04-28
+  cert subj: Common Name: BugSplat, LLC; Organization: BugSplat, LLC; Locality: Boulder; State/Province: Colorado; Country: US; Serial Number: 449046; Business Category: Private Organization; Incorporation State/Province: New Hampshire; Incorporation Country: US | issuer: Common Name: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1; Organization: DigiCert, Inc.; Country: US | 2024-04-11 -> 2025-04-10
+  spc digest sha256 41b4ff48328da9d17ff15a1aff749fad9a6bf31c9e824624ebb245f42eec4432 computed 41b4ff48328da9d17ff15a1aff749fad9a6bf31c9e824624ebb245f42eec4432 MATCH
+  signer serial 15330617294156544436764458640947730558
+  unsigned attr microsoft_time_stamp_token
+  timestamp 2024-04-25 22:49:33+00:00
+  signature over signed attrs: VALID against BugSplat, LLC
+  leaf issued by embedded cert: DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1
+  url http://cacerts.digicert.com/DigiCertTrustedG4RSA4096SHA256TimeStampingCA.crt0
+  url http://ocsp.digicert.com0C
+  url http://ocsp.digicert.com0\
+  url http://crl3.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crl0S
+  url http://crl3.digicert.com/DigiCertTrustedG4RSA4096SHA256TimeStampingCA.crl0
+  url http://crl3.digicert.com/DigiCertTrustedRootG4.crl0
+  url http://cacerts.digicert.com/DigiCertTrustedRootG4.crt0C
+  url http://crl4.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crl0
+  url http://ocsp.digicert.com0X
+  url http://crl3.digicert.com/DigiCertTrustedRootG4.crl0 
+  url http://cacerts.digicert.com/DigiCertAssuredIDRootCA.crt0E
+  url http://schemas.microsoft.com/SMI/2005/WindowsSettings">true</dpiAware></windowsSettings></application></ass
+  url http://www.digicert.com/CPS0
+  url http://crl3.digicert.com/DigiCertAssuredIDRootCA.crl0
+  url http://ocsp.digicert.com0A
+  url http://cacerts.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crt0
+== plugins/RARBuilder/UnRAR.dll 0 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  not PE: 'Unable to read the DOS Header, possibly a truncated file.'
+== plugins/RARBuilder/UnRAR64.dll 0 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  not PE: 'Unable to read the DOS Header, possibly a truncated file.'
+== plugins/RARBuilder/unrar.dll 285336 a647aec65edb9736ad9bbc60a99779d18438b783b3a7045533de97ba4134f4fe
+  machine 0x14c ts 2022-03-03T13:17:47 dll subsys 3 linker 14
+  ver: {'CompanyName': 'Alexander Roshal', 'ProductName': 'RAR decompression library', 'FileDescription': 'RAR decompression library', 'FileVersion': '6.11.0', 'ProductVersion': '6.11.0', 'LegalCopyright': 'Copyright © Alexander Roshal 1993-2022', 'OriginalFilename': 'Unrar.dll'}
+  pdb ['D:\\Projects\\WinRAR\\rar\\build\\unrardll32\\Release\\UnRAR.pdb']
+  cert subj: Common Name: GlobalSign CodeSigning CA - SHA256 - G3, Organization: GlobalSign nv-sa, Country: BE | issuer: Common Name: GlobalSign, Organization: GlobalSign, Organizational Unit: GlobalSign Root CA - R3 | 2016-06-15 -> 2024-06-15
+  cert subj: Common Name: win.rar GmbH, Organization: win.rar GmbH, Locality: Berlin, State/Province: Berlin, Country: DE | issuer: Common Name: GlobalSign CodeSigning CA - SHA256 - G3, Organization: GlobalSign nv-sa, Country: BE | 2020-08-25 -> 2023-08-26
+  cert subj: Common Name: DigiCert Timestamp 2021; Organization: DigiCert, Inc.; Country: US | issuer: Common Name: DigiCert SHA2 Assured ID Timestamping CA, Organizational Unit: www.digicert.com, Organization: DigiCert Inc, Country: US | 2021-01-01 -> 2031-01-06
+  cert subj: Common Name: DigiCert SHA2 Assured ID Timestamping CA, Organizational Unit: www.digicert.com, Organization: DigiCert Inc, Country: US | issuer: Common Name: DigiCert Assured ID Root CA, Organizational Unit: www.digicert.com, Organization: DigiCert Inc, Country: US | 2016-01-07 -> 2031-01-07
+  spc digest sha1 ef5ea71225f10ceada19d078044cfbe7685203e2 computed ef5ea71225f10ceada19d078044cfbe7685203e2 MATCH
+  signer serial 35626140423967868457733424021
+  unsigned attr counter_signature
+  unsigned attr microsoft_nested_signature
+  signature over signed attrs: VALID against win.rar GmbH
+  leaf issued by embedded cert: GlobalSign CodeSigning CA - SHA256 - G3
+  path-string D:\Projects\WinRAR\rar\build\unrardll32\Release\UnRAR.pdb
+  path-string T:\:d:l:t:|:
+  url http://crl.globalsign.com/root-r6.crl0G
+  url http://crl.globalsign.com/gscodesignsha2g3.crl0
+  url http://www.digicert.com/CPS0
+  url http://crl.globalsign.com/ca/gstsacasha384g4.crl0
+  url http://ocsp.globalsign.com/ca/gstsacasha384g40C
+  url https://www.globalsign.com/repository/0
+  url http://secure.globalsign.com/cacert/gstsacasha384g4.crt0
+  url http://crl.globalsign.com/root-r3.crl0c
+  url http://crl4.digicert.com/DigiCertAssuredIDRootCA.crl0:
+  url http://secure.globalsign.com/cacert/gscodesignsha2g3ocsp.crt08
+  url http://ocsp.digicert.com0O
+  url http://ocsp2.globalsign.com/rootr306
+  url https://www.digicert.com/CPS0
+  url http://ocsp2.globalsign.com/gscodesignsha2g30V
+  url http://ocsp.digicert.com0C
+  url http://crl4.digicert.com/sha2-assured-ts.crl0
+  url http://crl3.digicert.com/sha2-assured-ts.crl02
+  url http://crl.globalsign.com/root-r3.crl0G
+  url http://ocsp2.globalsign.com/rootr606
+  url http://cacerts.digicert.com/DigiCertSHA2AssuredIDTimestampingCA.crt0
+  url http://cacerts.digicert.com/DigiCertAssuredIDRootCA.crt0
+  url http://crl3.digicert.com/DigiCertAssuredIDRootCA.crl0P
+== plugins/RARBuilder/unrar64.dll 335512 d98d274733eabc6a7e425c6549c6b28fc61e850a0ac5f3c103b2d3efdb99b019
+  machine 0x8664 ts 2022-03-03T13:17:51 dll subsys 3 linker 14
+  ver: {'CompanyName': 'Alexander Roshal', 'ProductName': 'RAR decompression library', 'FileDescription': 'RAR decompression library', 'FileVersion': '6.11.0', 'ProductVersion': '6.11.0', 'LegalCopyright': 'Copyright © Alexander Roshal 1993-2022', 'OriginalFilename': 'Unrar.dll'}
+  pdb ['D:\\Projects\\WinRAR\\rar\\build\\unrardll64\\Release\\UnRAR64.pdb']
+  cert subj: Common Name: GlobalSign CodeSigning CA - SHA256 - G3, Organization: GlobalSign nv-sa, Country: BE | issuer: Common Name: GlobalSign, Organization: GlobalSign, Organizational Unit: GlobalSign Root CA - R3 | 2016-06-15 -> 2024-06-15
+  cert subj: Common Name: win.rar GmbH, Organization: win.rar GmbH, Locality: Berlin, State/Province: Berlin, Country: DE | issuer: Common Name: GlobalSign CodeSigning CA - SHA256 - G3, Organization: GlobalSign nv-sa, Country: BE | 2020-08-25 -> 2023-08-26
+  cert subj: Common Name: DigiCert Timestamp 2021; Organization: DigiCert, Inc.; Country: US | issuer: Common Name: DigiCert SHA2 Assured ID Timestamping CA, Organizational Unit: www.digicert.com, Organization: DigiCert Inc, Country: US | 2021-01-01 -> 2031-01-06
+  cert subj: Common Name: DigiCert SHA2 Assured ID Timestamping CA, Organizational Unit: www.digicert.com, Organization: DigiCert Inc, Country: US | issuer: Common Name: DigiCert Assured ID Root CA, Organizational Unit: www.digicert.com, Organization: DigiCert Inc, Country: US | 2016-01-07 -> 2031-01-07
+  spc digest sha1 45c88daa3e893aa705c32ef449769edbf274816b computed 45c88daa3e893aa705c32ef449769edbf274816b MATCH
+  signer serial 35626140423967868457733424021
+  unsigned attr counter_signature
+  unsigned attr microsoft_nested_signature
+  signature over signed attrs: VALID against win.rar GmbH
+  leaf issued by embedded cert: GlobalSign CodeSigning CA - SHA256 - G3
+  path-string D:\Projects\WinRAR\rar\build\unrardll64\Release\UnRAR64.pdb
+  url http://crl.globalsign.com/root-r6.crl0G
+  url http://crl.globalsign.com/gscodesignsha2g3.crl0
+  url http://www.digicert.com/CPS0
+  url http://crl.globalsign.com/ca/gstsacasha384g4.crl0
+  url http://ocsp.globalsign.com/ca/gstsacasha384g40C
+  url https://www.globalsign.com/repository/0
+  url http://secure.globalsign.com/cacert/gstsacasha384g4.crt0
+  url http://crl.globalsign.com/root-r3.crl0c
+  url http://crl4.digicert.com/DigiCertAssuredIDRootCA.crl0:
+  url http://secure.globalsign.com/cacert/gscodesignsha2g3ocsp.crt08
+  url http://ocsp.digicert.com0O
+  url http://ocsp2.globalsign.com/rootr306
+  url https://www.digicert.com/CPS0
+  url http://ocsp2.globalsign.com/gscodesignsha2g30V
+  url http://ocsp.digicert.com0C
+  url http://crl4.digicert.com/sha2-assured-ts.crl0
+  url http://crl3.digicert.com/sha2-assured-ts.crl02
+  url http://crl.globalsign.com/root-r3.crl0G
+  url http://ocsp2.globalsign.com/rootr606
+  url http://cacerts.digicert.com/DigiCertSHA2AssuredIDTimestampingCA.crt0
+  url http://cacerts.digicert.com/DigiCertAssuredIDRootCA.crt0
+  url http://crl3.digicert.com/DigiCertAssuredIDRootCA.crl0P
+== BugSplat/Win32/Debug/BugSplat.lib 17382 8f187147a3d7116e43a2f57659245245ed2e260d635c9d9eec8ea7ded59a6af3
+  not PE: 'DOS Header magic not found.'
+== BugSplat/Win32/Release/BugSplat.lib 17382 8f187147a3d7116e43a2f57659245245ed2e260d635c9d9eec8ea7ded59a6af3
+  not PE: 'DOS Header magic not found.'
+== BugSplat/x64/Debug/BugSplat64.lib 17880 48e965c773889be369fe7a209723e769d313898f58f3ae83b98de76b6b8ac0a2
+  not PE: 'DOS Header magic not found.'
+== BugSplat/x64/Release/BugSplat64.lib 17880 48e965c773889be369fe7a209723e769d313898f58f3ae83b98de76b6b8ac0a2
+  not PE: 'DOS Header magic not found.'

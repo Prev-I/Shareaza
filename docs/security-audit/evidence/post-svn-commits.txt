@@ -1,0 +1,348 @@
+f24b0ce37 2024-06-21 Salvatore Ansani | Create qodana_code_quality.yml
+79fa7f5a3 2024-05-09 Salvatore Ansani | Merge pull request #161 from ansani/156-the-check-for-new-version-is-not-working-properly
+cce74a2c4 2024-05-09 Salvatore Ansani | Added version strict check
+97378ef15 2024-04-30 Salvatore Ansani | Update release.yml
+a69325df4 2024-04-30 Salvatore Ansani | Create release.yml
+67d5753c8 2024-04-30 Salvatore Ansani | Addedd manual workflow execution to VT Action
+f311fa376 2024-04-30 Salvatore Ansani | Create virustotal.yaml
+55026f568 2024-04-30 Salvatore Ansani | Bump release to 2.7.10.6
+dd30a36bb 2024-04-30 Salvatore Ansani | Merge pull request #152 from ansani/150-uninstalling-shareaza-reports-that-some-elements-are-left-in-the-program-folder
+7c9d8ffa7 2024-04-30 Salvatore Ansani | Merge pull request #151 from ansani/107-security-predefined-default-shared-folder-cuserdownloads
+0628872c4 2024-04-30 Salvatore Ansani | Remove unused DLLs and Exes.
+035bbf776 2024-04-30 Salvatore Ansani | Added - by default - the Shareaza folder in Downloads
+a4fe27787 2024-04-30 Salvatore Ansani | Removed BugTrap file not used anymore
+ad4457bc1 2024-04-30 Salvatore Ansani | Upgraded Boost and 7z NuGet packages
+0bd720a48 2024-04-30 Salvatore Ansani | Merge pull request #149 from ansani/146-replace-the-old-and-outdated-crash-handler-bugtrap-with-a-modern-one
+776d220b7 2024-04-30 Salvatore Ansani | Changed references to bug dll in iss
+c87dc59ae 2024-04-30 Salvatore Ansani | Removed references to BugTrap and added the BugSplat SDK
+dab5e15bf 2024-04-25 Salvatore Ansani | Merge pull request #145 from ansani/144-fixes-some-deprecations-in-msbuild-workflow
+f6d88851d 2024-04-25 Salvatore Ansani | Updated some actions to latest releases
+183f6c26f 2024-04-25 Salvatore Ansani | Updated some github actions
+bf87d582b 2024-04-24 Salvatore Ansani | Merge pull request #143 from ansani/139-network-window-continuously-clear-and-refresh-unable-to-select-and-click-on-a-neighbour
+a4a7d184c 2024-04-24 Salvatore Ansani | Fixed the flickering on 64bits OSes
+f93918a46 2024-04-24 Salvatore Ansani | Fixes the security flickering
+69b0fbe1c 2023-09-27 Salvatore Ansani | Merge pull request #135 from ansani/128-there-is-no-confirmation-when-cancelling-non-started-downloads
+d61ff5363 2023-09-27 Salvatore Ansani | Added dialog confirmation when user ask to delete a not yet started download
+9bf411867 2023-09-25 Salvatore Ansani | Merge pull request #130 from ansani/106-the-resume-button-should-stay-accessible-even-if-there-are-already-resumed-or-completed-downloads-in-the-selection
+90ce358a0 2023-09-25 Salvatore Ansani | Enable the resume button when selecting more downloads
+cb1e6ba4a 2023-09-23 Salvatore Ansani | Added some generated resources to .gitignore
+3838afd76 2023-09-23 Salvatore Ansani | Modified the support email for BugTrap
+2742b88bf 2023-09-23 Salvatore Ansani | Bump release to 2.7.10.5
+57a869230 2023-09-23 Salvatore Ansani | Remove build generated files
+a4a1fd42c 2023-09-23 Salvatore Ansani | Bump VC solution boost release from 1.80 to 1.83
+101ee6a29 2023-09-23 Salvatore Ansani | Bump boost package release from 1.80 to 1.83
+6cf46622e 2023-09-23 Salvatore Ansani | Merge pull request #123 from ansani/118-reenable-autoupdate-feature
+1d2d3538e 2023-09-23 Salvatore Ansani | Added support for update checking through github
+ed5a78399 2023-09-23 Salvatore Ansani | Merge pull request #120 from ansani/119-add-support-for-direct-download-of-https-uri
+4f4563788 2023-09-23 Salvatore Ansani | Added support for SSL connections (Using OpenSSL)
+4bd799374 2023-09-08 Salvatore Ansani | Raised the maximum value of SearchWindowsLimit from 50 to 100
+fef2a3b5d 2023-09-08 Salvatore Ansani | Merge pull request #116 from ansani/87-it-should-be-possible-to-sort-downloads-by-added-date-with-a-sorely-missing-added-date-column
+8ff11d90f 2023-09-08 Salvatore Ansani | Added the sort capability
+1eaf60880 2023-09-07 Salvatore Ansani | Added the new column "Date Added" and raised the  DOWNLOAD_SER_VERSION to 44
+c91ae04be 2023-09-07 Salvatore Ansani | Added support for C++ 17
+861c6eab4 2023-09-07 Salvatore Ansani | Added support for C++ 17
+bfdf0a27c 2022-12-29 Salvatore Ansani | Merge pull request #102 from ansani/85-shareaza-systematically-overwrites-a-file-if-a-file-with-the-same-name-is-received-in-the-same-folder
+d8a68e585 2022-12-29 Salvatore Ansani | Fixes output message
+5a1b02b8e 2022-12-29 Salvatore Ansani | Check if a downloaded file already exists
+57af11fa2 2022-12-28 Salvatore Ansani | Merge pull request #100 from ansani/92-some-pdf-files-interrupt-shareazas-hashing-process-as-it-attempts-to-scan-them
+099d50b54 2022-12-28 Salvatore Ansani | Fixes for PDF documents that doesn't contains a proper terminated Metadata
+2da8686a3 2022-12-28 Salvatore Ansani | Merge pull request #95 from ansani/94-some-git-actions-still-rely-to-nodejs-v12
+dafe3d79b 2022-12-28 Salvatore Ansani | Merge remote-tracking branch 'origin/94-some-git-actions-still-rely-to-nodejs-v12' into 94-some-git-actions-still-rely-to-nodejs-v12
+0fa6b6540 2022-12-27 Salvatore Ansani | Updated some GitActions modules
+39d673b87 2022-12-28 Salvatore Ansani | Removed TortoiseSVN dependency from the Readme
+e70a2244e 2022-12-27 Salvatore Ansani | Merge pull request #78 from ansani/1-remove-support-for-tortoisesvn-and-link-the-new-repo
+1a42741c0 2022-12-27 Salvatore Ansani | Updated some GitActions modules
+035e78f8f 2022-12-27 Salvatore Ansani | Changed the msbuild workflow to add git info
+72cee30e7 2022-12-27 Salvatore Ansani | Added support for external Definitions
+df27131f7 2022-11-23 Salvatore Ansani | Added revision.h into the project
+2b1a6fb4b 2022-11-23 Salvatore Ansani | Removed revision.h from .gitignore
+d6686b566 2022-11-23 Salvatore Ansani | Removed the revision.js and use the GIT info from gitversion
+7ac6cb5a5 2022-11-22 Salvatore Ansani | Merge pull request #73 from ansani/57-test-connection-failed
+24ad28596 2022-11-21 Salvatore Ansani | Remove reference to TortoiseSVN (issue #1)
+c777c2c1c 2022-11-21 Salvatore Ansani | retarget the Windows 10 SDK
+8b2200b2f 2022-11-21 Salvatore Ansani | Changed the website for the Connection Test
+7b3499369 2022-11-07 Salvatore Ansani | Merge pull request #62 from ansani/52-dpi-scaling-issue-in-windows-10-11
+a3dc11feb 2022-11-02 Salvatore Ansani | Fixes some font calculation
+9ad47d2a8 2022-10-28 Salvatore Ansani | Debug for release / Win32 SQ
+378ff9e2b 2022-10-25 Salvatore Ansani | Try to run SQ in selfhosted
+1044ea9a6 2022-10-25 Salvatore Ansani | Added build strategy to SQ
+b65a9f3d8 2022-10-25 Salvatore Ansani | Added missing env values in SQ workflow
+fe4e7e209 2022-10-25 Salvatore Ansani | Typo in build command
+ce5da0907 2022-10-25 Salvatore Ansani | Added intermediates step for SQ build
+8f084f8fe 2022-10-25 Salvatore Ansani | Added sonar project properties
+b94fe45ee 2022-10-25 Salvatore Ansani | Changed SonarQube trigger
+f105e50cc 2022-10-25 Salvatore Ansani | Added sonarcube support
+83eccf79b 2022-10-25 Salvatore Ansani | Added selfhosted runner for codeQL
+16a21d3ec 2022-10-25 Salvatore Ansani | Merge pull request #50 from ansani/41-upgrade-miniupnp-client-miniupnpc-to-the-latest-release
+f85ce7ca2 2022-10-25 Salvatore Ansani | Updated MiniUPnPc to 2.2.4
+b079d6a17 2022-10-25 Salvatore Ansani | Merge pull request #48 from ansani/47-change-the-referenced-servermet-uri-with-an-updated-one
+138691f56 2022-10-25 Salvatore Ansani | Merge pull request #45 from ansani/44-enable-https-protocol-in-the-emule-download-servermet-file
+336be88bf 2022-10-25 Salvatore Ansani | Changed the referenced server.met URI with an updated one
+525b392cf 2022-10-25 Salvatore Ansani | Added support for HTTPS server.met URI
+df0a5b6e1 2022-10-24 Salvatore Ansani | Merge pull request #38 from ansani/2-add-support-for-4k-screens
+0a0a6bfda 2022-10-24 Salvatore Ansani | Removed "DPI Aware" configuration
+ea4a48a37 2022-10-13 Salvatore Ansani | Removed NuGet flow for sec purposes
+5097e0c6e 2022-10-13 Salvatore Ansani | Added the msbuild and nuget setup in CodeQL
+f1cd9a0b5 2022-10-13 Salvatore Ansani | Fixed the CodeQL Workflow
+f257165dd 2022-10-13 Salvatore Ansani | Remove python files from CodeQL Analysis
+d4897116f 2022-10-12 Salvatore Ansani | Added funding file
+73797f272 2022-10-12 Salvatore Ansani | Merge pull request #36 from ansani/29-upgrade-unrardll-and-unrar64dll
+ba680a60d 2022-10-12 Salvatore Ansani | Update UnRAR to 6.11.0
+93bbd6477 2022-10-11 Salvatore Ansani | Merge pull request #35 from ansani/30-upgrade-dbghelpdll-in-the-bugtrap-folder
+a49f89e9a 2022-10-11 Salvatore Ansani | Updated the dll to release 10.0.22621.1
+c5aca781e 2022-10-11 Salvatore Ansani | Activate builds only on PR or on demand
+b343be633 2022-10-10 Salvatore Ansani | Merge pull request #31 from ansani/22-update-the-bugtrap-library-using-the-repo-in-github
+2b85f8b02 2022-10-10 Salvatore Ansani | Remove missing dll file in Bugtrap
+75fb0e4a4 2022-10-10 Salvatore Ansani | Fixes DLL naming in BugTrap
+64731ab33 2022-10-10 Salvatore Ansani | Remove BugTrap.pdb from the final bundle
+34aaf827f 2022-10-10 Salvatore Ansani | Added dbghelp.dll
+e87b9e038 2022-10-10 Salvatore Ansani | Fixes for installer
+5695be0e9 2022-10-10 Salvatore Ansani | Add missing lib path
+4ca296e99 2022-10-10 Salvatore Ansani | Support foe external BugTrap dll and lib
+58dc5f3fb 2022-10-10 Salvatore Ansani | BugTrap changed sources to dll support
+3d7d7ba78 2022-10-06 Salvatore Ansani | Change CodeQL host. Ubuntu -> Windows
+7460f12e9 2022-10-06 Salvatore Ansani | Enable CodeQL workflow on-demand only
+2d942ebae 2022-10-06 Salvatore Ansani | Merge pull request #25 from ansani/9-add-support-for-codeql
+a6d1e31d6 2022-10-06 Salvatore Ansani | Enable Code Analysis by request
+1bdea48eb 2022-10-05 Salvatore Ansani | Merge pull request #19 from ansani/18-install-and-run-the-software-in-arm64-cpus
+46767638b 2022-10-04 Salvatore Ansani | Add support for ARM64
+b06474787 2022-10-04 Salvatore Ansani | Removed old solution file
+fcc87c767 2022-10-04 Salvatore Ansani | Changed the website URI for stable releases
+fe9eeb24e 2022-10-04 Salvatore Ansani | Merge pull request #16 from ansani/4-add-support-for-github-actions
+489efe970 2022-10-03 Salvatore Ansani | Merge pull request #15 from ansani/CodeQL
+3e79e3ab7 2022-10-03 Salvatore Ansani | Create codeql-analysis.yml
+f6ad199e3 2022-10-03 Salvatore Ansani | Support multi platforms / multi arch
+78403969d 2022-10-03 Salvatore Ansani | Merge pull request #13 from ansani/first_64bit_build
+90256d6cc 2022-10-03 Salvatore Ansani | Fixes the artifacts path
+c9e518fec 2022-10-03 Salvatore Ansani | Fixes the artifact path
+3a5503df8 2022-10-03 Salvatore Ansani | Added *.exe artifacts
+91c4ea03a 2022-09-30 Salvatore Ansani | Added packagedirectory
+591e21776 2022-09-30 Salvatore Ansani | Added package restore for zlibwapi_143.vcxproj
+eb6ed8ea1 2022-09-30 Salvatore Ansani | Removed the verbosity level
+e7008438b 2022-09-30 Salvatore Ansani | Changed the build action
+8d0114478 2022-09-29 Salvatore Ansani | Modified the Raza plugin reference
+0bd81d6b7 2022-09-29 Salvatore Ansani | Merge remote-tracking branch 'origin/4-add-support-for-github-actions' into 4-add-support-for-github-actions
+2b35d0af7 2022-09-28 Salvatore Ansani | Early stage support for github actions
+204cebf83 2022-09-29 Salvatore Ansani | Merge pull request #6 from ansani/3-remove-support-for-external-7zexe-file
+ca50bfed1 2022-09-29 restyled-io[bot] | Restyle 3 remove support for external 7zexe file (#7)
+55edf629b 2022-09-29 Salvatore Ansani | Removed the 7zip section from the doc
+e45bbb643 2022-09-29 Salvatore Ansani | Remove the 7z system-wide dep
+a6342169d 2022-09-28 Salvatore Ansani | Early stage support for github actions
+21bd69926 2022-09-28 Salvatore Ansani | Documentation updated
+653628637 2022-09-28 Salvatore Ansani | Bump release 2.7.10.4
+7d2b6d05e 2022-09-28 Salvatore Ansani | Support for new C++ dialect in VS2022
+12c0aa369 2022-09-28 Salvatore Ansani | Fixes for Win32 Build
+1c4f6d92f 2022-09-28 Salvatore Ansani | Fixes zlib compatibility with VS2022
+aea4b9ba4 2022-09-28 Salvatore Ansani | Completely remove all reference to old VS
+fac2f252d 2022-09-27 Salvatore Ansani | Fixes the error C2280
+feea9f08e 2022-09-27 Salvatore Ansani | Remove ASSERT error (added the #TODO section)
+6621e3e32 2022-09-27 Salvatore Ansani | Added WinDNS.h for IPV6 support
+640fd8caf 2022-09-27 Salvatore Ansani | Updated the zlib library to 1.2.12
+2d4ba51dc 2022-09-27 Salvatore Ansani | Updated .gitignore with some NuGet exclusions
+c4ae74bcb 2022-09-27 Salvatore Ansani | Added support for Visual Studio 2022
+0c2f2f56c 2019-08-08 ivan386 | New Setting: Downloads.RenameIfExist = false If true then file will be renamed if file with same name exists in target folder.
+5f2c4285a 2019-08-07 ivan386 | Check that size known
+88a46ba58 2019-08-07 ivan386 | Downloads.MaxConnectingSources == 0 - disable connecting sources check
+52df02c3d 2019-08-07 ivan386 | Limit counters
+79bfc80c0 2019-07-19 ivan386 | XML Fix: Surrogate Pairs
+c21751c0f 2019-07-19 ivan386 | Settings.Connection.Reuse
+ed24b1a58 2019-07-15 ivan386 | Revert "Limit time to save downloads info to 200 ms each cycle"
+4b0579ba6 2019-07-10 ivan386 | New settings: Downloads.CountOnlyWithSources = false If true and one download not have sources then start next download.
+5abb64745 2019-06-28 ivan386 | Generate xml without prefixes.
+bf2564de9 2019-06-27 ivan386 | Do not get name from URL if it already set
+3bf004444 2019-06-21 ivan386 | GiveConnectionToNext Use one connection for many downloads.
+8e1a2da70 2019-06-18 ivan386 | One Lock and Settings.Downloads.AutoShow
+5e7ddabcd 2019-06-18 ivan386 | Limit time to save downloads info to 200 ms each cycle
+cb819b0dd 2019-06-17 ivan386 | URLEncode bugfix
+c04fb06fb 2018-09-30 ivan386 | New option eDonkey.CloseNeighboursOnConnect
+ba272695d 2018-09-30 ivan386 | Downloads.AllowUnlimitedFirstAttempt
+8e50823f4 2018-09-30 ivan386 | Fix limit StateSortOrder index
+535f52912 2018-09-30 ivan386 | Downloads.AllowUnlimitedFirstAttempt Try to connect to source first time without host limit
+123d38975 2018-09-30 ivan386 | IsZeroBlock fix new functions FindBlockCopy, GetColor
+5d25d5d17 2018-06-13 ivan386 | Settings for lowest and medium priority search
+3c5015dc7 2018-06-13 ivan386 | Download direction from nearest peace
+79ad97e17 2018-05-13 ivan386 | Delete old iShareaza installers after new install
+11324d9e4 2018-05-04 ivan386 | strCookie for cookie
+076996304 2018-05-03 ivan386 | Translation fix
+e2a93a377 2018-05-01 ivan386 | New search results filter options: Hide partial sources, Hide comments sources.
+3d9f36ac2 2018-04-22 ivan386 | First and last chunk priority
+6b222d165 2018-04-22 ivan386 | Check start of non random download
+a9261012f 2018-04-21 ivan386 | Count only online sources for search limit
+3d0361673 2018-04-16 ivan386 | Move to resources
+70b3de0d1 2018-04-16 ivan386 | Error some times
+c37b5bdeb 2018-04-16 ivan386 | Save windows one time per second
+ebb931fc7 2018-03-31 ivan386 | Save windows one time per second
+d4f2cacb5 2018-03-13 ivan386 | Save windows one time per second
+8ba94c383 2018-03-13 ivan386 | Show online sources
+b18e0a23c 2018-03-12 ivan386 | partial ipv6 support 10
+f8dc3e584 2018-03-12 ivan386 | Download sources sort optimization
+19410e01e 2018-01-13 ivan386 | Don't change IP for G2Neighbour. Call right menu for download or source on downloads page from keyboard. With Ctrl default menu. More IPv6 changes.
+a1d25a59f 2018-01-09 ivan386 | Lost unchanged.
+4665a9f0e 2018-01-08 ivan386 | Check source or download is selected. Download.ForceBrowse = false; //All download sources activate browse host menu item
+754736039 2018-01-07 ivan386 | Context menu in downloads by context menu key
+764d6bb9a 2018-01-07 ivan386 | Direct search on sources and more ipv6 support in G2
+755436d84 2017-12-26 ivan386 | IPv6: ban rule (Lost in last ipv6 commit) Setting: Downloads.ClearSourcesAfter = true; Clear sources after download ends.
+3b06881d9 2017-12-26 ivan386 | Zeros ranges test Memory leak fix
+453215720 2017-12-24 ivan386 | Recheck for zeros ranges on new hash set.
+186b80353 2017-12-22 ivan386 | Preview for .torrent files from original file DHT sources search fix
+2e29fc031 2017-12-22 ivan386 | Test for zero blocks Don't remove sources after download complete
+1a594e91f 2017-12-16 ivan386 | Missing files
+10198c321 2017-12-15 ivan386 | partial ipv6 support 9
+ddc49326d 2017-12-11 ivan386 | partial ipv6 support 8 ipv6 security rules dht seed and noseed flag
+4a83f5e96 2017-12-06 ivan386 | partial ipv6 support 8 bug fix in hostcache
+a8e4b0463 2017-12-05 ivan386 | bug fix in hostcache
+54a88362c 2017-12-04 ivan386 | partial ipv6 support 7 bittorent accelerate
+34c4279a8 2017-11-29 ivan386 | partial ipv6 support 6 ipv6 pex support CtrlDownloads optimization if set bitrate to 18446744073709551615 will be sequential download
+79d94d3c5 2017-11-28 ivan386 | partial ipv6 support 6 Bittorrent DHT work fine Added G2 ipv6 push
+2217fa01f 2017-11-26 ivan386 | partial ipv6 support 5
+89e9cce22 2017-11-26 ivan386 | partial ipv6 support 4
+7c73e7f4f 2017-11-25 ivan386 | partial ipv6 support 3
+c3ab2daf2 2017-11-22 ivan386 | partial ipv6 support 2
+ef6b36c02 2017-11-21 ivan386 | Bittorrent push sources fix
+5d1f14fd7 2017-11-21 ivan386 | partial ipv6 support
+b9f114a51 2017-11-17 ivan386 | Recovery lost files
+f98b7b64d 2017-11-10 ivan386 | Merge branch 'My-Code' into mix2
+eeeb427a1 2017-10-06 ivan386 | New function GetNetworkLevel Fixed local address in global network
+b46c732ef 2017-10-06 ivan386 | More rename
+3dad21904 2017-10-03 ivan386 | "i" prefix for builds and ignore torrent files in source archive
+64541b5d5 2017-10-03 ivan386 | Soft name change
+7903e740f 2017-10-03 ivan386 | install script fix
+fca2b3938 2017-09-28 ivan386 | Advanced non random download. Now you can click on download bar where to start non random download.
+ea60d7ca7 2017-09-28 ivan386 | -nowarn key for first pre-release window
+896d2ff2e 2017-09-28 ivan386 | Change default border color on select.
+14beb0efe 2017-09-27 ivan386 | Allow http download from 127.0.0.1 if Settings.Connection.IgnoreOwnIP == FALSE
+2ddf3bb33 2017-09-25 ivan386 | Unlimited settings and Ctrl+F10 for Graph SVN Revision 9700
+8a894b65f 2017-04-30 ivan386 | README.md update from ReadMe.txt
+e5727cfb1 2017-04-30 ivan386 | README.md Update
+7d1e5a56d 2017-04-30 ivan386 | README.md edit
+42c2133e3 2017-04-16 ivan386 | Download Fix
+98df1ca3a 2017-03-27 ivan386 | Save
+df344e13d 2017-03-24 ivan386 | Rewrite of "Work in Home, LAN and Internet"
+b1f846d0f 2017-03-22 ivan386 | Work in Home, LAN and Internet
+91723e207 2017-03-13 ivan386 | BitTorrent Local Service Discovery Receive Update
+1d98185dc 2017-03-13 ivan386 | BitTorrent Local Service Discovery Receive Sync 9667
+f82ace8d6 2017-03-09 ivan386 | multicast and broadcast fix
+206ca2564 2017-03-09 ivan386 | Datagrams (Multi-cast Fix)
+b6968b8fd 2017-02-24 ivan386 | Sync to 9660 Part 4 DiscoveryServices
+4518b917d 2017-02-24 ivan386 | Sync to 9660 Part 3 Got heap corruption error once
+570ddaf0c 2017-02-24 ivan386 | Sync to 9660 Part 2
+4d31559ec 2017-02-24 ivan386 | Sync to 9660 Part 1
+44820833d 2017-02-23 ivan386 | Download get both hash sets. Upload return old clients compatibility.
+985668194 2017-02-23 ivan386 | Better GetFragment for CDownloadWithTiger
+09950385f 2017-02-23 ivan386 | Share eDonkey2000 hashset without TigerTree hashset
+e0362611b 2017-02-18 ivan386 | return TRUE;
+45dd32804 2017-02-18 ivan386 | Check Settings.Gnutella2.EnableToday
+2c5c13730 2017-02-18 ivan386 | Check m_pMember != NULL
+ced6d5e68 2017-02-17 ivan386 | Sync revision 9650
+b03381fca 2017-02-17 ivan386 | Send directory tree before search results
+c9f25f057 2017-02-17 ivan386 | BitTorrent Magnet Link in search hit details
+57c6d4856 2017-01-12 ivan386 | BT Bootstrap Fix and 9847 sync
+9bf92a2bd 2017-01-04 ivan386 | Remove Experement. TCP Hole Punch.
+d9d3f5714 2016-12-30 ivan386 | Update 9639, Firewalled detection, BitTorrent bootstrap request
+735b215f9 2016-09-02 ivan386 | Sync 9629
+41ed4f9bf 2016-09-02 ivan386 | Sync
+5ed60da20 2016-06-12 ivan386 | Sync and modifications
+6f1b2e1a8 2016-01-19 ivan386 | SVN: 9617 DC Collection fix re-factoring
+f4ff893f8 2016-01-17 ivan386 | DC FileList download rename fix
+b3cb5c59c 2016-01-14 ivan386 | SVN: 9615 Fix for DCCollections and other changes
+c059d29e4 2015-02-08 ivan | Revision 9530
+af961db39 2015-02-04 ivan | Test bloks not empty
+b106290c2 2015-02-02 ivan | GeoIP Update BugFix: Check status display
+78615820a 2015-01-31 ivan | files for installer
+b80455972 2015-01-31 ivan | Fixed Relese compilation BugFix in DownloadWithSources My update server
+be5e3c38d 2015-01-29 ivan | Check Host before share
+b86b4af1b 2015-01-26 ivan | If no hashset but download complete check it by root tigerhash.
+77cf8ef52 2015-01-25 ivan | Full sync at 9526 https://svn.code.sf.net/p/shareaza/code/trunk
+d5459074e 2015-01-15 ivan | Check we request next piece
+283f961f6 2015-01-15 ivan | Stop hashing when shareaza exits
+fcde8243d 2015-01-15 ivan | Disabled internal player
+b4f839a6b 2015-01-15 ivan | Bitrate to Magnet
+ed0434374 2015-01-12 ivan | Clear cache BugFix
+94f09a996 2015-01-12 ivan | Catch bitrate from magnet BugFix
+8a891837c 2015-01-10 ivan | bugfix
+0c5c0e7e7 2015-01-10 ivan | Anti clear host cache
+4cbd5c831 2015-01-08 ivan | Sync and Ignore to Ignored
+da986a8c5 2014-12-30 ivan | Build sync
+4729171c9 2014-12-30 ivan | Sync point
+548ca4594 2014-12-29 ivan | First step sync with original shareaza
+7d50f25a5 2014-12-29 ivan | BugFix BTInfo.h  public: 	void		Clear();
+9ac3a7e5d 2014-12-24 ivan | Sync some files with original Shareaza
+14294e806 2014-12-24 ivan | WebSeed implementation
+cdcb8dbbc 2014-12-23 ivan | Don't request tiger tree from mom gnutella sources
+a0f9f9100 2014-12-23 ivan | BTInfo.cpp svn sync with 9507
+44192c7d4 2014-12-23 ivan | Web-seed implementation
+35140d1eb 2014-12-23 ivan | Settings optimisation
+6f724962a 2014-12-15 ivan | BugFix: WantBackwards for DC
+8e5733e6e 2014-12-03 ivan | Added WebSeed download from magnet
+c1c968382 2014-04-10 ivan | Merge branch 'For-XP' into My-Code
+ca7294b1e 2014-04-10 ivan | Merge branch 'master' into For-XP
+669692060 2014-04-10 ivan | Added KeywordTest for VC10
+4f23af5d7 2014-04-06 ivan | Sync
+6c2dce9b7 2014-04-06 ivan | Revision: 9383 Author: raspopov Date: 4 апреля 2014 г. 20:01:38 Message: Added automatic port change on TCP/UDP-port conflicts. ---- Modified : /trunk/shareaza/Datagrams.cpp Modified : /trunk/shareaza/Handshakes.cpp Modified : /trunk/shareaza/Network.cpp
+68fae46ed 2014-04-06 ivan | Added UPnPNAT.cpp in Shareaza project
+22dddfca1 2014-04-05 ivan | Exclude MiniUPnPc
+2debf2595 2014-04-01 ivan | -- Forget to add files --
+d9b455d40 2014-04-01 ivan | Revision: 9377 Author: raspopov Date: 30 марта 2014 г. 12:29:26 Message: Adjusted project options. ---- Modified : /trunk/MiniUPnPc/MiniUPnPc.vcxproj Modified : /trunk/RegExp/RegExp_10.vcxproj Modified : /trunk/pack_pdb.cmd
+c7e4e3980 2014-03-28 ivan | Revision: 9370 Author: raspopov Date: 26 марта 2014 г. 20:39:04 Message: Fixed disconnected networks bug in scheduler task. ---- Modified : /trunk/shareaza/Scheduler.cpp
+610cc78f9 2014-03-19 ivan | Revision: 9367 Author: raspopov Date: 17 марта 2014 г. 18:28:10 Message: Bumped version 2.7.3.0. ---- Modified : /trunk/BugTrap/BugTrap.rc Modified : /trunk/GeoIP/GeoIP.rc Modified : /trunk/HashLib/HashLib.rc Modified : /trunk/KeywordTest/KeywordTest.rc Modified : /trunk/Languages/tools/SkinTranslate/SkinTranslate.rc Modified : /trunk/PluginWizard/Shareaza Image Service Plugin (Visual Studio 2003, ATL)/#PROJECT#.rc Modified : /trunk/PluginWizard/Shareaza Library Builder Plugin (Visual Studio 2003, ATL)/#PROJECT#.rc Modified : /trunk/RegExp/RegExp.rc Modified : /trunk/RegExpTest/RegExpTest.rc Modified : /trunk/TorrentWizard/TorrentWizard.rc Modified : /trunk/bzlib/bzlib.rc Modified : /trunk/plugins/7ZipBuilder/7ZipBuilder.rc Modified : /trunk/plugins/DocumentReader/DocumentReader.rc Modified : /trunk/plugins/GFLImageServices/GFLImageServices.rc Modified : /trunk/plugins/GFLLibraryBuilder/GFLLibraryBuilder.rc Modified : /trunk/plugins/ImageViewer/ImageViewer.rc Modified : /trunk/plugins/MediaImageServices/MediaImageServices.rc Modified : /trunk/plugins/MediaLibraryBuilder/MediaLibraryBuilder.rc Modified : /trunk/plugins/MediaPlayer/MediaPlayer.rc Modified : /trunk/plugins/Preview/Preview.rc Modified : /trunk/plugins/RARBuilder/RARBuilder.rc Modified : /trunk/plugins/RatDVDPlugin/RatDVDReader.rc Modified : /trunk/plugins/RazaWebHook/RazaWebHook.rc Modified : /trunk/plugins/SWFPlugin/SWFPlugin.rc Modified : /trunk/plugins/SearchExport/SearchExport.rc Modified : /trunk/plugins/SkinScanSKS/SkinScanSKS.rc Modified : /trunk/plugins/VirusTotal/VirusTotal.rc Modified : /trunk/plugins/WindowsThumbnail/WindowsThumbnail.rc Modified : /trunk/plugins/ZIPBuilder/ZIPBuilder.rc Modified : /trunk/shareaza/Shareaza.rc Modified : /trunk/skin-installer/resource.rc Modified : /trunk/sqlite3/sqlite3.rc Modified : /trunk/zlib/zlibwapi.rc
+57c452cdd 2014-03-15 ivan | New files in project
+86c758471 2014-03-02 ivan | Revision: 9363
+f3b0d3222 2014-02-05 ivan | Sync at revision 9354 05.02.2014
+54518ad9c 2014-04-06 ivan | My Build Mark
+c8137d193 2014-04-06 ivan | Merge branch 'For-XP' into My-Code
+5b398e677 2014-04-06 ivan | Sync
+f35c831ad 2014-04-06 ivan | Merge branch 'master' into For-XP
+67fda0de6 2014-04-06 ivan | Revision: 9383 Author: raspopov Date: 4 апреля 2014 г. 20:01:38 Message: Added automatic port change on TCP/UDP-port conflicts. ---- Modified : /trunk/shareaza/Datagrams.cpp Modified : /trunk/shareaza/Handshakes.cpp Modified : /trunk/shareaza/Network.cpp
+7575754c8 2014-04-06 ivan | Added UPnPNAT.cpp in Shareaza project
+e11abd116 2014-04-05 ivan | Merge branch 'For-XP' into My-Code
+ada7fa82b 2014-04-05 ivan | Exclude MiniUPnPc
+f37ac9a70 2014-04-01 ivan | Merge branch 'master' into For-XP
+528ebd185 2014-04-01 ivan | -- Forget to add files --
+a46637165 2014-04-01 ivan | Revision: 9377 Author: raspopov Date: 30 марта 2014 г. 12:29:26 Message: Adjusted project options. ---- Modified : /trunk/MiniUPnPc/MiniUPnPc.vcxproj Modified : /trunk/RegExp/RegExp_10.vcxproj Modified : /trunk/pack_pdb.cmd
+0376f9c88 2014-03-28 ivan | Merge branch 'For-XP' into My-Code
+b8ed0f271 2014-03-28 ivan | Merge branch 'master' into For-XP
+745028ac3 2014-03-28 ivan | Revision: 9370 Author: raspopov Date: 26 марта 2014 г. 20:39:04 Message: Fixed disconnected networks bug in scheduler task. ---- Modified : /trunk/shareaza/Scheduler.cpp
+d03247985 2014-03-28 ivan | light play position
+d773b68af 2014-03-19 ivan | Merge branch 'master' into My-Code
+19d01d314 2014-03-19 ivan | Merge branch 'master' into For-XP
+ca85ce785 2014-03-19 ivan | Revision: 9367 Author: raspopov Date: 17 марта 2014 г. 18:28:10 Message: Bumped version 2.7.3.0. ---- Modified : /trunk/BugTrap/BugTrap.rc Modified : /trunk/GeoIP/GeoIP.rc Modified : /trunk/HashLib/HashLib.rc Modified : /trunk/KeywordTest/KeywordTest.rc Modified : /trunk/Languages/tools/SkinTranslate/SkinTranslate.rc Modified : /trunk/PluginWizard/Shareaza Image Service Plugin (Visual Studio 2003, ATL)/#PROJECT#.rc Modified : /trunk/PluginWizard/Shareaza Library Builder Plugin (Visual Studio 2003, ATL)/#PROJECT#.rc Modified : /trunk/RegExp/RegExp.rc Modified : /trunk/RegExpTest/RegExpTest.rc Modified : /trunk/TorrentWizard/TorrentWizard.rc Modified : /trunk/bzlib/bzlib.rc Modified : /trunk/plugins/7ZipBuilder/7ZipBuilder.rc Modified : /trunk/plugins/DocumentReader/DocumentReader.rc Modified : /trunk/plugins/GFLImageServices/GFLImageServices.rc Modified : /trunk/plugins/GFLLibraryBuilder/GFLLibraryBuilder.rc Modified : /trunk/plugins/ImageViewer/ImageViewer.rc Modified : /trunk/plugins/MediaImageServices/MediaImageServices.rc Modified : /trunk/plugins/MediaLibraryBuilder/MediaLibraryBuilder.rc Modified : /trunk/plugins/MediaPlayer/MediaPlayer.rc Modified : /trunk/plugins/Preview/Preview.rc Modified : /trunk/plugins/RARBuilder/RARBuilder.rc Modified : /trunk/plugins/RatDVDPlugin/RatDVDReader.rc Modified : /trunk/plugins/RazaWebHook/RazaWebHook.rc Modified : /trunk/plugins/SWFPlugin/SWFPlugin.rc Modified : /trunk/plugins/SearchExport/SearchExport.rc Modified : /trunk/plugins/SkinScanSKS/SkinScanSKS.rc Modified : /trunk/plugins/VirusTotal/VirusTotal.rc Modified : /trunk/plugins/WindowsThumbnail/WindowsThumbnail.rc Modified : /trunk/plugins/ZIPBuilder/ZIPBuilder.rc Modified : /trunk/shareaza/Shareaza.rc Modified : /trunk/skin-installer/resource.rc Modified : /trunk/sqlite3/sqlite3.rc Modified : /trunk/zlib/zlibwapi.rc
+45bb0153e 2014-03-15 ivan | Merge branch 'master' into For-XP
+1a944db0c 2014-03-15 ivan | New files in project
+660e9f0f4 2014-03-07 ivan | BugFix
+54444b045 2014-03-02 ivan | Added new files in project
+97e868b3c 2014-03-02 ivan | Merge branch 'master' into My-Code
+a74a97749 2014-03-02 ivan | Merge branch 'master' into For-XP
+ad227643d 2014-03-02 ivan | Revision: 9363
+9ea99988e 2014-02-05 ivan | Merge branch 'master' into My-Code
+35e8ab355 2014-02-05 ivan | Sync at revision 9354 05.02.2014
+d4c85b4d5 2014-01-28 ivan | Sync
+c3a3c1777 2014-01-28 ivan | Merge branch 'master' into For-XP
+7b673c0d2 2014-01-28 ivan | Sync 28.01.2014
+13dad7a1e 2013-12-21 ivan | Sync
+0486456b4 2013-12-20 ivan | Sync
+16930bbc8 2013-12-20 ivan | Download first part, last part and then other.
+62b17aeb7 2013-12-20 ivan | Use ip that hub give
+db744e8e7 2013-11-12 ivan | New gitignore
+2ba37bb74 2013-11-10 ivan | Merge branch 'master' of https://github.com/ivan386/Shareaza into For-XP
+2424c5c6c 2013-11-10 ivan | Fixed trash in "added.f" PEX (by ivan386) 9330
+5d61a2ab7 2013-11-10 ivan | 9331 (raspopov)
+af0a377b3 2013-11-10 ivan | New gitignore
+d80eaa24a 2013-11-10 ivan | new ignore
+e8327fb51 2013-11-10 ivan | Original Shareaza 9331 (raspopov)
+d1111d3a9 2013-11-10 ivan | Fix for x64
+82af38417 2013-11-10 ivan | new ignore
+9803f288f 2013-11-10 ivan | Don't add to cache hosts from some countries.
+4b6835dd4 2013-11-01 ivan | Uncomment InternetConnect check
+985dfbede 2013-10-30 ivan | Windows API name collision fix
+91592fb50 2013-10-30 ivan | gitignore update
+617bf8d9a 2013-10-29 ivan | That's don't work right for me.
+141b2f079 2013-10-29 ivan | README test
+b34af0b0b 2013-10-29 ivan | Single File BT Download Fix
+e4a2e2ee9 2013-10-29 ivan | DC Collection Opt
+24d865608 2013-10-28 ivan | BugFix for PEX pAddedFalgsBuffer
+5c993f80e 2013-10-28 ivan | Bug bupass
+3621a616e 2013-10-28 ivan | Non random download for media files
+78bb66df3 2013-10-28 ivan | TTH in Torrent File
+2d6dc870f 2013-10-28 ivan | Buffer optimisation
+d01d92efa 2013-10-28 ivan | Compile in XP
+98c83e15d 2013-10-28 ivan | Original Shareaza build 9329
