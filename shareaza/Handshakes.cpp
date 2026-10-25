@@ -461,9 +461,25 @@ int CALLBACK CHandshakes::AcceptCheck(IN LPWSABUF lpCallerId,
 	if ( lpCallerId == NULL )                    return CF_REJECT; // WSAAccept didn't get the remote computer's IP and port
 	if ( lpCallerId->len < sizeof(SOCKADDR_IN) ) return CF_REJECT; // The IP and port aren't long enough
 
+	// The IPv6 listener uses this check too, and its callers carry a SOCKADDR_IN6
+	if ( ((const SOCKADDR*)lpCallerId->buf)->sa_family == AF_INET6 )
+	{
+		if ( lpCallerId->len < sizeof(SOCKADDR_IN6) ) return CF_REJECT;
+
+		const SOCKADDR_IN6* pHostIPv6 = (const SOCKADDR_IN6*)lpCallerId->buf;
+
+		if ( Security.IsDenied( &pHostIPv6->sin6_addr ) )
+		{
+			theApp.Message( MSG_ERROR, IDS_SECURITY_DENIED, (LPCTSTR)IPv6ToString( &pHostIPv6->sin6_addr ) );
+			return CF_REJECT;
+		}
+
+		return CF_ACCEPT;
+	}
+
 	// Copy out the IP address and port number of the remote computer
 	const SOCKADDR_IN* pHost = (const SOCKADDR_IN*)lpCallerId->buf;
-	
+
 	// If the remote computer's IP address is on the list of blocked IPs
 	if ( Security.IsDenied( &pHost->sin_addr ) )
 	{
