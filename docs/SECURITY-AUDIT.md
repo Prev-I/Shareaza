@@ -2,7 +2,7 @@
 
 Static security review of what was added to Shareaza after the original SourceForge project ended.
 It was done for this fork of `github.com/ansani/Shareaza` before its builds were used as protocol
-oracles for `rs-gwc-edge` (see [ORACLE.md](ORACLE.md)).
+oracles for `gwc-edge` (see [ORACLE.md](ORACLE.md)).
 
 **Disclosure.**
 - **Not reported upstream.** As of 2026-10-25 the findings have not been reported to ansani/Shareaza.
