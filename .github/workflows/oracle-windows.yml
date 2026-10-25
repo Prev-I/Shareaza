@@ -127,14 +127,16 @@ jobs:
                 $bmp = New-Object Drawing.Bitmap $b.Width, $b.Height
                 [Drawing.Graphics]::FromImage($bmp).CopyFromScreen($b.Left, $b.Top, 0, 0, $bmp.Size)
                 $bmp.Save("$env:WORK\screen-$Name.png")
-                # Close it cleanly: taskkill without /F posts WM_CLOSE to its windows. (The
-                # process's "main" window is a hidden one, 'Shareaza Remote', so
-                # CloseMainWindow() does not exit it.)
-                & taskkill.exe /IM Shareaza.exe 2>&1 | ForEach-Object { "taskkill: $_" }
+                # Close it cleanly with WM_CLOSE: taskkill without /F. One message is not
+                # always enough: the first can land on Shareaza's hidden 'Shareaza Remote'
+                # window, which is what Windows reports as its main window. So repeat it.
                 $exited = $false
-                foreach ($i in 1..24) { Start-Sleep 5; if (-not (Get-Process -Name Shareaza -ErrorAction SilentlyContinue)) { $exited = $true; break } }
-                if (-not $exited) { Stop-Process -Name Shareaza -Force; Start-Sleep 5; throw 'Shareaza did not exit after WM_CLOSE' }
-                'closed by taskkill'
+                foreach ($attempt in 1..6) {
+                    & taskkill.exe /IM Shareaza.exe 2>&1 | ForEach-Object { "taskkill $attempt`: $_" }
+                    foreach ($i in 1..6) { Start-Sleep 5; if (-not (Get-Process -Name Shareaza -ErrorAction SilentlyContinue)) { $exited = $true; break } }
+                    if ($exited) { "closed by taskkill, attempt $attempt"; break }
+                }
+                if (-not $exited) { Stop-Process -Name Shareaza -Force; Start-Sleep 5; throw 'Shareaza did not exit after six WM_CLOSE attempts' }
                 '@ | Set-Content -Encoding ASCII run-client.ps1
 
         -   name: Prepare as a leaf with the kit
