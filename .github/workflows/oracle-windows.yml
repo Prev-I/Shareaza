@@ -127,17 +127,14 @@ jobs:
                 $bmp = New-Object Drawing.Bitmap $b.Width, $b.Height
                 [Drawing.Graphics]::FromImage($bmp).CopyFromScreen($b.Left, $b.Top, 0, 0, $bmp.Size)
                 $bmp.Save("$env:WORK\screen-$Name.png")
-                # Close as a user would: the main window first, then taskkill without /F (both WM_CLOSE).
-                $how = $null
-                if ($p.MainWindowHandle -ne 0 -and $p.CloseMainWindow()) {
-                    foreach ($i in 1..12) { Start-Sleep 5; if (-not (Get-Process -Name Shareaza -ErrorAction SilentlyContinue)) { $how = 'CloseMainWindow'; break } }
-                }
-                if (-not $how) {
-                    & taskkill.exe /IM Shareaza.exe 2>&1 | ForEach-Object { "taskkill: $_" }
-                    foreach ($i in 1..12) { Start-Sleep 5; if (-not (Get-Process -Name Shareaza -ErrorAction SilentlyContinue)) { $how = 'taskkill'; break } }
-                }
-                if (-not $how) { Stop-Process -Name Shareaza -Force; Start-Sleep 5; throw 'Shareaza did not exit after WM_CLOSE' }
-                "closed by $how"
+                # Close it cleanly: taskkill without /F posts WM_CLOSE to its windows. (The
+                # process's "main" window is a hidden one, 'Shareaza Remote', so
+                # CloseMainWindow() does not exit it.)
+                & taskkill.exe /IM Shareaza.exe 2>&1 | ForEach-Object { "taskkill: $_" }
+                $exited = $false
+                foreach ($i in 1..24) { Start-Sleep 5; if (-not (Get-Process -Name Shareaza -ErrorAction SilentlyContinue)) { $exited = $true; break } }
+                if (-not $exited) { Stop-Process -Name Shareaza -Force; Start-Sleep 5; throw 'Shareaza did not exit after WM_CLOSE' }
+                'closed by taskkill'
                 '@ | Set-Content -Encoding ASCII run-client.ps1
 
         -   name: Prepare as a leaf with the kit
@@ -218,19 +215,29 @@ jobs:
                 if (Test-Path "$env:WORK\session") { Fail 'the saved setup was not removed after restoring' }
 
                 # A second restore must refuse, not touch the restored setup.
-                $out = & powershell -NoProfile -File "$env:KIT\Restore-Oracle.ps1" -WorkDir $env:WORK 2>&1
-                if ($LASTEXITCODE -eq 0) { Fail "a second Restore-Oracle.ps1 did not refuse: $out" }
+                # Its refusal goes to stderr, which 'Stop' would turn into an error here.
+                $ErrorActionPreference = 'Continue'
+                $out = & powershell -NoProfile -File "$env:KIT\Restore-Oracle.ps1" -WorkDir $env:WORK 2>&1 | Out-String
+                $code = $LASTEXITCODE
+                $ErrorActionPreference = 'Stop'
+                if ($code -eq 0) { Fail "a second Restore-Oracle.ps1 did not refuse: $out" }
+                if ($out -notmatch 'nothing to restore') { Fail "a second Restore-Oracle.ps1 failed for another reason: $out" }
                 if ((Get-ItemProperty $k).OracleMarker -ne 'mine') { Fail 'the second restore damaged the setup' }
                 Write-Host 'All checks passed.'
+
+        -   name: Gather the evidence into the workspace
+            # upload-artifact takes files from under the workspace only.
+            if: always()
+            run: |
+                New-Item -ItemType Directory -Force evidence | Out-Null
+                foreach ($p in "$env:WORK\evidence-*.zip", "$env:WORK\install-*.log", "$env:WORK\screen-*.png", 'gwc-requests.jsonl') {
+                    Copy-Item $p evidence -ErrorAction SilentlyContinue
+                }
 
         -   name: Upload the evidence
             if: always()
             uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
             with:
                 name: oracle-windows-${{ matrix.client }}
-                path: |
-                    ${{ env.WORK }}\evidence-*.zip
-                    ${{ env.WORK }}\install-*.log
-                    ${{ env.WORK }}\screen-*.png
-                    gwc-requests.jsonl
+                path: evidence/
                 if-no-files-found: warn
