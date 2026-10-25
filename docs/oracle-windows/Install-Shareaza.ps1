@@ -1,18 +1,22 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-    Download, verify and silently install a Shareaza client for oracle testing.
+    Save your own Shareaza setup, then download, verify and silently install a
+    Shareaza client for oracle testing.
 
 .DESCRIPTION
     Official: Shareaza 2.7.10.2 x64 from SourceForge, checked against the SHA-256
     SourceForge publishes. Fork: this fork's x64 build from a published GitHub
     release, checked against the release's SHA256SUMS.txt.
 
+    Before installing, it saves your existing Shareaza settings, data folder,
+    DefaultServices.dat and installed version (once per test session), because
+    the installer itself changes some of them. Restore-Oracle.ps1 puts them back.
+
     The silent install keeps the installer's Windows Firewall exception and turns
     off its UPnP, desktop and quick-launch tasks. It never launches Shareaza.
 
-    Run it from an elevated PowerShell opened from YOUR OWN account (right-click,
-    Run as administrator), so the per-user settings land in your profile.
+    Run it from PowerShell opened as administrator from your own account.
 
 .EXAMPLE
     .\Install-Shareaza.ps1 -Client Official
@@ -27,21 +31,16 @@ param(
     [string] $Repository = 'Prev-I/Shareaza',
     [string] $WorkDir = (Join-Path $env:USERPROFILE 'ShareazaOracle')
 )
-Set-StrictMode -Version 3
-$ErrorActionPreference = 'Stop'
-$ProgressPreference = 'SilentlyContinue'   # Invoke-WebRequest is very slow with its progress bar
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-
-$principal = [Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()
-if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    throw 'Run this from an elevated PowerShell (Run as administrator).'
-}
-if (Get-Process -Name Shareaza -ErrorAction SilentlyContinue) {
-    throw 'Shareaza is running. Close it first.'
-}
+. (Join-Path $PSScriptRoot 'OracleCommon.ps1')
+Assert-Admin
+Assert-NotRunning
+Assert-SameVolume $WorkDir
 
 $downloads = Join-Path $WorkDir 'installers'
 New-Item -ItemType Directory -Force -Path $downloads | Out-Null
+# SourceForge serves an HTML page, not the file, to Windows PowerShell's browser-like
+# default user agent; the hash check below would catch it, but this avoids it.
+$agent = 'Wget/1.21.4'
 
 if ($Client -eq 'Official') {
     $name = 'Shareaza_2.7.10.2_x64.exe'
@@ -49,7 +48,7 @@ if ($Client -eq 'Official') {
     $expected = 'D6FF141D69A3AF53F8F7547B40E308A4E2AA4818EEB28DA827D7545165EF3051'   # published by SourceForge
     $exe = Join-Path $downloads $name
     Write-Host "Downloading $name from SourceForge"
-    Invoke-WebRequest -UseBasicParsing -Uri $url -OutFile $exe
+    Invoke-WebRequest -UseBasicParsing -UserAgent $agent -Uri $url -OutFile $exe
 } else {
     $api = "https://api.github.com/repos/$Repository/releases/tags/$ReleaseTag"
     $release = Invoke-RestMethod -UseBasicParsing -Uri $api -Headers @{ 'User-Agent' = 'shareaza-oracle' }
@@ -60,8 +59,8 @@ if ($Client -eq 'Official') {
     $exe = Join-Path $downloads $name
     $sums = Join-Path $downloads 'SHA256SUMS.txt'
     Write-Host "Downloading $name and SHA256SUMS.txt from $ReleaseTag"
-    Invoke-WebRequest -UseBasicParsing -Uri "$base/$name" -OutFile $exe
-    Invoke-WebRequest -UseBasicParsing -Uri "$base/SHA256SUMS.txt" -OutFile $sums
+    Invoke-WebRequest -UseBasicParsing -UserAgent $agent -Uri "$base/$name" -OutFile $exe
+    Invoke-WebRequest -UseBasicParsing -UserAgent $agent -Uri "$base/SHA256SUMS.txt" -OutFile $sums
     # Lines are "<hash> <name>" or "<hash> *<name>".
     $line = Get-Content $sums | Where-Object { $_ -match "^([0-9a-fA-F]{64}) [ *]$([regex]::Escape($name))$" } | Select-Object -First 1
     if (-not $line) { throw "$name is not listed in SHA256SUMS.txt." }
@@ -71,6 +70,8 @@ if ($Client -eq 'Official') {
 $actual = (Get-FileHash -Algorithm SHA256 -Path $exe).Hash
 if ($actual -ne $expected) { throw "$name has SHA-256 $actual, expected $expected. Not installing." }
 Write-Host "SHA-256 OK: $actual"
+
+Backup-UserSetup $WorkDir
 
 $log = Join-Path $WorkDir "install-$Client.log"
 $arguments = @('/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/SP-',
@@ -82,8 +83,10 @@ if (-not (Select-String -Path $log -SimpleMatch 'Installation process succeeded.
     throw "The installer did not report success; see $log"
 }
 
-$path = (Get-ItemProperty -Path 'HKCU:\Software\Shareaza\Shareaza' -Name Path -ErrorAction SilentlyContinue).Path
-if (-not $path) { $path = Join-Path $env:ProgramFiles 'Shareaza' }
-if (-not (Test-Path (Join-Path $path 'Shareaza.exe'))) { throw "Shareaza.exe not found in $path" }
-Write-Host "Installed $Client in $path"
-Write-Host 'Next: .\Prepare-Oracle.ps1 (the installer has just reset part of the settings).'
+$app = Get-ShareazaApp
+if (-not (Test-Path (Join-Path $app 'Shareaza.exe'))) { throw "Shareaza.exe not found in $app" }
+# With no Shareaza before the test, keep the stock discovery list for Restore-Oracle.ps1.
+$stock = Join-Path $WorkDir 'session\DefaultServices.dat'
+if (-not (Test-Path $stock)) { Copy-Item (Join-Path $app 'Data\DefaultServices.dat') $stock }
+Write-Host "Installed $Client $(Get-InstalledVersion) in $app"
+Write-Host 'Next: .\Prepare-Oracle.ps1'

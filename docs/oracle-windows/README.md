@@ -1,20 +1,26 @@
 # Testing a GWebCache with Shareaza on Windows
 
-A kit for testing [`gwc-edge`](https://github.com/Prev-I/gwc-edge) at
-`http://gwc-edge.net/` with a real Shareaza on Windows 10 or 11: first as a leaf, then as a
-hub with an open port. It covers stages 2 and 3 of gwc-edge's `docs/field-test-plan.md`.
-On Linux, use [`../ORACLE.md`](../ORACLE.md) instead.
+A kit for testing [`gwc-edge`](https://github.com/Prev-I/gwc-edge) at `http://gwc-edge.net/`
+with a real Shareaza on Windows 10 or 11: first as a leaf, then as a hub with an open port. It
+covers stages 2 and 3 of gwc-edge's `docs/field-test-plan.md`. On Linux, use
+[`../ORACLE.md`](../ORACLE.md) instead.
 
 | Script | Does |
 |---|---|
-| `Install-Shareaza.ps1` | Downloads the official 2.7.10.2 or this fork's build, checks its SHA-256, and installs it silently |
-| `Prepare-Oracle.ps1` | Backs up your own Shareaza setup, then sets the client to talk only to the cache under test, as a leaf or as a hub |
+| `Install-Shareaza.ps1` | Saves your own Shareaza setup, then downloads the official 2.7.10.2 or this fork's build, checks its SHA-256 and installs it silently |
+| `Prepare-Oracle.ps1` | Sets the installed client to share nothing and to talk only to the cache under test, as a leaf or as a hub |
 | `Watch-Oracle.ps1` | Follows the client's debug log and saves the cache's `/stats` |
-| `Restore-Oracle.ps1` | Zips the evidence, then puts your own setup back |
+| `Restore-Oracle.ps1` | Zips the evidence, then puts your own setup back exactly as it was before the test |
+| `OracleCommon.ps1` | Shared by the others; not run directly |
 
-`.github/workflows/oracle-windows.yml` runs these four scripts end to end, in this order, on a
-Windows runner against a stub cache. Each run checks the cache traffic, the clean shutdown and
-the restore.
+`.github/workflows/oracle-windows.yml` runs the kit end to end on a Windows runner, against a
+stub cache:
+- install, prepare as a leaf, run;
+- prepare again as a hub, run;
+- restore, then a second restore, which must refuse.
+
+It plants a fake "own setup" first, including a private torrent folder. It checks that the folder
+is never shared, and that the setup comes back unchanged.
 
 ## Before you start
 
@@ -25,41 +31,61 @@ the restore.
   - **The fork's build only as a short leaf test,** on a port that isn't forwarded. The two
     clients use the same registry key and folders, so run them one after the other, never
     together.
-- **An administrator account that is your own.** Run every script from **PowerShell opened as
-  administrator from your own Windows account**, so the settings land in your profile.
-- **Your existing Shareaza, if any,** is backed up and set aside by `Prepare-Oracle.ps1`, and put
-  back by `Restore-Oracle.ps1`.
+- **Your existing Shareaza, if you have one, is safe.**
+  - Before anything changes, `Install-Shareaza.ps1` (or `Prepare-Oracle.ps1`, if you skip it)
+    saves your settings, data folder, discovery list and installed version in
+    `%USERPROFILE%\ShareazaOracle\session`.
+  - `Restore-Oracle.ps1` puts all of it back, and only then deletes the saved copy.
+  - The test does replace your installed Shareaza. If it was a different version, reinstall
+    yours afterwards; `Restore-Oracle.ps1` tells you when.
+- **Nothing is shared.**
+  - On its first start Shareaza shares its download, incomplete, collection and torrent folders.
+    The kit points all four at new, empty folders under `ShareazaOracle\shared`.
+  - The kit also stops Shareaza copying its own installer there.
+  - The 2.7.10.2 default would have shared your whole Downloads folder.
+- **Shareaza runs as you, not as administrator.** Only the kit's scripts need an elevated
+  PowerShell. Start Shareaza itself from the Start menu, or with `explorer.exe`, as shown below.
+  Don't start it from the elevated window.
 - **For the hub test (test 6),** you also need:
   - a router where you can forward one port (TCP and UDP) to this PC;
   - a public IPv4 address, not behind carrier-grade NAT;
   - about 4 hours.
-- **What's exposed.** Nothing is shared: the download folder is a new, empty
-  `%USERPROFILE%\ShareazaOracle\Downloads`. A hub accepts connections from anyone on the internet
-  while it runs, so close it when you're done.
+  A hub accepts connections from anyone on the internet while it runs, so close it when you're
+  done.
 
 ### Getting the kit
 
-In an elevated PowerShell:
+The links below work once this kit is on the fork's `main` branch. Open **PowerShell as
+administrator** and run:
 
 ```powershell
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $kit = "$env:USERPROFILE\ShareazaOracle\kit"
 New-Item -ItemType Directory -Force $kit | Out-Null
 $base = 'https://raw.githubusercontent.com/Prev-I/Shareaza/main/docs/oracle-windows'
-foreach ($f in 'Install-Shareaza.ps1','Prepare-Oracle.ps1','Watch-Oracle.ps1','Restore-Oracle.ps1','README.md') {
+foreach ($f in 'OracleCommon.ps1','Install-Shareaza.ps1','Prepare-Oracle.ps1','Watch-Oracle.ps1','Restore-Oracle.ps1','README.md') {
     Invoke-WebRequest -UseBasicParsing "$base/$f" -OutFile "$kit\$f"
 }
 Set-Location $kit
 Get-ChildItem *.ps1 | Unblock-File            # downloaded scripts are blocked by default
-Set-ExecutionPolicy -Scope Process Bypass     # for this window only
+```
+
+**In every PowerShell window you use for the kit,** elevated or not, first run:
+
+```powershell
+Set-Location "$env:USERPROFILE\ShareazaOracle\kit"
+Set-ExecutionPolicy -Scope Process Bypass     # this window only
 ```
 
 ## Test 3: bootstrap as a leaf (official client, ~30 minutes)
 
+In the elevated window:
+
 ```powershell
 .\Install-Shareaza.ps1 -Client Official
 .\Prepare-Oracle.ps1 -Mode Leaf
-& "$env:ProgramFiles\Shareaza\Shareaza.exe"
-.\Watch-Oracle.ps1 -Hours 1                    # in a second elevated PowerShell, in the same folder
+explorer.exe "$env:ProgramFiles\Shareaza\Shareaza.exe"     # starts it as you, not as admin
+.\Watch-Oracle.ps1 -Hours 1
 ```
 
 **What you should see, in order:**
@@ -72,43 +98,47 @@ Set-ExecutionPolicy -Scope Process Bypass     # for this window only
    gwc-edge's Workers Logs show a `hostfile` line, then a `urlfile` line.
 
 **Passes if:**
-- **A hub from the cache.** At least one hub in the Neighbours window was in the cache's
-  hostfile reply. Compare with what the cache hands out:
+- **A hub from the cache.** The first hub the client connected to was in the cache's hostfile
+  reply. Compare `Shareaza.log` with what the cache hands out:
 
   ```powershell
   curl.exe -s -A "Shareaza 2.7.10.2" "http://gwc-edge.net/?get=1&hostfile=1&net=gnutella2&ping=1&client=TEST&version=0"
   ```
 
-- **No failures.** The Discovery window (**F9**) shows `gwc-edge.net` with accesses and no
+- **No failures.** The Discovery window (**F9**) shows `gwc-edge.net` with an access and no
   failures.
 
-## Test 4: second query (same run, after 30 minutes)
-
-Keep the client running. Shareaza queries the same cache at most every 30 minutes
-(`Discovery\AccessPeriod`), so leave it at least 35 minutes.
-
-**Passes if** the Discovery window shows a second access, still with no failures. Two failures
-in a row would have removed the cache from the client's list.
-
-## Test 5: a long leaf run (same run, a few hours)
+## Tests 4 and 5: repeated queries over a long leaf run (same run, a few hours)
 
 ```powershell
 .\Watch-Oracle.ps1 -Hours 4
 ```
 
-**Passes if:**
-- the queries keep coming every 30 minutes or more, with no failures;
-- no `limited` count appears in the `[stats]` lines;
-- the `/stats` counts for `RAZA 2.7.10.2` grow by about one `hostfile` per query.
+**A connected leaf doesn't query on a timer.**
+- **It only queries when it runs short of hosts.** A G2 query goes out only while the client knows
+  25 hosts or fewer (`HostCache`, `EnoughServers`). A leaf that learns hosts from its hubs may
+  never query again.
+- **There is a floor between queries.** It never queries the same cache more often than every
+  30 minutes (`Discovery\AccessPeriod`).
+- **To force one,** right-click `gwc-edge.net` in the Discovery window and choose **Query Now**.
+  Do it after 30 minutes or more.
 
-Close Shareaza with **File → Exit**, or just close the window, before going on.
+**Passes if:**
+- **Every query succeeds.** Each one, whether automatic or forced, gets a reply with no `failed,
+  fail count` line.
+- **The cache doesn't throttle it.** No `limited` count appears in the `[stats]` lines.
+- **The counts add up.** `/stats` grows by one `hostfile` (and possibly one `urlfile`) per query
+  from `RAZA 2.7.10.2`.
+
+Close Shareaza with **File → Exit** before going on.
 
 ## Test 6: as a hub (official client, ~4 hours)
 
 1. **Forward a port on your router to this PC, for both TCP and UDP.** The example uses 6346.
    Most routers have this under *Port forwarding* or *Virtual server*. Give the PC a fixed LAN
    address there too.
-2. **Prepare for hub mode** (your backup from test 3 is kept):
+2. **Prepare for hub mode.** Your saved setup from test 3 is kept; test 3's data is moved to
+   `ShareazaOracle\runs\`.
 
    ```powershell
    .\Prepare-Oracle.ps1 -Mode Hub -Port 6346 -PreferIPv4
@@ -120,10 +150,11 @@ Close Shareaza with **File → Exit**, or just close the window, before going on
 3. **Start Shareaza and the watcher:**
 
    ```powershell
-   & "$env:ProgramFiles\Shareaza\Shareaza.exe"
+   explorer.exe "$env:ProgramFiles\Shareaza\Shareaza.exe"
    .\Watch-Oracle.ps1 -Hours 5
    ```
 
+   The watcher warns if Shareaza listens on a port other than the one prepared.
 4. **Check the port is open from outside** while Shareaza runs, with any online port checker on
    TCP 6346. If it's closed, nothing below will happen.
 
@@ -151,8 +182,10 @@ Close Shareaza with **File → Exit**, or just close the window, before going on
   that `-PreferIPv4` was used.
 - **`cron_hub` result `timeout` or `unreachable`:** the port isn't reachable from the internet.
   Check the router forwarding and the port checker.
-- **No update after 3 hours:** look for `Is Gnutella2 hub capable?` and the `NO:` line after it
-  in the watcher's output. Check that the Neighbours window shows at least 4 G2 hubs or leaves.
+- **No update after 3 hours:**
+  - check that the Neighbours window shows at least 4 G2 hubs or leaves;
+  - check that the port checker still says open;
+  - check that the watcher showed the prepared port.
 
 ## Optional: the fork's build as a leaf
 
@@ -162,41 +195,43 @@ forwarded, and keep the run short:
 ```powershell
 .\Install-Shareaza.ps1 -Client Fork
 .\Prepare-Oracle.ps1 -Mode Leaf -Port 6347
-& "$env:ProgramFiles\Shareaza\Shareaza.exe"
+explorer.exe "$env:ProgramFiles\Shareaza\Shareaza.exe"
 .\Watch-Oracle.ps1 -Hours 0.5
 ```
 
 **Passes if** the query line carries `client=RAZI2.7.10.6`, and `/stats` lists `RAZI 2.7.10.6`.
 
-Close it, then reinstall the official client if you want it back: `.\Install-Shareaza.ps1
--Client Official`.
-
 ## Finishing
 
-Close Shareaza, then:
+Close Shareaza (**File → Exit**), then, in the elevated window:
 
 ```powershell
 .\Restore-Oracle.ps1
 ```
 
 It writes `%USERPROFILE%\ShareazaOracle\evidence-<time>.zip`, then:
-- removes the firewall rules and the IPv4 preference;
-- puts back your own settings, data folder and `DefaultServices.dat`;
-- keeps the test run's data under `ShareazaOracle\runs\`.
+- removes the kit's firewall rules and the IPv4 preference;
+- puts back your own settings, data folder and discovery list;
+- keeps the test runs' data under `ShareazaOracle\runs\`.
 
-The zip holds `Shareaza.log`, `Discovery.dat`, `HostCache.dat`, a settings export and the saved
-`/stats`. **The log and host cache contain hubs' public IP addresses and probably yours, so look
-before sharing it.** `Restore-Oracle.ps1 -CollectOnly` makes the zip and changes nothing.
+The installer's own firewall exception for Shareaza stays, as it would after any install.
 
-Shareaza itself stays installed. Uninstall it from Settings → Apps if you don't want it.
+The zip holds `Shareaza.log`, `Discovery.dat`, `HostCache.dat`, a settings export, and the
+watcher's log and `/stats` snapshots. **The log and host cache contain hubs' public IP addresses
+and probably yours, so look before sharing it.**
+
+Other ways to run it:
+- `Restore-Oracle.ps1 -CollectOnly` makes the zip and changes nothing.
+- A second `Restore-Oracle.ps1` refuses, because there is nothing left to restore.
 
 ## Troubleshooting
 
 | Symptom | Likely cause |
 |---|---|
 | SmartScreen warns about the installer, or Defender flags it as a potentially unwanted app | Normal for an unsigned P2P installer. The scripts have already checked its SHA-256; allow it, or stop here |
-| No `Querying discovery service` line at all | Shareaza still had a discovery list: run `Prepare-Oracle.ps1` again with Shareaza closed |
-| The QuickStart wizard opens | The settings were reset after preparing, for example by a reinstall: close it and run `Prepare-Oracle.ps1` again |
+| `session.partial exists` | An earlier run died while saving your setup. The message says how to put your data back; nothing has been lost |
+| No `Querying discovery service` line at all | Shareaza wasn't closed when you prepared it, so it saved its own settings on exit. Close it, run `Prepare-Oracle.ps1` again, then start it |
+| The QuickStart wizard opens | `Prepare-Oracle.ps1` wasn't run after the last install. Close Shareaza and run it |
 | `failed, fail count 1` after a query | The cache's reply didn't satisfy Shareaza: run `scripts/smoke.sh --prod http://gwc-edge.net/` from the gwc-edge repository |
 | Connected, but to no hub the cache listed | The first hub it reached handed it others (`X-Try-Hubs`), and it moved on. Check the first connection after the cache query in `Shareaza.log` |
-| Windows Firewall asks about Shareaza | Allow it on the network type you're on. `Prepare-Oracle.ps1` already opened the port for all profiles |
+| Windows Firewall asks about Shareaza | Allow it on the network type you're on. `Prepare-Oracle.ps1` already opened the port for Shareaza on all profiles |
