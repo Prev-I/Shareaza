@@ -1,0 +1,273 @@
+name: Oracle on Windows
+
+# Runs the Windows test kit in docs/oracle-windows/ end to end, as its README
+# tells a person to: install a client, prepare it for one cache, start it, watch
+# it, close it, prepare it again as a hub, run it again, then collect and restore.
+# The cache is a local stub, so nothing here reaches the live G2 network. A fake
+# "own setup" is planted before installing, so the backup and restore are checked
+# too: its private torrent folder must never be shared and must come back.
+
+on:
+    workflow_dispatch:
+      inputs:
+        release_tag:
+          description: 'Published release tag for the fork installer'
+          required: false
+          default: 'v2.7.10.6-previ.1'
+    pull_request:
+      paths:
+        - docs/oracle-windows/**
+        - .github/workflows/oracle-windows.yml
+
+permissions:
+    contents: read
+
+jobs:
+    oracle:
+        runs-on: windows-2022
+        timeout-minutes: 40
+        strategy:
+            fail-fast: false
+            matrix:
+                include:
+                  - client: Official
+                    expect: client=RAZA2.7.10.2&
+                    agent: Shareaza 2.7.10.2
+                  - client: Fork
+                    expect: client=RAZI2.7.10.6&
+                    agent: iShareaza 2.7.10.6
+        defaults:
+            run:
+                # Windows PowerShell 5.1, the version on Windows 10.
+                shell: powershell
+        env:
+            KIT: docs\oracle-windows
+        steps:
+        -   name: Set the work folder
+            # The README's default; it must be on the same drive as %APPDATA%.
+            run: Add-Content -Path $env:GITHUB_ENV -Value "WORK=$env:USERPROFILE\ShareazaOracle"
+
+        -   name: Checkout the kit
+            uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+            with:
+                sparse-checkout: docs
+                persist-credentials: false
+
+        -   name: Plant a fake own setup before installing
+            run: |
+                $ErrorActionPreference = 'Stop'
+                $k = 'HKCU:\Software\Shareaza\Shareaza'
+                New-Item -Path "$k\Downloads" -Force | Out-Null
+                New-Item -Path "$k\Connection" -Force | Out-Null
+                New-ItemProperty -Path $k -Name OracleMarker -Value 'mine' -PropertyType String -Force | Out-Null
+                # A private folder of the user's own, which the oracle must not share.
+                $private = "$env:USERPROFILE\MyTorrents"
+                New-Item -ItemType Directory -Force $private | Out-Null
+                Set-Content "$private\secret.torrent" 'private'
+                New-ItemProperty -Path "$k\Downloads" -Name TorrentPath -Value $private -PropertyType String -Force | Out-Null
+                New-ItemProperty -Path "$k\Connection" -Name RandomPort -Value 1 -PropertyType DWord -Force | Out-Null
+                New-Item -ItemType Directory -Force -Path "$env:APPDATA\Shareaza\Data" | Out-Null
+                Set-Content -Path "$env:APPDATA\Shareaza\Data\marker.txt" -Value 'mine'
+
+        -   name: Install the client with the kit
+            env:
+                TAG: ${{ inputs.release_tag || 'v2.7.10.6-previ.1' }}
+            run: |
+                $ErrorActionPreference = 'Stop'
+                & "$env:KIT\Install-Shareaza.ps1" -Client ${{ matrix.client }} -ReleaseTag $env:TAG -WorkDir $env:WORK
+                if (-not (Test-Path "$env:WORK\session\manifest.json")) { throw 'no sealed backup after installing' }
+                $app = (Get-ItemProperty 'HKCU:\Software\Shareaza\Shareaza').Path
+                (Get-FileHash "$app\Data\DefaultServices.dat").Hash | Set-Content stock-defaults.sha256
+
+        -   name: Start a stub cache
+            run: |
+                $ErrorActionPreference = 'Stop'
+                @'
+                import http.server, json, time
+                class H(http.server.BaseHTTPRequestHandler):
+                    def do_GET(self):
+                        with open('gwc-requests.jsonl', 'a') as f:
+                            f.write(json.dumps({'t': time.time(), 'path': self.path,
+                                                'user_agent': self.headers.get('User-Agent')}) + '\n')
+                        body = b'I|pong|oracle-stub 0.1|gnutella2\n'
+                        self.send_response(200)
+                        self.send_header('Content-Type', 'text/plain')
+                        self.send_header('Content-Length', str(len(body)))
+                        self.end_headers()
+                        self.wfile.write(body)
+                    def log_message(self, *a):
+                        pass
+                http.server.ThreadingHTTPServer(('127.0.0.1', 8080), H).serve_forever()
+                '@ | Set-Content -Encoding ASCII stub.py
+                Start-Process -FilePath python -ArgumentList '-I', 'stub.py' -WindowStyle Hidden
+                $ok = $false
+                foreach ($i in 1..20) {
+                    try { Invoke-WebRequest -UseBasicParsing http://127.0.0.1:8080/ready | Out-Null; $ok = $true; break } catch { Start-Sleep -Milliseconds 500 }
+                }
+                if (-not $ok) { throw 'the stub cache did not start' }
+                Remove-Item gwc-requests.jsonl   # the readiness probe is not a client request
+                # A helper the run steps share: start Shareaza, wait for a query, watch, close it cleanly.
+                @'
+                param([string] $Name)
+                $ErrorActionPreference = 'Stop'
+                $before = if (Test-Path gwc-requests.jsonl) { @(Get-Content gwc-requests.jsonl).Count } else { 0 }
+                $app = (Get-ItemProperty 'HKCU:\Software\Shareaza\Shareaza').Path
+                # As the README does: through Explorer, so Shareaza runs unelevated.
+                Start-Process -FilePath explorer.exe -ArgumentList "`"$app\Shareaza.exe`""
+                foreach ($i in 1..15) { if (Get-Process -Name Shareaza -ErrorAction SilentlyContinue) { break }; Start-Sleep 2 }
+                if (Get-Process -Name Shareaza -ErrorAction SilentlyContinue) {
+                    'started through explorer.exe'
+                } else {
+                    '::warning::explorer.exe did not start Shareaza on this runner; starting it directly, elevated'
+                    Start-Process -FilePath "$app\Shareaza.exe" -WorkingDirectory $app
+                }
+                foreach ($i in 1..36) { if ((Test-Path gwc-requests.jsonl) -and @(Get-Content gwc-requests.jsonl).Count -gt $before) { break }; Start-Sleep 5 }
+                & "$env:KIT\Watch-Oracle.ps1" -CacheUrl 'http://127.0.0.1:8080/gwc/' -Hours 0.015 -StatsEveryMinutes 1 -WorkDir $env:WORK
+                # While running: nothing visible in the shared folders.
+                $files = @(Get-ChildItem -File -Recurse "$env:WORK\shared" -ErrorAction SilentlyContinue)
+                $files | ForEach-Object { "shared: $($_.FullName)" }
+                if ($files) { throw "files appeared in the shared folders: $($files.Name -join ', ')" }
+                $p = Get-Process -Name Shareaza -ErrorAction SilentlyContinue
+                if (-not $p) { throw 'Shareaza was not running' }
+                "window: handle=$($p.MainWindowHandle) title='$($p.MainWindowTitle)' session=$($p.SessionId)"
+                Add-Type -AssemblyName System.Windows.Forms, System.Drawing
+                $b = [Windows.Forms.SystemInformation]::VirtualScreen
+                $bmp = New-Object Drawing.Bitmap $b.Width, $b.Height
+                [Drawing.Graphics]::FromImage($bmp).CopyFromScreen($b.Left, $b.Top, 0, 0, $bmp.Size)
+                $bmp.Save("$env:WORK\screen-$Name.png")
+                # Close it cleanly with WM_CLOSE: taskkill without /F. One message is not
+                # always enough: the first can land on Shareaza's hidden 'Shareaza Remote'
+                # window, which is what Windows reports as its main window. So repeat it.
+                $exited = $false
+                foreach ($attempt in 1..6) {
+                    & taskkill.exe /IM Shareaza.exe 2>&1 | ForEach-Object { "taskkill $attempt`: $_" }
+                    foreach ($i in 1..6) { Start-Sleep 5; if (-not (Get-Process -Name Shareaza -ErrorAction SilentlyContinue)) { $exited = $true; break } }
+                    if ($exited) { "closed by taskkill, attempt $attempt"; break }
+                }
+                if (-not $exited) { Stop-Process -Name Shareaza -Force; Start-Sleep 5; throw 'Shareaza did not exit after six WM_CLOSE attempts' }
+                '@ | Set-Content -Encoding ASCII run-client.ps1
+
+        -   name: Prepare as a leaf with the kit
+            run: |
+                $ErrorActionPreference = 'Stop'
+                & "$env:KIT\Prepare-Oracle.ps1" -CacheUrl 'http://127.0.0.1:8080/gwc/' -Mode Leaf -Port 6346 -PreferIPv4 -WorkDir $env:WORK
+
+        -   name: Run 1, as a leaf
+            timeout-minutes: 10
+            run: .\run-client.ps1 -Name leaf
+
+        -   name: Prepare again, as a hub, with the kit
+            run: |
+                $ErrorActionPreference = 'Stop'
+                & "$env:KIT\Prepare-Oracle.ps1" -CacheUrl 'http://127.0.0.1:8080/gwc/' -Mode Hub -Port 6347 -WorkDir $env:WORK
+                if (-not (Get-ChildItem "$env:WORK\runs" -Directory)) { throw 'the first run was not moved aside' }
+
+        -   name: Run 2, as a hub
+            timeout-minutes: 10
+            run: .\run-client.ps1 -Name hub
+
+        -   name: Prepare must refuse while a restore is unfinished
+            run: |
+                $marker = "$env:WORK\session\restoring"
+                Set-Content $marker 'test'
+                $ErrorActionPreference = 'Continue'
+                $out = & powershell -NoProfile -File "$env:KIT\Prepare-Oracle.ps1" -CacheUrl 'http://127.0.0.1:8080/gwc/' -WorkDir $env:WORK 2>&1 | Out-String
+                $code = $LASTEXITCODE
+                Remove-Item $marker
+                if ($code -eq 0 -or $out -notmatch 'did not finish') { Write-Host "::error::Prepare did not refuse during a restore: $out"; exit 1 }
+                exit 0
+
+        -   name: Collect and restore with the kit
+            if: always()
+            run: |
+                $ErrorActionPreference = 'Stop'
+                if (Get-Process -Name Shareaza -ErrorAction SilentlyContinue) { Stop-Process -Name Shareaza -Force; Start-Sleep 5 }
+                if (Test-Path "$env:WORK\session\manifest.json") {
+                    & "$env:KIT\Restore-Oracle.ps1" -WorkDir $env:WORK
+                } else {
+                    # Nothing was saved, so nothing to restore (an earlier step failed first).
+                    & "$env:KIT\Restore-Oracle.ps1" -CollectOnly -WorkDir $env:WORK
+                    throw 'no saved setup to restore: an earlier step failed before the backup'
+                }
+
+        -   name: Check what the client did and what the kit restored
+            env:
+                EXPECT: ${{ matrix.expect }}
+                AGENT: ${{ matrix.agent }}
+            run: |
+                $ErrorActionPreference = 'Stop'
+                function Fail($m) { Write-Host "::error::$m"; exit 1 }
+                if (-not (Test-Path gwc-requests.jsonl)) { Fail 'Shareaza never queried the stub cache' }
+                $req = @(Get-Content gwc-requests.jsonl | Where-Object { $_ -match '"/gwc/\?' })
+                if ($req.Count -lt 2) { Fail "expected a query from each of the two runs, got $($req.Count)" }
+                if (-not ($req | Select-String -SimpleMatch $env:EXPECT)) { Fail "no request carried $env:EXPECT" }
+                if (-not ($req | Select-String -SimpleMatch "`"user_agent`": `"$env:AGENT`"")) { Fail "no request came from $env:AGENT" }
+
+                $zip = Get-ChildItem "$env:WORK\evidence-*.zip" | Select-Object -First 1
+                if (-not $zip) { Fail 'no evidence zip' }
+                $ev = "$env:WORK\ev"; Expand-Archive $zip.FullName $ev
+                foreach ($f in 'Shareaza.log', 'Discovery.dat', 'HostCache.dat', 'shareaza.reg') {
+                    if (-not (Test-Path "$ev\$f")) { Fail "the evidence lacks $f" }
+                }
+                $log = Get-Content -Encoding Unicode "$ev\Shareaza.log"
+                if (-not ($log | Select-String -SimpleMatch '[DiscoveryServices] Request:')) { Fail 'the log has no debug-level discovery lines' }
+                $other = $log | Select-String -SimpleMatch 'Querying discovery service' | Where-Object { $_ -notmatch '"http://127\.0\.0\.1:8080/gwc/"' }
+                if ($other) { Fail "queried another discovery service: $other" }
+                if ($log | Select-String -SimpleMatch '[VersionChecker] Request') { Fail 'the client still checked for updates' }
+                if ($log | Select-String -SimpleMatch 'Failed to load security rules') { Fail 'the client ran without security rules' }
+                if (-not ($log | Select-String -SimpleMatch 'port 6347.')) { Fail 'the hub run did not listen on the prepared port 6347' }
+                if ($log | Select-String -SimpleMatch 'MyTorrents') { Fail 'the client touched the private torrent folder' }
+                $reg = Get-Content "$ev\shareaza.reg"
+                $settings = ($reg -join "`n") -split '(?=\[HKEY)' | Where-Object { $_ -match '\\Shareaza\\Settings\]' }
+                if ($settings -notmatch '"Running"=dword:00000000') { Fail 'the hub run did not finish with a clean exit save' }
+
+                # Nothing but hidden folder files was ever in the shared folders.
+                $leaked = @(Get-ChildItem -File -Recurse "$env:WORK\runs" -ErrorAction SilentlyContinue |
+                    Where-Object { $_.FullName -match '\\shared\\' -and -not ($_.Attributes -band [IO.FileAttributes]::Hidden) })
+                if ($leaked) { Fail "files were in the shared folders: $($leaked.FullName -join ', ')" }
+
+                # Restored: the planted setup is back, the oracle's settings and rules are gone.
+                $k = 'HKCU:\Software\Shareaza\Shareaza'
+                if ((Get-ItemProperty $k).OracleMarker -ne 'mine') { Fail 'the planted registry value was not restored' }
+                if ((Get-ItemProperty "$k\Downloads").TorrentPath -ne "$env:USERPROFILE\MyTorrents") { Fail 'the planted TorrentPath was not restored' }
+                if ((Get-ItemProperty "$k\Connection").RandomPort -ne 1) { Fail 'the planted RandomPort was not restored' }
+                if ((Get-ItemProperty $k).PSObject.Properties['DebugLog']) { Fail 'oracle settings were left behind' }
+                if ((Get-Content "$env:APPDATA\Shareaza\Data\marker.txt" -ErrorAction SilentlyContinue) -ne 'mine') { Fail 'the planted data folder was not restored' }
+                if ((Get-Content "$env:USERPROFILE\MyTorrents\secret.torrent") -ne 'private') { Fail 'the private torrent folder changed' }
+                $app = Join-Path $env:ProgramFiles 'Shareaza'
+                if ((Get-FileHash "$app\Data\DefaultServices.dat").Hash -ne (Get-Content stock-defaults.sha256)) { Fail 'DefaultServices.dat was not restored' }
+                if (Get-NetFirewallRule -DisplayName 'Shareaza oracle *' -ErrorAction SilentlyContinue) { Fail 'firewall rules were left behind' }
+                $policy = @((& netsh interface ipv6 show prefixpolicies) -match '::ffff:0:0/96')
+                if ($policy.Count -ne 1) { Fail "no ::ffff:0:0/96 prefix policy row: $policy" }
+                if ($policy[0] -notmatch '^\s*35\s+4\s') { Fail "IPv4 preference not restored: $($policy[0])" }
+                if (Test-Path "$env:WORK\session") { Fail 'the saved setup was not removed after restoring' }
+
+                # A second restore must refuse, not touch the restored setup.
+                # Its refusal goes to stderr, which 'Stop' would turn into an error here.
+                $ErrorActionPreference = 'Continue'
+                $out = & powershell -NoProfile -File "$env:KIT\Restore-Oracle.ps1" -WorkDir $env:WORK 2>&1 | Out-String
+                $code = $LASTEXITCODE
+                $ErrorActionPreference = 'Stop'
+                if ($code -eq 0) { Fail "a second Restore-Oracle.ps1 did not refuse: $out" }
+                if ($out -notmatch 'nothing to restore') { Fail "a second Restore-Oracle.ps1 failed for another reason: $out" }
+                if ((Get-ItemProperty $k).OracleMarker -ne 'mine') { Fail 'the second restore damaged the setup' }
+                Write-Host 'All checks passed.'
+                # The refused restore above left $LASTEXITCODE at 1, which the step would report.
+                exit 0
+
+        -   name: Gather the evidence into the workspace
+            # upload-artifact takes files from under the workspace only.
+            if: always()
+            run: |
+                New-Item -ItemType Directory -Force evidence | Out-Null
+                foreach ($p in "$env:WORK\evidence-*.zip", "$env:WORK\install-*.log", "$env:WORK\screen-*.png", 'gwc-requests.jsonl') {
+                    Copy-Item $p evidence -ErrorAction SilentlyContinue
+                }
+
+        -   name: Upload the evidence
+            if: always()
+            uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+            with:
+                name: oracle-windows-${{ matrix.client }}
+                path: evidence/
+                if-no-files-found: warn
