@@ -212,6 +212,17 @@ void CSecurity::Remove(CSecureRule* pRule)
 			}
 		}
 	}
+	else if ( pRule->m_nType == CSecureRule::srAddressIPv6 &&
+		pRule->m_nIPv6PrefixLen == 128 )
+	{
+		// Add() keeps a single-address IPv6 rule only in this map, so drop it
+		// here too or the map keeps pointing at the rule we are about to free.
+		CAddressIPv6RuleMap::const_iterator i = m_pIPv6Rules.find( pRule->m_nIPv6 );
+		if ( i != m_pIPv6Rules.end() && (*i).second == pRule )
+		{
+			m_pIPv6Rules.erase( i );
+		}
+	}
 
 	delete pRule;
 }
