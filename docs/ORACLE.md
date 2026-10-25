@@ -68,6 +68,7 @@ echo 'd6ff141d69a3af53f8f7547b40e308a4e2aa4818eeb28da827d7545165ef3051  Shareaza
   | (cd ~/Downloads && sha256sum -c)
 export WINEPREFIX=~/.wine-shareaza-sf WINEARCH=win64
 wineboot --init && wineserver --wait
+winetricks -q isolate_home     # no links to your home folders: see below
 winetricks -q vcrun2022
 wine ~/Downloads/Shareaza_2.7.10.2_x64.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
 wineserver --wait
@@ -79,6 +80,7 @@ curl -fLo ~/Downloads/SHA256SUMS.txt "$base/SHA256SUMS.txt"
 (cd ~/Downloads && sha256sum -c --ignore-missing SHA256SUMS.txt)   # must print the installer's name and OK
 export WINEPREFIX=~/.wine-shareaza-previ WINEARCH=win64
 wineboot --init && wineserver --wait
+winetricks -q isolate_home     # no links to your home folders: see below
 winetricks -q vcrun2022
 wine ~/Downloads/iShareaza_2.7.10.6_x64_Release_2026-10-25.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
 wineserver --wait
@@ -86,6 +88,18 @@ wineserver --wait
 
 - **Use the exact installer file name** from the release; it carries the build date, so a later
   release changes both download lines and the install line.
+- **Run `isolate_home` before the client ever starts.**
+  - **The danger:** Wine links the prefix's Downloads, Documents and similar folders to your own.
+    On its first start Shareaza **shares its download folder**, and the official 2.7.10.2 uses
+    the whole Downloads folder.
+  - **Why it can be your whole home:** on a machine with no `~/Downloads`, the XDG download
+    folder, and so the link, is `$HOME` itself.
+  - **What it does:** `winetricks isolate_home` turns those links into real, empty folders inside
+    the prefix.
+  - **Why settings can't fix it:** a different download folder can't be set instead, because Wine
+    never lets Shareaza read string settings (see [Settings and Wine](#settings-and-wine)).
+  - **Checked both ways:** `oracle-prepare.sh` refuses a prefix that still links out. CI
+    reproduces the `$HOME` case and checks that nothing is indexed.
 - **Install `vcrun2022` first.** Without it the fork's installer fetches the VC++ runtime itself,
   from go.microsoft.com (`vc143/vcredist/vcredist.iss`). The 2.7.10.2 installer most likely does the
   same: it carries the same download helper (`idp.dll`), but no run has shown it downloading.
@@ -101,7 +115,8 @@ wineserver --wait
 - **Run it after every install or upgrade**, before the client's first start, **with the client
   closed**. A running client would overwrite the settings when it exits, and the script refuses to
   run while one is up.
-- **It also refuses a prefix with no Shareaza installed**, so it doesn't create an empty one.
+- **It also refuses a prefix with no Shareaza installed**, so it doesn't create an empty one, and
+  a prefix whose folders still link out of it, naming the links and the `isolate_home` command.
 
 ```bash
 CACHE=http://127.0.0.1:8787/          # your gwc-edge; see "Adding a GWebCache" for URL rules
@@ -113,7 +128,10 @@ done
 **What the script does, step by step:**
 
 0. Creates every settings section key (see [Settings and Wine](#settings-and-wine)).
-1. Replaces `DefaultServices.dat` with the single line `2 <cache>`.
+1. Replaces `DefaultServices.dat` with the single line `2 <cache>`, and sets `Settings\Upgrade` to
+   0. After an install Shareaza would otherwise copy its installer into the shared download
+   folder. Under Wine that copy can't happen anyway, because it needs a string setting, but the
+   setting costs nothing.
 2. Sets `VersionCheck\UpdateCheck`, `BitTorrent\EnableAlways`, `BitTorrent\EnableDHT` and
    `Connection\EnableUPnP` to 0.
 3. Sets `Settings\FirstRun` to 0 and `Windows\RunWizard`, `RunWarnings` and `RunPromote` to 1, plus

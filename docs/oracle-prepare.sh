@@ -16,8 +16,26 @@ app="$WINEPREFIX/drive_c/Program Files/Shareaza"
 k='HKCU\Software\Shareaza\Shareaza'
 
 [ -f "$app/Shareaza.exe" ] || { echo "$WINEPREFIX: Shareaza is not installed" >&2; exit 1; }
-if pgrep -f 'Shareaza.exe' >/dev/null; then
+if pgrep -x 'Shareaza.exe' >/dev/null; then
     echo "a Shareaza client is running; close it first, or its exit save overwrites these settings" >&2
+    exit 1
+fi
+
+# Shareaza shares its download folder on its first run, and under Wine that folder
+# is usually a link into your home directory: for the official 2.7.10.2, which
+# uses the whole Downloads folder, it can be $HOME itself. Wine never lets Shareaza
+# read a different folder from its settings (they are strings), so the prefix
+# itself must hold no links out of it: `winetricks isolate_home` makes them real,
+# empty folders inside the prefix.
+users="$WINEPREFIX/drive_c/users/${USER:-$(id -un)}"
+linked=$(find "$users" -maxdepth 1 -type l 2>/dev/null | while IFS= read -r l; do
+    t=$(readlink -f "$l") || continue
+    case "$t" in "$(readlink -f "$WINEPREFIX")"/*) ;; *) [ -d "$t" ] && echo "  $l -> $t" ;; esac
+done)
+if [ -n "$linked" ]; then
+    echo "$WINEPREFIX links folders out of the prefix, which Shareaza would share:" >&2
+    echo "$linked" >&2
+    echo "Run: WINEPREFIX=$WINEPREFIX winetricks -q isolate_home" >&2
     exit 1
 fi
 
@@ -34,6 +52,10 @@ done
 # 1. Discovery: the cache under test is the only service the client knows.
 #    Format "<type> <url>", 2 = G2 GWebCache, CRLF line ending.
 printf '2 %s\r\n' "$cache" > "$app/Data/DefaultServices.dat"
+
+# Do not copy the installer into the shared download folder, which Shareaza does
+# after an install (Settings.cpp, General.Upgrade).
+reg '\Settings' /v Upgrade /t REG_DWORD /d 0
 
 # 2. Nothing else that goes online by itself.
 reg '\VersionCheck' /v UpdateCheck  /t REG_DWORD /d 0
