@@ -35,6 +35,10 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
+// A remote sender adds one miss-cache entry per source address it uses, so
+// cap each cache rather than let it grow for as long as the program runs
+static const size_t MISS_CACHE_MAX = 65536;
+
 CSecurity Security;
 CAdultFilter AdultFilter;
 CMessageFilter MessageFilter;
@@ -621,6 +625,8 @@ BOOL CSecurity::IsDenied(const IN_ADDR* pAddress)
 	}
 
 	// If the IP is clean, add it to the miss cache
+	if ( m_Cache.size() >= MISS_CACHE_MAX )
+		m_Cache.clear();
 	m_Cache.insert( *(DWORD*) pAddress );
 
 	// In this case, return our default policy
@@ -692,6 +698,8 @@ BOOL CSecurity::IsDenied(const IN6_ADDR* pAddress)
 	}
 
 	// If the IP is clean, add it to the miss cache
+	if ( m_CacheIPv6.size() >= MISS_CACHE_MAX )
+		m_CacheIPv6.clear();
 	m_CacheIPv6.insert( *pAddress );
 
 	// In this case, return our default policy
