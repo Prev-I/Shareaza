@@ -16,11 +16,15 @@ G2 network runs, and this fork's 2.7.10.6 build. With both installed, a GWebCach
 | Interactive installs, the GUI steps (Discovery window, Add Service dialog), `gwc:` links | untested: they come from the source (`Res/Default.xml`, `Shareaza.rc`, `DlgURLAction.cpp`) |
 | Win32 builds, WSL2, Wine versions other than 9.0 | untested |
 
-> **Do not leave these clients unattended on the live G2 network.** A static audit of the code
-> added since the original project found three problems:
+> **Do not leave these clients unattended on the live G2 network.** A [static audit](SECURITY-AUDIT.md)
+> of the code added since the original project found three problems. All three are in code that
+> came after 2.7.10.2, so they affect this fork's build; going by the source, not the official one:
 > - HTTPS that never verifies certificates;
-> - a probable remote crash from a single G2 query acknowledgement sent by any IPv4 peer;
+> - a probable remote crash from a single packet, sent over UDP by any IPv4 peer or over TCP by a
+>   connected neighbour;
 > - IPv6 paths that bypass the ban list.
+>
+> The 2.7.10.2 code itself, from 2017, was not reviewed.
 >
 > A client is exposed as soon as it listens on a public interface, before it has discovered
 > anything. What [preparing a prefix](#preparing-a-prefix-isolated-and-unattended) does and does
@@ -150,12 +154,12 @@ closes it cleanly, so it saves `Discovery.dat` and `HostCache.dat`.
      [run 40137297045](https://github.com/Prev-I/Shareaza/actions/runs/40137297045) it changed
      nothing.
    - **Close the port on the host instead.** This is untested; adjust it for your firewall. It
-     drops inbound TCP and UDP to port 6346 from anywhere but loopback, which blocks the remote-crash
-     route.
+     drops inbound TCP and UDP to port 6346 from anywhere but loopback. That blocks unsolicited
+     packets from strangers. A hub the client connects to itself can still reach the same code over
+     that connection.
    - **It also changes how the client behaves.** It drops the UDP replies to the client's own G2
-     datagrams, so the client runs as a UDP-firewalled leaf, without query acknowledgements.
-     Outbound TCP to the hosts a cache hands out still works. Keep this in mind when reading the
-     client's behaviour.
+     datagrams, so the client runs as a UDP-firewalled leaf. Outbound TCP to the hosts a cache hands
+     out still works. Keep this in mind when reading the client's behaviour.
 
      ```bash
      for proto in tcp udp; do
