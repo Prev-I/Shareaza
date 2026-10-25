@@ -1,0 +1,170 @@
+name: Oracle on Windows
+
+# Runs the Windows test kit in docs/oracle-windows/ end to end, as the README
+# tells a person to: install a client, prepare it for one cache, start it, watch
+# it, close it, collect and restore. The cache is a local stub, so nothing here
+# reaches the live G2 network. A fake "own setup" is planted first, so the backup
+# and restore are checked too.
+
+on:
+    workflow_dispatch:
+      inputs:
+        release_tag:
+          description: 'Published release tag for the fork installer'
+          required: false
+          default: 'v2.7.10.6-previ.1'
+    pull_request:
+      paths:
+        - docs/oracle-windows/**
+        - .github/workflows/oracle-windows.yml
+
+permissions:
+    contents: read
+
+jobs:
+    oracle:
+        runs-on: windows-2022
+        timeout-minutes: 30
+        strategy:
+            fail-fast: false
+            matrix:
+                include:
+                  - client: Official
+                    expect: client=RAZA2.7.10.2&
+                    agent: Shareaza 2.7.10.2
+                  - client: Fork
+                    expect: client=RAZI2.7.10.6&
+                    agent: iShareaza 2.7.10.6
+        defaults:
+            run:
+                # Windows PowerShell 5.1, the version on Windows 10.
+                shell: powershell
+        env:
+            KIT: docs\oracle-windows
+        steps:
+        -   name: Set the work folder
+            run: Add-Content -Path $env:GITHUB_ENV -Value "WORK=$env:RUNNER_TEMP\oracle"
+
+        -   name: Checkout the kit
+            uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+            with:
+                sparse-checkout: docs
+                persist-credentials: false
+
+        -   name: Install the client with the kit
+            env:
+                TAG: ${{ inputs.release_tag || 'v2.7.10.6-previ.1' }}
+            run: |
+                $ErrorActionPreference = 'Stop'
+                & "$env:KIT\Install-Shareaza.ps1" -Client ${{ matrix.client }} -ReleaseTag $env:TAG -WorkDir $env:WORK
+
+        -   name: Plant a fake own setup to back up and restore
+            run: |
+                $ErrorActionPreference = 'Stop'
+                New-ItemProperty -Path 'HKCU:\Software\Shareaza\Shareaza' -Name OracleMarker -Value 'mine' -PropertyType String -Force | Out-Null
+                New-Item -ItemType Directory -Force -Path "$env:APPDATA\Shareaza\Data" | Out-Null
+                Set-Content -Path "$env:APPDATA\Shareaza\Data\marker.txt" -Value 'mine'
+
+        -   name: Start a stub cache
+            run: |
+                $ErrorActionPreference = 'Stop'
+                @'
+                import http.server, json, time
+                class H(http.server.BaseHTTPRequestHandler):
+                    def do_GET(self):
+                        with open('gwc-requests.jsonl', 'a') as f:
+                            f.write(json.dumps({'t': time.time(), 'path': self.path,
+                                                'user_agent': self.headers.get('User-Agent')}) + '\n')
+                        body = b'I|pong|oracle-stub 0.1|gnutella2\n'
+                        self.send_response(200)
+                        self.send_header('Content-Type', 'text/plain')
+                        self.send_header('Content-Length', str(len(body)))
+                        self.end_headers()
+                        self.wfile.write(body)
+                    def log_message(self, *a):
+                        pass
+                http.server.ThreadingHTTPServer(('127.0.0.1', 8080), H).serve_forever()
+                '@ | Set-Content -Encoding ASCII stub.py
+                Start-Process -FilePath python -ArgumentList '-I', 'stub.py' -WindowStyle Hidden
+                $ok = $false
+                foreach ($i in 1..20) {
+                    try { Invoke-WebRequest -UseBasicParsing http://127.0.0.1:8080/ready | Out-Null; $ok = $true; break } catch { Start-Sleep -Milliseconds 500 }
+                }
+                if (-not $ok) { throw 'the stub cache did not start' }
+                Remove-Item gwc-requests.jsonl   # the readiness probe is not a client request
+
+        -   name: Prepare with the kit
+            run: |
+                $ErrorActionPreference = 'Stop'
+                & "$env:KIT\Prepare-Oracle.ps1" -CacheUrl 'http://127.0.0.1:8080/gwc/' -Mode Leaf -Port 6346 -PreferIPv4 -WorkDir $env:WORK
+
+        -   name: Run Shareaza, watch it, close it
+            timeout-minutes: 10
+            run: |
+                $ErrorActionPreference = 'Stop'
+                $app = (Get-ItemProperty 'HKCU:\Software\Shareaza\Shareaza').Path
+                Start-Process -FilePath "$app\Shareaza.exe" -WorkingDirectory $app
+                foreach ($i in 1..36) { if (Test-Path gwc-requests.jsonl) { break }; Start-Sleep 5 }
+                # Exercise the watcher for about a minute; its stats call points at the stub.
+                & "$env:KIT\Watch-Oracle.ps1" -CacheUrl 'http://127.0.0.1:8080/gwc/' -Hours 0.02 -StatsEveryMinutes 1 -WorkDir $env:WORK
+                if (-not (Get-Process -Name Shareaza -ErrorAction SilentlyContinue)) { throw 'Shareaza was not running' }
+                # taskkill without /F posts WM_CLOSE, so Shareaza shuts down and saves its data.
+                & taskkill.exe /IM Shareaza.exe | Out-Null
+                $exited = $false
+                foreach ($i in 1..24) { Start-Sleep 5; if (-not (Get-Process -Name Shareaza -ErrorAction SilentlyContinue)) { $exited = $true; break } }
+                if (-not $exited) { Stop-Process -Name Shareaza -Force; throw 'Shareaza did not exit after WM_CLOSE' }
+
+        -   name: Collect and restore with the kit
+            if: always()
+            run: |
+                $ErrorActionPreference = 'Stop'
+                if (Get-Process -Name Shareaza -ErrorAction SilentlyContinue) { Stop-Process -Name Shareaza -Force; Start-Sleep 3 }
+                & "$env:KIT\Restore-Oracle.ps1" -WorkDir $env:WORK
+
+        -   name: Check what the client did and what the kit restored
+            env:
+                EXPECT: ${{ matrix.expect }}
+                AGENT: ${{ matrix.agent }}
+            run: |
+                $ErrorActionPreference = 'Stop'
+                function Fail($m) { Write-Host "::error::$m"; exit 1 }
+                if (-not (Test-Path gwc-requests.jsonl)) { Fail 'Shareaza never queried the stub cache' }
+                $req = Get-Content gwc-requests.jsonl
+                if (-not ($req | Select-String -SimpleMatch $env:EXPECT)) { Fail "no request carried $env:EXPECT" }
+                if (-not ($req | Select-String -SimpleMatch "`"user_agent`": `"$env:AGENT`"")) { Fail "no request came from $env:AGENT" }
+
+                $zip = Get-ChildItem "$env:WORK\evidence-*.zip" | Select-Object -First 1
+                if (-not $zip) { Fail 'no evidence zip' }
+                $ev = "$env:WORK\ev"; Expand-Archive $zip.FullName $ev
+                foreach ($f in 'Shareaza.log', 'Discovery.dat', 'HostCache.dat', 'shareaza.reg') {
+                    if (-not (Test-Path "$ev\$f")) { Fail "the evidence lacks $f" }
+                }
+                $log = Get-Content -Encoding Unicode "$ev\Shareaza.log"
+                if (-not ($log | Select-String -SimpleMatch '[DiscoveryServices] Request:')) { Fail 'the log has no debug-level discovery lines' }
+                $other = $log | Select-String -SimpleMatch 'Querying discovery service' | Where-Object { $_ -notmatch '"http://127\.0\.0\.1:8080/gwc/"' }
+                if ($other) { Fail "queried another discovery service: $other" }
+                if ($log | Select-String -SimpleMatch '[VersionChecker] Request') { Fail 'the client still checked for updates' }
+                if (-not ($log | Select-String -SimpleMatch 'Shutting down Shareaza network core')) { Fail 'no clean shutdown in the log' }
+                $reg = Get-Content "$ev\shareaza.reg"
+                if (-not ($reg | Select-String -Pattern ([regex]::Escape($env:WORK + '\Downloads').Replace('\\', '\\\\')))) { Fail 'CompletePath was not the kit folder' }
+
+                # Restored: the planted marker is back, the oracle settings and rules are gone.
+                $marker = (Get-ItemProperty 'HKCU:\Software\Shareaza\Shareaza' -Name OracleMarker -ErrorAction SilentlyContinue).OracleMarker
+                if ($marker -ne 'mine') { Fail 'the planted registry value was not restored' }
+                if ((Get-ItemProperty 'HKCU:\Software\Shareaza\Shareaza' -Name DebugLog -ErrorAction SilentlyContinue)) { Fail 'oracle settings were left behind' }
+                if ((Get-Content "$env:APPDATA\Shareaza\Data\marker.txt" -ErrorAction SilentlyContinue) -ne 'mine') { Fail 'the planted data folder was not restored' }
+                if (Get-NetFirewallRule -DisplayName 'Shareaza oracle *' -ErrorAction SilentlyContinue) { Fail 'firewall rules were left behind' }
+                $policy = (& netsh interface ipv6 show prefixpolicies) -match '::ffff:0:0/96'
+                if ($policy -notmatch '^\s*35\s') { Fail "IPv4 preference not restored: $policy" }
+                Write-Host 'All checks passed.'
+
+        -   name: Upload the evidence
+            if: always()
+            uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+            with:
+                name: oracle-windows-${{ matrix.client }}
+                path: |
+                    ${{ runner.temp }}\oracle\evidence-*.zip
+                    ${{ runner.temp }}\oracle\install-*.log
+                    gwc-requests.jsonl
+                if-no-files-found: warn
