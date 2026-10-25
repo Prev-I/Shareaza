@@ -68,8 +68,13 @@ extern "C"
 		{
 			if ( salen != sizeof( SOCKADDR_IN6 ) )
 				return 1;
-			else
-				return 0;
+
+			const SOCKADDR_IN6* pHostIPv6 = (const SOCKADDR_IN6*)sa;
+
+			return ( pHostIPv6->sin6_port == 0 ||
+				Network.IsFirewalledAddress( &pHostIPv6->sin6_addr, Settings.Connection.IgnoreOwnIP ) ||
+				Network.IsReserved( &pHostIPv6->sin6_addr ) ||
+				Security.IsDenied( &pHostIPv6->sin6_addr ) ) ? 1 : 0;
 		}
 
 		const SOCKADDR_IN* pHost = (const SOCKADDR_IN*)sa;
