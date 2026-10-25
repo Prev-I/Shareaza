@@ -4,7 +4,7 @@ How to run two Shareaza clients under Wine on Linux or WSL2: the official 2.7.10
 G2 network runs, and this fork's 2.7.10.6 build. With both installed, a GWebCache such as
 [`rs-gwc-edge`](https://github.com/Prev-I/rs-gwc-edge) can be exercised against real clients.
 
-`.github/workflows/oracle-wine.yml` checks these steps on `ubuntu-24.04` ([its runs](https://github.com/Prev-I/Shareaza/actions/workflows/oracle-wine.yml)). The results below come from runs on 2026-10-24 with Wine 9.0 (`9.0~repack-4build3`) and winetricks 20240105. [Run 40138506381](https://github.com/Prev-I/Shareaza/actions/runs/40138506381) is the first that ran `docs/oracle-prepare.sh` itself.
+`.github/workflows/oracle-wine.yml` checks these steps on `ubuntu-24.04` ([its runs](https://github.com/Prev-I/Shareaza/actions/workflows/oracle-wine.yml)). The results below come from runs on 2026-10-24 and 2026-10-25 with Wine 9.0 (`9.0~repack-4build3`) and winetricks 20240105. [Run 40138506381](https://github.com/Prev-I/Shareaza/actions/runs/40138506381) is the first that ran `docs/oracle-prepare.sh` itself.
 
 | | Status |
 |---|---|
@@ -12,7 +12,7 @@ G2 network runs, and this fork's 2.7.10.6 build. With both installed, a GWebCach
 | [Preparing a prefix](#preparing-a-prefix-isolated-and-unattended) with `docs/oracle-prepare.sh`, then starting the client | **tested**, against a stub cache on `127.0.0.1`. Covered: no dialogs at start, the client starts connecting, the stub is the only discovery service it queries, it makes no update check, and it exits by itself on `WM_CLOSE` after saving. Not covered: other traffic (UPnP, DHT, direct connects) is off by configuration only, and nothing watches the network for it. |
 | `client=` and user agent per client | **tested** ([table](#which-client-is-which-in-the-caches-logs)) |
 | Data file locations | **tested** |
-| Downloading the fork's release asset and checking `SHA256SUMS.txt` | untested: CI takes the same installer from the tag build's artifact instead, because releases are drafts until published |
+| Downloading the fork's x64 installer from its latest release and checking it against `SHA256SUMS.txt` | **tested** since 2026-10-25, with the same URLs and check as below; earlier runs used the tag build's artifact |
 | Interactive installs, the GUI steps (Discovery window, Add Service dialog), `gwc:` links | untested: they come from the source (`Res/Default.xml`, `Shareaza.rc`, `DlgURLAction.cpp`) |
 | Win32 builds, WSL2, Wine versions other than 9.0 | untested |
 
@@ -35,7 +35,7 @@ G2 network runs, and this fork's 2.7.10.6 build. With both installed, a GWebCach
 | Prefix | Installer | Where it comes from | SHA-256 |
 |---|---|---|---|
 | `~/.wine-shareaza-sf` | `Shareaza_2.7.10.2_x64.exe` | [SourceForge, Shareaza-2.7.10.2](https://sourceforge.net/projects/shareaza/files/Shareaza/Shareaza-2.7.10.2/) | `d6ff141d69a3af53f8f7547b40e308a4e2aa4818eeb28da827d7545165ef3051`, as SourceForge publishes it |
-| `~/.wine-shareaza-previ` | `iShareaza_2.7.10.6_x64_Release_<build date>.exe` | this fork's [releases](https://github.com/Prev-I/Shareaza/releases), tag `v2.7.10.6-previ.N`. A release can be downloaded once it is published; until then only the repository owner sees it. | in the release's `SHA256SUMS.txt` |
+| `~/.wine-shareaza-previ` | `iShareaza_2.7.10.6_x64_Release_<build date>.exe` | this fork's [releases](https://github.com/Prev-I/Shareaza/releases), tag `v2.7.10.6-previ.N`, currently [`v2.7.10.6-previ.1`](https://github.com/Prev-I/Shareaza/releases/tag/v2.7.10.6-previ.1). A new tag first makes a draft, which only the repository owner can download until it is published. | in the release's `SHA256SUMS.txt` |
 
 Each client gets its own prefix, for three reasons:
 - **Same registry key.** Both clients keep their settings under `HKCU\Software\Shareaza\Shareaza`,
@@ -72,16 +72,20 @@ winetricks -q vcrun2022
 wine ~/Downloads/Shareaza_2.7.10.2_x64.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
 wineserver --wait
 
-# This fork's build: put the x64 installer and SHA256SUMS.txt from the release in ~/Downloads first.
-(cd ~/Downloads && sha256sum -c --ignore-missing SHA256SUMS.txt)   # untested
+# This fork's build, from release v2.7.10.6-previ.1
+base=https://github.com/Prev-I/Shareaza/releases/download/v2.7.10.6-previ.1
+curl -fLo ~/Downloads/iShareaza_2.7.10.6_x64_Release_2026-10-25.exe "$base/iShareaza_2.7.10.6_x64_Release_2026-10-25.exe"
+curl -fLo ~/Downloads/SHA256SUMS.txt "$base/SHA256SUMS.txt"
+(cd ~/Downloads && sha256sum -c --ignore-missing SHA256SUMS.txt)   # must print the installer's name and OK
 export WINEPREFIX=~/.wine-shareaza-previ WINEARCH=win64
 wineboot --init && wineserver --wait
 winetricks -q vcrun2022
-wine ~/Downloads/iShareaza_2.7.10.6_x64_Release_2026-10-24.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
+wine ~/Downloads/iShareaza_2.7.10.6_x64_Release_2026-10-25.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
 wineserver --wait
 ```
 
-- **Use the exact installer file name** from the release; it carries the build date.
+- **Use the exact installer file name** from the release; it carries the build date, so a later
+  release changes both download lines and the install line.
 - **Install `vcrun2022` first.** Without it the fork's installer fetches the VC++ runtime itself,
   from go.microsoft.com (`vc143/vcredist/vcredist.iss`). The 2.7.10.2 installer most likely does the
   same: it carries the same download helper (`idp.dll`), but no run has shown it downloading.
@@ -284,5 +288,5 @@ GET /gwc/?get=1&hostfile=1&net=gnutella2&ping=1&pv=4&client=RAZI2.7.10.6&getleav
 **Listening differs.** The fork also listens on IPv6 (`[::]:6346`); 2.7.10.2 listens only on IPv4.
 
 **The About box** of a fork build shows the commit it was built from, for example
-`Release 64-bit (commit 0fc2b4b of 2026-10-24)`. That string was read from the built
-`Shareaza.exe`, not from a screenshot.
+`Release 64-bit (commit 0dbc19d of 2026-10-25)` for `v2.7.10.6-previ.1`. That string was read
+from the built `Shareaza.exe`, not from a screenshot.
