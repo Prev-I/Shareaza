@@ -29,14 +29,21 @@ fi
 # itself must hold no links out of it: `winetricks isolate_home` makes them real,
 # empty folders inside the prefix.
 users="$WINEPREFIX/drive_c/users/${USER:-$(id -un)}"
-linked=$(find "$users" -maxdepth 1 -type l 2>/dev/null | while IFS= read -r l; do
-    t=$(readlink -f "$l") || continue
-    case "$t" in "$(readlink -f "$WINEPREFIX")"/*) ;; *) [ -d "$t" ] && echo "  $l -> $t" ;; esac
-done)
+[ -d "$users" ] || { echo "$WINEPREFIX: no user profile at $users" >&2; exit 1; }
+prefix=$(readlink -f "$WINEPREFIX")
+# Every link anywhere in the profile that does not resolve inside the prefix, except
+# links to plain files. An unresolvable link counts too: it may point at a drive
+# that is not mounted now. find does not follow links, so it never walks into $HOME.
+linked=$(find "$users" -type l | while IFS= read -r l; do
+    if ! t=$(readlink -f "$l"); then echo "  $l -> (unresolved) $(readlink "$l")"; continue; fi
+    case "$t" in "$prefix"/*) continue ;; esac
+    [ -f "$t" ] || echo "  $l -> $t"
+done || true)
 if [ -n "$linked" ]; then
-    echo "$WINEPREFIX links folders out of the prefix, which Shareaza would share:" >&2
+    echo "$WINEPREFIX links folders out of the prefix, which Shareaza could share:" >&2
     echo "$linked" >&2
-    echo "Run: WINEPREFIX=$WINEPREFIX winetricks -q isolate_home" >&2
+    echo "Links into \$HOME: run  WINEPREFIX=$WINEPREFIX winetricks -q isolate_home" >&2
+    echo "Any other link: replace it with an empty folder:  rm <link> && mkdir <link>" >&2
     exit 1
 fi
 

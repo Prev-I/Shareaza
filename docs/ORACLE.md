@@ -97,12 +97,27 @@ wineserver --wait
     `~/.config/user-dirs.dirs` sets `XDG_DOWNLOAD_DIR="$HOME/"`, the target is your whole home
     folder. With neither, Wine makes a real folder inside the prefix.
     (`dlls/shell32/shellpath.c`, `dlls/mountmgr.sys/unixlib.c`)
-  - **What it does:** `winetricks isolate_home` turns those links into real, empty folders inside
-    the prefix.
+  - **The recipe above makes the link certain.** It creates `~/Downloads` before `wineboot`, so
+    the prefix's Downloads would link straight to the folder holding both installers.
+  - **What it does:** `winetricks isolate_home` turns the links into `$HOME` into real, empty
+    folders inside the prefix.
+    - It also turns off Wine's automatic update of the prefix after a Wine upgrade
+      (`.update-timestamp`).
+    - It leaves alone XDG folders outside `$HOME`, such as `XDG_DOWNLOAD_DIR="/data/Downloads"`.
+      `oracle-prepare.sh` reports those too: replace each with an empty folder (`rm <link> &&
+      mkdir <link>`).
   - **Why settings can't fix it:** a different download folder can't be set instead, because Wine
     never lets Shareaza read string settings (see [Settings and Wine](#settings-and-wine)).
-  - **Checked both ways:** `oracle-prepare.sh` refuses a prefix that still links out. CI
-    reproduces the whole-home case and checks that nothing is indexed.
+  - **Checked both ways:**
+    - `oracle-prepare.sh` refuses a prefix with any link out of it.
+    - CI reproduces the whole-home case, with a canary file in `$HOME`. It then checks that the
+      client hashes exactly one file: one planted in its shared folder on purpose.
+  - **A prefix whose client already started without `isolate_home`** has indexed your files, and
+    may have offered them to peers while online.
+    - The best fix is to delete the prefix and follow the steps again.
+    - At the very least, with the client closed: run `isolate_home`, then delete
+      `drive_c/users/$USER/AppData/Roaming/Shareaza/Data/Library*.dat` and `TigerTree.dat` in
+      the prefix. They hold the index of what it saw.
 - **Install `vcrun2022` first.** Without it the fork's installer fetches the VC++ runtime itself,
   from go.microsoft.com (`vc143/vcredist/vcredist.iss`). The 2.7.10.2 installer most likely does the
   same: it carries the same download helper (`idp.dll`), but no run has shown it downloading.

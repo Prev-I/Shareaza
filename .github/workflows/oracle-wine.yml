@@ -32,9 +32,12 @@ jobs:
                   - client: sf
                     expect: client=RAZA2.7.10.2&
                     agent: Shareaza 2.7.10.2
+                    # The folder Shareaza shares on its first run: its default CompletePath.
+                    shared: Downloads
                   - client: previ
                     expect: client=RAZI2.7.10.6&
                     agent: iShareaza 2.7.10.6
+                    shared: Downloads/Shareaza
         env:
             WINEPREFIX: /home/runner/.wine-shareaza-${{ matrix.client }}
             WINEARCH: win64
@@ -105,10 +108,11 @@ jobs:
             # Shareaza shares it. xdg-user-dirs writes "$HOME/" when the download folder
             # is the home folder itself; Wine accepts only "/..." or "$HOME/..." values.
             run: |
-                mkdir -p ~/.config
+                conf="${XDG_CONFIG_HOME:-$HOME/.config}"
+                mkdir -p "$conf"
                 # user-dirs.dirs holds "$HOME/" literally; Wine and xdg expand it.
                 # shellcheck disable=SC2016
-                echo 'XDG_DOWNLOAD_DIR="$HOME/"' > ~/.config/user-dirs.dirs
+                echo 'XDG_DOWNLOAD_DIR="$HOME/"' > "$conf/user-dirs.dirs"
                 echo 'private' > ~/oracle-canary-private.txt
 
         -   name: Create the prefix, isolate it from $HOME, install the VC++ 2022 runtime
@@ -135,6 +139,16 @@ jobs:
 
         -   name: Prepare the prefix as docs/ORACLE.md describes
             run: bash docs/oracle-prepare.sh "$WINEPREFIX" http://127.0.0.1:8080/gwc/
+
+        -   name: Plant one file in the folder the client shares
+            # A positive control: the check below requires this file, and only it, to be
+            # hashed, so a run too short to index anything cannot pass as "nothing shared".
+            env:
+                SHARED: ${{ matrix.shared }}
+            run: |
+                d="$WINEPREFIX/drive_c/users/$USER/$SHARED"
+                mkdir -p "$d"
+                echo 'shared on purpose' > "$d/inside.txt"
 
         -   name: Run Shareaza against the stub cache
             timeout-minutes: 10
@@ -230,8 +244,11 @@ jobs:
                 # nothing else wrote, such as Gnutella2.
                 awk '/^\[/{sec=$0} sec ~ /Shareaza\\Gnutella2\]$/ && /^"HostCount"/{found=1} END{exit !found}' out/shareaza.utf8.reg \
                   || fail "Shareaza did not save its Gnutella2 settings"
-                # Nothing shared: Shareaza indexed no file at all, the $HOME canary included.
-                grep 'Hashing:' "$log" && fail "Shareaza indexed files it would share"
+                # Only the planted file was indexed: the first-run sharing happened and was
+                # seen, and nothing from \$HOME (the canary included) was shared.
+                grep 'Hashing:' "$log" || true
+                [ "$(grep -c 'Hashing:' "$log")" = 1 ] || fail "expected exactly one hashed file, the planted inside.txt"
+                grep -q 'Hashing:.*inside\.txt' "$log" || fail "the planted inside.txt was not the file hashed"
                 grep -q 'oracle-canary' "$log" && fail "Shareaza saw the canary in \$HOME"
                 [ "$(cat out/exact-name.txt)" = seen ] || fail "pgrep -x Shareaza.exe did not find the client: oracle-prepare.sh's running check would miss it"
                 grep -E 'Accepting incoming TCP|Listening for UDP' "$log" || true
