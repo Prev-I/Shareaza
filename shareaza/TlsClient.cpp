@@ -507,6 +507,9 @@ TlsResult CTlsClient::Negotiate(std::vector<BYTE>& oSend, bool bCallOnEmpty)
 
 TlsResult CTlsClient::DecryptBuffered(std::vector<BYTE>& oPlain, std::vector<BYTE>& oSend)
 {
+	// m_oIn only shrinks within this call, so a second post-handshake message
+	// at the same buffer size means neither call consumed anything.
+	size_t nRenegotiatedAt = static_cast< size_t >( -1 );
 	bool bRenegotiateNow = false;
 	for ( ;; )
 	{
@@ -535,6 +538,7 @@ TlsResult CTlsClient::DecryptBuffered(std::vector<BYTE>& oPlain, std::vector<BYT
 			{ 0, SECBUFFER_EMPTY, NULL }
 		};
 		SecBufferDesc oDesc = { SECBUFFER_VERSION, 4, oBuffers };
+		const size_t nBefore = m_oIn.size();
 		const SECURITY_STATUS nStatus = DecryptMessage( &m_hContext, &oDesc, 0, NULL );
 		m_nStatus = nStatus;
 
@@ -573,6 +577,9 @@ TlsResult CTlsClient::DecryptBuffered(std::vector<BYTE>& oPlain, std::vector<BYT
 
 		if ( nStatus == SEC_I_RENEGOTIATE )
 		{
+			if ( nBefore == nRenegotiatedAt )
+				return Fail( SEC_E_INTERNAL_ERROR );
+			nRenegotiatedAt = nBefore;
 			++m_nRenegotiations;
 			m_nState = State::Renegotiating;
 			bRenegotiateNow = true;
