@@ -55,10 +55,10 @@ jobs:
         if ($code -eq 2) { Write-Output "::error::endpoint unreachable"; exit 1 }
         exit $code
 
-    # A self-signed certificate from Git for Windows' openssl, and the local
-    # server in the background, bound to [::1] only. MSYS2_ARG_CONV_EXCL stops
-    # the MSYS runtime from rewriting /CN=localhost as a Windows path.
-    - name: Start the local TLS server
+    # A self-signed certificate from Git for Windows' openssl for the local
+    # server. MSYS2_ARG_CONV_EXCL stops the MSYS runtime from rewriting
+    # /CN=localhost as a Windows path.
+    - name: Generate the local server's certificate
       if: ${{ !cancelled() && steps.build.outcome == 'success' }}
       shell: pwsh
       run: |
@@ -70,36 +70,38 @@ jobs:
         $env:MSYS_NO_PATHCONV = '1'
         & $openssl req -x509 -newkey rsa:2048 -nodes -days 2 -subj /CN=localhost -keyout "$dir\key.pem" -out "$dir\cert.pem"
         if ($LASTEXITCODE -ne 0) { exit 1 }
-        $log = Join-Path $dir 'server.log'
-        $server = Start-Process -FilePath python -PassThru -NoNewWindow `
-          -ArgumentList @('TlsTest/tls_server.py', '--cert', "$dir\cert.pem", '--key', "$dir\key.pem", '--log', $log) `
-          -RedirectStandardOutput "$dir\stdout.txt" -RedirectStandardError "$dir\stderr.txt"
-        "TLS_SERVER_PID=$($server.Id)" >> $env:GITHUB_ENV
         "TLS_SERVER_DIR=$dir" >> $env:GITHUB_ENV
-        "TLSTEST_SERVER_LOG=$log" >> $env:GITHUB_ENV
-        for ($i = 0; $i -lt 30; $i++) {
-          if ((Test-Path $log) -and (Select-String -Path $log -Pattern 'listening' -Quiet)) { exit 0 }
-          if ($server.HasExited) { break }
-          Start-Sleep -Seconds 1
-        }
-        Write-Output "::error::the local TLS server did not start"
-        Get-Content "$dir\stderr.txt" -ErrorAction SilentlyContinue
-        exit 1
+        "TLSTEST_SERVER_LOG=$(Join-Path $dir 'server.log')" >> $env:GITHUB_ENV
 
+    # The local server runs in the background for this step only, bound to
+    # [::1]; a process started in an earlier step does not outlive it.
     - name: Network tests
       if: ${{ !cancelled() && steps.build.outcome == 'success' }}
       shell: pwsh
       run: |
-        & $env:TLSTEST_EXE --network
-        $code = $LASTEXITCODE
+        $dir = $env:TLS_SERVER_DIR
+        $server = Start-Process -FilePath python -PassThru -NoNewWindow `
+          -ArgumentList @('TlsTest/tls_server.py', '--cert', "$dir\cert.pem", '--key', "$dir\key.pem", '--log', $env:TLSTEST_SERVER_LOG) `
+          -RedirectStandardOutput "$dir\stdout.txt" -RedirectStandardError "$dir\stderr.txt"
+        try {
+          $ready = $false
+          for ($i = 0; $i -lt 30 -and -not $server.HasExited; $i++) {
+            if ((Test-Path $env:TLSTEST_SERVER_LOG) -and (Select-String -Path $env:TLSTEST_SERVER_LOG -Pattern 'listening' -Quiet)) { $ready = $true; break }
+            Start-Sleep -Seconds 1
+          }
+          if (-not $ready) { Write-Output "::error::the local TLS server did not start"; exit 1 }
+          & $env:TLSTEST_EXE --network
+          $code = $LASTEXITCODE
+        } finally {
+          Stop-Process -Id $server.Id -Force -ErrorAction SilentlyContinue
+        }
         if ($code -eq 2) { Write-Output "::error::endpoint unreachable"; exit 1 }
         exit $code
 
-    - name: Stop the local TLS server
-      if: ${{ always() && env.TLS_SERVER_PID != '' }}
+    - name: Local server log
+      if: ${{ always() && env.TLS_SERVER_DIR != '' }}
       shell: pwsh
       run: |
-        Stop-Process -Id $env:TLS_SERVER_PID -Force -ErrorAction SilentlyContinue
         Write-Output "--- server log"
         Get-Content $env:TLSTEST_SERVER_LOG -ErrorAction SilentlyContinue
         Write-Output "--- server stderr"
