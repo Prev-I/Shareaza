@@ -4,6 +4,11 @@ Static security review of what was added to Shareaza after the original SourceFo
 It was done for this fork of `github.com/ansani/Shareaza` before its builds were used as protocol
 oracles for `gwc-edge` (see [ORACLE.md](ORACLE.md)).
 
+**Status, 2026-10-26.** Findings 3, 4 and 5 are fixed on `main` by
+[PR #8](https://github.com/Prev-I/Shareaza/pull/8) (merge `d2f09dd`). The first release built
+with the fixes is `v2.7.10.6-previ.2`. Findings 1 and 2 are still open. The text below is the
+audit as written; what changed since is in the [addendum](#addendum-2026-10-26-fixes-for-findings-3-4-and-5).
+
 **Disclosure.**
 - **Not reported upstream.** As of 2026-10-25 the findings have not been reported to ansani/Shareaza.
 - **Finding 3 omits its trigger.** It names the faulty code but not the packet that reaches it.
@@ -91,6 +96,7 @@ went to the provenance pass instead.
   fork's builds. The SVN baseline lacks the code, so 2.7.10.2 should not be affected (inference from
   source).
 - **Not verified:** the path was traced in the code but not run.
+- **Fixed** in `91330b820`, with `ad4d685df` for IPv6 hubs. See the addendum.
 
 ### 4. IPv6 traffic bypasses the ban list and address filters
 
@@ -102,6 +108,8 @@ went to the provenance pass instead.
 - **Deny-by-default:** `Security.cpp:695-697` returns `FALSE` when no rule matches, so this policy
   is not applied to IPv6.
 - **No opt-out:** the IPv6 listeners always bind to `in6addr_any`.
+- **Fixed**, apart from the opt-out, by `e6ad1a848`, `85be3a518`, `178100427` and `2c632d30c`.
+  Three more defects found on the way are in the addendum.
 
 ### 5. ✔ The installer deletes every top-level `*.exe` and `*.dll` in the install folder
 
@@ -110,6 +118,9 @@ went to the provenance pass instead.
 - **Effect:** `[InstallDelete]` runs at install time, not uninstall. With `DirExistsWarning=no`,
   installing into an existing folder silently removes these files. Intent looks benign: the rules
   belong in `[UninstallDelete]`.
+- **Fixed** in `14578ddb0`, but not by moving the rules. They cleaned up after the switch from
+  BugTrap to BugSplat, so they now name the retired files instead of matching every `*.exe` and
+  `*.dll`.
 
 ## Medium
 
@@ -186,11 +197,58 @@ went to the provenance pass instead.
 
 - **Not unattended on the live G2 network.** Findings 1, 3 and 4 mean any peer may be able to crash
   the client or slip past its ban list.
+  - From `v2.7.10.6-previ.2`, findings 3 and 4 are fixed.
+  - Finding 1 is still open, and the fixes were verified by review and a clean build, not by running
+    an attack.
+  - So the rule stands.
 - **A fresh Wine prefix per installer**, because of finding 5.
+  - Releases from `previ.2` no longer delete unrelated files.
+  - A fresh prefix is still needed for a clean comparison between clients.
 - **Revision string:** the fork's builds show ` Release 64-bit (commit <sha> of <date>)` in the About
   box.
 - **Identifying the client:** they identify to caches as `RAZI2.7.10.6`, as ansani's own builds do.
   The official SourceForge 2.7.10.2 sends `RAZA2.7.10.2`.
+
+## Addendum 2026-10-26: fixes for findings 3, 4 and 5
+
+[PR #8](https://github.com/Prev-I/Shareaza/pull/8), merged as `d2f09dd`, landed these commits.
+
+| Commit | Finding | Change |
+|---|---|---|
+| `91330b820` | 3 | `CSearchManager::OnQueryAck` adds a host-cache entry only when it has the same address family as the sender, as `CG2Neighbour::ParseKHLPacket` already did. Before, it built a pointer from the family that was NULL. |
+| `ad4d685df` | 3 | A G2 hub connected over IPv6 passes its own IPv6 address to query-ack handling, not a zeroed IPv4 one. |
+| `e6ad1a848` | 4 | `CSecurity::IsDenied` for an IPv6 address no rule matches returns the default policy, as the IPv4 overload does. |
+| `85be3a518` | 4 | `CHandshakes::AcceptCheck` checks an IPv6 caller's own address. |
+| `178100427` | 4 | `TryReadIPv6` and `Send(SOCKADDR_IN6*)` apply the same filters as their IPv4 twins. |
+| `2c632d30c` | 4 | `dht_blacklisted` applies the ban list, self and site-local filtering, and the port-0 check to IPv6 nodes. |
+| `809d1c840` | 4, new | Outgoing IPv6 connections are refused for banned hosts and the unspecified address. The audit missed this path; the download sources reach it. |
+| `d613cffb2` | 4, new | The security miss caches are capped at 65536 entries each. Before, a sender could grow them one entry per source address, which a single IPv6 /64 makes free. |
+| `570dbdd05` | 4, new | `CSecurity::Remove` erases a single-address (/128) IPv6 rule from its address map before freeing it. |
+| `14578ddb0` | 5 | `[InstallDelete]` names the retired BugTrap files instead of `*.exe` and `*.dll`. |
+
+**The use-after-free fixed by `570dbdd05`.** The audit missed it; the second review of the fixes
+found it.
+- **How to reach it:** in the Security window, edit any rule, change it to a single IPv6 address,
+  save it, then remove it. That frees the rule but leaves it in the IPv6 address map.
+- **What follows:** the next check of that address reads and writes freed memory.
+- **Who triggers it:** it takes those local steps first. After that, the host at that address
+  decides when the freed rule is touched.
+
+**How the fixes were verified.**
+- Root causes traced in the source.
+- Two independent read-only reviews.
+- A clean Win32 and x64, Release and Debug build, with no compiler warning in any changed line.
+
+The crash in finding 3 was not reproduced. Its trigger stays out of this repository, and no
+exploit was written to prove the fix.
+
+**Still open.**
+- Findings 1 (no TLS certificate check) and 2 (third-party OpenSSL 1.1.1b).
+- The "no opt-out" point of finding 4: the IPv6 listeners always bind to `in6addr_any`.
+- Single-address IPv6 rules still cannot be edited or removed from the Security window, because
+  `CSecurity::GetGUID` does not search the map that holds them. This is a functional defect. Fix it
+  only together with `570dbdd05`: on its own it would make the use-after-free reachable from a
+  single Remove click.
 
 ## Evidence (`security-audit/evidence/`, `security-audit/tools/`)
 
