@@ -54,6 +54,7 @@ CConnection::CConnection(PROTOCOLID nProtocol)
 	, m_nProtocol			( nProtocol )
 	, m_nDelayCloseReason	( 0 )
 	, m_bAutoDelete			( FALSE )
+	, sslConnection			( NULL )
 {
 	ZeroMemory( &m_pHost, sizeof( m_pHost ) );
 	m_pHost.sin_family = AF_INET;
@@ -78,6 +79,7 @@ void CConnection::AttachTo(CConnection* pConnection)
 	ASSERT( pConnection->IsValid() );					// And make sure its socket exists
 
 	DestroyBuffers();
+	DestroySSL();
 
 	CQuickLock oOutputLock( *pConnection->m_pOutputSection );
 	CQuickLock oInputLock( *pConnection->m_pInputSection );
@@ -102,6 +104,7 @@ void CConnection::AttachTo(CConnection* pConnection)
 	if ( m_nProtocol <= PROTOCOL_NULL && pConnection->m_nProtocol > PROTOCOL_NULL )
 		m_nProtocol		= pConnection->m_nProtocol;
 	m_nDelayCloseReason	= pConnection->m_nDelayCloseReason;
+	sslConnection		= pConnection->sslConnection;	// The TLS session goes with its socket
 
 	// Record the current time in the input and output TCP bandwidth meters
 	m_mInput.tLast = m_mOutput.tLast = GetTickCount();
@@ -109,9 +112,10 @@ void CConnection::AttachTo(CConnection* pConnection)
 	// Invalidate the socket in the given connection object so it's just here now
 	pConnection->m_hSocket	= INVALID_SOCKET;
 
-	// Null the input and output pointers
+	// Null the input and output pointers, and the TLS session
 	pConnection->m_pInput	= NULL;
 	pConnection->m_pOutput	= NULL;
+	pConnection->sslConnection = NULL;
 
 	// Zero the memory of the input and output TCPBandwidthMeter objects
 	ZeroMemory( &pConnection->m_mInput, sizeof( m_mInput ) );
@@ -127,6 +131,7 @@ CConnection::~CConnection()
 
 	// Delete and mark null the input and output buffers
 	DestroyBuffers();
+	DestroySSL();
 }
 
 void CConnection::LogOutgoing()
@@ -484,13 +489,22 @@ BOOL CConnection::SSLConnectTo(const IN_ADDR* pAddress, WORD nPort)
 	const SSL_METHOD* method = TLS_client_method();
 	SSL_CTX* ctx = SSL_CTX_new(method);
 
-	// Create an SSL structure for the connection
-	sslConnection = SSL_new(ctx);
-	SSL_set_fd(sslConnection, (int)m_hSocket);
+	// Create an SSL structure for the connection. It holds its own reference
+	// to the context, so the context is freed along with it.
+	DestroySSL();
+	sslConnection = ctx ? SSL_new(ctx) : NULL;
+	SSL_CTX_free(ctx);
+	if (sslConnection == NULL || SSL_set_fd(sslConnection, (int)m_hSocket) != 1) {
+		theApp.Message(MSG_ERROR, _T("Failed to create SSL context"));
+		DestroySSL();
+		CNetwork::CloseSocket(m_hSocket, true);
+		return FALSE;
+	}
 
 	// Perform the SSL/TLS handshake
 	if (SSL_connect(sslConnection) != 1) {
 		theApp.Message(MSG_ERROR, _T("SSL_connect failed"));
+		DestroySSL();
 		CNetwork::CloseSocket(m_hSocket, true);
 		return FALSE;
 	}
@@ -929,8 +943,8 @@ BOOL CConnection::OnSSLRead()
 {
 	CQuickLock oInputLock(*m_pInputSection);
 
-	// Make sure the socket is valid
-	if (!IsValid())
+	// Make sure the socket is valid and carries a TLS session
+	if (!IsValid() || !sslConnection)
 		return FALSE;
 
 	if (m_nDelayCloseReason)
@@ -1061,8 +1075,8 @@ BOOL CConnection::OnSSLWrite()
 {
 	CQuickLock oOutputLock(*m_pOutputSection);
 
-	// Make sure the socket is valid
-	if (!IsValid())
+	// Make sure the socket is valid and carries a TLS session
+	if (!IsValid() || !sslConnection)
 		return FALSE;
 
 	// If there is nothing to send, we succeed without doing anything
