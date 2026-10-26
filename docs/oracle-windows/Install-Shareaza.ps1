@@ -21,13 +21,13 @@
 .EXAMPLE
     .\Install-Shareaza.ps1 -Client Official
 .EXAMPLE
-    .\Install-Shareaza.ps1 -Client Fork -ReleaseTag v2.7.10.6-previ.2
+    .\Install-Shareaza.ps1 -Client Fork -ReleaseTag v2.7.10.6-previ.3
 #>
 [CmdletBinding()]
 param(
     [ValidateSet('Official', 'Fork')]
     [string] $Client = 'Official',
-    [string] $ReleaseTag = 'v2.7.10.6-previ.2',
+    [string] $ReleaseTag = 'v2.7.10.6-previ.3',
     [string] $Repository = 'Prev-I/Shareaza',
     [string] $WorkDir = (Join-Path $env:USERPROFILE 'ShareazaOracle')
 )
@@ -68,6 +68,7 @@ if ($Client -eq 'Official') {
     $pinned = @{
         'v2.7.10.6-previ.1' = '731FCA2A95BEF41F2A3EFC83837B8FA164C7482D82896ED6CA32F8F36EF8DEDF'
         'v2.7.10.6-previ.2' = '8A818CAAAA98B43ABDA6FF2E75789E80795641DE9F60A476580DB16E08A9F256'
+        'v2.7.10.6-previ.3' = 'F55DCB85E43688599D078B47CF7B6A4723DE54D0CB4E2EC58D5B859CBB5AFCF3'
     }
     if ($pinned.ContainsKey($ReleaseTag) -and $pinned[$ReleaseTag] -ne $expected) {
         throw "SHA256SUMS.txt of $ReleaseTag lists $expected, not the pinned $($pinned[$ReleaseTag]). Not installing."
