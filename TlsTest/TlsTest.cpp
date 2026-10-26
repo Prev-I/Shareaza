@@ -19,12 +19,16 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
-// Tests of CTlsClient: credentials, handshake and the record layer.
+// Tests of CTlsClient (credentials, handshake and the record layer) and of
+// TlsVerify (certificate evaluation, trust store, URL host).
 // The Local tests need tls_server.py listening on [::1]:8443.
 
 #include "TlsTest.h"
+#include "../shareaza/TlsVerify.h"
 
+#include <atomic>
 #include <stdio.h>
+#include <thread>
 
 namespace
 {
@@ -136,6 +140,120 @@ namespace
 			nResult = oTls.Decrypt( reinterpret_cast< const BYTE* >( pBuffer ),
 				static_cast< size_t >( nReceived ), oPlain, oSend );
 		}
+	}
+
+	// Two well-formed fingerprints, as text for files and as wide strings.
+#define TLSTEST_FP1 "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF"
+#define TLSTEST_FP2 "FEDCBA9876543210FEDCBA9876543210FEDCBA9876543210FEDCBA9876543210"
+	const wchar_t* const FP1 = L"" TLSTEST_FP1;
+	const wchar_t* const FP2 = L"" TLSTEST_FP2;
+
+	// A path in the temporary directory that no other test or run uses.
+	std::wstring TempPath(const wchar_t* pszName)
+	{
+		wchar_t szDir[ MAX_PATH + 1 ] = {};
+		const DWORD nDir = GetTempPathW( MAX_PATH + 1, szDir );
+		static unsigned s_nPath = 0;
+		return std::wstring( szDir, nDir <= MAX_PATH ? nDir : 0 ) + L"TlsTest-" +
+			std::to_wstring( GetCurrentProcessId() ) + L"-" + std::to_wstring( GetTickCount64() ) +
+			L"-" + std::to_wstring( ++s_nPath ) + L"-" + pszName;
+	}
+
+	// Deletes a file, and the .tmp file Save() writes beside it, when the test returns.
+	class CFileGuard
+	{
+	public:
+		explicit CFileGuard(const std::wstring& sPath) : m_sPath( sPath ) {}
+		~CFileGuard() { DeleteFileW( m_sPath.c_str() ); DeleteFileW( ( m_sPath + L".tmp" ).c_str() ); }
+		CFileGuard(const CFileGuard&) = delete;
+		CFileGuard& operator=(const CFileGuard&) = delete;
+	private:
+		std::wstring m_sPath;
+	};
+
+	bool WriteBytes(const std::wstring& sPath, const std::string& sData)
+	{
+		const HANDLE hFile = CreateFileW( sPath.c_str(), GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL );
+		if ( hFile == INVALID_HANDLE_VALUE )
+			return false;
+		DWORD nWritten = 0;
+		const bool bOk = WriteFile( hFile, sData.data(), static_cast< DWORD >( sData.size() ), &nWritten, NULL ) &&
+			nWritten == sData.size();
+		CloseHandle( hFile );
+		return bOk;
+	}
+
+	bool ReadBytes(const std::wstring& sPath, std::string& sData)
+	{
+		const HANDLE hFile = CreateFileW( sPath.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL );
+		if ( hFile == INVALID_HANDLE_VALUE )
+			return false;
+		sData.clear();
+		char pBuffer[ 4096 ];
+		DWORD nRead = 0;
+		bool bOk = true;
+		for ( ;; )
+		{
+			if ( ! ReadFile( hFile, pBuffer, static_cast< DWORD >( sizeof( pBuffer ) ), &nRead, NULL ) )
+			{
+				bOk = false;
+				break;
+			}
+			if ( nRead == 0 )
+				break;
+			sData.append( pBuffer, nRead );
+		}
+		CloseHandle( hFile );
+		return bOk;
+	}
+
+	std::wstring Widen(const char* psz)
+	{
+		std::wstring s;
+		for ( ; *psz ; ++psz )
+			s += static_cast< wchar_t >( static_cast< unsigned char >( *psz ) );
+		return s;
+	}
+
+	const char* ProblemName(TlsCertProblem nProblem)
+	{
+		switch ( nProblem )
+		{
+		case TlsCertProblem::None:		return "None";
+		case TlsCertProblem::Expired:	return "Expired";
+		case TlsCertProblem::WrongName:	return "WrongName";
+		case TlsCertProblem::Untrusted:	return "Untrusted";
+		case TlsCertProblem::Revoked:	return "Revoked";
+		case TlsCertProblem::Other:		return "Other";
+		}
+		return "?";
+	}
+
+	bool IsUpperHex(const std::wstring& s)
+	{
+		for ( wchar_t c : s )
+		{
+			if ( ! ( ( c >= L'0' && c <= L'9' ) || ( c >= L'A' && c <= L'F' ) ) )
+				return false;
+		}
+		return true;
+	}
+
+	// Runs a Manual handshake with pszHost:nPort, without accepting the
+	// session, and evaluates the peer certificate for pszName. False if the
+	// handshake failed or left no certificate.
+	bool ManualVerdict(const char* pszHost, unsigned short nPort, const char* pszName,
+		TlsCertProblem& nProblem, std::wstring* psFingerprint = NULL)
+	{
+		CTlsClient c( TlsCred::Manual, Widen( pszName ) );
+		const SOCKET hSocket = ConnectAndHandshake( c, pszHost, nPort, 0, false );
+		CSocketGuard oGuard( hSocket );
+		if ( hSocket == INVALID_SOCKET || c.PeerCertificate() == NULL )
+			return false;
+		nProblem = VerifyServerCertificate( c.PeerCertificate(), Widen( pszName ) );
+		if ( psFingerprint )
+			*psFingerprint = CertFingerprintSha256( c.PeerCertificate() );
+		return true;
 	}
 
 	// Reads until the peer closes the socket. False on a timeout or error.
@@ -544,4 +662,246 @@ TLS_TEST_NETWORK(LocalTls13KeyUpdate)
 	const BYTE pData[] = { 'b', 'y', 'e', '\n' };
 	CHECK( c.Encrypt( pData, sizeof( pData ), oSend ) == TlsResult::Ok );
 	CHECK( SendAll( hSocket, oSend ) );
+}
+
+// TlsVerify, offline.
+
+TLS_TEST_OFFLINE(OfflineHostFromUrl)
+{
+	CHECK( TlsHostFromUrl( L"https://[2001:db8::1]:8443/x" ) == L"2001:db8::1" );
+	CHECK( TlsHostFromUrl( L"https://Host.Example:443/" ) == L"host.example" );
+	CHECK( TlsHostFromUrl( L"https://user@host/a?b" ) == L"host" );
+	CHECK( TlsHostFromUrl( L"http://host/" ) == L"" );
+	CHECK( TlsHostFromUrl( L"HTTPS://HOST.example" ) == L"host.example" );
+	CHECK( TlsHostFromUrl( L"https://host?q=1" ) == L"host" );
+	CHECK( TlsHostFromUrl( L"https://host#top" ) == L"host" );
+	CHECK( TlsHostFromUrl( L"https://user:p@ss@host:1/" ) == L"host" );
+	CHECK( TlsHostFromUrl( L"https://[2001:DB8::A]/" ) == L"2001:db8::a" );
+	CHECK( TlsHostFromUrl( L"https://bücher.example/" ) == L"xn--bcher-kva.example" );
+	CHECK( TlsHostFromUrl( L"https://Bücher.Example:8443/x" ) == L"xn--bcher-kva.example" );
+	CHECK( TlsHostFromUrl( L"https://" ) == L"" );
+	CHECK( TlsHostFromUrl( L"https:///path" ) == L"" );
+	CHECK( TlsHostFromUrl( L"https://:443/" ) == L"" );
+	CHECK( TlsHostFromUrl( L"https://user@/" ) == L"" );
+	CHECK( TlsHostFromUrl( L"https://[2001:db8::1/" ) == L"" );
+	CHECK( TlsHostFromUrl( L"https://[]/" ) == L"" );
+	CHECK( TlsHostFromUrl( L"https://ho st/" ) == L"" );
+	CHECK( TlsHostFromUrl( L"ftp://host/" ) == L"" );
+	CHECK( TlsHostFromUrl( L"https:host" ) == L"" );
+	CHECK( TlsHostFromUrl( L"" ) == L"" );
+}
+
+TLS_TEST_OFFLINE(OfflineTrustStore)
+{
+	CTlsTrustStore oStore;
+	CHECK( oStore.Count() == 0 );
+	oStore.Accept( L"Host.example", FP1 );
+	CHECK( oStore.Count() == 1 );
+	CHECK( oStore.IsAccepted( L"host.EXAMPLE", FP1 ) );
+	CHECK( oStore.IsAccepted( L"host.example", L"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef" ) );
+	CHECK( ! oStore.IsAccepted( L"host.example", FP2 ) );
+	CHECK( ! oStore.IsAccepted( L"other.example", FP1 ) );
+	// The same entry again, and entries the file could not hold.
+	oStore.Accept( L"HOST.EXAMPLE", FP1 );
+	oStore.Accept( L"", FP2 );
+	oStore.Accept( L"tab\there", FP2 );
+	oStore.Accept( L"short.example", L"0123" );
+	oStore.Accept( L"nothex.example", L"0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEG" );
+	CHECK( oStore.Count() == 1 );
+
+	const std::wstring sPath = TempPath( L"trust.txt" );
+	CFileGuard oGuard( sPath );
+	CHECK( oStore.Save( sPath ) );
+	std::string sText;
+	CHECK( ReadBytes( sPath, sText ) );
+	CHECK( sText == "host.example\t" TLSTEST_FP1 "\n" );
+	CHECK( GetFileAttributesW( ( sPath + L".tmp" ).c_str() ) == INVALID_FILE_ATTRIBUTES );
+
+	CTlsTrustStore oLoaded;
+	CHECK( oLoaded.Load( sPath ) );
+	CHECK( oLoaded.Count() == 1 );
+	CHECK( oLoaded.IsAccepted( L"HOST.EXAMPLE", FP1 ) );
+
+	// Save replaces an existing file.
+	oStore.Accept( L"second.example", FP2 );
+	CHECK( oStore.Save( sPath ) );
+	CHECK( oLoaded.Load( sPath ) );
+	CHECK( oLoaded.Count() == 2 );
+	CHECK( oLoaded.IsAccepted( L"second.example", FP2 ) );
+
+	// A file that cannot be read leaves the store unchanged.
+	wchar_t szDir[ MAX_PATH + 1 ] = {};
+	CHECK( GetTempPathW( MAX_PATH + 1, szDir ) > 0 );
+	CHECK( ! oLoaded.Load( szDir ) );
+	CHECK( oLoaded.Count() == 2 );
+
+	// Malformed lines are skipped; CRLF and a missing final line end are tolerated.
+	CHECK( WriteBytes( sPath, "garbage\n" ) );
+	CHECK( oLoaded.Load( sPath ) );
+	CHECK( oLoaded.Count() == 0 );
+	CHECK( WriteBytes( sPath, "a.example\t" TLSTEST_FP1 "\r\nbad line\n\t" TLSTEST_FP2 "\nb.example\t0123\n"
+		"x.example\t" TLSTEST_FP1 "\textra\n\nc.example\t" TLSTEST_FP2 ) );
+	CHECK( oLoaded.Load( sPath ) );
+	CHECK( oLoaded.Count() == 2 );
+	CHECK( oLoaded.IsAccepted( L"a.example", FP1 ) );
+	CHECK( oLoaded.IsAccepted( L"c.example", FP2 ) );
+
+	// A missing file is an empty store.
+	CHECK( oLoaded.Load( TempPath( L"missing.txt" ) ) );
+	CHECK( oLoaded.Count() == 0 );
+
+	oStore.Clear();
+	CHECK( oStore.Count() == 0 );
+	CHECK( ! oStore.IsAccepted( L"host.example", FP1 ) );
+}
+
+TLS_TEST_OFFLINE(OfflinePendingPromptsDedupe)
+{
+	CTlsPendingPrompts oPending;
+	CHECK( oPending.Add( L"host.example", FP1 ) );
+	CHECK( ! oPending.Add( L"HOST.Example", FP1 ) );
+	CHECK( oPending.Add( L"host.example", FP2 ) );
+	oPending.Remove( L"Host.Example", FP1 );
+	CHECK( oPending.Add( L"host.example", FP1 ) );
+	CHECK( ! oPending.Add( L"host.example", FP2 ) );
+
+	// Many threads failing on the same host and certificate: one prompt.
+	CTlsPendingPrompts oShared;
+	std::atomic< int > nAdded( 0 );
+	std::vector< std::thread > oThreads;
+	for ( int i = 0 ; i < 8 ; ++i )
+	{
+		oThreads.emplace_back( [ &oShared, &nAdded ]()
+		{
+			for ( int j = 0 ; j < 1000 ; ++j )
+			{
+				if ( oShared.Add( L"race.example", FP1 ) )
+					++nAdded;
+			}
+		} );
+	}
+	for ( std::thread& oThread : oThreads )
+		oThread.join();
+	CHECK( nAdded == 1 );
+}
+
+TLS_TEST_OFFLINE(OfflineProblemFromStatus)
+{
+	CHECK( ProblemFromStatus( SEC_E_CERT_EXPIRED ) == TlsCertProblem::Expired );
+	CHECK( ProblemFromStatus( SEC_E_WRONG_PRINCIPAL ) == TlsCertProblem::WrongName );
+	CHECK( ProblemFromStatus( SEC_E_UNTRUSTED_ROOT ) == TlsCertProblem::Untrusted );
+	CHECK( ProblemFromStatus( CRYPT_E_REVOKED ) == TlsCertProblem::Revoked );
+	CHECK( ProblemFromStatus( SEC_E_ALGORITHM_MISMATCH ) == TlsCertProblem::None );
+
+	CHECK( ProblemFromStatus( CERT_E_EXPIRED ) == TlsCertProblem::Expired );
+	CHECK( ProblemFromStatus( CERT_E_CN_NO_MATCH ) == TlsCertProblem::WrongName );
+	CHECK( ProblemFromStatus( CERT_E_INVALID_NAME ) == TlsCertProblem::WrongName );
+	CHECK( ProblemFromStatus( CERT_E_UNTRUSTEDROOT ) == TlsCertProblem::Untrusted );
+	CHECK( ProblemFromStatus( CERT_E_CHAINING ) == TlsCertProblem::Untrusted );
+	CHECK( ProblemFromStatus( SEC_E_ISSUING_CA_UNTRUSTED ) == TlsCertProblem::Untrusted );
+	CHECK( ProblemFromStatus( CERT_E_REVOKED ) == TlsCertProblem::Revoked );
+	CHECK( ProblemFromStatus( TRUST_E_CERT_SIGNATURE ) == TlsCertProblem::Other );
+	CHECK( ProblemFromStatus( CERT_E_WRONG_USAGE ) == TlsCertProblem::Other );
+	CHECK( ProblemFromStatus( SEC_E_CERT_WRONG_USAGE ) == TlsCertProblem::Other );
+	CHECK( ProblemFromStatus( SEC_E_CERT_UNKNOWN ) == TlsCertProblem::Other );
+
+	CHECK( ProblemFromStatus( SEC_E_OK ) == TlsCertProblem::None );
+	CHECK( ProblemFromStatus( SEC_E_UNSUPPORTED_FUNCTION ) == TlsCertProblem::None );
+	CHECK( ProblemFromStatus( SEC_E_ILLEGAL_MESSAGE ) == TlsCertProblem::None );
+	CHECK( ProblemFromStatus( SEC_E_INTERNAL_ERROR ) == TlsCertProblem::None );
+	CHECK( ProblemFromStatus( SEC_E_DECRYPT_FAILURE ) == TlsCertProblem::None );
+}
+
+TLS_TEST_OFFLINE(OfflineVerifyWithoutCertificate)
+{
+	CHECK( VerifyServerCertificate( NULL, L"host.example" ) == TlsCertProblem::Other );
+	CHECK( CertFingerprintSha256( NULL ).empty() );
+}
+
+// TlsVerify, against public endpoints and tls_server.py.
+
+TLS_TEST_NETWORK(NetVerifyProblems)
+{
+	const struct { const char* pszHost; TlsCertProblem nExpected; } pCases[] =
+	{
+		{ "github.com",					TlsCertProblem::None },
+		{ "expired.badssl.com",			TlsCertProblem::Expired },
+		{ "wrong.host.badssl.com",		TlsCertProblem::WrongName },
+		{ "self-signed.badssl.com",		TlsCertProblem::Untrusted },
+		{ "untrusted-root.badssl.com",	TlsCertProblem::Untrusted },
+	};
+	for ( const auto& oCase : pCases )
+	{
+		TlsCertProblem nProblem = TlsCertProblem::Other;
+		std::wstring sFingerprint;
+		CHECK( ManualVerdict( oCase.pszHost, 443, oCase.pszHost, nProblem, &sFingerprint ) );
+		printf( "  %s: %s, SHA-256 %ls\n", oCase.pszHost, ProblemName( nProblem ), sFingerprint.c_str() );
+		CHECK( nProblem == oCase.nExpected );
+		CHECK( sFingerprint.size() == 64 );
+		CHECK( IsUpperHex( sFingerprint ) );
+	}
+}
+
+// The verdict of a Manual handshake and VerifyServerCertificate equals
+// Schannel's automatic validation, mapped with ProblemFromStatus.
+TLS_TEST_NETWORK(NetVerifyMatchesSchannel)
+{
+	const char* const pHosts[] =
+	{
+		"github.com", "expired.badssl.com", "wrong.host.badssl.com",
+		"self-signed.badssl.com", "untrusted-root.badssl.com"
+	};
+	bool bAllMatch = true, bAllCertificate = true, bAllManual = true;
+	for ( const char* pszHost : pHosts )
+	{
+		CTlsClient c( TlsCred::Validating, Widen( pszHost ) );
+		const bool bValid = RunHandshake( c, pszHost, 443 );
+		const SECURITY_STATUS nStatus = bValid ? SEC_E_OK : c.LastStatus();
+		const TlsCertProblem nSchannel = bValid ? TlsCertProblem::None : ProblemFromStatus( nStatus );
+
+		TlsCertProblem nManual = TlsCertProblem::Other;
+		const bool bManual = ManualVerdict( pszHost, 443, pszHost, nManual );
+
+		printf( "  %-26s Schannel 0x%08lX -> %-9s Manual %s\n", pszHost,
+			static_cast< unsigned long >( nStatus ), ProblemName( nSchannel ),
+			bManual ? ProblemName( nManual ) : "(handshake failed)" );
+		// A Validating failure that is not about the certificate says nothing.
+		if ( ! bValid && nSchannel == TlsCertProblem::None )
+			bAllCertificate = false;
+		if ( ! bManual )
+			bAllManual = false;
+		else if ( nManual != nSchannel )
+			bAllMatch = false;
+	}
+	CHECK( bAllCertificate );
+	CHECK( bAllManual );
+	CHECK( bAllMatch );
+}
+
+// The fingerprint is the SHA-256 hash Windows records for the certificate.
+TLS_TEST_NETWORK(NetFingerprintMatchesCertProperty)
+{
+	CTlsClient c( TlsCred::Manual, L"github.com" );
+	const SOCKET hSocket = ConnectAndHandshake( c, "github.com", 443, 0, false );
+	CSocketGuard oGuard( hSocket );
+	CHECK( hSocket != INVALID_SOCKET );
+	CHECK( c.PeerCertificate() != NULL );
+	BYTE pHash[ 32 ];
+	DWORD nHash = sizeof( pHash );
+	CHECK( CertGetCertificateContextProperty( c.PeerCertificate(), CERT_SHA256_HASH_PROP_ID, pHash, &nHash ) );
+	CHECK( nHash == 32 );
+	wchar_t szHex[ 65 ] = {};
+	for ( DWORD i = 0 ; i < nHash ; ++i )
+		swprintf_s( szHex + i * 2, 3, L"%02X", pHash[ i ] );
+	CHECK( CertFingerprintSha256( c.PeerCertificate() ) == szHex );
+}
+
+TLS_TEST_NETWORK(LocalVerifySelfSigned)
+{
+	TlsCertProblem nProblem = TlsCertProblem::None;
+	std::wstring sFingerprint;
+	CHECK( ManualVerdict( LOCAL_ADDRESS, LOCAL_PORT, "localhost", nProblem, &sFingerprint ) );
+	printf( "  localhost: %s, SHA-256 %ls\n", ProblemName( nProblem ), sFingerprint.c_str() );
+	CHECK( nProblem == TlsCertProblem::Untrusted );
+	CHECK( sFingerprint.size() == 64 );
 }
