@@ -83,7 +83,8 @@ jobs:
       shell: pwsh
       run: |
         $dir = $env:TLS_SERVER_DIR
-        $openssl = Join-Path $env:ProgramFiles 'Git\usr\bin\openssl.exe'
+        # Start-Process joins -ArgumentList with spaces and quotes nothing.
+        $openssl = '"' + (Join-Path $env:ProgramFiles 'Git\usr\bin\openssl.exe') + '"'
         $servers = @(
           @{ Name = 'server'; Ready = 'listening on \[::1\]:8443$'; Args = @('TlsTest/tls_server.py', '--cert', "$dir\cert.pem", '--key', "$dir\key.pem", '--log', $env:TLSTEST_SERVER_LOG, '--optional-port', '8444') },
           @{ Name = 'tls12'; Ready = 'listening on'; Args = @('TlsTest/openssl_driver.py', '--openssl', $openssl, '--cert', "$dir\cert.pem", '--key', "$dir\key.pem", '--port', '8445', '--protocol', 'tls1_2', '--command', 'R', '--log', "$dir\tls12.log") },
