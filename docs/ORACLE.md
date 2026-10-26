@@ -118,9 +118,17 @@ wineserver --wait
     - At the very least, with the client closed: run `isolate_home`, then delete
       `drive_c/users/$USER/AppData/Roaming/Shareaza/Data/Library*.dat` and `TigerTree.dat` in
       the prefix. They hold the index of what it saw.
-- **Install `vcrun2022` first.** Without it the fork's installer fetches the VC++ runtime itself,
-  from go.microsoft.com (`vc143/vcredist/vcredist.iss`). The 2.7.10.2 installer most likely does the
-  same: it carries the same download helper (`idp.dll`), but no run has shown it downloading.
+- **Install `vcrun2022` first.** Without it the fork's installer fetches the VC++ runtime itself
+  (`vc143/vcredist/vcredist.iss`).
+  - Up to `previ.2` it fetches a 2017 runtime, older than its own v143 build needs.
+  - Later releases fetch Microsoft's latest runtime from `aka.ms/vc14` whenever `vcruntime140.dll`,
+    `msvcp140.dll` or `mfc140u.dll` is missing or older than 14.44.
+  - winetricks 20240105 pins a stale hash for `vcrun2022`. Under `-q` it reports `SHA256 mismatch!`
+    and installs whatever `aka.ms/vs/17` serves. The x86 file the 2026-10-25 run downloaded
+    (sha256 `0c09f261…`) is 14.44.35211, new enough that no download happens. The Wine workflow
+    logs the versions it finds in the prefix.
+  - The 2.7.10.2 installer most likely downloads too: it carries the same download helper
+    (`idp.dll`), but no run has shown it downloading.
 - **No DLL override was needed.** With only `vcrun2022` added to a fresh 64-bit prefix, both
   clients installed, started, connected and closed under Wine 9.0 (`9.0~repack-4build3`).
 - **One harmless installer error:** Inno Setup's log shows `Internal error: Helper: Response message
