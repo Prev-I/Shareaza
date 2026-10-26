@@ -79,7 +79,23 @@ BOOL CSecurity::Check(CSecureRule* pRule) const
 {
 	CQuickLock oLock( m_pSection );
 
-	return pRule != NULL && GetGUID( pRule->m_pGUID ) != NULL;
+	// Compare pointers only: the caller's rule may have been freed since it
+	// was listed, so it must not be read before it is found here.
+	if ( pRule == NULL ) return FALSE;
+
+	if ( m_pRules.Find( pRule ) ) return TRUE;
+
+	for ( CAddressRuleMap::const_iterator i = m_pIPRules.begin(); i != m_pIPRules.end(); ++i )
+	{
+		if ( (*i).second == pRule ) return TRUE;
+	}
+
+	for ( CAddressIPv6RuleMap::const_iterator i = m_pIPv6Rules.begin(); i != m_pIPv6Rules.end(); ++i )
+	{
+		if ( (*i).second == pRule ) return TRUE;
+	}
+
+	return FALSE;
 }
 
 CSecureRule* CSecurity::GetGUID(const GUID& pGUID) const
