@@ -104,6 +104,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MiniUPnPc", "..\MiniUPnPc\M
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ShortURL", "..\plugins\ShortURL\ShortURL_143.vcxproj", "{D7D7FE07-A029-4B4D-A92E-7A25503F08EE}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TlsTest", "..\TlsTest\TlsTest_143.vcxproj", "{AE398C15-7B69-4A61-8330-D4FE60FBCCC1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -360,6 +362,14 @@ Global
 		{D7D7FE07-A029-4B4D-A92E-7A25503F08EE}.Release|Win32.Build.0 = Release|Win32
 		{D7D7FE07-A029-4B4D-A92E-7A25503F08EE}.Release|x64.ActiveCfg = Release|x64
 		{D7D7FE07-A029-4B4D-A92E-7A25503F08EE}.Release|x64.Build.0 = Release|x64
+		{AE398C15-7B69-4A61-8330-D4FE60FBCCC1}.Debug|Win32.ActiveCfg = Debug|Win32
+		{AE398C15-7B69-4A61-8330-D4FE60FBCCC1}.Debug|Win32.Build.0 = Debug|Win32
+		{AE398C15-7B69-4A61-8330-D4FE60FBCCC1}.Debug|x64.ActiveCfg = Debug|x64
+		{AE398C15-7B69-4A61-8330-D4FE60FBCCC1}.Debug|x64.Build.0 = Debug|x64
+		{AE398C15-7B69-4A61-8330-D4FE60FBCCC1}.Release|Win32.ActiveCfg = Release|Win32
+		{AE398C15-7B69-4A61-8330-D4FE60FBCCC1}.Release|Win32.Build.0 = Release|Win32
+		{AE398C15-7B69-4A61-8330-D4FE60FBCCC1}.Release|x64.ActiveCfg = Release|x64
+		{AE398C15-7B69-4A61-8330-D4FE60FBCCC1}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

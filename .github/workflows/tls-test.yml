@@ -1,0 +1,64 @@
+name: TLS tests
+
+# Builds TlsTest, the console test program for the Schannel TLS core, and runs
+# it offline and against public endpoints. A network test that still cannot
+# reach its endpoint after its retries makes TlsTest exit 2, which fails the
+# step as "endpoint unreachable", distinct from a wrong result.
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'prev-i/schannel-*'
+  pull_request:
+    paths:
+      - 'shareaza/Tls*'
+      - 'TlsTest/**'
+      - '.github/workflows/tls-test.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  tls-test:
+    runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: x64
+            configuration: Release
+          - platform: Win32
+            configuration: Debug
+    env:
+      # OutDir is $(SolutionDir)TlsTest\$(Platform)\$(Configuration)\; the build
+      # sets SolutionDir to vc143/, as a build of vc143/Shareaza.sln does.
+      TLSTEST_EXE: vc143/TlsTest/${{ matrix.platform }}/${{ matrix.configuration }}/TlsTest.exe
+    steps:
+    - name: Checkout GIT sources
+      uses: actions/checkout@v4
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Build
+      id: build
+      run: msbuild TlsTest/TlsTest_143.vcxproj /nologo /v:m /p:Configuration=${{ matrix.configuration }} /p:Platform=${{ matrix.platform }} /p:SolutionDir=${{ github.workspace }}/vc143/
+
+    - name: Offline tests
+      if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+      shell: pwsh
+      run: |
+        & $env:TLSTEST_EXE --offline
+        $code = $LASTEXITCODE
+        if ($code -eq 2) { Write-Output "::error::endpoint unreachable"; exit 1 }
+        exit $code
+
+    - name: Network tests
+      if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+      shell: pwsh
+      run: |
+        & $env:TLSTEST_EXE --network
+        $code = $LASTEXITCODE
+        if ($code -eq 2) { Write-Output "::error::endpoint unreachable"; exit 1 }
+        exit $code
