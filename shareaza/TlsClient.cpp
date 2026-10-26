@@ -30,6 +30,9 @@
 
 #include "TlsClient.h"
 
+#include <algorithm>
+#include <string.h>
+
 namespace
 {
 	// Windows validates the chain, the host name and the dates. Revocation is
@@ -45,9 +48,10 @@ namespace
 	const ULONG TLS_CONTEXT_FLAGS = ISC_REQ_SEQUENCE_DETECT | ISC_REQ_REPLAY_DETECT |
 		ISC_REQ_CONFIDENTIALITY | ISC_REQ_ALLOCATE_MEMORY | ISC_REQ_STREAM;
 
-	// Handshake input Schannel has not consumed. A record is at most 16 KiB
-	// plus overhead, so a buffer this large means the peer is misbehaving.
-	const size_t TLS_MAX_HANDSHAKE_INPUT = 1024 * 1024;
+	// Received bytes Schannel has not consumed, in any state. A record is at
+	// most 16 KiB plus overhead, so a buffer this large means the peer is
+	// misbehaving.
+	const size_t TLS_MAX_INPUT = 1024 * 1024;
 
 	// The process-wide credentials, indexed by TlsCred. SRWLOCK_INIT is a
 	// constant, so the lock is usable before any dynamic initialisation.
@@ -109,6 +113,27 @@ namespace
 		FreeContextBuffer( oBuffer.pvBuffer );
 		oBuffer.pvBuffer = NULL;
 		oBuffer.cbBuffer = 0;
+	}
+
+	// Frees a token Schannel allocated, without sending it.
+	void DropToken(SecBuffer& oBuffer)
+	{
+		if ( oBuffer.pvBuffer == NULL )
+			return;
+		FreeContextBuffer( oBuffer.pvBuffer );
+		oBuffer.pvBuffer = NULL;
+		oBuffer.cbBuffer = 0;
+	}
+
+	// The size of the SECBUFFER_EXTRA buffer in a buffer list, or 0.
+	ULONG ExtraSize(const SecBuffer* pBuffers, size_t nBuffers)
+	{
+		for ( size_t i = 0 ; i < nBuffers ; ++i )
+		{
+			if ( pBuffers[ i ].BufferType == SECBUFFER_EXTRA )
+				return pBuffers[ i ].cbBuffer;
+		}
+		return 0;
 	}
 }
 
@@ -189,79 +214,158 @@ TlsResult CTlsClient::Handshake(const BYTE* pIn, size_t nIn, std::vector<BYTE>& 
 {
 	switch ( m_nState )
 	{
-	case State::Initial:
-		return Fail( SEC_E_INVALID_HANDLE );
 	case State::Failed:
 		return TlsResult::Failed;
-	case State::Established:
-		m_oIn.insert( m_oIn.end(), pIn, pIn + nIn );
-		return TlsResult::Done;
 	case State::Handshaking:
 		break;
+	default:
+		// Before Start(), or once established: received bytes go to Decrypt().
+		return Fail( SEC_E_INVALID_HANDLE );
 	}
 
-	m_oIn.insert( m_oIn.end(), pIn, pIn + nIn );
-	if ( m_oIn.size() > TLS_MAX_HANDSHAKE_INPUT )
+	if ( nIn > TLS_MAX_INPUT - m_oIn.size() )
 		return Fail( SEC_E_ILLEGAL_MESSAGE );
+	if ( nIn )
+		m_oIn.insert( m_oIn.end(), pIn, pIn + nIn );
 
-	bool bNoClientCertificate = false;
-	while ( ! m_oIn.empty() )
+	const TlsResult nResult = Negotiate( oSend, false );
+	return nResult == TlsResult::Done ? Establish() : nResult;
+}
+
+TlsResult CTlsClient::Encrypt(const BYTE* p, size_t n, std::vector<BYTE>& oSend)
+{
+	switch ( m_nState )
 	{
-		SecBuffer oIn[ 2 ] =
+	case State::Failed:
+		return TlsResult::Failed;
+	case State::Closed:
+		return TlsResult::Closed;
+	case State::Established:
+	case State::Renegotiating:
+		break;
+	default:
+		return Fail( SEC_E_INVALID_HANDLE );
+	}
+	if ( m_bShutdown )
+		return TlsResult::Closed;
+
+	const size_t nStart = oSend.size();
+	const ULONG cbHeader = m_oSizes.cbHeader, cbTrailer = m_oSizes.cbTrailer;
+	size_t nDone = 0;
+	while ( nDone < n )
+	{
+		// One record: header, data, trailer, encrypted in place in oSend.
+		const ULONG cbData = static_cast< ULONG >( ( std::min )( n - nDone, static_cast< size_t >( m_oSizes.cbMaximumMessage ) ) );
+		const size_t nRecord = oSend.size();
+		oSend.resize( nRecord + cbHeader + cbData + cbTrailer );
+		BYTE* const pRecord = oSend.data() + nRecord;
+		memcpy( pRecord + cbHeader, p + nDone, cbData );
+
+		BYTE* const pPart[ 3 ] = { pRecord, pRecord + cbHeader, pRecord + cbHeader + cbData };
+		const ULONG nPart[ 3 ] = { cbHeader, cbData, cbTrailer };
+		SecBuffer oBuffers[ 4 ] =
 		{
-			{ static_cast< ULONG >( m_oIn.size() ), SECBUFFER_TOKEN, m_oIn.data() },
+			{ cbHeader, SECBUFFER_STREAM_HEADER, pPart[ 0 ] },
+			{ cbData, SECBUFFER_DATA, pPart[ 1 ] },
+			{ cbTrailer, SECBUFFER_STREAM_TRAILER, pPart[ 2 ] },
 			{ 0, SECBUFFER_EMPTY, NULL }
 		};
-		SecBufferDesc oInDesc = { SECBUFFER_VERSION, 2, oIn };
-		SecBuffer oOut = { 0, SECBUFFER_TOKEN, NULL };
-		SecBufferDesc oOutDesc = { SECBUFFER_VERSION, 1, &oOut };
-		ULONG nAttributes = 0;
-		const SECURITY_STATUS nStatus = InitializeSecurityContextW( &m_hCred, &m_hContext, TargetName(),
-			TLS_CONTEXT_FLAGS, 0, 0, &oInDesc, 0, &m_hContext, &oOutDesc, &nAttributes, NULL );
-		TakeToken( oOut, oSend );
-		m_nStatus = nStatus;
-
-		if ( nStatus == SEC_E_INCOMPLETE_MESSAGE )
-			return TlsResult::NeedMore;			// m_oIn is kept whole
-
-		if ( nStatus == SEC_I_INCOMPLETE_CREDENTIALS )
+		SecBufferDesc oDesc = { SECBUFFER_VERSION, 4, oBuffers };
+		const SECURITY_STATUS nStatus = EncryptMessage( &m_hContext, 0, &oDesc, 0 );
+		if ( nStatus != SEC_E_OK )
 		{
-			// The server asked for a client certificate. There is none: call
-			// again with the same input and Schannel continues without one.
-			if ( bNoClientCertificate )
-				return Fail( nStatus );
-			bNoClientCertificate = true;
-			continue;
+			oSend.resize( nStart );
+			return Fail( nStatus );
 		}
 
-		if ( nStatus != SEC_E_OK && nStatus != SEC_I_CONTINUE_NEEDED )
-			return Fail( nStatus );
-
-		// Keep what Schannel did not consume: the next handshake message, or
-		// after the last one, the first application data.
-		if ( oIn[ 1 ].BufferType == SECBUFFER_EXTRA && oIn[ 1 ].cbBuffer > 0 && oIn[ 1 ].cbBuffer <= m_oIn.size() )
-			m_oIn.erase( m_oIn.begin(), m_oIn.end() - static_cast< std::ptrdiff_t >( oIn[ 1 ].cbBuffer ) );
-		else
-			m_oIn.clear();
-
-		if ( nStatus == SEC_E_OK )
-			return Establish();
+		// Schannel may use less than the trailer it asked for: close the gaps.
+		size_t nLength = 0;
+		for ( size_t i = 0 ; i < 3 ; ++i )
+		{
+			if ( oBuffers[ i ].pvBuffer != pPart[ i ] || oBuffers[ i ].cbBuffer > nPart[ i ] )
+			{
+				oSend.resize( nStart );
+				return Fail( SEC_E_INTERNAL_ERROR );
+			}
+			if ( pRecord + nLength != pPart[ i ] )
+				memmove( pRecord + nLength, pPart[ i ], oBuffers[ i ].cbBuffer );
+			nLength += oBuffers[ i ].cbBuffer;
+		}
+		oSend.resize( nRecord + nLength );
+		nDone += cbData;
 	}
-	return TlsResult::NeedMore;
+
+	m_nStatus = SEC_E_OK;
+	return TlsResult::Ok;
 }
 
-TlsResult CTlsClient::Encrypt(const BYTE* /*p*/, size_t /*n*/, std::vector<BYTE>& /*oSend*/)
+TlsResult CTlsClient::Decrypt(const BYTE* pIn, size_t nIn, std::vector<BYTE>& oPlain, std::vector<BYTE>& oSend)
 {
-	return Fail( SEC_E_UNSUPPORTED_FUNCTION );
+	switch ( m_nState )
+	{
+	case State::Failed:
+		return TlsResult::Failed;
+	case State::Closed:
+		return TlsResult::Closed;
+	case State::Established:
+	case State::Renegotiating:
+		break;
+	default:
+		return Fail( SEC_E_INVALID_HANDLE );
+	}
+
+	// The input is buffered in slices no larger than the space left, and each
+	// slice is decrypted before the next, so a large input does not trip the
+	// cap. Only an unconsumed buffer that fills the cap fails the session.
+	const size_t nPlain = oPlain.size();
+	size_t nDone = 0;
+	do
+	{
+		const size_t nTake = ( std::min )( nIn - nDone, TLS_MAX_INPUT - m_oIn.size() );
+		if ( nTake == 0 && nDone < nIn )
+			return Fail( SEC_E_ILLEGAL_MESSAGE );
+		if ( nTake )
+			m_oIn.insert( m_oIn.end(), pIn + nDone, pIn + nDone + nTake );
+		nDone += nTake;
+
+		const TlsResult nResult = DecryptBuffered( oPlain, oSend );
+		if ( nResult == TlsResult::Closed || nResult == TlsResult::Failed )
+			return nResult;
+	}
+	while ( nDone < nIn );
+
+	return oPlain.size() > nPlain ? TlsResult::Ok : TlsResult::NeedMore;
 }
 
-TlsResult CTlsClient::Decrypt(const BYTE* /*pIn*/, size_t /*nIn*/, std::vector<BYTE>& /*oPlain*/, std::vector<BYTE>& /*oSend*/)
+void CTlsClient::Shutdown(std::vector<BYTE>& oSend)
 {
-	return Fail( SEC_E_UNSUPPORTED_FUNCTION );
-}
+	if ( m_bShutdown )
+		return;
+	if ( m_nState != State::Established && m_nState != State::Renegotiating && m_nState != State::Closed )
+		return;
+	m_bShutdown = true;
 
-void CTlsClient::Shutdown(std::vector<BYTE>& /*oSend*/)
-{
+	DWORD nType = SCHANNEL_SHUTDOWN;
+	SecBuffer oControl = { static_cast< ULONG >( sizeof( nType ) ), SECBUFFER_TOKEN, &nType };
+	SecBufferDesc oControlDesc = { SECBUFFER_VERSION, 1, &oControl };
+	SECURITY_STATUS nStatus = ApplyControlToken( &m_hContext, &oControlDesc );
+	if ( nStatus != SEC_E_OK )
+	{
+		m_nStatus = nStatus;
+		return;
+	}
+
+	// With the shutdown token applied, the next call produces close_notify.
+	SecBuffer oOut = { 0, SECBUFFER_TOKEN, NULL };
+	SecBufferDesc oOutDesc = { SECBUFFER_VERSION, 1, &oOut };
+	ULONG nAttributes = 0;
+	nStatus = InitializeSecurityContextW( &m_hCred, &m_hContext, TargetName(),
+		TLS_CONTEXT_FLAGS, 0, 0, NULL, 0, &m_hContext, &oOutDesc, &nAttributes, NULL );
+	if ( nStatus == SEC_E_OK || nStatus == SEC_I_CONTEXT_EXPIRED )
+		TakeToken( oOut, oSend );
+	else
+		DropToken( oOut );
+	m_nStatus = nStatus;
 }
 
 bool CTlsClient::IsEstablished() const
@@ -303,6 +407,9 @@ TlsResult CTlsClient::Fail(SECURITY_STATUS nStatus)
 
 TlsResult CTlsClient::Establish()
 {
+	if ( ! QueryStreamSizes() )
+		return TlsResult::Failed;
+
 	SecPkgContext_ConnectionInfo oInfo = {};
 	if ( QueryContextAttributesW( &m_hContext, SECPKG_ATTR_CONNECTION_INFO, &oInfo ) == SEC_E_OK )
 		m_nProtocol = oInfo.dwProtocol;
@@ -314,6 +421,163 @@ TlsResult CTlsClient::Establish()
 	m_nStatus = SEC_E_OK;
 	m_nState = State::Established;
 	return TlsResult::Done;
+}
+
+bool CTlsClient::QueryStreamSizes()
+{
+	SecPkgContext_StreamSizes oSizes = {};
+	const SECURITY_STATUS nStatus = QueryContextAttributesW( &m_hContext, SECPKG_ATTR_STREAM_SIZES, &oSizes );
+	if ( nStatus != SEC_E_OK )
+	{
+		Fail( nStatus );
+		return false;
+	}
+	if ( oSizes.cbMaximumMessage == 0 )
+	{
+		Fail( SEC_E_INTERNAL_ERROR );
+		return false;
+	}
+	m_oSizes = oSizes;
+	return true;
+}
+
+TlsResult CTlsClient::Negotiate(std::vector<BYTE>& oSend, bool bCallOnEmpty)
+{
+	bool bNoClientCertificate = false;
+	while ( ! m_oIn.empty() || bCallOnEmpty )
+	{
+		bCallOnEmpty = false;
+		// Schannel is given a non-null pointer even for an empty token.
+		BYTE nEmpty = 0;
+		SecBuffer oIn[ 2 ] =
+		{
+			{ static_cast< ULONG >( m_oIn.size() ), SECBUFFER_TOKEN, m_oIn.empty() ? &nEmpty : m_oIn.data() },
+			{ 0, SECBUFFER_EMPTY, NULL }
+		};
+		SecBufferDesc oInDesc = { SECBUFFER_VERSION, 2, oIn };
+		SecBuffer oOut = { 0, SECBUFFER_TOKEN, NULL };
+		SecBufferDesc oOutDesc = { SECBUFFER_VERSION, 1, &oOut };
+		ULONG nAttributes = 0;
+		const SECURITY_STATUS nStatus = InitializeSecurityContextW( &m_hCred, &m_hContext, TargetName(),
+			TLS_CONTEXT_FLAGS, 0, 0, &oInDesc, 0, &m_hContext, &oOutDesc, &nAttributes, NULL );
+		m_nStatus = nStatus;
+
+		if ( nStatus == SEC_E_INCOMPLETE_MESSAGE )
+		{
+			DropToken( oOut );
+			return TlsResult::NeedMore;			// m_oIn is kept whole
+		}
+
+		if ( nStatus == SEC_I_INCOMPLETE_CREDENTIALS )
+		{
+			// The server asked for a client certificate. There is none: call
+			// again with the same input and Schannel continues without one.
+			DropToken( oOut );
+			if ( bNoClientCertificate )
+				return Fail( nStatus );
+			bNoClientCertificate = true;
+			bCallOnEmpty = m_oIn.empty();
+			continue;
+		}
+
+		if ( nStatus != SEC_E_OK && nStatus != SEC_I_CONTINUE_NEEDED )
+		{
+			DropToken( oOut );
+			return Fail( nStatus );
+		}
+		TakeToken( oOut, oSend );
+
+		// Keep what Schannel did not consume: the next handshake message, or
+		// after the last one, the first application data.
+		const size_t nBefore = m_oIn.size();
+		const ULONG nExtra = ExtraSize( oIn, 2 );
+		if ( nExtra > nBefore )
+			return Fail( SEC_E_INTERNAL_ERROR );
+		m_oIn.erase( m_oIn.begin(), m_oIn.end() - static_cast< std::ptrdiff_t >( nExtra ) );
+
+		if ( nStatus == SEC_E_OK )
+			return TlsResult::Done;
+
+		// Nothing consumed: wait for more input rather than spin.
+		if ( nBefore && nExtra == nBefore )
+			return TlsResult::NeedMore;
+	}
+	return TlsResult::NeedMore;
+}
+
+TlsResult CTlsClient::DecryptBuffered(std::vector<BYTE>& oPlain, std::vector<BYTE>& oSend)
+{
+	bool bRenegotiateNow = false;
+	for ( ;; )
+	{
+		if ( m_nState == State::Renegotiating )
+		{
+			// A post-handshake message: Schannel takes the bytes past it (if
+			// any) through InitializeSecurityContextW, called at least once.
+			const TlsResult nResult = Negotiate( oSend, bRenegotiateNow );
+			bRenegotiateNow = false;
+			if ( nResult != TlsResult::Done )
+				return nResult;
+			if ( ! QueryStreamSizes() )
+				return TlsResult::Failed;
+			m_nStatus = SEC_E_OK;
+			m_nState = State::Established;
+		}
+
+		if ( m_oIn.empty() )
+			return TlsResult::NeedMore;
+
+		SecBuffer oBuffers[ 4 ] =
+		{
+			{ static_cast< ULONG >( m_oIn.size() ), SECBUFFER_DATA, m_oIn.data() },
+			{ 0, SECBUFFER_EMPTY, NULL },
+			{ 0, SECBUFFER_EMPTY, NULL },
+			{ 0, SECBUFFER_EMPTY, NULL }
+		};
+		SecBufferDesc oDesc = { SECBUFFER_VERSION, 4, oBuffers };
+		const SECURITY_STATUS nStatus = DecryptMessage( &m_hContext, &oDesc, 0, NULL );
+		m_nStatus = nStatus;
+
+		if ( nStatus == SEC_E_INCOMPLETE_MESSAGE )
+			return TlsResult::NeedMore;			// m_oIn is kept whole
+		if ( nStatus == SEC_I_CONTEXT_EXPIRED )
+		{
+			// close_notify. Anything after it is not part of the session.
+			m_oIn.clear();
+			m_nState = State::Closed;
+			return TlsResult::Closed;
+		}
+		if ( nStatus != SEC_E_OK && nStatus != SEC_I_RENEGOTIATE )
+			return Fail( nStatus );
+
+		// The plaintext is decrypted in place, inside m_oIn: copy it out
+		// before the buffer changes.
+		const BYTE* const pFirst = m_oIn.data();
+		const BYTE* const pLast = pFirst + m_oIn.size();
+		for ( size_t i = 0 ; i < 4 ; ++i )
+		{
+			if ( oBuffers[ i ].BufferType != SECBUFFER_DATA || oBuffers[ i ].cbBuffer == 0 )
+				continue;
+			const BYTE* const pData = static_cast< const BYTE* >( oBuffers[ i ].pvBuffer );
+			if ( pData < pFirst || pData > pLast || oBuffers[ i ].cbBuffer > static_cast< size_t >( pLast - pData ) )
+				return Fail( SEC_E_INTERNAL_ERROR );
+			oPlain.insert( oPlain.end(), pData, pData + oBuffers[ i ].cbBuffer );
+		}
+
+		const ULONG nExtra = ExtraSize( oBuffers, 4 );
+		if ( nExtra > m_oIn.size() )
+			return Fail( SEC_E_INTERNAL_ERROR );
+		if ( nStatus == SEC_E_OK && nExtra == m_oIn.size() )
+			return Fail( SEC_E_INTERNAL_ERROR );	// nothing consumed
+		m_oIn.erase( m_oIn.begin(), m_oIn.end() - static_cast< std::ptrdiff_t >( nExtra ) );
+
+		if ( nStatus == SEC_I_RENEGOTIATE )
+		{
+			++m_nRenegotiations;
+			m_nState = State::Renegotiating;
+			bRenegotiateNow = true;
+		}
+	}
 }
 
 SEC_WCHAR* CTlsClient::TargetName() const

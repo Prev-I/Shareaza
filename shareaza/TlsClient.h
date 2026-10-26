@@ -130,6 +130,14 @@ private:
 
 	TlsResult	Fail(SECURITY_STATUS nStatus);
 	TlsResult	Establish();
+	bool		QueryStreamSizes();
+	// Runs InitializeSecurityContextW over m_oIn until it needs more input
+	// (NeedMore), completes (Done) or fails. bCallOnEmpty calls it once even
+	// with nothing buffered.
+	TlsResult	Negotiate(std::vector<BYTE>& oSend, bool bCallOnEmpty);
+	// Decrypts the records in m_oIn, handling post-handshake messages.
+	// NeedMore once only a partial record (or nothing) is left.
+	TlsResult	DecryptBuffered(std::vector<BYTE>& oPlain, std::vector<BYTE>& oSend);
 	SEC_WCHAR*	TargetName() const;
 
 	CTlsClient(const CTlsClient&) = delete;
