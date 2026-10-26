@@ -86,6 +86,7 @@ public:
 	INT_PTR			GetCount() const;
 	BOOL			Check(CSecureRule* pRule) const;
 	void			Add(CSecureRule* pRule);
+	void			Replace(CSecureRule* pRule);
 	void			Remove(CSecureRule* pRule);
 	void			MoveUp(CSecureRule* pRule);
 	void			MoveDown(CSecureRule* pRule);

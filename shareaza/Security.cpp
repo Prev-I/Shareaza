@@ -199,6 +199,28 @@ void CSecurity::Add(CSecureRule* pRule)
 	PostMainWndMessage( WM_SANITY_CHECK );
 }
 
+// Store an edited copy of a rule, which carries the original's GUID. Add()
+// files a single-address rule by address alone, so drop the original first,
+// or it stays active next to the copy. Add() handles every other case.
+void CSecurity::Replace(CSecureRule* pRule)
+{
+	CQuickLock oLock( m_pSection );
+
+	pRule->MaskFix();
+
+	const bool bSingleAddress =
+		( pRule->m_nType == CSecureRule::srAddress && *(DWORD*)pRule->m_nMask == 0xffffffff ) ||
+		( pRule->m_nType == CSecureRule::srAddressIPv6 && pRule->m_nIPv6PrefixLen == 128 );
+
+	CSecureRule* pOriginal = GetGUID( pRule->m_pGUID );
+	if ( bSingleAddress && pOriginal != NULL && pOriginal != pRule )
+	{
+		Remove( pOriginal );
+	}
+
+	Add( pRule );
+}
+
 void CSecurity::Remove(CSecureRule* pRule)
 {
 	CQuickLock oLock( m_pSection );
