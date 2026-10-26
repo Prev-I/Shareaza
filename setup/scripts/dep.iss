@@ -113,6 +113,7 @@ begin
 
 			if SmartExec(products[i], ResultCode) then begin
 				//setup executed; ResultCode contains the exit code
+				Log(products[i].Title + ' exited with ' + IntToStr(ResultCode));
 				if (products[i].MustRebootAfter) then begin
 					//delay reboot after install if we installed the last dependency anyways
 					if (i = productCount - 1) then begin
@@ -132,6 +133,7 @@ begin
 					break;
 				end;
 			end else begin
+				Log(products[i].Title + ' could not be started');
 				Result := InstallError;
 				break;
 			end;

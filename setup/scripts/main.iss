@@ -152,10 +152,10 @@ WizardSmallImageFile=setup\misc\corner.bmp
 ChangesAssociations=yes
 ChangesEnvironment=yes
 OutputManifestFile=Manifest_{#ConfigurationName}{#PlatformName}.txt
-MinVersion=6.0
+MinVersion=10.0
 #if PlatformName == "x64"
-ArchitecturesAllowed=x64 arm64
-ArchitecturesInstallIn64BitMode=x64 arm64
+ArchitecturesAllowed=x64os arm64
+ArchitecturesInstallIn64BitMode=x64os arm64
 #endif
 
 ; Set the CVS root as source dir (up 2 levels)
@@ -179,8 +179,8 @@ AppUpdatesURL=http://shareaza.sourceforge.net/?id=download
 Name: "language"; Description: "{cm:tasks_languages}";
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"
 Name: "quicklaunch"; Description: "{cm:CreateQuickLaunchIcon}"
-Name: "firewall"; Description: "{cm:tasks_firewall}"; MinVersion: 5.1sp2
-Name: "upnp"; Description: "{cm:tasks_upnp}"; MinVersion: 5.1; Check: CanUserModifyServices
+Name: "firewall"; Description: "{cm:tasks_firewall}"
+Name: "upnp"; Description: "{cm:tasks_upnp}"; Check: CanUserModifyServices
 Name: "deleteoldsetup"; Description: "{cm:tasks_deleteoldsetup}"; Check: EnableDeleteOldSetup
 Name: "resetdiscoveryhostcache"; Description: "{cm:tasks_resetdiscoveryhostcache}"; Flags: unchecked
 

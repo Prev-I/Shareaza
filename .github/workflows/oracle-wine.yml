@@ -127,6 +127,29 @@ jobs:
                 [ -d "$dl" ] && [ ! -L "$dl" ] || { echo "::error::isolate_home left Downloads linked"; exit 1; }
                 winetricks -q vcrun2022
                 wineserver --wait
+                # Releases after previ.2 make the fork's installer download a runtime
+                # itself when any of these is missing or older than 14.44. winetricks
+                # 20240105 installs whatever aka.ms/vs/17 serves, despite its stale
+                # hash, so record what that was.
+                python3 -I - "$WINEPREFIX/drive_c/windows" <<'EOF'
+                import struct, sys
+                low = False
+                for d in ('system32', 'syswow64'):
+                    for f in ('vcruntime140.dll', 'msvcp140.dll', 'mfc140u.dll'):
+                        try:
+                            b = open(f'{sys.argv[1]}/{d}/{f}', 'rb').read()
+                        except OSError:
+                            print(f'{d}/{f}: missing'); low = True; continue
+                        i = b.find(b'\xbd\x04\xef\xfe')
+                        if i < 0:
+                            print(f'{d}/{f}: no version'); low = True; continue
+                        ms, ls = struct.unpack_from('<II', b, i + 8)
+                        v = (ms >> 16, ms & 0xffff, ls >> 16, ls & 0xffff)
+                        print(f'{d}/{f}: ' + '.'.join(map(str, v)))
+                        low = low or v[:2] < (14, 44)
+                if low:
+                    print('::warning::the VC++ runtime in the prefix is missing or older than 14.44, so the fork installer will download one')
+                EOF
 
         -   name: Install Shareaza silently
             run: |
