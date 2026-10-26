@@ -729,10 +729,13 @@ TLS_TEST_OFFLINE(OfflineTrustStore)
 	CHECK( oLoaded.Count() == 2 );
 	CHECK( oLoaded.IsAccepted( L"second.example", FP2 ) );
 
-	// A file that cannot be read leaves the store unchanged.
+	// A file that cannot be read, here a directory, leaves the store unchanged.
 	wchar_t szDir[ MAX_PATH + 1 ] = {};
 	CHECK( GetTempPathW( MAX_PATH + 1, szDir ) > 0 );
-	CHECK( ! oLoaded.Load( szDir ) );
+	std::wstring sDir( szDir );
+	if ( ! sDir.empty() && sDir.back() == L'\\' )
+		sDir.pop_back();
+	CHECK( ! oLoaded.Load( sDir ) );
 	CHECK( oLoaded.Count() == 2 );
 
 	// Malformed lines are skipped; CRLF and a missing final line end are tolerated.

@@ -73,23 +73,24 @@ std::wstring CertFingerprintSha256(PCCERT_CONTEXT pCert);
 // scheme is https, or if the URL names no valid host.
 std::wstring TlsHostFromUrl(const std::wstring& sUrl);
 
-// The certificates the user accepted, by host and fingerprint. Hosts compare
-// case-insensitively (ASCII). Fingerprints are 64 hex digits, compared
-// case-insensitively.
+// The certificates the user accepted, by host and fingerprint. Hosts are
+// ASCII, as TlsHostFromUrl() returns them, and compare case-insensitively.
+// Fingerprints are 64 hex digits, compared case-insensitively.
 class CTlsTrustStore
 {
 public:
 	CTlsTrustStore();
 
 	bool	IsAccepted(const std::wstring& sHost, const std::wstring& sFingerprint) const;
-	// Ignores an empty host, a host holding control characters and a
-	// fingerprint that is not 64 hex digits.
+	// Ignores an empty host, a host holding anything but printable ASCII
+	// other than a space, and a fingerprint that is not 64 hex digits.
 	void	Accept(const std::wstring& sHost, const std::wstring& sFingerprint);
 	void	Clear();
 	size_t	Count() const;
 
 	// Replaces the store with the file's entries: UTF-8, one
-	// "host<TAB>fingerprint" line per entry. Malformed lines are skipped.
+	// "host<TAB>fingerprint" line per entry. Malformed lines, and lines
+	// Accept() would ignore, are skipped.
 	// A missing file is an empty store and returns true. False if the file
 	// cannot be read; the store is then unchanged.
 	bool	Load(const std::wstring& sPath);
@@ -108,7 +109,8 @@ private:
 };
 
 // The certificate prompts waiting for the user, so that several sources
-// failing on the same host and certificate produce one prompt.
+// failing on the same host and certificate produce one prompt. Hosts and
+// fingerprints compare case-insensitively (ASCII).
 class CTlsPendingPrompts
 {
 public:
