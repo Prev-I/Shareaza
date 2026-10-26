@@ -326,7 +326,11 @@ void CSecureRuleDlg::OnOK()
 							+ m_nExpireH * 3600 + m_nExpireM * 60;
 	}
 
-	Security.Add( m_pRule );
+	// An edited rule is a copy of the original and replaces it
+	if ( m_bNew )
+		Security.Add( m_pRule );
+	else
+		Security.Replace( m_pRule );
 	m_pRule = NULL;
 
 	CSkinDialog::OnOK();

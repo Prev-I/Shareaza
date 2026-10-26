@@ -79,7 +79,23 @@ BOOL CSecurity::Check(CSecureRule* pRule) const
 {
 	CQuickLock oLock( m_pSection );
 
-	return pRule != NULL && GetGUID( pRule->m_pGUID ) != NULL;
+	// Compare pointers only: the caller's rule may have been freed since it
+	// was listed, so it must not be read before it is found here.
+	if ( pRule == NULL ) return FALSE;
+
+	if ( m_pRules.Find( pRule ) ) return TRUE;
+
+	for ( CAddressRuleMap::const_iterator i = m_pIPRules.begin(); i != m_pIPRules.end(); ++i )
+	{
+		if ( (*i).second == pRule ) return TRUE;
+	}
+
+	for ( CAddressIPv6RuleMap::const_iterator i = m_pIPv6Rules.begin(); i != m_pIPv6Rules.end(); ++i )
+	{
+		if ( (*i).second == pRule ) return TRUE;
+	}
+
+	return FALSE;
 }
 
 CSecureRule* CSecurity::GetGUID(const GUID& pGUID) const
@@ -93,6 +109,11 @@ CSecureRule* CSecurity::GetGUID(const GUID& pGUID) const
 	}
 
 	for ( CAddressRuleMap::const_iterator i = m_pIPRules.begin(); i != m_pIPRules.end(); ++i )
+	{
+		if( (*i).second->m_pGUID == pGUID ) return (*i).second;
+	}
+
+	for ( CAddressIPv6RuleMap::const_iterator i = m_pIPv6Rules.begin(); i != m_pIPv6Rules.end(); ++i )
 	{
 		if( (*i).second->m_pGUID == pGUID ) return (*i).second;
 	}
@@ -177,8 +198,19 @@ void CSecurity::Add(CSecureRule* pRule)
 			}
 			else if ( pExistingRule != pRule )
 			{
-				*pExistingRule = *pRule;
-				delete pRule;
+				if ( m_pRules.Find( pExistingRule ) )
+				{
+					// Overwrite in place, so the rule keeps its position.
+					*pExistingRule = *pRule;
+					delete pRule;
+				}
+				else
+				{
+					// Rules in an address map are filed by address: replace
+					// them, never change them in place.
+					Remove( pExistingRule );
+					m_pRules.AddHead( pRule );
+				}
 			}
 		}
 
@@ -186,6 +218,28 @@ void CSecurity::Add(CSecureRule* pRule)
 
 	// Check all lists for newly denied hosts
 	PostMainWndMessage( WM_SANITY_CHECK );
+}
+
+// Store an edited copy of a rule, which carries the original's GUID. Add()
+// files a single-address rule by address alone, so drop the original first,
+// or it stays active next to the copy. Add() handles every other case.
+void CSecurity::Replace(CSecureRule* pRule)
+{
+	CQuickLock oLock( m_pSection );
+
+	pRule->MaskFix();
+
+	const bool bSingleAddress =
+		( pRule->m_nType == CSecureRule::srAddress && *(DWORD*)pRule->m_nMask == 0xffffffff ) ||
+		( pRule->m_nType == CSecureRule::srAddressIPv6 && pRule->m_nIPv6PrefixLen == 128 );
+
+	CSecureRule* pOriginal = GetGUID( pRule->m_pGUID );
+	if ( bSingleAddress && pOriginal != NULL && pOriginal != pRule )
+	{
+		Remove( pOriginal );
+	}
+
+	Add( pRule );
 }
 
 void CSecurity::Remove(CSecureRule* pRule)
@@ -206,7 +260,7 @@ void CSecurity::Remove(CSecureRule* pRule)
 			*(DWORD*)pRule->m_nMask == 0xffffffff )
 		{
 			CAddressRuleMap::const_iterator i = m_pIPRules.find( *(DWORD*)pRule->m_nIP );
-			if ( i != m_pIPRules.end() )
+			if ( i != m_pIPRules.end() && (*i).second == pRule )
 			{
 				m_pIPRules.erase( i );
 			}
@@ -1086,19 +1140,18 @@ BOOL CSecurity::FromXML(CXMLElement* pXML)
 		{
 			CQuickLock oLock( m_pSection );
 			CSecureRule* pRule	= NULL;
+			CSecureRule* pExisting = NULL;
 			CString strGUID		= pElement->GetAttributeValue( _T("guid") );
-			BOOL bExisting		= FALSE;
 			GUID pGUID;
 
+			// Parse into a new rule even when one with this GUID exists. Rules in
+			// an address map are filed by address: replace them, never change
+			// them in place.
 			if ( Hashes::fromGuid( strGUID, &pGUID ) )
 			{
-				if ( ( pRule = GetGUID( pGUID ) ) != NULL ) bExisting = TRUE;
-
-				if ( pRule == NULL )
-				{
-					pRule = new CSecureRule( FALSE );
-					pRule->m_pGUID = pGUID;
-				}
+				pExisting = GetGUID( pGUID );
+				pRule = new CSecureRule( FALSE );
+				pRule->m_pGUID = pGUID;
 			}
 			else
 			{
@@ -1107,13 +1160,30 @@ BOOL CSecurity::FromXML(CXMLElement* pXML)
 
 			if ( pRule->FromXML( pElement ) )
 			{
-				if ( ! bExisting )
+				pRule->MaskFix();
+
+				const bool bSingleIP = pRule->m_nType == CSecureRule::srAddress &&
+					*(DWORD*)pRule->m_nMask == 0xffffffff;
+
+				if ( pExisting )
 				{
-					pRule->MaskFix();
+					// The file carries no hit counts; keep the ones we have
+					pRule->m_nToday	= pExisting->m_nToday;
+					pRule->m_nEver	= pExisting->m_nEver;
+				}
+
+				if ( pExisting && ! bSingleIP && m_pRules.Find( pExisting ) )
+				{
+					// Overwrite in place, so the rule keeps its position.
+					*pExisting = *pRule;
+					delete pRule;
+				}
+				else
+				{
+					if ( pExisting ) Remove( pExisting );
 
 					// special treatment for single IP security rules
-					if ( pRule->m_nType == CSecureRule::srAddress &&
-						*(DWORD*)pRule->m_nMask == 0xffffffff )
+					if ( bSingleIP )
 					{
 						m_pIPRules[ *(DWORD*)pRule->m_nIP ] = pRule;
 					}
@@ -1126,7 +1196,7 @@ BOOL CSecurity::FromXML(CXMLElement* pXML)
 			}
 			else
 			{
-				if ( ! bExisting ) delete pRule;
+				delete pRule;
 			}
 		}
 	}
