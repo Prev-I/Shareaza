@@ -59,16 +59,13 @@ jobs:
                 $p = Start-Process -FilePath $exe -Wait -PassThru -ArgumentList '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/SP-', '/ALLUSERS', "/DIR=`"$dir`"", "/LOG=`"$log`""
                 if ($p.ExitCode -ne 0) { throw "Inno Setup installer exited with $($p.ExitCode)" }
                 if (-not (Select-String -Path $log -SimpleMatch 'Installation process succeeded.' -Quiet)) { Get-Content $log -Tail 40; throw "Inno Setup $version did not install" }
-                # The hash pins what ran; this checks what the fixed path now holds. Which of
-                # these carries the version was not known when this was written, so any of
-                # them is accepted, and all are printed.
-                $iscc = Get-Item (Join-Path $dir 'ISCC.exe')
-                $reported = @($iscc.VersionInfo.ProductVersion, $iscc.VersionInfo.FileVersion)
-                foreach ($view in 'SOFTWARE\WOW6432Node', 'SOFTWARE') {
-                    $reported += (Get-ItemProperty -Path "HKLM:\$view\Microsoft\Windows\CurrentVersion\Uninstall\Inno Setup 6_is1" -ErrorAction SilentlyContinue).DisplayVersion
-                }
-                Write-Output "$($iscc.FullName) reports: $($reported -join ' | ')"
-                if (-not ($reported | Where-Object { $_ -match "^$([regex]::Escape($version))(\.0)?$" })) { throw "Inno Setup in $dir is not $version" }
+                # The hash pins what ran; this checks what is installed now. ISCC.exe's own
+                # version fields read 0.0.0.0, so only the uninstall key carries the version.
+                $key = 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Inno Setup 6_is1'
+                $installed = (Get-ItemProperty -Path $key -ErrorAction SilentlyContinue).DisplayVersion
+                Write-Output "Inno Setup in $dir reports $installed"
+                if ($installed -ne $version) { throw "Inno Setup reports $installed, not $version" }
+                if (-not (Test-Path (Join-Path $dir 'ISCC.exe'))) { throw "ISCC.exe is not in $dir" }
 
         -   name: Restore NuGet packages (zlibwapi)
             working-directory: ${{env.GITHUB_WORKSPACE}}
