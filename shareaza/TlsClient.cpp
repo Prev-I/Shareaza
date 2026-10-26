@@ -139,6 +139,9 @@ CTlsClient::CTlsClient(TlsCred nCred, const std::wstring& sHost)
 	, m_nStatus		( SEC_E_OK )
 	, m_pPeerCert	( NULL )
 	, m_nProtocol	( 0 )
+	, m_oSizes		()
+	, m_bShutdown	( false )
+	, m_nRenegotiations	( 0 )
 {
 	SecInvalidateHandle( &m_hCred );
 	SecInvalidateHandle( &m_hContext );
@@ -247,6 +250,20 @@ TlsResult CTlsClient::Handshake(const BYTE* pIn, size_t nIn, std::vector<BYTE>& 
 	return TlsResult::NeedMore;
 }
 
+TlsResult CTlsClient::Encrypt(const BYTE* /*p*/, size_t /*n*/, std::vector<BYTE>& /*oSend*/)
+{
+	return Fail( SEC_E_UNSUPPORTED_FUNCTION );
+}
+
+TlsResult CTlsClient::Decrypt(const BYTE* /*pIn*/, size_t /*nIn*/, std::vector<BYTE>& /*oPlain*/, std::vector<BYTE>& /*oSend*/)
+{
+	return Fail( SEC_E_UNSUPPORTED_FUNCTION );
+}
+
+void CTlsClient::Shutdown(std::vector<BYTE>& /*oSend*/)
+{
+}
+
 bool CTlsClient::IsEstablished() const
 {
 	return m_nState == State::Established;
@@ -270,6 +287,11 @@ PCCERT_CONTEXT CTlsClient::PeerCertificate() const
 DWORD CTlsClient::Protocol() const
 {
 	return m_nProtocol;
+}
+
+ULONG CTlsClient::Renegotiations() const
+{
+	return m_nRenegotiations;
 }
 
 TlsResult CTlsClient::Fail(SECURITY_STATUS nStatus)

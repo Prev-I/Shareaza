@@ -1,9 +1,10 @@
 name: TLS tests
 
 # Builds TlsTest, the console test program for the Schannel TLS core, and runs
-# it offline and against public endpoints. A network test that still cannot
-# reach its endpoint after its retries makes TlsTest exit 2, which fails the
-# step as "endpoint unreachable", distinct from a wrong result.
+# it offline, against public endpoints and against TlsTest/tls_server.py on
+# [::1]:8443. A network test that still cannot reach its endpoint after its
+# retries makes TlsTest exit 2, which fails the step as "endpoint unreachable",
+# distinct from a wrong result.
 
 on:
   workflow_dispatch:
@@ -54,6 +55,37 @@ jobs:
         if ($code -eq 2) { Write-Output "::error::endpoint unreachable"; exit 1 }
         exit $code
 
+    # A self-signed certificate from Git for Windows' openssl, and the local
+    # server in the background, bound to [::1] only. MSYS2_ARG_CONV_EXCL stops
+    # the MSYS runtime from rewriting /CN=localhost as a Windows path.
+    - name: Start the local TLS server
+      if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+      shell: pwsh
+      run: |
+        $dir = Join-Path $env:RUNNER_TEMP 'tls-server'
+        New-Item -ItemType Directory -Force -Path $dir | Out-Null
+        $openssl = Join-Path $env:ProgramFiles 'Git\usr\bin\openssl.exe'
+        if (-not (Test-Path $openssl)) { Write-Output "::error::$openssl not found"; exit 1 }
+        $env:MSYS2_ARG_CONV_EXCL = '*'
+        $env:MSYS_NO_PATHCONV = '1'
+        & $openssl req -x509 -newkey rsa:2048 -nodes -days 2 -subj /CN=localhost -keyout "$dir\key.pem" -out "$dir\cert.pem"
+        if ($LASTEXITCODE -ne 0) { exit 1 }
+        $log = Join-Path $dir 'server.log'
+        $server = Start-Process -FilePath python -PassThru -NoNewWindow `
+          -ArgumentList @('TlsTest/tls_server.py', '--cert', "$dir\cert.pem", '--key', "$dir\key.pem", '--log', $log) `
+          -RedirectStandardOutput "$dir\stdout.txt" -RedirectStandardError "$dir\stderr.txt"
+        "TLS_SERVER_PID=$($server.Id)" >> $env:GITHUB_ENV
+        "TLS_SERVER_DIR=$dir" >> $env:GITHUB_ENV
+        "TLSTEST_SERVER_LOG=$log" >> $env:GITHUB_ENV
+        for ($i = 0; $i -lt 30; $i++) {
+          if ((Test-Path $log) -and (Select-String -Path $log -Pattern 'listening' -Quiet)) { exit 0 }
+          if ($server.HasExited) { break }
+          Start-Sleep -Seconds 1
+        }
+        Write-Output "::error::the local TLS server did not start"
+        Get-Content "$dir\stderr.txt" -ErrorAction SilentlyContinue
+        exit 1
+
     - name: Network tests
       if: ${{ !cancelled() && steps.build.outcome == 'success' }}
       shell: pwsh
@@ -62,3 +94,13 @@ jobs:
         $code = $LASTEXITCODE
         if ($code -eq 2) { Write-Output "::error::endpoint unreachable"; exit 1 }
         exit $code
+
+    - name: Stop the local TLS server
+      if: ${{ always() && env.TLS_SERVER_PID != '' }}
+      shell: pwsh
+      run: |
+        Stop-Process -Id $env:TLS_SERVER_PID -Force -ErrorAction SilentlyContinue
+        Write-Output "--- server log"
+        Get-Content $env:TLSTEST_SERVER_LOG -ErrorAction SilentlyContinue
+        Write-Output "--- server stderr"
+        Get-Content (Join-Path $env:TLS_SERVER_DIR 'stderr.txt') -ErrorAction SilentlyContinue

@@ -30,6 +30,8 @@
 
 #include "../shareaza/TlsClient.h"
 
+#include <string>
+
 struct TlsTestCase
 {
 	const char*		pszName;
@@ -67,7 +69,29 @@ void TlsTestUnreachable(const char* pszFormat, ...);
 // blocking socket. Returns the connected socket, or INVALID_SOCKET if the
 // endpoint is unreachable (reported with TlsTestUnreachable) or the handshake
 // fails (its SECURITY_STATUS is printed).
-SOCKET ConnectAndHandshake(CTlsClient& oTls, const char* pszHost, unsigned short nPort);
+// nChunk > 0 feeds received bytes to Handshake() that many at a time. Bytes
+// received after the handshake completes go to Decrypt(); they must not hold
+// application data, as no server speaks first in these tests.
+SOCKET ConnectAndHandshake(CTlsClient& oTls, const char* pszHost, unsigned short nPort, size_t nChunk = 0);
 
 // ConnectAndHandshake, then closes the socket. True if the session was established.
 bool RunHandshake(CTlsClient& oTls, const char* pszHost, unsigned short nPort);
+
+// Sends all of oData. False on a socket error.
+bool SendAll(SOCKET hSocket, const std::vector<BYTE>& oData);
+
+// Sends "GET pszPath" with "Connection: close" over an established session
+// and reads until the server closes it, with or without close_notify.
+// sBody receives everything the server sent: status line, headers and body.
+// nChunk > 0 feeds received ciphertext to Decrypt() that many bytes at a time.
+// False if the session fails or the socket breaks (the latter reported with
+// TlsTestUnreachable).
+bool HttpGet(CTlsClient& oTls, SOCKET hSocket, const char* pszHost, const char* pszPath,
+	std::string& sBody, size_t nChunk = 0);
+
+// True if the log file of tls_server.py, named by the TLSTEST_SERVER_LOG
+// environment variable, contains psz. Waits up to five seconds for it.
+bool ServerLogContains(const char* psz);
+
+// True if every byte satisfies sBody[ i ] == i % 251, the pattern tls_server.py serves.
+bool BodyMatchesPattern(const std::string& sBody);

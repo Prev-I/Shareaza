@@ -131,19 +131,75 @@ namespace
 		return hSocket;
 	}
 
-	bool SendAll(SOCKET hSocket, const std::vector<BYTE>& oData)
+	// Feeds nIn received bytes to Handshake(), nChunk at a time if nChunk > 0.
+	// Bytes left over after Done go to Decrypt(). False if those held
+	// application data or failed the session.
+	bool FeedHandshake(CTlsClient& oTls, const BYTE* pIn, size_t nIn, size_t nChunk,
+		std::vector<BYTE>& oSend, TlsResult& nResult)
 	{
-		size_t nSent = 0;
-		while ( nSent < oData.size() )
+		const size_t nStep = nChunk ? nChunk : nIn;
+		size_t nDone = 0;
+		do
 		{
-			const size_t nChunk = ( std::min )( oData.size() - nSent, static_cast< size_t >( 65536 ) );
-			const int nResult = send( hSocket, reinterpret_cast< const char* >( oData.data() + nSent ), static_cast< int >( nChunk ), 0 );
-			if ( nResult <= 0 )
-				return false;
-			nSent += static_cast< size_t >( nResult );
+			const size_t nTake = ( std::min )( nStep, nIn - nDone );
+			nResult = oTls.Handshake( pIn + nDone, nTake, oSend );
+			nDone += nTake;
+		}
+		while ( nResult == TlsResult::NeedMore && nDone < nIn );
+
+		if ( nResult != TlsResult::Done || nDone == nIn )
+			return true;
+
+		std::vector<BYTE> oPlain;
+		const TlsResult nRest = oTls.Decrypt( pIn + nDone, nIn - nDone, oPlain, oSend );
+		if ( nRest == TlsResult::Failed || nRest == TlsResult::Closed || ! oPlain.empty() )
+		{
+			printf( "  %zu bytes after the handshake: result %d, %zu bytes of plaintext\n",
+				nIn - nDone, static_cast< int >( nRest ), oPlain.size() );
+			return false;
 		}
 		return true;
 	}
+
+	// Reads a whole file that another process may hold open for writing.
+	bool ReadSharedFile(const char* pszPath, std::string& sText)
+	{
+		const HANDLE hFile = CreateFileA( pszPath, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+			NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL );
+		if ( hFile == INVALID_HANDLE_VALUE )
+			return false;
+		sText.clear();
+		char pBuffer[ 4096 ];
+		DWORD nRead = 0;
+		bool bOk = true;
+		for ( ;; )
+		{
+			if ( ! ReadFile( hFile, pBuffer, static_cast< DWORD >( sizeof( pBuffer ) ), &nRead, NULL ) )
+			{
+				bOk = false;
+				break;
+			}
+			if ( nRead == 0 )
+				break;
+			sText.append( pBuffer, nRead );
+		}
+		CloseHandle( hFile );
+		return bOk;
+	}
+}
+
+bool SendAll(SOCKET hSocket, const std::vector<BYTE>& oData)
+{
+	size_t nSent = 0;
+	while ( nSent < oData.size() )
+	{
+		const size_t nChunk = ( std::min )( oData.size() - nSent, static_cast< size_t >( 65536 ) );
+		const int nResult = send( hSocket, reinterpret_cast< const char* >( oData.data() + nSent ), static_cast< int >( nChunk ), 0 );
+		if ( nResult <= 0 )
+			return false;
+		nSent += static_cast< size_t >( nResult );
+	}
+	return true;
 }
 
 TlsTestRegistrar::TlsTestRegistrar(TlsTestCase& oTest)
@@ -169,7 +225,7 @@ void TlsTestUnreachable(const char* pszFormat, ...)
 	printf( "\n" );
 }
 
-SOCKET ConnectAndHandshake(CTlsClient& oTls, const char* pszHost, unsigned short nPort)
+SOCKET ConnectAndHandshake(CTlsClient& oTls, const char* pszHost, unsigned short nPort, size_t nChunk)
 {
 	SOCKET hSocket = Connect( pszHost, nPort );
 	if ( hSocket == INVALID_SOCKET )
@@ -215,7 +271,8 @@ SOCKET ConnectAndHandshake(CTlsClient& oTls, const char* pszHost, unsigned short
 					pszHost, static_cast< unsigned >( nPort ), WSAGetLastError() );
 			break;
 		}
-		nResult = oTls.Handshake( pBuffer, static_cast< size_t >( nReceived ), oSend );
+		if ( ! FeedHandshake( oTls, pBuffer, static_cast< size_t >( nReceived ), nChunk, oSend, nResult ) )
+			break;
 	}
 
 	closesocket( hSocket );
@@ -228,6 +285,111 @@ bool RunHandshake(CTlsClient& oTls, const char* pszHost, unsigned short nPort)
 	if ( hSocket == INVALID_SOCKET )
 		return false;
 	closesocket( hSocket );
+	return true;
+}
+
+bool HttpGet(CTlsClient& oTls, SOCKET hSocket, const char* pszHost, const char* pszPath,
+	std::string& sBody, size_t nChunk)
+{
+	sBody.clear();
+	const std::string sRequest = std::string( "GET " ) + pszPath + " HTTP/1.1\r\nHost: " + pszHost +
+		"\r\nUser-Agent: TlsTest\r\nAccept: */*\r\nConnection: close\r\n\r\n";
+
+	std::vector<BYTE> oSend, oPlain;
+	if ( oTls.Encrypt( reinterpret_cast< const BYTE* >( sRequest.data() ), sRequest.size(), oSend ) != TlsResult::Ok )
+	{
+		printf( "  %s: encrypt failed, SECURITY_STATUS 0x%08lX\n",
+			pszHost, static_cast< unsigned long >( oTls.LastStatus() ) );
+		return false;
+	}
+
+	// Bytes that arrived with the end of the handshake are decrypted first.
+	TlsResult nResult = oTls.Decrypt( NULL, 0, oPlain, oSend );
+	for ( ;; )
+	{
+		if ( ! oPlain.empty() )
+		{
+			sBody.append( reinterpret_cast< const char* >( oPlain.data() ), oPlain.size() );
+			oPlain.clear();
+		}
+		if ( ! oSend.empty() )
+		{
+			if ( ! SendAll( hSocket, oSend ) )
+			{
+				TlsTestUnreachable( "%s%s: send failed: error %d", pszHost, pszPath, WSAGetLastError() );
+				return false;
+			}
+			oSend.clear();
+		}
+
+		if ( nResult == TlsResult::Closed )
+		{
+			printf( "  %s%s: %zu bytes, then close_notify; %lu post-handshake messages\n",
+				pszHost, pszPath, sBody.size(), static_cast< unsigned long >( oTls.Renegotiations() ) );
+			return true;
+		}
+		if ( nResult == TlsResult::Failed )
+		{
+			printf( "  %s%s: decrypt failed after %zu bytes, SECURITY_STATUS 0x%08lX\n",
+				pszHost, pszPath, sBody.size(), static_cast< unsigned long >( oTls.LastStatus() ) );
+			return false;
+		}
+
+		BYTE pBuffer[ 16384 ];
+		const int nReceived = recv( hSocket, reinterpret_cast< char* >( pBuffer ), static_cast< int >( sizeof( pBuffer ) ), 0 );
+		if ( nReceived == 0 )
+		{
+			printf( "  %s%s: %zu bytes, then closed without close_notify; %lu post-handshake messages\n",
+				pszHost, pszPath, sBody.size(), static_cast< unsigned long >( oTls.Renegotiations() ) );
+			return true;
+		}
+		if ( nReceived < 0 )
+		{
+			TlsTestUnreachable( "%s%s: receive failed after %zu bytes: error %d",
+				pszHost, pszPath, sBody.size(), WSAGetLastError() );
+			return false;
+		}
+
+		const size_t nIn = static_cast< size_t >( nReceived );
+		const size_t nStep = nChunk ? nChunk : nIn;
+		size_t nDone = 0;
+		do
+		{
+			const size_t nTake = ( std::min )( nStep, nIn - nDone );
+			nResult = oTls.Decrypt( pBuffer + nDone, nTake, oPlain, oSend );
+			nDone += nTake;
+		}
+		while ( nDone < nIn && ( nResult == TlsResult::Ok || nResult == TlsResult::NeedMore ) );
+	}
+}
+
+bool ServerLogContains(const char* psz)
+{
+	char szPath[ MAX_PATH ];
+	size_t nLength = 0;
+	if ( getenv_s( &nLength, szPath, "TLSTEST_SERVER_LOG" ) != 0 || nLength <= 1 )
+	{
+		printf( "  TLSTEST_SERVER_LOG is not set\n" );
+		return false;
+	}
+
+	for ( int nAttempt = 0 ; nAttempt < 50 ; ++nAttempt )
+	{
+		std::string sLog;
+		if ( ReadSharedFile( szPath, sLog ) && sLog.find( psz ) != std::string::npos )
+			return true;
+		Sleep( 100 );
+	}
+	return false;
+}
+
+bool BodyMatchesPattern(const std::string& sBody)
+{
+	for ( size_t i = 0 ; i < sBody.size() ; ++i )
+	{
+		if ( static_cast< unsigned char >( sBody[ i ] ) != i % 251 )
+			return false;
+	}
 	return true;
 }
 
