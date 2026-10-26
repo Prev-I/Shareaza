@@ -88,7 +88,8 @@ choice):
    server, and only a file with a known hash is still verified after download.
 
 **The upgrade installer always requires a valid certificate**, whatever the setting says. It is
-run by the user and arrives with no hash (`VersionChecker.cpp`, `DlgUpgrade.cpp`).
+run by the user, and the version check passes on a hash only if the release response carries
+one (`VersionChecker.cpp:319-329`, `DlgUpgrade.cpp`).
 - *(Build's call)* The requirement is a flag on the `CDownload` that `CUpgradeDlg::OnOK`
   creates, saved in its `.sd` file. It applies to every source of that download, including
   sources created by redirects (a GitHub asset URL normally redirects to another host), and
