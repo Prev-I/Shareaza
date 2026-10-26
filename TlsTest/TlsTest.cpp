@@ -504,9 +504,14 @@ TLS_TEST_NETWORK(LocalManualRefusesBeforeAccept)
 	}
 }
 
+// Schannel caches sessions by target name and offers a cached session's
+// protocol again: a TLS 1.2 session for "localhost" made the next ClientHello
+// for "localhost" unacceptable to a TLS 1.3-only server. Each s_server test
+// therefore uses a target name of its own.
+
 TLS_TEST_NETWORK(LocalTls12RenegotiationRefused)
 {
-	CTlsClient c( TlsCred::Manual, L"localhost" );
+	CTlsClient c( TlsCred::Manual, L"tls12.localhost" );
 	const SOCKET hSocket = ConnectAndHandshake( c, LOCAL_ADDRESS, LOCAL_PORT_TLS12 );
 	CSocketGuard oGuard( hSocket );
 	CHECK( hSocket != INVALID_SOCKET );
@@ -522,7 +527,7 @@ TLS_TEST_NETWORK(LocalTls12RenegotiationRefused)
 
 TLS_TEST_NETWORK(LocalTls13KeyUpdate)
 {
-	CTlsClient c( TlsCred::Manual, L"localhost" );
+	CTlsClient c( TlsCred::Manual, L"tls13.localhost" );
 	const SOCKET hSocket = ConnectAndHandshake( c, LOCAL_ADDRESS, LOCAL_PORT_TLS13 );
 	CSocketGuard oGuard( hSocket );
 	CHECK( hSocket != INVALID_SOCKET );
