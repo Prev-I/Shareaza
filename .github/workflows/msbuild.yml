@@ -158,7 +158,7 @@ jobs:
           $after = @(Get-Runtime)
           $after | Format-Table -AutoSize | Out-String | Write-Output
           foreach ($arch in $dirs.Keys) {
-              $ran = @($log | Select-String -Pattern "Redistributable \($arch\) exited with (\d+)")
+              $ran = @($log | Select-String -Pattern "Redistributable \($arch\) exited with (-?\d+)")
               if ($ran.Count -ne 1) { throw "Setup did not run the $arch runtime installer exactly once" }
               $exit = [int]$ran[0].Matches[0].Groups[1].Value
               $set = @($after | Where-Object Arch -eq $arch)
@@ -175,7 +175,7 @@ jobs:
               } elseif ($exit -ne 0) {
                   throw "the $arch runtime installer exited with $exit"
               } elseif ($mfc.Major -ne $runtime.Major -or $mfc.Minor -ne $runtime.Minor) {
-                  throw "$arch mfc140u.dll is $mfc but vcruntime140.dll is $runtime: the latest runtime may not install MFC"
+                  throw "$arch mfc140u.dll is $mfc but vcruntime140.dll is ${runtime}: the latest runtime may not install MFC"
               } elseif ($runtime -eq ($before | Where-Object { $_.Arch -eq $arch -and $_.File -eq 'vcruntime140.dll' }).Version) {
                   Write-Output "::warning::the $arch runtime stayed at $runtime, so the runner already had the latest; MFC check not informative"
               } else {
