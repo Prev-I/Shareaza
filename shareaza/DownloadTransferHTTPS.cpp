@@ -95,7 +95,8 @@ BOOL CDownloadTransferHTTPS::Initiate()
 		m_pDownload->RemoveSource( m_pSource, FALSE );
 		return FALSE;
 	}
-	else if ( m_pSource->m_pAddress.s_addr ? SSLConnectTo( &m_pSource->m_pAddress, m_pSource->m_nPort ) : ConnectToIPv6( &m_pSource->m_pAddressIPv6, m_pSource->m_nPort ) )
+	// An https source is fetched only over a TLS connection.
+	else if ( m_pSource->m_pAddress.s_addr && SSLConnectTo( &m_pSource->m_pAddress, m_pSource->m_nPort ) )
 	{
 		SetState( dtsConnecting );
 		
@@ -121,7 +122,14 @@ BOOL CDownloadTransferHTTPS::Initiate()
 void CDownloadTransferHTTPS::AttachTo(CConnection* pConnection)
 {
 	CDownloadTransfer::AttachTo( pConnection );
-	
+
+	// An https source is fetched only over a TLS connection.
+	if ( ! HasSSL() )
+	{
+		Close( TRI_UNKNOWN );
+		return;
+	}
+
 	theApp.Message( MSG_INFO, IDS_DOWNLOAD_PUSHED, (LPCTSTR)m_sAddress,
 		(LPCTSTR)m_pDownload->GetDisplayName() );
 	
@@ -621,6 +629,15 @@ BOOL CDownloadTransferHTTPS::OnRun()
 	}
 
 	return TRUE;
+}
+
+//////////////////////////////////////////////////////////////////////
+// CDownloadTransferHTTPS write handler
+
+// Writes on an https transfer go through TLS only.
+BOOL CDownloadTransferHTTPS::OnWrite()
+{
+	return CDownloadTransfer::OnSSLWrite();
 }
 
 //////////////////////////////////////////////////////////////////////
