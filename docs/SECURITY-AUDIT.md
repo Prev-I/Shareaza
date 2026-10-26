@@ -7,12 +7,18 @@ oracles for `gwc-edge` (see [ORACLE.md](ORACLE.md)).
 **Status, 2026-10-26.** Findings 3, 4 and 5 are fixed on `main` by
 [PR #8](https://github.com/Prev-I/Shareaza/pull/8) (merge `d2f09dd42`). The only part not fixed
 is finding 4's missing opt-out. The first release built with the fixes is `v2.7.10.6-previ.2`.
-Findings 1 and 2 are still open. The text below is the audit as written, apart from the **Fixed**
-lines under findings 3 to 5 and the notes under "Consequences for the oracle". What changed since
-is in the [addendum](#addendum-2026-10-26-fixes-for-findings-3-4-and-5).
+Findings 1 and 2 are still open. All five were reported privately to ansani/Shareaza on
+2026-10-26. The text below is the audit as written, apart from the dated bullets under
+**Disclosure**, the **Fixed** lines under findings 3 to 5, and the notes under "Consequences for
+the oracle". What changed since is in the
+[addendum](#addendum-2026-10-26-fixes-for-findings-3-4-and-5).
 
 **Disclosure.**
 - **Not reported upstream.** As of 2026-10-25 the findings have not been reported to ansani/Shareaza.
+- **Reported upstream on 2026-10-26.**
+  - Findings 1 to 5 were reported privately to ansani/Shareaza, with links to the fixes for
+    findings 3 to 5.
+  - No reply yet.
 - **Finding 3 omits its trigger.** It names the faulty code but not the packet that reaches it.
   Since the source is public, that only slows a reader down.
 - **The fix gives the trigger away.** The message of fix commit `91330b820` describes how finding 3
