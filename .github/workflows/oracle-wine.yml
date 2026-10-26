@@ -32,9 +32,12 @@ jobs:
                   - client: sf
                     expect: client=RAZA2.7.10.2&
                     agent: Shareaza 2.7.10.2
+                    # The folder Shareaza shares on its first run: its default CompletePath.
+                    shared: Downloads
                   - client: previ
                     expect: client=RAZI2.7.10.6&
                     agent: iShareaza 2.7.10.6
+                    shared: Downloads/Shareaza
         env:
             WINEPREFIX: /home/runner/.wine-shareaza-${{ matrix.client }}
             WINEARCH: win64
@@ -99,10 +102,29 @@ jobs:
                 Xvfb :99 -screen 0 1280x800x24 &
                 sleep 3
 
-        -   name: Create the prefix and install the VC++ 2022 runtime
+        -   name: Make the download folder $HOME, the worst case docs/ORACLE.md guards against
+            # Wine links the prefix's Downloads folder to XDG_DOWNLOAD_DIR when that
+            # folder exists (dlls/shell32/shellpath.c, dlls/mountmgr.sys/unixlib.c), and
+            # Shareaza shares it. xdg-user-dirs writes "$HOME/" when the download folder
+            # is the home folder itself; Wine accepts only "/..." or "$HOME/..." values.
+            run: |
+                conf="${XDG_CONFIG_HOME:-$HOME/.config}"
+                mkdir -p "$conf"
+                # user-dirs.dirs holds "$HOME/" literally; Wine and xdg expand it.
+                # shellcheck disable=SC2016
+                echo 'XDG_DOWNLOAD_DIR="$HOME/"' > "$conf/user-dirs.dirs"
+                echo 'private' > ~/oracle-canary-private.txt
+
+        -   name: Create the prefix, isolate it from $HOME, install the VC++ 2022 runtime
             run: |
                 wineboot --init
                 wineserver --wait
+                dl="$WINEPREFIX/drive_c/users/$USER/Downloads"
+                echo "before: $(ls -ld "$dl")"
+                [ "$(readlink -f "$dl")" = "$HOME" ] || { echo "::error::the test did not reproduce Downloads -> \$HOME"; exit 1; }
+                winetricks -q isolate_home
+                echo "after: $(ls -ld "$dl")"
+                [ -d "$dl" ] && [ ! -L "$dl" ] || { echo "::error::isolate_home left Downloads linked"; exit 1; }
                 winetricks -q vcrun2022
                 wineserver --wait
 
@@ -117,6 +139,16 @@ jobs:
 
         -   name: Prepare the prefix as docs/ORACLE.md describes
             run: bash docs/oracle-prepare.sh "$WINEPREFIX" http://127.0.0.1:8080/gwc/
+
+        -   name: Plant one file in the folder the client shares
+            # A positive control: the check below requires this file, and only it, to be
+            # hashed, so a run too short to index anything cannot pass as "nothing shared".
+            env:
+                SHARED: ${{ matrix.shared }}
+            run: |
+                d="$WINEPREFIX/drive_c/users/$USER/$SHARED"
+                mkdir -p "$d"
+                echo 'shared on purpose' > "$d/inside.txt"
 
         -   name: Run Shareaza against the stub cache
             timeout-minutes: 10
@@ -156,6 +188,8 @@ jobs:
                 import -window root screenshot-running.png || true
                 # The exit check below means something only if this pattern finds the client.
                 if pgrep -f 'Shareaza.exe' >/dev/null; then echo seen > running-state.txt; else echo not-seen > running-state.txt; fi
+                # docs/oracle-prepare.sh refuses to run while `pgrep -x Shareaza.exe` finds a client.
+                if pgrep -x 'Shareaza.exe' >/dev/null; then echo seen > exact-name.txt; else echo not-seen > exact-name.txt; fi
                 # taskkill without /F posts WM_CLOSE, so Shareaza shuts down and saves its data.
                 wine taskkill /IM Shareaza.exe || true
                 for _ in $(seq 1 24); do
@@ -176,7 +210,7 @@ jobs:
                 mkdir -p out
                 user_data="$WINEPREFIX/drive_c/users/$USER/AppData/Roaming/Shareaza"
                 find "$WINEPREFIX/drive_c" \( -name 'Discovery.dat' -o -name 'HostCache.dat' -o -name 'Shareaza.log' \) -printf '%s\t%p\n' | sed "s|$WINEPREFIX|\$WINEPREFIX|" | tee out/data-files.txt
-                cp gwc-requests.jsonl running-state.txt exit-state.txt setup.log wine-version.txt screenshot-*.png out/ 2>/dev/null || true
+                cp gwc-requests.jsonl running-state.txt exact-name.txt exit-state.txt setup.log wine-version.txt screenshot-*.png out/ 2>/dev/null || true
                 cp "$user_data/Data/Shareaza.log" out/ 2>/dev/null || true
                 if [ -f out/Shareaza.log ]; then iconv -f UTF-16 -t UTF-8 out/Shareaza.log | tr -d '\r' > out/Shareaza.utf8.log || true; fi
                 wine reg export 'HKCU\Software\Shareaza' out/shareaza.reg /y || true
@@ -210,6 +244,13 @@ jobs:
                 # nothing else wrote, such as Gnutella2.
                 awk '/^\[/{sec=$0} sec ~ /Shareaza\\Gnutella2\]$/ && /^"HostCount"/{found=1} END{exit !found}' out/shareaza.utf8.reg \
                   || fail "Shareaza did not save its Gnutella2 settings"
+                # Only the planted file was indexed: the first-run sharing happened and was
+                # seen, and nothing from \$HOME (the canary included) was shared.
+                grep 'Hashing:' "$log" || true
+                [ "$(grep -c 'Hashing:' "$log")" = 1 ] || fail "expected exactly one hashed file, the planted inside.txt"
+                grep -q 'Hashing:.*inside\.txt' "$log" || fail "the planted inside.txt was not the file hashed"
+                grep -q 'oracle-canary' "$log" && fail "Shareaza saw the canary in \$HOME"
+                [ "$(cat out/exact-name.txt)" = seen ] || fail "pgrep -x Shareaza.exe did not find the client: oracle-prepare.sh's running check would miss it"
                 grep -E 'Accepting incoming TCP|Listening for UDP' "$log" || true
 
         -   name: Upload the evidence

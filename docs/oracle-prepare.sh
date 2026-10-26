@@ -16,8 +16,34 @@ app="$WINEPREFIX/drive_c/Program Files/Shareaza"
 k='HKCU\Software\Shareaza\Shareaza'
 
 [ -f "$app/Shareaza.exe" ] || { echo "$WINEPREFIX: Shareaza is not installed" >&2; exit 1; }
-if pgrep -f 'Shareaza.exe' >/dev/null; then
+if pgrep -x 'Shareaza.exe' >/dev/null; then
     echo "a Shareaza client is running; close it first, or its exit save overwrites these settings" >&2
+    exit 1
+fi
+
+# Shareaza shares its download folder on its first run, and the official 2.7.10.2
+# uses the whole Downloads folder. Wine links the prefix's Downloads to your own
+# when it exists (~/Downloads, or what ~/.config/user-dirs.dirs names, which can be
+# "$HOME/": your whole home). Wine never lets Shareaza
+# read a different folder from its settings (they are strings), so the prefix
+# itself must hold no links out of it: `winetricks isolate_home` makes them real,
+# empty folders inside the prefix.
+users="$WINEPREFIX/drive_c/users/${USER:-$(id -un)}"
+[ -d "$users" ] || { echo "$WINEPREFIX: no user profile at $users" >&2; exit 1; }
+prefix=$(readlink -f "$WINEPREFIX")
+# Every link anywhere in the profile that does not resolve inside the prefix, except
+# links to plain files. An unresolvable link counts too: it may point at a drive
+# that is not mounted now. find does not follow links, so it never walks into $HOME.
+linked=$(find "$users" -type l | while IFS= read -r l; do
+    if ! t=$(readlink -f "$l"); then echo "  $l -> (unresolved) $(readlink "$l")"; continue; fi
+    case "$t" in "$prefix"/*) continue ;; esac
+    [ -f "$t" ] || echo "  $l -> $t"
+done || true)
+if [ -n "$linked" ]; then
+    echo "$WINEPREFIX links folders out of the prefix, which Shareaza could share:" >&2
+    echo "$linked" >&2
+    echo "Links into \$HOME: run  WINEPREFIX=$WINEPREFIX winetricks -q isolate_home" >&2
+    echo "Any other link: replace it with an empty folder:  rm <link> && mkdir <link>" >&2
     exit 1
 fi
 
@@ -34,6 +60,10 @@ done
 # 1. Discovery: the cache under test is the only service the client knows.
 #    Format "<type> <url>", 2 = G2 GWebCache, CRLF line ending.
 printf '2 %s\r\n' "$cache" > "$app/Data/DefaultServices.dat"
+
+# Do not copy the installer into the shared download folder, which Shareaza does
+# after an install (Settings.cpp, General.Upgrade).
+reg '\Settings' /v Upgrade /t REG_DWORD /d 0
 
 # 2. Nothing else that goes online by itself.
 reg '\VersionCheck' /v UpdateCheck  /t REG_DWORD /d 0
