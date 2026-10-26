@@ -35,6 +35,10 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
+// A remote sender adds one miss-cache entry per source address it uses, so
+// cap each cache rather than let it grow for as long as the program runs
+static const size_t MISS_CACHE_MAX = 65536;
+
 CSecurity Security;
 CAdultFilter AdultFilter;
 CMessageFilter MessageFilter;
@@ -206,6 +210,17 @@ void CSecurity::Remove(CSecureRule* pRule)
 			{
 				m_pIPRules.erase( i );
 			}
+		}
+	}
+	else if ( pRule->m_nType == CSecureRule::srAddressIPv6 &&
+		pRule->m_nIPv6PrefixLen == 128 )
+	{
+		// Add() keeps a single-address IPv6 rule only in this map, so drop it
+		// here too or the map keeps pointing at the rule we are about to free.
+		CAddressIPv6RuleMap::const_iterator i = m_pIPv6Rules.find( pRule->m_nIPv6 );
+		if ( i != m_pIPv6Rules.end() && (*i).second == pRule )
+		{
+			m_pIPv6Rules.erase( i );
 		}
 	}
 
@@ -621,6 +636,8 @@ BOOL CSecurity::IsDenied(const IN_ADDR* pAddress)
 	}
 
 	// If the IP is clean, add it to the miss cache
+	if ( m_Cache.size() >= MISS_CACHE_MAX )
+		m_Cache.clear();
 	m_Cache.insert( *(DWORD*) pAddress );
 
 	// In this case, return our default policy
@@ -692,9 +709,12 @@ BOOL CSecurity::IsDenied(const IN6_ADDR* pAddress)
 	}
 
 	// If the IP is clean, add it to the miss cache
+	if ( m_CacheIPv6.size() >= MISS_CACHE_MAX )
+		m_CacheIPv6.clear();
 	m_CacheIPv6.insert( *pAddress );
 
-	return FALSE;
+	// In this case, return our default policy
+	return m_bDenyPolicy;
 }
 
 BOOL CSecurity::IsDenied(LPCTSTR pszContent)

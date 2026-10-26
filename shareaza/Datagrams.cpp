@@ -517,6 +517,12 @@ BOOL CDatagrams::Send(const SOCKADDR_IN6* pHost, CPacket* pPacket, BOOL bRelease
 {
 	ASSERT( pHost != NULL && pPacket != NULL );
 
+	if ( ! IsValid( true ) || Security.IsDenied( &pHost->sin6_addr ) )
+	{
+		if ( bRelease ) pPacket->Release();
+		return FALSE;
+	}
+
 	if ( pPacket->m_nProtocol != PROTOCOL_G2 )
 	{
 		CBuffer pBuffer;
@@ -955,6 +961,12 @@ BOOL CDatagrams::TryReadIPv6()
 
 	m_mInput.nTotal += nLength;
 	Statistics.Current.Bandwidth.Incoming += nLength;
+
+	if ( Network.IsFirewalledAddress( &pFrom.sin6_addr, Settings.Connection.IgnoreOwnUDP, FALSE ) ||
+		Security.IsDenied( &pFrom.sin6_addr ) )
+	{
+		return TRUE;
+	}
 
 	if ( ! OnDatagram( &pFrom, m_pReadBuffer, nLength ) )
 	{

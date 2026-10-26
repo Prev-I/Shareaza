@@ -287,6 +287,18 @@ BOOL CConnection::ConnectTo(const IN6_ADDR* pAddress, WORD nPort)
 	if ( pAddress == NULL || nPort == 0 )
 		return FALSE;
 
+	// :: is not a host
+	if ( IN6_IS_ADDR_UNSPECIFIED( pAddress ) )
+		return FALSE;
+
+	// The IP address is in the security list of government and corporate addresses we want to avoid
+	if ( Security.IsDenied( pAddress ) )
+	{
+		// Report that we aren't connecting to this IP address and return false
+		theApp.Message( MSG_ERROR, IDS_SECURITY_OUTGOING, (LPCTSTR)IPv6ToString( pAddress ) );
+		return FALSE;
+	}
+
 	// The IN_ADDR structure we just got passed isn't the same as the one already stored in this object
 	if ( pAddress != &m_pHostIPv6.sin6_addr )
 	{
@@ -507,6 +519,18 @@ BOOL CConnection::SSLConnectTo(const IN6_ADDR* pAddress, WORD nPort)
 	// Make sure we have an address and a nonzero port number
 	if (pAddress == NULL || nPort == 0)
 		return FALSE;
+
+	// :: is not a host
+	if (IN6_IS_ADDR_UNSPECIFIED(pAddress))
+		return FALSE;
+
+	// The IP address is in the security list of government and corporate addresses we want to avoid
+	if (Security.IsDenied(pAddress))
+	{
+		// Report that we aren't connecting to this IP address and return false
+		theApp.Message(MSG_ERROR, IDS_SECURITY_OUTGOING, (LPCTSTR)IPv6ToString(pAddress));
+		return FALSE;
+	}
 
 	// The IN_ADDR structure we just got passed isn't the same as the one already stored in this object
 	if (pAddress != &m_pHostIPv6.sin6_addr)
