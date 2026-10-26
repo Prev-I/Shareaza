@@ -4,10 +4,20 @@ Static security review of what was added to Shareaza after the original SourceFo
 It was done for this fork of `github.com/ansani/Shareaza` before its builds were used as protocol
 oracles for `gwc-edge` (see [ORACLE.md](ORACLE.md)).
 
+**Status, 2026-10-26.** Findings 3, 4 and 5 are fixed on `main` by
+[PR #8](https://github.com/Prev-I/Shareaza/pull/8) (merge `d2f09dd42`). The only part not fixed
+is finding 4's missing opt-out. The first release built with the fixes is `v2.7.10.6-previ.2`.
+Findings 1 and 2 are still open. The text below is the audit as written, apart from the **Fixed**
+lines under findings 3 to 5 and the notes under "Consequences for the oracle". What changed since
+is in the [addendum](#addendum-2026-10-26-fixes-for-findings-3-4-and-5).
+
 **Disclosure.**
 - **Not reported upstream.** As of 2026-10-25 the findings have not been reported to ansani/Shareaza.
 - **Finding 3 omits its trigger.** It names the faulty code but not the packet that reaches it.
   Since the source is public, that only slows a reader down.
+- **The fix gives the trigger away.** The message of fix commit `91330b820` describes how finding 3
+  is reached closely enough to count as public, and so does its diff. Treat the trigger as public
+  from 2026-10-26.
 - **Scope of "affected".** Where a finding says the official 2.7.10.2 is not affected, that is
   inferred from the source: the SVN baseline, which is no older than the 2.7.10.2 release, lacks the
   code. The 2.7.10.2 binary itself was not examined.
@@ -91,6 +101,7 @@ went to the provenance pass instead.
   fork's builds. The SVN baseline lacks the code, so 2.7.10.2 should not be affected (inference from
   source).
 - **Not verified:** the path was traced in the code but not run.
+- **Fixed** in `91330b820`, with `ad4d685df` for IPv6 hubs. See the addendum.
 
 ### 4. IPv6 traffic bypasses the ban list and address filters
 
@@ -102,6 +113,8 @@ went to the provenance pass instead.
 - **Deny-by-default:** `Security.cpp:695-697` returns `FALSE` when no rule matches, so this policy
   is not applied to IPv6.
 - **No opt-out:** the IPv6 listeners always bind to `in6addr_any`.
+- **Fixed**, apart from the opt-out, by `e6ad1a848`, `85be3a518`, `178100427` and `2c632d30c`.
+  Three more defects found on the way are in the addendum.
 
 ### 5. ✔ The installer deletes every top-level `*.exe` and `*.dll` in the install folder
 
@@ -110,6 +123,9 @@ went to the provenance pass instead.
 - **Effect:** `[InstallDelete]` runs at install time, not uninstall. With `DirExistsWarning=no`,
   installing into an existing folder silently removes these files. Intent looks benign: the rules
   belong in `[UninstallDelete]`.
+- **Fixed** in `14578ddb0`, but not by moving the rules. They cleaned up after the switch from
+  BugTrap to BugSplat, so they now name the retired files instead of matching every `*.exe` and
+  `*.dll`.
 
 ## Medium
 
@@ -186,11 +202,66 @@ went to the provenance pass instead.
 
 - **Not unattended on the live G2 network.** Findings 1, 3 and 4 mean any peer may be able to crash
   the client or slip past its ban list.
+  - From `v2.7.10.6-previ.2`, findings 3 and 4 are fixed, apart from finding 4's opt-out.
+  - Finding 1 is still open, and the fixes were verified by review and a clean build, not by running
+    an attack.
+  - So the rule stands.
 - **A fresh Wine prefix per installer**, because of finding 5.
+  - Releases from `previ.2` delete only the retired BugTrap files. A program that keeps its own
+    `dbghelp.dll` in the same folder would still lose it.
+  - A fresh prefix is still needed for a clean comparison between clients.
 - **Revision string:** the fork's builds show ` Release 64-bit (commit <sha> of <date>)` in the About
   box.
 - **Identifying the client:** they identify to caches as `RAZI2.7.10.6`, as ansani's own builds do.
   The official SourceForge 2.7.10.2 sends `RAZA2.7.10.2`.
+
+## Addendum 2026-10-26: fixes for findings 3, 4 and 5
+
+[PR #8](https://github.com/Prev-I/Shareaza/pull/8), merged as `d2f09dd`, landed these commits.
+
+| Commit | Finding | Change |
+|---|---|---|
+| `91330b820` | 3 | Fixes the NULL-derived pointer dereference. |
+| `ad4d685df` | 3 | Follow-up for hubs connected over IPv6, so the fix does not drop their entries. |
+| `e6ad1a848` | 4 | `CSecurity::IsDenied` for an IPv6 address no rule matches returns the default policy, as the IPv4 overload does. |
+| `85be3a518` | 4 | `CHandshakes::AcceptCheck` checks an IPv6 caller's own address. |
+| `178100427` | 4 | `TryReadIPv6` and `Send(SOCKADDR_IN6*)` apply the same filters as their IPv4 twins. |
+| `2c632d30c` | 4 | `dht_blacklisted` applies the ban list, self and site-local filtering, and the port-0 check to IPv6 nodes. |
+| `809d1c840` | 4, new | Outgoing IPv6 connections are refused for banned hosts and the unspecified address. The audit missed this path; the download sources reach it. |
+| `d613cffb2` | 4, new | Each security miss cache is emptied once it reaches 65536 entries. Before, a sender could grow them by one entry per source address it used, which costs nothing from a single IPv6 /64. The IPv6 receive filter above made that a per-datagram cost, so the limit came with it. |
+| `570dbdd05` | new (IPv6 rule map) | `CSecurity::Remove` erases a single-address (/128) IPv6 rule from its address map before freeing it. |
+| `14578ddb0` | 5 | `[InstallDelete]` names the retired BugTrap files instead of `*.exe` and `*.dll`. |
+
+**The use-after-free fixed by `570dbdd05`.** The audit missed it; the second review of the fixes
+found it.
+- **What it was:** removing certain single-address IPv6 rules from the Security window freed the
+  rule but left it in the IPv6 address map.
+- **What followed:** saving and listing the rules, both of which happen right after a removal, read
+  the freed rule at once. Later checks of that address, inbound or outbound, read and wrote it.
+- **Who could trigger it:** it took the local user's own actions in the Security window. It could
+  not be reached from the network alone.
+
+**How the fixes were verified.**
+- Root causes traced in the source.
+- Two independent read-only reviews.
+- A clean Win32 and x64, Release and Debug build, with no compiler warning in any changed line.
+
+The crash in finding 3 was not reproduced. No exploit was written to prove the fix, and this
+document still does not spell out the trigger. The fix commit is a different matter: see
+**Disclosure** at the top.
+
+**Still open.**
+- Findings 1 (no TLS certificate check) and 2 (third-party OpenSSL 1.1.1b).
+- The "no opt-out" point of finding 4: the IPv6 listeners always bind to `in6addr_any`.
+- **Single-address IPv6 rules can't be edited or removed** from the Security window, because
+  `CSecurity::GetGUID` does not search the map that holds them.
+  - This is a functional defect.
+  - Never fix `GetGUID` in a tree that lacks `570dbdd05`: there, a single Remove click would reach
+    the use-after-free.
+- **Editing a rule into a single address leaves the original active.** This applies to an IPv6
+  /128 rule and an IPv4 /32 one alike.
+  - The edited copy goes into the address map, but the original stays in place with the same GUID.
+  - So the old rule still applies after the user believes they changed it.
 
 ## Evidence (`security-audit/evidence/`, `security-audit/tools/`)
 

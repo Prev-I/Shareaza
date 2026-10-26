@@ -21,13 +21,13 @@
 .EXAMPLE
     .\Install-Shareaza.ps1 -Client Official
 .EXAMPLE
-    .\Install-Shareaza.ps1 -Client Fork -ReleaseTag v2.7.10.6-previ.1
+    .\Install-Shareaza.ps1 -Client Fork -ReleaseTag v2.7.10.6-previ.2
 #>
 [CmdletBinding()]
 param(
     [ValidateSet('Official', 'Fork')]
     [string] $Client = 'Official',
-    [string] $ReleaseTag = 'v2.7.10.6-previ.1',
+    [string] $ReleaseTag = 'v2.7.10.6-previ.2',
     [string] $Repository = 'Prev-I/Shareaza',
     [string] $WorkDir = (Join-Path $env:USERPROFILE 'ShareazaOracle')
 )
@@ -65,7 +65,10 @@ if ($Client -eq 'Official') {
     $name = ($lines[0] -replace '^[0-9a-fA-F]{64} [ *]', '')
     if ([IO.Path]::GetFileName($name) -ne $name) { throw "Unexpected installer name in SHA256SUMS.txt: $name" }
     # The default release's hash is pinned here as well, so a replaced release is caught.
-    $pinned = @{ 'v2.7.10.6-previ.1' = '731FCA2A95BEF41F2A3EFC83837B8FA164C7482D82896ED6CA32F8F36EF8DEDF' }
+    $pinned = @{
+        'v2.7.10.6-previ.1' = '731FCA2A95BEF41F2A3EFC83837B8FA164C7482D82896ED6CA32F8F36EF8DEDF'
+        'v2.7.10.6-previ.2' = '8A818CAAAA98B43ABDA6FF2E75789E80795641DE9F60A476580DB16E08A9F256'
+    }
     if ($pinned.ContainsKey($ReleaseTag) -and $pinned[$ReleaseTag] -ne $expected) {
         throw "SHA256SUMS.txt of $ReleaseTag lists $expected, not the pinned $($pinned[$ReleaseTag]). Not installing."
     }

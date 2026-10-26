@@ -35,7 +35,7 @@ G2 network runs, and this fork's 2.7.10.6 build. With both installed, a GWebCach
 | Prefix | Installer | Where it comes from | SHA-256 |
 |---|---|---|---|
 | `~/.wine-shareaza-sf` | `Shareaza_2.7.10.2_x64.exe` | [SourceForge, Shareaza-2.7.10.2](https://sourceforge.net/projects/shareaza/files/Shareaza/Shareaza-2.7.10.2/) | `d6ff141d69a3af53f8f7547b40e308a4e2aa4818eeb28da827d7545165ef3051`, as SourceForge publishes it |
-| `~/.wine-shareaza-previ` | `iShareaza_2.7.10.6_x64_Release_<build date>.exe` | this fork's [releases](https://github.com/Prev-I/Shareaza/releases), tag `v2.7.10.6-previ.N`, currently [`v2.7.10.6-previ.1`](https://github.com/Prev-I/Shareaza/releases/tag/v2.7.10.6-previ.1). A new tag first makes a draft, which only the repository owner can download until it is published. | in the release's `SHA256SUMS.txt` |
+| `~/.wine-shareaza-previ` | `iShareaza_2.7.10.6_x64_Release_<build date>.exe` | this fork's [releases](https://github.com/Prev-I/Shareaza/releases), tag `v2.7.10.6-previ.N`, currently [`v2.7.10.6-previ.2`](https://github.com/Prev-I/Shareaza/releases/tag/v2.7.10.6-previ.2), the first with the fixes for audit findings 3 to 5. A new tag first makes a draft, which only the repository owner can download until it is published. | in the release's `SHA256SUMS.txt` |
 
 Each client gets its own prefix, for three reasons:
 - **Same registry key.** Both clients keep their settings under `HKCU\Software\Shareaza\Shareaza`,
@@ -73,16 +73,16 @@ winetricks -q vcrun2022
 wine ~/Downloads/Shareaza_2.7.10.2_x64.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
 wineserver --wait
 
-# This fork's build, from release v2.7.10.6-previ.1
-base=https://github.com/Prev-I/Shareaza/releases/download/v2.7.10.6-previ.1
-curl -fLo ~/Downloads/iShareaza_2.7.10.6_x64_Release_2026-10-25.exe "$base/iShareaza_2.7.10.6_x64_Release_2026-10-25.exe"
+# This fork's build, from release v2.7.10.6-previ.2
+base=https://github.com/Prev-I/Shareaza/releases/download/v2.7.10.6-previ.2
+curl -fLo ~/Downloads/iShareaza_2.7.10.6_x64_Release_2026-10-26.exe "$base/iShareaza_2.7.10.6_x64_Release_2026-10-26.exe"
 curl -fLo ~/Downloads/SHA256SUMS.txt "$base/SHA256SUMS.txt"
 (cd ~/Downloads && sha256sum -c --ignore-missing SHA256SUMS.txt)   # must print the installer's name and OK
 export WINEPREFIX=~/.wine-shareaza-previ WINEARCH=win64
 wineboot --init && wineserver --wait
 winetricks -q isolate_home     # no links to your home folders: see below
 winetricks -q vcrun2022
-wine ~/Downloads/iShareaza_2.7.10.6_x64_Release_2026-10-25.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
+wine ~/Downloads/iShareaza_2.7.10.6_x64_Release_2026-10-26.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
 wineserver --wait
 ```
 
