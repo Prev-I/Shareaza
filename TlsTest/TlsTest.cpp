@@ -668,19 +668,6 @@ TLS_TEST_NETWORK(LocalTls13KeyUpdate)
 
 TLS_TEST_OFFLINE(OfflineHostFromUrl)
 {
-	{	// DIAGNOSTIC, temporary
-		wchar_t szOut[ 256 ] = {};
-		SetLastError( 0 );
-		const int n = IdnToAscii( 0, L"b\u00FCcher.example", 14, szOut, 256 );
-		printf( "  IdnToAscii -> %d, error %lu, \"%ls\"\n", n, GetLastError(), szOut );
-		SetLastError( 0 );
-		const int n2 = IdnToAscii( 0, L"b\u00FCcher.example", -1, szOut, 256 );
-		printf( "  IdnToAscii(-1) -> %d, error %lu, \"%ls\"\n", n2, GetLastError(), szOut );
-		const std::wstring s = TlsHostFromUrl( L"https://b\u00FCcher.example/" );
-		printf( "  TlsHostFromUrl -> %zu chars \"%ls\"\n", s.size(), s.c_str() );
-		for ( wchar_t c : std::wstring( L"b\u00FCcher" ) ) printf( " %04X", (unsigned)c );
-		printf( "\n" );
-	}
 	CHECK( TlsHostFromUrl( L"https://[2001:db8::1]:8443/x" ) == L"2001:db8::1" );
 	CHECK( TlsHostFromUrl( L"https://Host.Example:443/" ) == L"host.example" );
 	CHECK( TlsHostFromUrl( L"https://user@host/a?b" ) == L"host" );
@@ -690,8 +677,8 @@ TLS_TEST_OFFLINE(OfflineHostFromUrl)
 	CHECK( TlsHostFromUrl( L"https://host#top" ) == L"host" );
 	CHECK( TlsHostFromUrl( L"https://user:p@ss@host:1/" ) == L"host" );
 	CHECK( TlsHostFromUrl( L"https://[2001:DB8::A]/" ) == L"2001:db8::a" );
-	CHECK( TlsHostFromUrl( L"https://bücher.example/" ) == L"xn--bcher-kva.example" );
-	CHECK( TlsHostFromUrl( L"https://Bücher.Example:8443/x" ) == L"xn--bcher-kva.example" );
+	CHECK( TlsHostFromUrl( L"https://b\u00FCcher.example/" ) == L"xn--bcher-kva.example" );
+	CHECK( TlsHostFromUrl( L"https://B\u00FCcher.Example:8443/x" ) == L"xn--bcher-kva.example" );
 	CHECK( TlsHostFromUrl( L"https://" ) == L"" );
 	CHECK( TlsHostFromUrl( L"https:///path" ) == L"" );
 	CHECK( TlsHostFromUrl( L"https://:443/" ) == L"" );
