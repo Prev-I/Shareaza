@@ -97,6 +97,11 @@ CSecureRule* CSecurity::GetGUID(const GUID& pGUID) const
 		if( (*i).second->m_pGUID == pGUID ) return (*i).second;
 	}
 
+	for ( CAddressIPv6RuleMap::const_iterator i = m_pIPv6Rules.begin(); i != m_pIPv6Rules.end(); ++i )
+	{
+		if( (*i).second->m_pGUID == pGUID ) return (*i).second;
+	}
+
 	return NULL;
 }
 
