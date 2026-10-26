@@ -287,6 +287,22 @@ public:
 		}
 	}
 
+	inline bool HasSSL() const throw()
+	{
+		return sslConnection != NULL;
+	}
+
+protected:
+	// Free the TLS session, if any. It does not close the socket.
+	inline void DestroySSL() throw()
+	{
+		if ( sslConnection )
+		{
+			SSL_free( sslConnection );
+			sslConnection = NULL;
+		}
+	}
+
 // Overrides
 public:
 	// Make a connection, accept a connection, copy a connection, and close a connection
