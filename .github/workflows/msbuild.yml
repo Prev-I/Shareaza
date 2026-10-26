@@ -45,33 +45,35 @@ jobs:
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v2
 
-    - name: Install Inno Setup 6.2.2
-      # Inno Setup 6.3.0 dropped Windows Vista, so the runner's 6.7.x rejects
-      # setup/scripts/main.iss (MinVersion=6.0). 6.2.2 is the last release that
-      # accepts it. setup/Installer_143.vcxproj calls ISCC by a fixed path, so the
-      # old version is installed over the new one, from the official release,
-      # hash-pinned.
+    - name: Install Inno Setup 6.7.3
+      # setup/Installer_143.vcxproj calls ISCC by a fixed path, under "Inno Setup 6".
+      # The runner image ships whatever 6.x it was built with, so the build installs
+      # the last 6.x release over it, from the official release, hash-pinned.
+      # Moving to 7.x would be a change of its own.
       shell: pwsh
       run: |
-          $url = 'https://github.com/jrsoftware/issrc/releases/download/is-6_2_2/innosetup-6.2.2.exe'
-          $sha256 = '8117D10D00A2AD33A1390978EA3872861C330E087914410A6377B22C4C5B8563'
+          $version = '6.7.3'
+          $url = 'https://github.com/jrsoftware/issrc/releases/download/is-6_7_3/innosetup-6.7.3.exe'
+          $sha256 = '9C73C3BAE7ED48D44112A0F48E66742C00090BDB5BEF71D9D3C056C66E97B732'
           $dir = Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6'
-          $exe = Join-Path $env:RUNNER_TEMP 'innosetup-6.2.2.exe'
-          $log = Join-Path $env:RUNNER_TEMP 'innosetup-6.2.2.log'
+          $exe = Join-Path $env:RUNNER_TEMP "innosetup-$version.exe"
+          $log = Join-Path $env:RUNNER_TEMP "innosetup-$version.log"
           Invoke-WebRequest -Uri $url -OutFile $exe
           $actual = (Get-FileHash -Path $exe -Algorithm SHA256).Hash
-          if ($actual -ne $sha256) { throw "innosetup-6.2.2.exe hash $actual does not match $sha256" }
+          if ($actual -ne $sha256) { throw "innosetup-$version.exe hash $actual does not match $sha256" }
           $p = Start-Process -FilePath $exe -Wait -PassThru -ArgumentList '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/SP-', '/ALLUSERS', "/DIR=`"$dir`"", "/LOG=`"$log`""
           if ($p.ExitCode -ne 0) { throw "Inno Setup installer exited with $($p.ExitCode)" }
-          if (-not (Select-String -Path $log -SimpleMatch 'Installation process succeeded.' -Quiet)) { Get-Content $log -Tail 40; throw 'Inno Setup 6.2.2 did not install' }
-          # The 6.2.2 banner carries no minor version, only its copyright year: the
-          # runner's 6.7.x reads 1997-2026. Every file in 6.2.2's own installer is
-          # flagged ignoreversion, so every file 6.2.2 ships replaces the newer one.
-          $banner = (& (Join-Path $dir 'ISCC.exe') 2>&1 | Select-Object -First 3) -join ' '
-          Write-Output $banner
-          if ($banner -notmatch 'Copyright \(C\) 1997-2023 Jordan Russell') { throw 'ISCC is not 6.2.2' }
-          # ISCC exits non-zero when given no script; do not let that fail the step.
-          $global:LASTEXITCODE = 0
+          if (-not (Select-String -Path $log -SimpleMatch 'Installation process succeeded.' -Quiet)) { Get-Content $log -Tail 40; throw "Inno Setup $version did not install" }
+          # The hash pins what ran; this checks what the fixed path now holds. Which of
+          # these carries the version was not known when this was written, so any of
+          # them is accepted, and all are printed.
+          $iscc = Get-Item (Join-Path $dir 'ISCC.exe')
+          $reported = @($iscc.VersionInfo.ProductVersion, $iscc.VersionInfo.FileVersion)
+          foreach ($view in 'SOFTWARE\WOW6432Node', 'SOFTWARE') {
+              $reported += (Get-ItemProperty -Path "HKLM:\$view\Microsoft\Windows\CurrentVersion\Uninstall\Inno Setup 6_is1" -ErrorAction SilentlyContinue).DisplayVersion
+          }
+          Write-Output "$($iscc.FullName) reports: $($reported -join ' | ')"
+          if (-not ($reported | Where-Object { $_ -match "^$([regex]::Escape($version))(\.0)?$" })) { throw "Inno Setup in $dir is not $version" }
 
     - name: Restore NuGet packages (zlibwapi)
       working-directory: ${{env.GITHUB_WORKSPACE}}
@@ -95,6 +97,93 @@ jobs:
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       run: msbuild ${{env.SOLUTION_FILE_PATH}} /nologo /v:m /t:Rebuild /p:ForceImportBeforeCppTargets=${{env.RELEASEBUILD_FILE_PATH}} /p:Configuration=${{ matrix.type }} /p:Platform=${{ matrix.platform }} /p:DefineConstants=BUILDFROMMSBUILD /p:RevisionSHA=${{ steps.gitversion.outputs.ShortSha }} /p:RevisionDate=${{ steps.gitversion.outputs.commitDate }} /fl /flp:Summary
+
+    - name: Test the installer and its VC++ runtime check
+      # Installs the build, then a second build of the same script with the
+      # runtime minimum set out of reach, so Setup has to download and run
+      # Microsoft's latest runtime installers. Setup logs each DLL version it
+      # reads, its decision, and each runtime installer's exit code, which the
+      # checks below read back. The last check is the one that shows whether
+      # Microsoft's latest runtime still installs MFC: after a run that needed
+      # no reboot, mfc140u.dll has to be from the same minor release as
+      # vcruntime140.dll.
+      if: matrix.type == 'Release'
+      timeout-minutes: 30
+      shell: pwsh
+      run: |
+          $files = 'vcruntime140.dll', 'msvcp140.dll', 'mfc140u.dll'
+          $dirs = [ordered]@{ x86 = "$env:WINDIR\SysWOW64"; x64 = "$env:WINDIR\System32" }
+          $minimum = [version]'14.44'
+          function Get-Runtime {
+              foreach ($arch in $dirs.Keys) {
+                  foreach ($f in $files) {
+                      $path = Join-Path $dirs[$arch] $f
+                      $v = if (Test-Path $path) { (Get-Item $path).VersionInfo.FileVersionRaw } else { $null }
+                      [pscustomobject]@{ Arch = $arch; File = $f; Version = $v }
+                  }
+              }
+          }
+          function Install-Build([string]$Exe, [string]$Log) {
+              Write-Host "Installing $Exe"
+              $p = Start-Process -FilePath $Exe -Wait -PassThru -ArgumentList '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/SP-', '/MERGETASKS="!firewall,!upnp,!desktopicon,!quicklaunch"', "/LOG=`"$Log`""
+              $lines = @(Get-Content -Path $Log -ErrorAction SilentlyContinue)
+              $lines | Select-String -SimpleMatch 'VC++ runtime', 'Redistributable' | ForEach-Object { Write-Host "  $($_.Line)" }
+              if ($p.ExitCode -ne 0) { $lines | Select-Object -Last 40 | Out-Host; throw "$Exe exited with $($p.ExitCode)" }
+              if (-not ($lines | Select-String -SimpleMatch 'Installation process succeeded.' -Quiet)) { $lines | Select-Object -Last 40 | Out-Host; throw "$Exe did not install" }
+              return $lines
+          }
+          $before = @(Get-Runtime)
+          $before | Format-Table -AutoSize | Out-String | Write-Output
+
+          $built = @(Get-ChildItem -Path setup\builds -Filter *.exe)
+          if ($built.Count -ne 1) { throw "expected one installer in setup\builds, found $($built.Count)" }
+          $log = Install-Build $built[0].FullName (Join-Path $env:RUNNER_TEMP 'setup.log')
+          $current = -not ($before | Where-Object { $null -eq $_.Version -or $_.Version -lt $minimum })
+          $queued = @($log | Select-String -Pattern 'VC\+\+ runtime: .* needs ')
+          if ($current -and $queued.Count) { throw 'the runner has a current runtime, but Setup still queued a download' }
+          if (-not ($log | Select-String -SimpleMatch 'VC++ runtime:' -Quiet)) { throw 'Setup did not check the runtime' }
+
+          # Run from setup\, as the installer project's build step does.
+          $forced = Join-Path $env:RUNNER_TEMP 'forced'
+          $iscc = Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6\ISCC.exe'
+          Push-Location setup
+          & $iscc /Dvcredist_min_minor=9999 "/O$forced" scripts\main.iss
+          $code = $LASTEXITCODE
+          Pop-Location
+          if ($code -ne 0) { throw "ISCC exited with $code" }
+          $exe = @(Get-ChildItem -Path $forced -Filter *.exe)
+          if ($exe.Count -ne 1) { throw "expected one forced installer, found $($exe.Count)" }
+          $log = Install-Build $exe[0].FullName (Join-Path $env:RUNNER_TEMP 'setup-forced.log')
+
+          $after = @(Get-Runtime)
+          $after | Format-Table -AutoSize | Out-String | Write-Output
+          foreach ($arch in $dirs.Keys) {
+              $ran = @($log | Select-String -Pattern "Redistributable \($arch\) exited with (\d+)")
+              if ($ran.Count -ne 1) { throw "Setup did not run the $arch runtime installer exactly once" }
+              $exit = [int]$ran[0].Matches[0].Groups[1].Value
+              $set = @($after | Where-Object Arch -eq $arch)
+              $missing = @($set | Where-Object { $null -eq $_.Version })
+              if ($missing.Count) { throw "$arch runtime is missing $($missing.File -join ', ')" }
+              foreach ($b in @($before | Where-Object Arch -eq $arch)) {
+                  $a = $set | Where-Object File -eq $b.File
+                  if ($null -ne $b.Version -and $a.Version -lt $b.Version) { throw "$arch $($b.File) went from $($b.Version) to $($a.Version)" }
+              }
+              $runtime = ($set | Where-Object File -eq 'vcruntime140.dll').Version
+              $mfc = ($set | Where-Object File -eq 'mfc140u.dll').Version
+              if ($exit -eq 3010) {
+                  Write-Output "::warning::the $arch runtime installer needs a reboot, so its files may not be in place yet; MFC not checked"
+              } elseif ($exit -ne 0) {
+                  throw "the $arch runtime installer exited with $exit"
+              } elseif ($mfc.Major -ne $runtime.Major -or $mfc.Minor -ne $runtime.Minor) {
+                  throw "$arch mfc140u.dll is $mfc but vcruntime140.dll is $runtime: the latest runtime may not install MFC"
+              } elseif ($runtime -eq ($before | Where-Object { $_.Arch -eq $arch -and $_.File -eq 'vcruntime140.dll' }).Version) {
+                  Write-Output "::warning::the $arch runtime stayed at $runtime, so the runner already had the latest; MFC check not informative"
+              } else {
+                  Write-Output "$arch runtime $runtime includes MFC $mfc"
+              }
+          }
+          # Ends the step on the checks above, not on a native exit code.
+          exit 0
 
     - name: Archive Shareaza Release
       uses: actions/upload-artifact@v4
