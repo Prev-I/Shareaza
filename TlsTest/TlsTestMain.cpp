@@ -132,9 +132,9 @@ namespace
 	}
 
 	// Feeds nIn received bytes to Handshake(), nChunk at a time if nChunk > 0.
-	// Bytes left over after Done go to Decrypt(). False if those held
-	// application data or failed the session.
-	bool FeedHandshake(CTlsClient& oTls, const BYTE* pIn, size_t nIn, size_t nChunk,
+	// On Done, accepts a Manual session if bAccept, and passes bytes left over
+	// to Decrypt(). False if those held application data or failed the session.
+	bool FeedHandshake(CTlsClient& oTls, const BYTE* pIn, size_t nIn, size_t nChunk, bool bAccept,
 		std::vector<BYTE>& oSend, TlsResult& nResult)
 	{
 		const size_t nStep = nChunk ? nChunk : nIn;
@@ -147,8 +147,15 @@ namespace
 		}
 		while ( nResult == TlsResult::NeedMore && nDone < nIn );
 
+		if ( nResult == TlsResult::Done && bAccept && oTls.Credential() == TlsCred::Manual )
+			oTls.Accept();
 		if ( nResult != TlsResult::Done || nDone == nIn )
 			return true;
+		if ( ! oTls.IsAccepted() )
+		{
+			printf( "  %zu bytes after the handshake of a session not accepted\n", nIn - nDone );
+			return false;
+		}
 
 		std::vector<BYTE> oPlain;
 		const TlsResult nRest = oTls.Decrypt( pIn + nDone, nIn - nDone, oPlain, oSend );
@@ -225,7 +232,7 @@ void TlsTestUnreachable(const char* pszFormat, ...)
 	printf( "\n" );
 }
 
-SOCKET ConnectAndHandshake(CTlsClient& oTls, const char* pszHost, unsigned short nPort, size_t nChunk)
+SOCKET ConnectAndHandshake(CTlsClient& oTls, const char* pszHost, unsigned short nPort, size_t nChunk, bool bAccept)
 {
 	SOCKET hSocket = Connect( pszHost, nPort );
 	if ( hSocket == INVALID_SOCKET )
@@ -271,7 +278,7 @@ SOCKET ConnectAndHandshake(CTlsClient& oTls, const char* pszHost, unsigned short
 					pszHost, static_cast< unsigned >( nPort ), WSAGetLastError() );
 			break;
 		}
-		if ( ! FeedHandshake( oTls, pBuffer, static_cast< size_t >( nReceived ), nChunk, oSend, nResult ) )
+		if ( ! FeedHandshake( oTls, pBuffer, static_cast< size_t >( nReceived ), nChunk, bAccept, oSend, nResult ) )
 			break;
 	}
 
@@ -295,13 +302,26 @@ bool HttpGet(CTlsClient& oTls, SOCKET hSocket, const char* pszHost, const char* 
 	const std::string sRequest = std::string( "GET " ) + pszPath + " HTTP/1.1\r\nHost: " + pszHost +
 		"\r\nUser-Agent: TlsTest\r\nAccept: */*\r\nConnection: close\r\n\r\n";
 
-	std::vector<BYTE> oSend, oPlain;
+	std::vector<BYTE> oSend;
 	if ( oTls.Encrypt( reinterpret_cast< const BYTE* >( sRequest.data() ), sRequest.size(), oSend ) != TlsResult::Ok )
 	{
 		printf( "  %s: encrypt failed, SECURITY_STATUS 0x%08lX\n",
 			pszHost, static_cast< unsigned long >( oTls.LastStatus() ) );
 		return false;
 	}
+	if ( ! SendAll( hSocket, oSend ) )
+	{
+		TlsTestUnreachable( "%s%s: send failed: error %d", pszHost, pszPath, WSAGetLastError() );
+		return false;
+	}
+	return ReadResponse( oTls, hSocket, pszHost, pszPath, sBody, nChunk );
+}
+
+bool ReadResponse(CTlsClient& oTls, SOCKET hSocket, const char* pszHost, const char* pszPath,
+	std::string& sBody, size_t nChunk)
+{
+	sBody.clear();
+	std::vector<BYTE> oSend, oPlain;
 
 	// Bytes that arrived with the end of the handshake are decrypted first.
 	TlsResult nResult = oTls.Decrypt( NULL, 0, oPlain, oSend );
@@ -325,7 +345,7 @@ bool HttpGet(CTlsClient& oTls, SOCKET hSocket, const char* pszHost, const char* 
 		if ( nResult == TlsResult::Closed )
 		{
 			printf( "  %s%s: %zu bytes, then close_notify; %lu post-handshake messages\n",
-				pszHost, pszPath, sBody.size(), static_cast< unsigned long >( oTls.Renegotiations() ) );
+				pszHost, pszPath, sBody.size(), static_cast< unsigned long >( oTls.PostHandshakeMessages() ) );
 			return true;
 		}
 		if ( nResult == TlsResult::Failed )
@@ -340,7 +360,7 @@ bool HttpGet(CTlsClient& oTls, SOCKET hSocket, const char* pszHost, const char* 
 		if ( nReceived == 0 )
 		{
 			printf( "  %s%s: %zu bytes, then closed without close_notify; %lu post-handshake messages\n",
-				pszHost, pszPath, sBody.size(), static_cast< unsigned long >( oTls.Renegotiations() ) );
+				pszHost, pszPath, sBody.size(), static_cast< unsigned long >( oTls.PostHandshakeMessages() ) );
 			return true;
 		}
 		if ( nReceived < 0 )

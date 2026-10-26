@@ -72,7 +72,10 @@ void TlsTestUnreachable(const char* pszFormat, ...);
 // nChunk > 0 feeds received bytes to Handshake() that many at a time. Bytes
 // received after the handshake completes go to Decrypt(); they must not hold
 // application data, as no server speaks first in these tests.
-SOCKET ConnectAndHandshake(CTlsClient& oTls, const char* pszHost, unsigned short nPort, size_t nChunk = 0);
+// bAccept calls Accept() on a Manual session as soon as the handshake is
+// complete; these tests take any certificate the local servers present.
+SOCKET ConnectAndHandshake(CTlsClient& oTls, const char* pszHost, unsigned short nPort,
+	size_t nChunk = 0, bool bAccept = true);
 
 // ConnectAndHandshake, then closes the socket. True if the session was established.
 bool RunHandshake(CTlsClient& oTls, const char* pszHost, unsigned short nPort);
@@ -87,6 +90,11 @@ bool SendAll(SOCKET hSocket, const std::vector<BYTE>& oData);
 // False if the session fails or the socket breaks (the latter reported with
 // TlsTestUnreachable).
 bool HttpGet(CTlsClient& oTls, SOCKET hSocket, const char* pszHost, const char* pszPath,
+	std::string& sBody, size_t nChunk = 0);
+
+// The reading half of HttpGet, for a request the caller already sent.
+// pszHost and pszPath only label the output.
+bool ReadResponse(CTlsClient& oTls, SOCKET hSocket, const char* pszHost, const char* pszPath,
 	std::string& sBody, size_t nChunk = 0);
 
 // True if the log file of tls_server.py, named by the TLSTEST_SERVER_LOG

@@ -45,8 +45,14 @@ namespace
 	// No validation by Schannel: the caller evaluates the peer certificate.
 	const DWORD TLS_MANUAL_FLAGS = SCH_CRED_MANUAL_CRED_VALIDATION | SCH_CRED_NO_DEFAULT_CREDS;
 
+	// USE_SUPPLIED_CREDS: never pick a client certificate on our own when a
+	// server asks for one.
 	const ULONG TLS_CONTEXT_FLAGS = ISC_REQ_SEQUENCE_DETECT | ISC_REQ_REPLAY_DETECT |
-		ISC_REQ_CONFIDENTIALITY | ISC_REQ_ALLOCATE_MEMORY | ISC_REQ_STREAM;
+		ISC_REQ_CONFIDENTIALITY | ISC_REQ_ALLOCATE_MEMORY | ISC_REQ_STREAM |
+		ISC_REQ_USE_SUPPLIED_CREDS;
+
+	// The TLS 1.3 wire version, as SECPKG_ATTR_CIPHER_INFO reports it.
+	const DWORD TLS_WIRE_VERSION_1_3 = 0x0304;
 
 	// Received bytes Schannel has not consumed, in any state. A record is at
 	// most 16 KiB plus overhead, so a buffer this large means the peer is
@@ -125,15 +131,22 @@ namespace
 		oBuffer.cbBuffer = 0;
 	}
 
-	// The size of the SECBUFFER_EXTRA buffer in a buffer list, or 0.
-	ULONG ExtraSize(const SecBuffer* pBuffers, size_t nBuffers)
+	// The SECBUFFER_EXTRA buffer in a buffer list, or NULL.
+	const SecBuffer* FindExtra(const SecBuffer* pBuffers, size_t nBuffers)
 	{
 		for ( size_t i = 0 ; i < nBuffers ; ++i )
 		{
 			if ( pBuffers[ i ].BufferType == SECBUFFER_EXTRA )
-				return pBuffers[ i ].cbBuffer;
+				return &pBuffers[ i ];
 		}
-		return 0;
+		return NULL;
+	}
+
+	// The size of the SECBUFFER_EXTRA buffer in a buffer list, or 0.
+	ULONG ExtraSize(const SecBuffer* pBuffers, size_t nBuffers)
+	{
+		const SecBuffer* pExtra = FindExtra( pBuffers, nBuffers );
+		return pExtra ? pExtra->cbBuffer : 0;
 	}
 }
 
@@ -164,9 +177,11 @@ CTlsClient::CTlsClient(TlsCred nCred, const std::wstring& sHost)
 	, m_nStatus		( SEC_E_OK )
 	, m_pPeerCert	( NULL )
 	, m_nProtocol	( 0 )
+	, m_nCipherProtocol	( 0 )
 	, m_oSizes		()
+	, m_bAccepted	( false )
 	, m_bShutdown	( false )
-	, m_nRenegotiations	( 0 )
+	, m_nPostHandshake	( 0 )
 {
 	SecInvalidateHandle( &m_hCred );
 	SecInvalidateHandle( &m_hContext );
@@ -201,9 +216,12 @@ TlsResult CTlsClient::Start(std::vector<BYTE>& oSend)
 	ULONG nAttributes = 0;
 	const SECURITY_STATUS nStatus = InitializeSecurityContextW( &m_hCred, NULL, TargetName(),
 		TLS_CONTEXT_FLAGS, 0, 0, NULL, 0, &m_hContext, &oOutDesc, &nAttributes, NULL );
-	TakeToken( oOut, oSend );
 	if ( nStatus != SEC_I_CONTINUE_NEEDED )
+	{
+		DropToken( oOut );
 		return Fail( nStatus == SEC_E_OK ? SEC_E_INTERNAL_ERROR : nStatus );
+	}
+	TakeToken( oOut, oSend );
 
 	m_nStatus = nStatus;
 	m_nState = State::Handshaking;
@@ -240,14 +258,17 @@ TlsResult CTlsClient::Encrypt(const BYTE* p, size_t n, std::vector<BYTE>& oSend)
 		return TlsResult::Failed;
 	case State::Closed:
 		return TlsResult::Closed;
-	case State::Established:
 	case State::Renegotiating:
+		return m_bShutdown ? TlsResult::Closed : TlsResult::NeedMore;
+	case State::Established:
 		break;
 	default:
 		return Fail( SEC_E_INVALID_HANDLE );
 	}
 	if ( m_bShutdown )
 		return TlsResult::Closed;
+	if ( ! m_bAccepted )
+		return Fail( SEC_E_CERT_UNKNOWN );
 
 	const size_t nStart = oSend.size();
 	const ULONG cbHeader = m_oSizes.cbHeader, cbTrailer = m_oSizes.cbTrailer;
@@ -313,6 +334,8 @@ TlsResult CTlsClient::Decrypt(const BYTE* pIn, size_t nIn, std::vector<BYTE>& oP
 	default:
 		return Fail( SEC_E_INVALID_HANDLE );
 	}
+	if ( ! m_bAccepted )
+		return Fail( SEC_E_CERT_UNKNOWN );
 
 	// The input is buffered in slices no larger than the space left, and each
 	// slice is decrypted before the next, so a large input does not trip the
@@ -368,9 +391,25 @@ void CTlsClient::Shutdown(std::vector<BYTE>& oSend)
 	m_nStatus = nStatus;
 }
 
+void CTlsClient::Accept()
+{
+	if ( IsHandshakeComplete() )
+		m_bAccepted = true;
+}
+
 bool CTlsClient::IsEstablished() const
 {
 	return m_nState == State::Established;
+}
+
+bool CTlsClient::IsHandshakeComplete() const
+{
+	return m_nState == State::Established || m_nState == State::Renegotiating || m_nState == State::Closed;
+}
+
+bool CTlsClient::IsAccepted() const
+{
+	return m_bAccepted;
 }
 
 TlsCred CTlsClient::Credential() const
@@ -393,9 +432,14 @@ DWORD CTlsClient::Protocol() const
 	return m_nProtocol;
 }
 
-ULONG CTlsClient::Renegotiations() const
+bool CTlsClient::IsTls13() const
 {
-	return m_nRenegotiations;
+	return ( m_nProtocol & SP_PROT_TLS1_3_CLIENT ) != 0 || m_nCipherProtocol == TLS_WIRE_VERSION_1_3;
+}
+
+ULONG CTlsClient::PostHandshakeMessages() const
+{
+	return m_nPostHandshake;
 }
 
 TlsResult CTlsClient::Fail(SECURITY_STATUS nStatus)
@@ -411,13 +455,26 @@ TlsResult CTlsClient::Establish()
 		return TlsResult::Failed;
 
 	SecPkgContext_ConnectionInfo oInfo = {};
-	if ( QueryContextAttributesW( &m_hContext, SECPKG_ATTR_CONNECTION_INFO, &oInfo ) == SEC_E_OK )
-		m_nProtocol = oInfo.dwProtocol;
+	const SECURITY_STATUS nInfo = QueryContextAttributesW( &m_hContext, SECPKG_ATTR_CONNECTION_INFO, &oInfo );
+	if ( nInfo != SEC_E_OK )
+		return Fail( nInfo );
+	m_nProtocol = oInfo.dwProtocol;
+
+	// The wire version too, where Windows reports it: either source may name
+	// TLS 1.3, which decides whether post-handshake messages are allowed.
+	SecPkgContext_CipherInfo oCipher = {};
+	if ( QueryContextAttributesW( &m_hContext, SECPKG_ATTR_CIPHER_INFO, &oCipher ) == SEC_E_OK )
+		m_nCipherProtocol = oCipher.dwProtocol;
 
 	PCCERT_CONTEXT pCert = NULL;
 	if ( QueryContextAttributesW( &m_hContext, SECPKG_ATTR_REMOTE_CERT_CONTEXT, &pCert ) == SEC_E_OK )
 		m_pPeerCert = pCert;
+	// A manual session exists so that the owner can judge the certificate:
+	// without one there is nothing to judge.
+	if ( m_nCred == TlsCred::Manual && m_pPeerCert == NULL )
+		return Fail( SEC_E_CERT_UNKNOWN );
 
+	m_bAccepted = m_nCred == TlsCred::Validating;
 	m_nStatus = SEC_E_OK;
 	m_nState = State::Established;
 	return TlsResult::Done;
@@ -568,8 +625,12 @@ TlsResult CTlsClient::DecryptBuffered(std::vector<BYTE>& oPlain, std::vector<BYT
 			oPlain.insert( oPlain.end(), pData, pData + oBuffers[ i ].cbBuffer );
 		}
 
-		const ULONG nExtra = ExtraSize( oBuffers, 4 );
+		const SecBuffer* const pExtra = FindExtra( oBuffers, 4 );
+		const ULONG nExtra = pExtra ? pExtra->cbBuffer : 0;
 		if ( nExtra > m_oIn.size() )
+			return Fail( SEC_E_INTERNAL_ERROR );
+		// The unconsumed bytes must be the tail of m_oIn, as they are kept by size.
+		if ( nExtra && pExtra->pvBuffer != pLast - nExtra )
 			return Fail( SEC_E_INTERNAL_ERROR );
 		if ( nStatus == SEC_E_OK && nExtra == m_oIn.size() )
 			return Fail( SEC_E_INTERNAL_ERROR );	// nothing consumed
@@ -577,10 +638,15 @@ TlsResult CTlsClient::DecryptBuffered(std::vector<BYTE>& oPlain, std::vector<BYT
 
 		if ( nStatus == SEC_I_RENEGOTIATE )
 		{
+			// TLS 1.3 post-handshake messages continue. A renegotiation in an
+			// older protocol could change the peer's identity: refuse it,
+			// and refuse too when the protocol is unknown.
+			if ( ! IsTls13() )
+				return Fail( SEC_E_UNSUPPORTED_FUNCTION );
 			if ( nBefore == nRenegotiatedAt )
 				return Fail( SEC_E_INTERNAL_ERROR );
 			nRenegotiatedAt = nBefore;
-			++m_nRenegotiations;
+			++m_nPostHandshake;
 			m_nState = State::Renegotiating;
 			bRenegotiateNow = true;
 		}
