@@ -26,13 +26,15 @@
 
 #include "Buffer.h"
 #include "Packet.h"
-#define OPENSSL_NO_STDIO
-#include <openssl/ssl.h>
-#include <openssl/err.h>
+
+#include <memory>
 
 #pragma comment(lib, "ws2_32.lib")
-#pragma comment(lib, "libssl.lib")
-#pragma comment(lib, "libcrypto.lib")
+
+class CTlsClient;
+struct CTlsVerifyJob;
+enum class TlsCertProblem;
+enum class TlsVerdict;
 
 
 
@@ -77,7 +79,33 @@ private:
 
 	CConnection(const CConnection&);
 	CConnection& operator=(const CConnection&);
-	SSL* sslConnection;
+
+	// TLS client state. All of it is NULL or empty on a plain connection,
+	// and every TLS branch below is taken only when m_pTls exists.
+	enum TlsPhase
+	{
+		tlsNone,			// Plain connection
+		tlsConnecting,		// Waiting for the TCP connection
+		tlsHandshaking,		// Exchanging handshake messages
+		tlsVerifying,		// Handshake done, the certificate is being verified
+		tlsEstablished,		// Certificate accepted, application data flows
+		tlsFailed,			// The handshake failed
+		tlsEnded			// The peer closed the session, or it failed after the handshake
+	};
+	std::unique_ptr< CTlsClient >		m_pTls;			// The TLS session, NULL on a plain connection
+	std::vector< BYTE >					m_oTlsSend;		// Ciphertext not yet sent
+	std::shared_ptr< CTlsVerifyJob >	m_pTlsJob;		// Certificate verification in progress
+	TlsPhase							m_nTlsPhase;
+	CString								m_sTlsHost;		// The name the certificate is checked against
+	bool								m_bTlsValidated;	// The certificate passed strict verification
+	CString								m_sTlsFingerprint;	// SHA-256 of the accepted certificate
+
+	void	ResetTls();							// Free the TLS state, without touching the socket
+	BOOL	OnTlsRead();						// OnRead for a TLS connection
+	BOOL	OnTlsWrite();						// OnWrite for a TLS connection
+	DWORD	SendTls(DWORD nLimit);				// Send up to nLimit bytes of m_oTlsSend, return the number sent
+	void	StartTlsVerify();					// Start verifying the peer certificate on a worker thread
+	BOOL	OnTlsRun();							// Handle TLS state changes; FALSE if the connection was dropped
 
 public:
 	inline CLockedBuffer GetInput() const throw()
@@ -287,21 +315,26 @@ public:
 		}
 	}
 
-	inline bool HasSSL() const throw()
+	// True if the connection is TLS, its handshake has completed and its certificate was accepted
+	bool IsTls() const;
+	// True if the connection is TLS and its certificate passed strict verification
+	bool IsTlsValidated() const;
+	// The TLS session, or NULL on a plain connection
+	const CTlsClient* GetTls() const;
+	// The host a TLS session's certificate was verified for (empty on a plain connection)
+	inline const CString& GetTlsHostName() const throw()
 	{
-		return sslConnection != NULL;
+		return m_sTlsHost;
+	}
+	// The SHA-256 fingerprint of a TLS session's accepted certificate (empty until it is accepted)
+	inline const CString& GetTlsFingerprint() const throw()
+	{
+		return m_sTlsFingerprint;
 	}
 
-protected:
-	// Free the TLS session, if any. It does not close the socket.
-	inline void DestroySSL() throw()
-	{
-		if ( sslConnection )
-		{
-			SSL_free( sslConnection );
-			sslConnection = NULL;
-		}
-	}
+	// Wait up to nTimeout ms for the certificate verifications still running. Call at exit,
+	// before CTlsClient::Cleanup().
+	static void WaitForTlsJobs(DWORD nTimeout);
 
 // Overrides
 public:
@@ -310,8 +343,9 @@ public:
 	virtual BOOL ConnectTo(const SOCKADDR_IN6* pHost);
 	virtual BOOL ConnectTo(const IN_ADDR* pAddress, WORD nPort);
 	virtual BOOL ConnectTo(const IN6_ADDR* pAddress, WORD nPort);
-	virtual BOOL SSLConnectTo(const IN_ADDR* pAddress, WORD nPort);
-	virtual BOOL SSLConnectTo(const IN6_ADDR* pAddress, WORD nPort);
+	// Connect, then speak TLS with sHost as the name the certificate must carry
+	virtual BOOL TLSConnectTo(const IN_ADDR* pAddress, WORD nPort, const CString& sHost);
+	virtual BOOL TLSConnectTo(const IN6_ADDR* pAddress, WORD nPort, const CString& sHost);
 	virtual void AcceptFrom(SOCKET hSocket, SOCKADDR_IN* pHost); // Accept a connection from a remote computer
 	virtual void AcceptFrom(SOCKET hSocket, SOCKADDR_IN6* pHost); // Accept a connection from a remote computer
 	virtual void AttachTo(CConnection* pConnection);             // Copy a connection (do)
@@ -322,10 +356,21 @@ public:
 	virtual BOOL OnRun();                // (do) just returns true
 	virtual BOOL OnConnected();          // (do) just returns true
 	virtual BOOL OnRead();               // Read data waiting in the socket into the input buffer
-	virtual BOOL OnSSLRead();               // Read data waiting in the socket into the input buffer
 	virtual BOOL OnWrite();              // Move the contents of the output buffer into the socket
-	virtual BOOL OnSSLWrite();              // Move the contents of the output buffer into the socket
 	virtual void OnDropped(); 			 // (do) empty
+	// A TLS connection's certificate was accepted; OnConnected() follows. Return FALSE to refuse
+	// the session: the connection is then dropped (OnDropped). Do not close the connection here.
+	virtual BOOL OnTlsEstablished();     // Just returns true
+	// A TLS connection's certificate was verified: nProblem is what strict verification found
+	// (TlsCertProblem::None if the certificate is valid for the host), sFingerprint its SHA-256
+	// fingerprint. Return whether to use the session. The default accepts only a valid certificate.
+	// TlsVerdict::AskUser means the override asked the user and logged why: the session is not
+	// used, and OnTlsRejected() follows as for TlsVerdict::Reject, without a rejection line.
+	// IsTlsValidated() reflects nProblem, whatever the verdict.
+	virtual TlsVerdict OnTlsVerified(TlsCertProblem nProblem, const CString& sFingerprint);
+	// A TLS connection failed its handshake or was refused by OnTlsVerified(); the reason is
+	// already logged. The default drops the connection (OnDropped).
+	virtual void OnTlsRejected();
 	virtual BOOL OnHeaderLine(CString& strHeader, CString& strValue); // Processes a single line from the headers
 	virtual BOOL OnHeadersComplete();    // (do) just returns true
 

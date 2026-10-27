@@ -79,6 +79,7 @@ public:
 
 protected:
 	void			GiveConnectionToNext();
+	BOOL			ConnectTls();
 	BOOL			StartNextFragment();
 	BOOL			SendRequest();
 	BOOL			ReadResponseLine();
@@ -89,8 +90,9 @@ protected:
 
 	virtual BOOL	OnConnected();
 	virtual BOOL	OnRead();
-	virtual BOOL	OnWrite();
 	virtual void	OnDropped();
+	virtual TlsVerdict	OnTlsVerified(TlsCertProblem nProblem, const CString& sFingerprint);
+	virtual void	OnTlsRejected();
 	virtual BOOL	OnHeaderLine(CString& strHeader, CString& strValue);
 	virtual BOOL	OnHeadersComplete();
 };

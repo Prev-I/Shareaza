@@ -134,7 +134,7 @@ namespace
 		CERT_CHAIN_POLICY_STATUS oStatus = {};
 		oStatus.cbSize = sizeof( oStatus );
 		if ( ! CertVerifyCertificateChainPolicy( CERT_CHAIN_POLICY_SSL, pChain, &oPolicy, &oStatus ) )
-			return TlsCertProblem::Other;
+			return TlsCertProblem::Unverifiable;
 		if ( oStatus.dwError != 0 )
 			return ProblemFromPolicyError( oStatus.dwError );
 
@@ -176,7 +176,7 @@ namespace
 TlsCertProblem VerifyServerCertificate(PCCERT_CONTEXT pCert, const std::wstring& sHost)
 {
 	if ( pCert == NULL || sHost.empty() )
-		return TlsCertProblem::Other;
+		return TlsCertProblem::Unverifiable;
 
 	// The usages Schannel requests for a server certificate.
 	char szServerAuth[] = szOID_PKIX_KP_SERVER_AUTH;
@@ -196,11 +196,28 @@ TlsCertProblem VerifyServerCertificate(PCCERT_CONTEXT pCert, const std::wstring&
 	if ( ! CertGetCertificateChain( NULL, pCert, NULL, pCert->hCertStore, &oChainPara,
 		TLS_CHAIN_FLAGS, NULL, &pChain ) )
 	{
-		return TlsCertProblem::Other;
+		return TlsCertProblem::Unverifiable;
 	}
 	const TlsCertProblem nProblem = EvaluateChain( pChain, sHost );
 	CertFreeCertificateChain( pChain );
 	return nProblem;
+}
+
+TlsVerdict DecideTlsVerdict(TlsCertProblem nProblem, bool bRequireValid, DWORD nPolicy, bool bRemembered)
+{
+	if ( nProblem == TlsCertProblem::None )
+		return TlsVerdict::Accept;
+	if ( bRequireValid || nProblem == TlsCertProblem::Unverifiable )
+		return TlsVerdict::Reject;
+	switch ( nPolicy )
+	{
+	case TLS_POLICY_IGNORE:
+		return TlsVerdict::Accept;
+	case TLS_POLICY_ASK:
+		return bRemembered ? TlsVerdict::Accept : TlsVerdict::AskUser;
+	default:
+		return TlsVerdict::Reject;
+	}
 }
 
 TlsCertProblem ProblemFromStatus(SECURITY_STATUS nStatus)
@@ -213,9 +230,11 @@ TlsCertProblem ProblemFromStatus(SECURITY_STATUS nStatus)
 
 	case SEC_E_WRONG_PRINCIPAL:
 	case CERT_E_CN_NO_MATCH:
-	case CERT_E_INVALID_NAME:
 		return TlsCertProblem::WrongName;
 
+	// CERT_E_INVALID_NAME is a name-constraint violation: an authority in the
+	// chain issued a name it is not trusted for.
+	case CERT_E_INVALID_NAME:
 	case SEC_E_UNTRUSTED_ROOT:
 	case SEC_E_ISSUING_CA_UNTRUSTED:
 	case CERT_E_UNTRUSTEDROOT:
@@ -357,10 +376,12 @@ void CTlsTrustStore::Accept(const std::wstring& sHost, const std::wstring& sFing
 	m_oEntries.insert( oEntry );
 }
 
-void CTlsTrustStore::Clear()
+size_t CTlsTrustStore::Clear()
 {
 	CExclusiveLock oLock( m_oLock );
+	const size_t nCount = m_oEntries.size();
 	m_oEntries.clear();
+	return nCount;
 }
 
 size_t CTlsTrustStore::Count() const

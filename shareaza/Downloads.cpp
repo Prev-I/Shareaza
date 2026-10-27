@@ -27,6 +27,7 @@
 #include "Transfers.h"
 #include "Transfer.h"
 #include "DownloadGroups.h"
+#include "DownloadSource.h"
 #include "DownloadTransfer.h"
 #include "DownloadTransferED2K.h"
 #include "DownloadTransferBT.h"
@@ -1144,6 +1145,45 @@ BOOL CDownloads::OnPush(const Hashes::Guid& oGUID, CConnection* pConnection)
 	}
 
 	return FALSE;
+}
+
+//////////////////////////////////////////////////////////////////////
+// CDownloads certificate decision handler
+
+void CDownloads::OnTlsDecision(const CString& sHost, const CString& sFingerprint, bool bAccepted)
+{
+	ASSUME_LOCK( Transfers.m_pSection );
+
+	if ( sHost.IsEmpty() )
+		return;
+
+	// An acceptance lets every waiting source of the host connect again: one whose server
+	// shows another certificate is asked about again. A refusal removes only the sources
+	// that waited on this certificate.
+	for ( POSITION pos = GetIterator() ; pos ; )
+	{
+		CDownload* pDownload = GetNext( pos );
+
+		for ( POSITION posSource = pDownload->GetIterator() ; posSource ; )
+		{
+			CDownloadSource* pSource = pDownload->GetNext( posSource );
+
+			if ( ! pSource->m_bTlsWaiting || pSource->GetTlsHost().CompareNoCase( sHost ) != 0 )
+				continue;
+
+			if ( bAccepted )
+			{
+				pSource->m_bTlsWaiting = false;
+				pSource->m_sTlsWaitingFingerprint.Empty();
+				pSource->m_tAttempt = 0;
+			}
+			else if ( pSource->m_sTlsWaitingFingerprint.CompareNoCase( sFingerprint ) == 0 )
+			{
+				// As a certificate the policy rejects
+				pSource->Remove( TRUE, TRUE );
+			}
+		}
+	}
 }
 
 //////////////////////////////////////////////////////////////////////

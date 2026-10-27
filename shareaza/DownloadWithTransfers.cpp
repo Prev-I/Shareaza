@@ -511,6 +511,8 @@ BOOL CDownloadWithTransfers::OnDonkeyCallback(const CEDClient* pClient, CDownloa
 	}
 
 	CDownloadTransferED2K* pTransfer = (CDownloadTransferED2K*)pSource->CreateTransfer();
+	if ( pTransfer == NULL )
+		return FALSE;
 	ASSERT( pTransfer->m_nProtocol == PROTOCOL_ED2K );
 	return pTransfer->Initiate();
 }

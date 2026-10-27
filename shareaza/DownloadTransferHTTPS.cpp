@@ -37,6 +37,7 @@
 #include "VendorCache.h"
 #include "Transfers.h"
 #include "Security.h"
+#include "TlsPolicy.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -89,14 +90,25 @@ BOOL CDownloadTransferHTTPS::Initiate()
 	theApp.Message( MSG_INFO, IDS_DOWNLOAD_CONNECTING,
 		(LPCTSTR)CString( inet_ntoa( m_pSource->m_pAddress ) ), m_pSource->m_nPort,
 		(LPCTSTR)m_pDownload->GetDisplayName() );
+
+	// Only this attempt's certificate verification may make the source wait again
+	m_pSource->m_bTlsWaiting = false;
+	m_pSource->m_sTlsWaitingFingerprint.Empty();
 	
 	if ( m_pDownload->IsCompleted() )
 	{
 		m_pDownload->RemoveSource( m_pSource, FALSE );
 		return FALSE;
 	}
-	// An https source is fetched only over a TLS connection.
-	else if ( m_pSource->m_pAddress.s_addr && SSLConnectTo( &m_pSource->m_pAddress, m_pSource->m_nPort ) )
+	// A source whose URL names no host cannot be checked: retrying would not help
+	else if ( m_pSource->GetTlsHost().IsEmpty() )
+	{
+		theApp.Message( MSG_ERROR, IDS_TLS_NO_HOST, (LPCTSTR)m_pSource->m_sURL );
+		Close( TRI_FALSE );
+		return FALSE;
+	}
+	// An https source is fetched only over a TLS connection, checked against the URL's host.
+	else if ( ConnectTls() )
 	{
 		SetState( dtsConnecting );
 		
@@ -116,6 +128,22 @@ BOOL CDownloadTransferHTTPS::Initiate()
 	}
 }
 
+// Connect to the source's IPv4 address if it has one, otherwise to its IPv6 address
+BOOL CDownloadTransferHTTPS::ConnectTls()
+{
+	const CString sHost = m_pSource->GetTlsHost();
+	if ( sHost.IsEmpty() )
+		return FALSE;
+
+	if ( m_pSource->m_pAddress.s_addr )
+		return TLSConnectTo( &m_pSource->m_pAddress, m_pSource->m_nPort, sHost );
+
+	if ( ! IN6_IS_ADDR_UNSPECIFIED( &m_pSource->m_pAddressIPv6 ) )
+		return TLSConnectTo( &m_pSource->m_pAddressIPv6, m_pSource->m_nPort, sHost );
+
+	return FALSE;
+}
+
 //////////////////////////////////////////////////////////////////////
 // CDownloadTransferHTTPS accept push
 
@@ -123,8 +151,11 @@ void CDownloadTransferHTTPS::AttachTo(CConnection* pConnection)
 {
 	CDownloadTransfer::AttachTo( pConnection );
 
-	// An https source is fetched only over a TLS connection.
-	if ( ! HasSSL() )
+	// An https source is fetched only over a TLS connection whose certificate was accepted.
+	// A TLS session is only reused for the host its certificate was verified for, and only
+	// if its certificate is valid when the download requires it.
+	if ( ! IsTls() || m_pSource->GetTlsHost().CompareNoCase( GetTlsHostName() ) != 0 ||
+		( m_pDownload->m_bRequireValidCert && ! IsTlsValidated() ) )
 	{
 		Close( TRI_UNKNOWN );
 		return;
@@ -166,10 +197,23 @@ void CDownloadTransferHTTPS::Close( TRISTATE bKeepSource, DWORD nRetryAfter )
 
 void CDownloadTransferHTTPS::GiveConnectionToNext()
 {
-	if ( m_hSocket == INVALID_SOCKET )
+	if ( m_hSocket == INVALID_SOCKET || m_pSource == NULL )
 		return;
 
 	ASSUME_LOCK( Transfers.m_pSection );
+
+	// A TLS session is only reused for the host its certificate was verified for, and only
+	// while the certificate policy still accepts it: a valid certificate, every certificate,
+	// or one the user accepted for the host.
+	const CString sHost = m_pSource->GetTlsHost();
+	if ( ! IsTls() || sHost.IsEmpty() || sHost.CompareNoCase( GetTlsHostName() ) != 0 )
+		return;
+
+	const DWORD nPolicy = Settings.Connection.TlsCertPolicy;
+	if ( ! IsTlsValidated() && nPolicy != static_cast< DWORD >( TLS_CERT_IGNORE ) &&
+		! ( nPolicy == static_cast< DWORD >( TLS_CERT_ASK ) &&
+			TlsTrust.IsAccepted( std::wstring( (LPCWSTR)GetTlsHostName() ), std::wstring( (LPCWSTR)GetTlsFingerprint() ) ) ) )
+		return;
 
 	for ( POSITION pos = Downloads.GetIterator() ; pos != NULL ; )
 	{
@@ -188,7 +232,11 @@ void CDownloadTransferHTTPS::GiveConnectionToNext()
 			if ( pSource->m_nBusyCount == 0 
 				 && pSource->IsSSLSource()
 				 && !pSource->IsConnected()
-				 && pSource->Equals(m_pSource) )
+				 && pSource->Equals(m_pSource)
+				 && pSource->m_nPort == m_pSource->m_nPort
+				 && ! pSource->m_bTlsWaiting
+				 && pSource->GetTlsHost().CompareNoCase( sHost ) == 0
+				 && ( ! pDownload->m_bRequireValidCert || IsTlsValidated() ) )
 			{
 				if ( pSource->GetTransfer() )
 					continue;
@@ -248,6 +296,14 @@ BOOL CDownloadTransferHTTPS::StartNextFragment()
 
 	ASSERT( this != NULL );
 	if ( this == NULL ) return FALSE;
+
+	// A download that requires a valid certificate (an upgrade) may have become one while this
+	// session, accepted under a weaker policy, was open: reconnect and verify strictly.
+	if ( m_pDownload->m_bRequireValidCert && IsTls() && ! IsTlsValidated() )
+	{
+		Close( TRI_UNKNOWN );
+		return FALSE;
+	}
 
 	m_nOffset			= SIZE_UNKNOWN;
 	m_nPosition			= 0;
@@ -560,7 +616,7 @@ BOOL CDownloadTransferHTTPS::SendRequest()
 	
 	m_pSource->SetLastSeen();
 	
-	CDownloadTransfer::OnSSLWrite();
+	CDownloadTransfer::OnWrite();
 	
 	return TRUE;
 }
@@ -632,20 +688,11 @@ BOOL CDownloadTransferHTTPS::OnRun()
 }
 
 //////////////////////////////////////////////////////////////////////
-// CDownloadTransferHTTPS write handler
-
-// Writes on an https transfer go through TLS only.
-BOOL CDownloadTransferHTTPS::OnWrite()
-{
-	return CDownloadTransfer::OnSSLWrite();
-}
-
-//////////////////////////////////////////////////////////////////////
 // CDownloadTransferHTTPS read handler
 
 BOOL CDownloadTransferHTTPS::OnRead()
 {
-	CDownloadTransfer::OnSSLRead();
+	CDownloadTransfer::OnRead();
 	
 	switch ( m_nState )
 	{
@@ -1681,6 +1728,44 @@ BOOL CDownloadTransferHTTPS::ReadFlush()
 	}
 	
 	return TRUE;
+}
+
+//////////////////////////////////////////////////////////////////////
+// CDownloadTransferHTTPS rejected certificate handler
+
+TlsVerdict CDownloadTransferHTTPS::OnTlsVerified(TlsCertProblem nProblem, const CString& sFingerprint)
+{
+	ASSUME_LOCK( Transfers.m_pSection );
+
+	// The user's certificate policy applies, unless the download requires a valid certificate.
+	// Without a download, nothing says which policy applies: only a valid certificate is accepted.
+	const TlsVerdict nVerdict = EvaluateTlsPeer( nProblem, GetTlsHostName(), sFingerprint,
+		m_pDownload == NULL || m_pDownload->m_bRequireValidCert );
+	if ( nVerdict != TlsVerdict::AskUser )
+		return nVerdict;
+
+	// The source waits for the user's decision, and is not retried before it. With no source
+	// to keep, no fingerprint to remember the answer by, or no way to ask, the certificate
+	// is rejected.
+	if ( m_pSource == NULL || sFingerprint.IsEmpty() ||
+		! RequestTlsDecision( GetTlsHostName(), sFingerprint, nProblem ) )
+		return TlsVerdict::Reject;
+
+	m_pSource->m_bTlsWaiting = true;
+	m_pSource->m_sTlsWaitingFingerprint = sFingerprint;
+	theApp.Message( MSG_WARNING, IDS_TLS_CERT_WAITING, (LPCTSTR)GetTlsHostName(),
+		(LPCTSTR)TlsProblemText( nProblem ) );
+	return TlsVerdict::AskUser;
+}
+
+void CDownloadTransferHTTPS::OnTlsRejected()
+{
+	ASSUME_LOCK( Transfers.m_pSection );
+
+	// CConnection or OnTlsVerified() logged the reason. A source waiting for the user's
+	// decision on the certificate is kept; otherwise (a failed handshake or a refused
+	// certificate) the source cannot be fetched safely: drop it.
+	Close( ( m_pSource != NULL && m_pSource->m_bTlsWaiting ) ? TRI_TRUE : TRI_FALSE );
 }
 
 //////////////////////////////////////////////////////////////////////

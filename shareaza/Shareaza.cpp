@@ -45,6 +45,8 @@
 #include "Library.h"
 #include "LibraryBuilder.h"
 #include "Neighbours.h"
+#include "Connection.h"
+#include "TlsClient.h"
 #include "Network.h"
 #include "Plugins.h"
 #include "QueryHashMaster.h"
@@ -52,6 +54,7 @@
 #include "Scheduler.h"
 #include "SchemaCache.h"
 #include "Security.h"
+#include "TlsPolicy.h"
 #include "Settings.h"
 #include "ShareazaURL.h"
 #include "SharedFile.h"
@@ -444,6 +447,9 @@ BOOL CShareazaApp::InitInstance()
 			AfxMessageBox( _T("Failed to initialize Windows Sockets."), MB_ICONHAND | MB_OK );
 			return FALSE;
 		}
+		// Acquire the TLS credentials now; a failure shows when an https download connects
+		if ( ! CTlsClient::Startup() )
+			theApp.Message( MSG_ERROR, IDS_TLS_CREDENTIALS_FAILED );
 	SplashStep( L"Database" );
 		PurgeDeletes();
 		CThumbCache::InitDatabase();
@@ -495,6 +501,7 @@ BOOL CShareazaApp::InitInstance()
 		MyProfile.Load();
 	SplashStep( L"Security Services" );
 		Security.Load();
+		LoadTlsTrust();
 		AdultFilter.Load();
 		MessageFilter.Load();
 	SplashStep( L"Query Manager" );
@@ -587,6 +594,10 @@ int CShareazaApp::ExitInstance()
 		SplashStep( L"Stopping Transfers" );
 		Transfers.StopThread();
 		Downloads.CloseTransfers();
+		// Certificate verifications still running may block on revocation fetches
+		// for up to 10 seconds; wait for them before freeing the TLS credentials
+		CConnection::WaitForTlsJobs( 15000 );
+		CTlsClient::Cleanup();
 
 		SplashStep( L"Clearing Clients" );
 		Uploads.Clear( FALSE );
@@ -601,6 +612,7 @@ int CShareazaApp::ExitInstance()
 			DownloadGroups.Save();
 			Library.Save();
 			Security.Save();
+			SaveTlsTrustAtExit();
 			HostCache.Save();
 			UploadQueues.Save();
 			DiscoveryServices.Save();

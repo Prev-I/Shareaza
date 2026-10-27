@@ -43,6 +43,7 @@
 #include "Network.h"
 #include "QueryHit.h"
 #include "ShareazaURL.h"
+#include "TlsVerify.h"
 #include "Transfers.h"
 #include "VendorCache.h"
 
@@ -285,12 +286,21 @@ void CDownloadSource::Construct(const CDownload* pDownload)
 	m_bPreview				= FALSE;
 	m_bPreviewRequestSent	= FALSE;
 	m_bMetaIgnore			= FALSE;
+	m_bTlsWaiting			= false;
 }
 
 CDownloadSource::~CDownloadSource()
 {
 	ASSUME_LOCK( Transfers.m_pSection );
 	ASSERT( m_pTransfer == NULL );
+}
+
+//////////////////////////////////////////////////////////////////////
+// CDownloadSource TLS host
+
+CString CDownloadSource::GetTlsHost() const
+{
+	return CString( TlsHostFromUrl( std::wstring( (LPCWSTR)m_sURL ) ).c_str() );
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -512,6 +522,12 @@ CDownloadTransfer* CDownloadSource::CreateTransfer(LPVOID pParam)
 {
 	ASSUME_LOCK( Transfers.m_pSection );
 	ASSERT( m_pTransfer == NULL );
+
+	// Every transfer starts here, whoever asks for it (the scheduler, the user's Connect,
+	// a push or a callback): a download that requires a valid certificate is fetched only
+	// from https sources.
+	if ( ! IsAllowedForDownload() )
+		return NULL;
 	
 	switch ( m_nProtocol )
 	{
@@ -539,9 +555,23 @@ CDownloadTransfer* CDownloadSource::CreateTransfer(LPVOID pParam)
 //////////////////////////////////////////////////////////////////////
 // CDownloadSource check
 
+// A download that requires a valid certificate (an upgrade) must come only from https
+// sources, whose certificates are verified strictly: an http source, from a redirect or
+// an alternate location, would bypass TLS for a file that may have no hash to check.
+bool CDownloadSource::IsAllowedForDownload() const
+{
+	return ! m_pDownload->m_bRequireValidCert || m_nProtocol == PROTOCOL_SSL;
+}
+
 BOOL CDownloadSource::CanInitiate(BOOL bNetwork, BOOL bEstablished, bool bFirstAttempt)
 {
 	if( !Network.IsConnected() ) return FALSE;
+
+	// Not until the user decides whether to trust its server's certificate
+	if ( m_bTlsWaiting ) return FALSE;
+
+	// Never for a source CreateTransfer() refuses
+	if ( ! IsAllowedForDownload() ) return FALSE;
 
 	if ( Settings.Connection.RequireForTransfers )
 	{

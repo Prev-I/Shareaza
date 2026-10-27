@@ -1979,6 +1979,10 @@
 			<gap size="4"/>
 			<text>Download throughput, scheduling, verification, timeouts and management.</text>
 			<newline gap="10"/>
+			<link target="raza:page:CTlsSettingsPage" format="b">Certificates:</link>
+			<gap size="4"/>
+			<text>Which https server certificates to accept, and the ones you accepted.</text>
+			<newline gap="10"/>
 			<link target="raza:page:CUploadsSettingsPage" format="b">Uploads:</link>
 			<gap size="4"/>
 			<text>Upload capacity, queuing, banning, timeouts and special requests.</text>
@@ -2953,6 +2957,26 @@
 		<string id="16211" value="Neighbour %s forwarded a push request to a firewalled address, ignoring."/>
 		<string id="16212" value="Neighbour %s forwarded an extended packet that is not GGEP encoded."/>
 		<string id="16213" value="Sending query routing table to neighbour %s (%i bit = %lu[%i], %i%% full)"/>
+		<string id="16236" value="Failed to acquire the TLS credentials."/>
+		<string id="16237" value="Unable to read the accepted certificates from %s."/>
+		<string id="16238" value="the certificate check could not run"/>
+		<string id="16239" value="Unable to save the accepted certificates."/>
+		<string id="16240" value="Refuse the server (recommended)"/>
+		<string id="16241" value="Ask me, and remember my answer for the server"/>
+		<string id="16242" value="Accept the certificate anyway"/>
+		<string id="16243" value="The connection stays encrypted, but anyone on the path can impersonate the server. Only files with a known hash are still verified after download."/>
+		<string id="16244" value="Forgot %u accepted certificate(s)."/>
+		<string id="16245" value="%s is not a valid https URL."/>
+		<string id="16246" value="Waiting for your decision on the certificate of %s: %s."/>
+		<string id="16247" value="The certificate of %s cannot be trusted: %s.\n\nSHA-256 fingerprint:\n%s\n\nSuch a certificate does not prove who the server is: anyone between you and the server could read or change what you download.\n\nTrust this certificate for this server from now on, and download from it?"/>
+		<string id="16248" value="TLS handshake with %s failed: %s."/>
+		<string id="16249" value="Rejected the certificate of %s: %s."/>
+		<string id="16250" value="the certificate has expired or is not yet valid"/>
+		<string id="16251" value="the certificate was not issued for this host"/>
+		<string id="16252" value="the certificate was not issued by a trusted authority"/>
+		<string id="16253" value="the certificate has been revoked"/>
+		<string id="16254" value="the certificate could not be verified"/>
+		<string id="16255" value="error 0x%08X"/>
 		<string id="16256" value="Added &quot;%s&quot; to download queue with %i source(s)."/>
 		<string id="16257" value="Completed download of &quot;%s&quot;."/>
 		<string id="16258" value="Pausing download of &quot;%s&quot;."/>
@@ -3408,6 +3432,7 @@
 		<string id="20135" value="Next"/>
 		<string id="20136" value="Q"/>
 		<string id="20137" value="sources (e.g. 3/10 sources)"/>
+		<string id="20138" value="Certificate not trusted"/>
 		<string id="20210" value="(No Rating)"/>
 		<string id="20211" value="Fake / Corrupt"/>
 		<string id="20212" value="Poor"/>
@@ -3663,6 +3688,16 @@
 			<control caption="Store Temporary Incomplete Files Here"/>
 			<control/>
 			<control/>
+		</dialog>
+		<dialog name="CTlsSettingsPage" cookie="BuStCoStStBuStBu" caption="Certificates">
+			<control caption="_Server certificates:"/>
+			<control caption="Shareaza checks the certificate of every https server it downloads from. When a certificate is not valid:"/>
+			<control/>
+			<control/>
+			<control caption="Shareaza upgrades are downloaded only from servers with a valid certificate, whatever this setting."/>
+			<control caption="_Accepted certificates:"/>
+			<control caption="The certificates you accept for a server are remembered. Forget them to be asked again."/>
+			<control caption="_Forget accepted certificates"/>
 		</dialog>
 		<dialog name="CUploadsSettingsPage" cookie="BuBuBuBuStEdmsBuCoBuBuBuStCoStCoBuSyBuBuBuSt" caption="Uploads">
 			<control caption="_Options:"/>

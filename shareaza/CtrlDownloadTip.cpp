@@ -782,6 +782,12 @@ void CDownloadTipCtrl::OnPaint(CDC* pDC, CDownloadSource* pSource)
 			strSpeed = Settings.SmartSpeed( pSource->GetMeasuredSpeed() );
 		}
 	}
+	else if ( pSource->m_bTlsWaiting )
+	{
+		// Waiting for the user's decision on a certificate
+		strStatus = pSource->GetState( TRUE );
+		LoadString( strSpeed, IDS_TIP_NA );
+	}
 	else
 	{
 		LoadString( strStatus, IDS_TIP_INACTIVE );

@@ -33,6 +33,7 @@
 
 class CChildWnd;
 class CURLActionDlg;
+struct CTlsPromptRequest;
 
 
 class CMainWnd : public CMDIFrameWnd
@@ -96,6 +97,18 @@ protected:
 	DWORD				m_nAlpha;				// Main window transparency (0...255)
 	CSkinWindow*		m_pSkin;
 	CBrush				m_brshDockbar;
+	CList< CTlsPromptRequest* > m_pTlsPrompts;	// Certificate prompts not shown yet (owned)
+	bool				m_bTlsPromptShowing;	// A certificate prompt is open
+
+	// Show the queued certificate prompts one at a time, if no prompt is open and the
+	// UI thread may block on them. False if the application began closing meanwhile:
+	// this object may then be gone.
+	bool		ShowTlsPrompts();
+	// Ask the user about one certificate, and pass the answer on. False if the
+	// application began closing meanwhile: this object may then be gone.
+	bool		ShowTlsPrompt(const CTlsPromptRequest& oRequest);
+	// Free the certificate prompts not shown, queued or still posted
+	void		ClearTlsPrompts();
 
 	// Update main window tile, status bar and tray messages
 	void		UpdateMessages();
@@ -300,6 +313,7 @@ protected:
 	afx_msg LRESULT OnMenuChar(UINT nChar, UINT nFlags, CMenu* pMenu);
 	afx_msg LRESULT OnSanityCheck(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnNowUploading(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnTlsPrompt(WPARAM wParam, LPARAM lParam);
 #if _MSC_VER >= 1800 // Microsoft Visual Studio 2013
 	afx_msg UINT OnPowerBroadcast(UINT nPowerEvent, LPARAM nEventData);
 #else

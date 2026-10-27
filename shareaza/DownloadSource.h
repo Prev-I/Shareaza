@@ -96,11 +96,16 @@ public:
 	CString				m_sPreview;				// if empty it has the default /gnutella/preview/v1?urn:xyz format
 	BOOL				m_bPreviewRequestSent;
 	BOOL				m_bMetaIgnore;			// Ignore metadata from this source (for example already got)
+	bool				m_bTlsWaiting;			// Waiting for the user to decide on its server's certificate (not saved)
+	CString				m_sTlsWaitingFingerprint;	// SHA-256 of that certificate (not saved)
 
 public:
 	BOOL		ResolveURL();
 	void		Serialize(CArchive& ar, int nVersion /* DOWNLOAD_SER_VERSION */);
 	BOOL		CanInitiate(BOOL bNetwork, BOOL bEstablished, bool bFirstAttempt = false);
+	// False for a source its download may not be fetched from: a download that requires
+	// a valid certificate is fetched only from https sources
+	bool		IsAllowedForDownload() const;
 	// Remove source from download, add it to failed sources if bBan == TRUE, and destroy source itself
 	void		Remove(BOOL bCloseTransfer = TRUE, BOOL bBan = FALSE, DWORD nRetryAfter = 0);
 	void		OnFailure(BOOL bNondestructive, DWORD nRetryAfter = 0);
@@ -175,6 +180,10 @@ public:
 	{
 		return (m_nProtocol == PROTOCOL_SSL );
 	}
+
+	// The host name of an https source's URL, as TLS checks the server's certificate
+	// against it; empty if the URL names no valid https host
+	CString GetTlsHost() const;
 
 	inline bool IsIPv6Source() const
 	{
@@ -259,7 +268,7 @@ public:
 	{
 		ASSUME_LOCK( Transfers.m_pSection );
 		return ( m_pTransfer ? m_pTransfer->GetStateText( bLong ) :
-			LoadString( IDS_STATUS_UNKNOWN ) );
+			LoadString( m_bTlsWaiting ? IDS_STATUS_TLS_UNTRUSTED : IDS_STATUS_UNKNOWN ) );
 	}
 
 	// Source transfer current limit (zero - no limit)

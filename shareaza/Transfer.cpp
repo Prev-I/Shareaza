@@ -84,26 +84,26 @@ BOOL CTransfer::ConnectToIPv6(const IN6_ADDR* pAddress, WORD nPort)
 	return FALSE;
 }
 
-BOOL CTransfer::SSLConnectTo(const IN_ADDR* pAddress, WORD nPort)
+BOOL CTransfer::TLSConnectTo(const IN_ADDR* pAddress, WORD nPort, const CString& sHost)
 {
 	m_nState = 0;
 
-	if (CConnection::SSLConnectTo(pAddress, nPort))
+	if ( CConnection::TLSConnectTo( pAddress, nPort, sHost ) )
 	{
-		Transfers.Add(this);
+		Transfers.Add( this );
 		return TRUE;
 	}
 
 	return FALSE;
 }
 
-BOOL CTransfer::SSLConnectToIPv6(const IN6_ADDR* pAddress, WORD nPort)
+BOOL CTransfer::TLSConnectTo(const IN6_ADDR* pAddress, WORD nPort, const CString& sHost)
 {
 	m_nState = 0;
 
-	if (CConnection::SSLConnectTo(pAddress, nPort))
+	if ( CConnection::TLSConnectTo( pAddress, nPort, sHost ) )
 	{
-		Transfers.Add(this);
+		Transfers.Add( this );
 		return TRUE;
 	}
 

@@ -107,6 +107,11 @@ void CUpgradeDlg::OnOK()
 
 	if ( CDownload* pDownload = Downloads.Add( pURL ) )
 	{
+		// An upgrade is fetched only from servers with a valid certificate, whatever the
+		// certificate policy. The transfers lock is still held, so the sources just added
+		// cannot have started a transfer yet.
+		pDownload->m_bRequireValidCert = TRUE;
+
 		if ( Settings.Downloads.ShowMonitorURLs )
 			pDownload->ShowMonitor();
 	}

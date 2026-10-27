@@ -1799,6 +1799,21 @@ BEGIN
     EDITTEXT        IDC_REMOTE_PASSWORD,96,186,96,12,ES_PASSWORD | ES_AUTOHSCROLL
 END
 
+IDD_SETTINGS_TLS DIALOGEX 0, 0, 282, 220
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Certificates"
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    GROUPBOX        "&Server certificates:",IDC_STATIC,6,6,270,124,WS_GROUP
+    LTEXT           "Shareaza checks the certificate of every https server it downloads from. When a certificate is not valid:",IDC_STATIC,18,22,246,18
+    COMBOBOX        IDC_TLS_POLICY,18,44,246,60,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "",IDC_TLS_POLICY_WARNING,18,64,246,26
+    LTEXT           "Shareaza upgrades are downloaded only from servers with a valid certificate, whatever this setting.",IDC_STATIC,18,96,246,18
+    GROUPBOX        "&Accepted certificates:",IDC_STATIC,6,138,270,64,WS_GROUP
+    LTEXT           "The certificates you accept for a server are remembered. Forget them to be asked again.",IDC_STATIC,18,154,246,18
+    PUSHBUTTON      "&Forget accepted certificates",IDC_TLS_FORGET,18,178,120,14
+END
+
 IDD_SETTINGS_BITTORRENT DIALOGEX 0, 0, 282, 220
 STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "BitTorrent"
@@ -2674,6 +2689,14 @@ BEGIN
     END
 
     IDD_SETTINGS_REMOTE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 275
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 213
+    END
+
+    IDD_SETTINGS_TLS, DIALOG
     BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 275
@@ -3782,6 +3805,31 @@ BEGIN
     IDS_PROTOCOL_SIZE_PUSH  "Neighbour %s forwarded a push packet with invalid length, ignoring."
 END
 
+STRINGTABLE
+BEGIN
+    IDS_TLS_CREDENTIALS_FAILED "Failed to acquire the TLS credentials."
+    IDS_TLS_TRUST_LOAD_FAILED "Unable to read the accepted certificates from %s."
+    IDS_TLS_REASON_UNVERIFIABLE "the certificate check could not run"
+    IDS_TLS_TRUST_SAVE_FAILED "Unable to save the accepted certificates."
+    IDS_TLS_POLICY_VALID    "Refuse the server (recommended)"
+    IDS_TLS_POLICY_ASK      "Ask me, and remember my answer for the server"
+    IDS_TLS_POLICY_IGNORE   "Accept the certificate anyway"
+    IDS_TLS_POLICY_IGNORE_WARNING 
+                            "The connection stays encrypted, but anyone on the path can impersonate the server. Only files with a known hash are still verified after download."
+    IDS_TLS_FORGET          "Forgot %u accepted certificate(s)."
+    IDS_TLS_NO_HOST         "%s is not a valid https URL."
+    IDS_TLS_CERT_WAITING    "Waiting for your decision on the certificate of %s: %s."
+    IDS_TLS_PROMPT          "The certificate of %s cannot be trusted: %s.\n\nSHA-256 fingerprint:\n%s\n\nSuch a certificate does not prove who the server is: anyone between you and the server could read or change what you download.\n\nTrust this certificate for this server from now on, and download from it?"
+    IDS_TLS_HANDSHAKE_FAILED "TLS handshake with %s failed: %s."
+    IDS_TLS_CERT_REJECTED   "Rejected the certificate of %s: %s."
+    IDS_TLS_REASON_EXPIRED  "the certificate has expired or is not yet valid"
+    IDS_TLS_REASON_WRONGNAME "the certificate was not issued for this host"
+    IDS_TLS_REASON_UNTRUSTED "the certificate was not issued by a trusted authority"
+    IDS_TLS_REASON_REVOKED  "the certificate has been revoked"
+    IDS_TLS_REASON_OTHER    "the certificate could not be verified"
+    IDS_TLS_REASON_STATUS   "error 0x%08X"
+END
+
 STRINGTABLE 
 BEGIN
     IDS_DOWNLOAD_ADDED      "Added ""%s"" to download queue with %i source(s)."
@@ -4491,6 +4539,7 @@ BEGIN
     IDS_STATUS_NEXT         "Next"
     IDS_STATUS_Q            "Q"
     IDS_STATUS_SOURCESOF    "sources"
+    IDS_STATUS_TLS_UNTRUSTED "Certificate not trusted"
 END
 
 STRINGTABLE 

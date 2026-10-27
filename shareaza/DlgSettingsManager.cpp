@@ -33,6 +33,7 @@
 #include "PageSettingsWeb.h"
 #include "PageSettingsConnection.h"
 #include "PageSettingsDownloads.h"
+#include "PageSettingsTls.h"
 #include "PageSettingsUploads.h"
 #include "PageSettingsRemote.h"
 #include "PageSettingsNetworks.h"
@@ -119,6 +120,7 @@ INT_PTR CSettingsManagerDlg::DoModal(LPCTSTR pszWindow)
 	CAutoPtr< CRichSettingsPage > gInternet( new CRichSettingsPage( _T("CInternetSettingsGroup") ) );
 	CAutoPtr< CConnectionSettingsPage > pConnection( new CConnectionSettingsPage );
 	CAutoPtr< CDownloadsSettingsPage > pDownloads( new CDownloadsSettingsPage );
+	CAutoPtr< CTlsSettingsPage > pTls( new CTlsSettingsPage );
 	CAutoPtr< CUploadsSettingsPage > pUploads( new CUploadsSettingsPage );
 	CAutoPtr< CRemoteSettingsPage > pRemote( new CRemoteSettingsPage );
 	CAutoPtr< CNetworksSettingsPage > gNetworks( new CNetworksSettingsPage );
@@ -140,6 +142,7 @@ INT_PTR CSettingsManagerDlg::DoModal(LPCTSTR pszWindow)
 	AddGroup( gInternet );
 	AddPage( pConnection );
 	AddPage( pDownloads );
+	AddPage( pTls );
 	AddPage( pUploads );
 	AddPage( pRemote );
 	if ( bAdvanced )

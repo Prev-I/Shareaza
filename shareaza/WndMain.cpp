@@ -53,6 +53,7 @@
 #include "DiscoveryServices.h"
 #include "Scheduler.h"
 #include "SchemaCache.h"
+#include "TlsPolicy.h"
 
 #include "WndMain.h"
 #include "WndChild.h"
@@ -286,6 +287,7 @@ BEGIN_MESSAGE_MAP(CMainWnd, CMDIFrameWnd)
 	ON_WM_MENUCHAR()
 	ON_MESSAGE(WM_SANITY_CHECK, &CMainWnd::OnSanityCheck)
 	ON_MESSAGE(WM_NOWUPLOADING, &CMainWnd::OnNowUploading)
+	ON_MESSAGE(WM_TLSPROMPT, &CMainWnd::OnTlsPrompt)
 	ON_WM_POWERBROADCAST()
 	ON_WM_COPYDATA()
 	ON_UPDATE_COMMAND_UI(ID_PATH_EXPLORE, &CMainWnd::OnUpdatePathExplore)
@@ -304,6 +306,7 @@ CMainWnd::CMainWnd()
 	, m_bTimer			( FALSE )
 	, m_pSkin			( NULL )
 	, m_nAlpha			( 255 )
+	, m_bTlsPromptShowing	( false )
 {
 	ZeroMemory( &m_pTray, sizeof( NOTIFYICONDATA ) );
 	m_pTray.cbSize				= theApp.m_bIsVistaOrNewer ? sizeof( NOTIFYICONDATA ) : NOTIFYICONDATA_V3_SIZE;
@@ -395,6 +398,8 @@ CMainWnd::~CMainWnd()
 {
 	theApp.m_pSafeWnd = NULL;
 	theApp.m_pMainWnd = NULL;
+
+	ClearTlsPrompts();
 }
 
 void CMainWnd::SaveState()
@@ -655,6 +660,9 @@ void CMainWnd::OnClose()
 	Transfers.StopThread();
 	ChatCore.Close();
 
+	// Nothing posts certificate prompts any more
+	ClearTlsPrompts();
+
 	if ( m_wndRemoteWnd.IsVisible() ) m_wndRemoteWnd.DestroyWindow();
 
 	m_brshDockbar.DeleteObject();
@@ -894,6 +902,10 @@ void CMainWnd::OnTimer(UINT_PTR nIDEvent)
 		PostMessage( WM_CLOSE );
 		return;
 	}
+
+	// Certificate prompts that could not be shown when they arrived
+	if ( ! ShowTlsPrompts() )
+		return;	// Closing: this window may be gone
 
 	// Propagate to children
 
@@ -3130,6 +3142,138 @@ LRESULT CMainWnd::OnNowUploading(WPARAM /*wParam*/, LPARAM lParam)
 		}
 	}
 	return 0;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// CMainWnd certificate prompts
+
+LRESULT CMainWnd::OnTlsPrompt(WPARAM /*wParam*/, LPARAM lParam)
+{
+	CAutoPtr< CTlsPromptRequest > pRequest( reinterpret_cast< CTlsPromptRequest* >( lParam ) );
+	if ( ! pRequest )
+		return 0;
+
+	if ( theApp.m_bClosing )
+		return 0;
+
+	m_pTlsPrompts.AddTail( pRequest.Detach() );
+
+	ShowTlsPrompts();
+
+	return 0;
+}
+
+namespace
+{
+	// The probe thread: owns its own handle to the mutex, and nothing else
+	DWORD WINAPI ProbeMutex(LPVOID pParam)
+	{
+		const HANDLE hMutex = static_cast< HANDLE >( pParam );
+		const DWORD nResult = WaitForSingleObject( hMutex, 0 );
+		const BOOL bFree = ( nResult == WAIT_OBJECT_0 || nResult == WAIT_ABANDONED );
+		if ( bFree )
+			ReleaseMutex( hMutex );
+		CloseHandle( hMutex );
+		return static_cast< DWORD >( bFree );
+	}
+
+	// True if no thread holds the mutex. A Win32 mutex does not tell its owner, and a thread
+	// that owns it would just enter it again, so another thread tries it without waiting.
+	// The probe gets its own duplicate of the handle, so a probe that outlives the wait
+	// (1 second, then the mutex counts as held) touches nothing the caller frees.
+	bool IsMutexFree(HANDLE hMutex)
+	{
+		HANDLE hProbe = NULL;
+		if ( ! DuplicateHandle( GetCurrentProcess(), hMutex, GetCurrentProcess(), &hProbe,
+			0, FALSE, DUPLICATE_SAME_ACCESS ) )
+			return false;
+
+		const HANDLE hThread = CreateThread( NULL, 0, ProbeMutex, hProbe, 0, NULL );
+		if ( hThread == NULL )
+		{
+			CloseHandle( hProbe );
+			return false;
+		}
+
+		DWORD nFree = FALSE;
+		if ( WaitForSingleObject( hThread, 1000 ) != WAIT_OBJECT_0 || ! GetExitCodeThread( hThread, &nFree ) )
+			nFree = FALSE;
+		CloseHandle( hThread );
+		return nFree != FALSE;
+	}
+}
+
+bool CMainWnd::ShowTlsPrompts()
+{
+	// The prompt's modal loop dispatches the prompts posted meanwhile, and the timer: they
+	// wait in the queue, and the outer call shows them one at a time.
+	if ( m_bTlsPromptShowing || m_pTlsPrompts.IsEmpty() || theApp.m_bClosing )
+		return true;
+
+	// Not from a message loop that runs while the UI thread holds Transfers.m_pSection
+	// (SafeMessageLoop while a thread is closed under the lock, or a dialog opened under
+	// it): the transfers would stop while the prompt is open, and the answer would change
+	// the sources under code that is using them. The timer tries again every second.
+	// Transfers.m_pSection must be free, not only free of this thread: a Win32 mutex does
+	// not tell which thread owns it.
+	if ( theApp.m_bBusy || ! IsMutexFree( Transfers.m_pSection.m_hObject ) )
+		return true;
+
+	m_bTlsPromptShowing = true;
+	while ( ! m_pTlsPrompts.IsEmpty() )
+	{
+		CAutoPtr< CTlsPromptRequest > pNext( m_pTlsPrompts.RemoveHead() );
+		if ( ! ShowTlsPrompt( *pNext ) )
+			return false;	// Closing: this window may be gone, its destruction freed the queue
+	}
+	m_bTlsPromptShowing = false;
+
+	return true;
+}
+
+bool CMainWnd::ShowTlsPrompt(const CTlsPromptRequest& oRequest)
+{
+	CString strMessage;
+	strMessage.Format( LoadString( IDS_TLS_PROMPT ), (LPCTSTR)oRequest.sHost,
+		(LPCTSTR)TlsProblemText( oRequest.nProblem ), (LPCTSTR)oRequest.sFingerprint );
+
+	// No is the default: closing the prompt does not trust the certificate
+	const bool bAccepted =
+		( AfxMessageBox( strMessage, MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2 ) == IDYES );
+
+	// The application may have begun closing while the prompt was open
+	if ( theApp.m_bClosing )
+		return false;
+
+	if ( bAccepted )
+	{
+		TlsTrust.Accept( std::wstring( (LPCWSTR)oRequest.sHost ), std::wstring( (LPCWSTR)oRequest.sFingerprint ) );
+		if ( ! SaveTlsTrust() )
+			theApp.Message( MSG_ERROR, IDS_TLS_TRUST_SAVE_FAILED );
+	}
+
+	// The pending prompt goes under the same lock as the decision: a source that fails on
+	// this certificate before it is gone is waiting and gets the decision, one that fails
+	// after it asks again (or, accepted, is not asked at all).
+	CSingleLock pLock( &Transfers.m_pSection, TRUE );
+	Downloads.OnTlsDecision( oRequest.sHost, oRequest.sFingerprint, bAccepted );
+	TlsPendingPrompts.Remove( std::wstring( (LPCWSTR)oRequest.sHost ), std::wstring( (LPCWSTR)oRequest.sFingerprint ) );
+	pLock.Unlock();
+
+	return true;
+}
+
+void CMainWnd::ClearTlsPrompts()
+{
+	while ( ! m_pTlsPrompts.IsEmpty() )
+		delete m_pTlsPrompts.RemoveHead();
+
+	if ( m_hWnd )
+	{
+		MSG msg;
+		while ( ::PeekMessage( &msg, m_hWnd, WM_TLSPROMPT, WM_TLSPROMPT, PM_REMOVE ) )
+			delete reinterpret_cast< CTlsPromptRequest* >( msg.lParam );
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////
