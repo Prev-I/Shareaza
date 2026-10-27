@@ -300,7 +300,7 @@ Three changes landed after the first addendum.
 |---|---|---|
 | [PR #14](https://github.com/Prev-I/Shareaza/pull/14), merged 2026-10-26 | new | `CSecurity` rule-list fixes (below). |
 | [PR #15](https://github.com/Prev-I/Shareaza/pull/15), merged 2026-10-26 | 1 (partly), new | `CConnection` TLS session ownership (below). |
-| Schannel change (pull request to be opened) | 1, 2, new | HTTPS runs over Windows' Schannel; OpenSSL is removed. |
+| [PR #17](https://github.com/Prev-I/Shareaza/pull/17) | 1, 2, new | HTTPS runs over Windows' Schannel; OpenSSL is removed. |
 
 **PR #15: TLS session ownership.**
 - **What it was:** `CConnection`'s OpenSSL session handle was never initialised, was not freed, and
