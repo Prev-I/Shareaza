@@ -1,5 +1,11 @@
-1. Download latest file "miniupnpc-*.tar.gz" from here: http://miniupnp.free.fr/files/
-2. Unpack all files to "miniupnpc" sub-folder
-3. Update version information inside "miniupnpcstrings.h" and "MiniUPnPc.rc"
+1. Download the latest "miniupnpc-*.tar.gz" and its ".sig" from https://miniupnp.tuxfamily.org/files/
+   and verify the signature (release key 751E 9FF6 944A 3B36 A543  2216 DB51 1043 A31A CAAF).
+2. Replace the whole "miniupnpc" sub-folder with the unpacked "miniupnpc-*" folder (upstream layout:
+   include\, src\, msvc\, ...). Re-apply any upstream fixes listed in "README.Shareaza.md" that the
+   new release does not already contain.
+3. Update the list of compiled files in "MiniUPnPc_143.vcxproj" (and .filters) from upstreams
+   "msvc\miniupnpc.vcxproj", and the version in "miniupnpcstrings.h" and "MiniUPnPc.rc".
+4. Check "shareaza\MiniUPnP.cpp" against the new "include\miniupnpc.h" API (see apiversions.txt).
+5. Record what was vendored and patched in "README.Shareaza.md".
 
 Also development sources can be found on GitHub: https://github.com/miniupnp/miniupnp/tree/master/miniupnpc
