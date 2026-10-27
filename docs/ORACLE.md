@@ -263,7 +263,7 @@ In builds that include the Schannel change, HTTPS downloads use Windows' Schanne
 trust store; OpenSSL is gone. Whether HTTPS downloads work under Wine has not been tested.
 - **Setting:** `Connection.TlsCertPolicy` (the Certificates page in Settings), a number setting.
   - **0, the default:** valid certificates only.
-  - **1:** ask, and remember the answer per host and certificate.
+  - **1:** ask; an accepted certificate is remembered per host and certificate.
   - **2:** don't check.
 - **Preparing a prefix** leaves it at the default. The upgrade download always requires a valid
   certificate.

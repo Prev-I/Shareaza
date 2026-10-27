@@ -17,11 +17,12 @@ pull request noted in the
 addendum also records the fixes merged on 2026-10-26 in
 [PR #14](https://github.com/Prev-I/Shareaza/pull/14) (the Security rule list) and
 [PR #15](https://github.com/Prev-I/Shareaza/pull/15) (TLS session ownership), and a new item about
-blocking in the HTTPS connect.
+blocking in the HTTPS connect. The only open audit item is now finding 4's missing opt-out (the
+IPv6 listeners are bound to all addresses).
 
 The text below is the audit as written, apart from the dated bullets under **Disclosure**, the
-**Fixed** lines under findings 1 and 3 to 5 and the Medium list, and the notes under "Consequences
-for the oracle". What changed on 2026-10-26 is in the
+**Fixed** lines under findings 1 to 5, the new item in the Medium list, the heading of the first
+addendum's "Still open" list, and the notes under "Consequences for the oracle". What changed on 2026-10-26 is in the
 [first addendum](#addendum-2026-10-26-fixes-for-findings-3-4-and-5).
 
 **Disclosure.**
@@ -165,7 +166,6 @@ went to the provenance pass instead.
     compiles the vendored 1.2.12 itself.
   - Boost 1.84.0: 45 packages from a single community publisher.
   - `7-Zip.StandaloneConsole.x64` 23.1.0, a community repack used only at build time.
-
 - **HTTPS connect and handshake blocked inside the transfers lock.**
   `CDownloadTransferHTTPS::Initiate` ran the connect and the TLS handshake as blocking calls while
   it held the transfers lock, so one slow server could stall every transfer and the UI. Found
@@ -323,15 +323,15 @@ Three changes landed after the first addendum.
 built against the Windows trust store, and revocation is checked with soft failure.
 - **Setting:** `Connection.TlsCertPolicy`, on the new Certificates page of Settings.
   - 0, the default: valid certificates only.
-  - 1, "ask": a certificate that fails validation raises a prompt, and the answer is remembered for
-    that host and certificate fingerprint in `Data\TlsTrust.dat`. The page has a button to forget
-    them.
+  - 1, "ask": a certificate that fails validation raises a prompt. An accepted certificate is
+    remembered for that host and fingerprint in `Data\TlsTrust.dat`; a refusal is not. The page has
+    a button to forget accepted certificates.
   - 2, "don't check": every certificate is accepted, with a warning on the page.
 - **Upgrade downloads** always require a valid certificate, whatever the setting
-  (`CDownload::m_bRequireValidCert`, set in `CDlgUpgrade::OnOK`). A kept-alive TLS connection is
-  handed to another source only when host, port and validation outcome allow it.
-- **Renegotiation:** `CTlsClient::Decrypt` refuses a renegotiation in TLS 1.2 or earlier and fails
-  the session. TLS 1.3 post-handshake messages are processed as usual.
+  (`CDownload::m_bRequireValidCert`, set in `CUpgradeDlg::OnOK`). The requirement holds for every TLS
+  session the download uses.
+- **Renegotiation:** `CTlsClient::Decrypt` refuses a renegotiation unless the session is TLS 1.3,
+  and fails the session. TLS 1.3 post-handshake messages are processed as usual.
 - **Not changed:** the update check still goes through WinINet, and GWebCache requests are
   unaffected.
 
@@ -346,8 +346,7 @@ handshake from socket events, and the certificate is checked on a worker thread.
 - Unit tests for the Schannel client and the certificate verdict rules (`TlsTest`), run in CI,
   including a local TLS server and github.com.
 - Read-only reviews and clean builds.
-- The oracle workflows and the manual checks on Windows are listed in the release notes and the
-  owner's checklist.
+- The oracle workflows and manual checks on Windows: see the release notes.
 - No attack was run against the changes.
 
 ## Evidence (`security-audit/evidence/`, `security-audit/tools/`)
