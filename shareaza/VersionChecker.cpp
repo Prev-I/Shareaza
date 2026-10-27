@@ -213,23 +213,23 @@ BOOL CVersionChecker::ExecuteRequest()
 
 	theApp.Message( MSG_DEBUG | MSG_FACILITY_INCOMING, _T("[VersionChecker] Response: %s"), (LPCTSTR)strOutput );
 
-	CT2CA pszConvertedAnsiString(strOutput);
-	std::string jsonResponse(pszConvertedAnsiString);
-
 	// Parse the JSON. A response that is not a JSON object carries no update
 	// information: report the request as failed, as for a network error.
 	try
 	{
+		CT2CA pszConvertedAnsiString(strOutput);
+		std::string jsonResponse(pszConvertedAnsiString);
+
 		boost::json::error_code ec;
 		boost::json::value jv = boost::json::parse( jsonResponse, ec );
 		if ( ec )
 		{
-			theApp.Message( MSG_DEBUG, _T("[VersionChecker] Malformed response: %hs"), ec.message().c_str() );
+			theApp.Message( MSG_DEBUG | MSG_FACILITY_INCOMING, _T("[VersionChecker] Malformed response: %hs"), ec.message().c_str() );
 			return FALSE;
 		}
 		if ( ! jv.is_object() )
 		{
-			theApp.Message( MSG_DEBUG, _T("[VersionChecker] Unexpected response: not a JSON object") );
+			theApp.Message( MSG_DEBUG | MSG_FACILITY_INCOMING, _T("[VersionChecker] Unexpected response: not a JSON object") );
 			return FALSE;
 		}
 		JsonToCStringIMap( jv, m_pResponse );
@@ -237,7 +237,14 @@ BOOL CVersionChecker::ExecuteRequest()
 	catch ( const std::exception& e )
 	{
 		m_pResponse.RemoveAll();
-		theApp.Message( MSG_DEBUG, _T("[VersionChecker] Response not processed: %hs"), e.what() );
+		theApp.Message( MSG_DEBUG | MSG_FACILITY_INCOMING, _T("[VersionChecker] Response not processed: %hs"), e.what() );
+		return FALSE;
+	}
+	catch ( CException* pEx )
+	{
+		pEx->Delete();
+		m_pResponse.RemoveAll();
+		theApp.Message( MSG_DEBUG | MSG_FACILITY_INCOMING, _T("[VersionChecker] Response not processed") );
 		return FALSE;
 	}
 
