@@ -3807,6 +3807,9 @@ END
 
 STRINGTABLE
 BEGIN
+    IDS_TLS_CREDENTIALS_FAILED "Failed to acquire the TLS credentials."
+    IDS_TLS_TRUST_LOAD_FAILED "Unable to read the accepted certificates from %s."
+    IDS_TLS_REASON_UNVERIFIABLE "the certificate check could not run"
     IDS_TLS_TRUST_SAVE_FAILED "Unable to save the accepted certificates."
     IDS_TLS_POLICY_VALID    "Refuse the server (recommended)"
     IDS_TLS_POLICY_ASK      "Ask me, and remember my answer for the server"

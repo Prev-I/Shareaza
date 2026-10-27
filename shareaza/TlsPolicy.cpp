@@ -44,17 +44,33 @@ namespace
 	{
 		return Settings.General.UserPath + L"\\Data\\TlsTrust.dat";
 	}
+
+	// The file holds what TlsTrust holds: it was read, or TlsTrust was written to it.
+	// Only the UI thread loads and saves the store.
+	bool g_bTlsTrustInFile = false;
 }
 
 void LoadTlsTrust()
 {
-	if ( ! TlsTrust.Load( std::wstring( (LPCWSTR)TlsTrustPath() ) ) )
-		theApp.Message( MSG_ERROR, _T("Unable to read the accepted certificates from %s."), (LPCTSTR)TlsTrustPath() );
+	g_bTlsTrustInFile = TlsTrust.Load( std::wstring( (LPCWSTR)TlsTrustPath() ) );
+	if ( ! g_bTlsTrustInFile )
+		theApp.Message( MSG_ERROR, IDS_TLS_TRUST_LOAD_FAILED, (LPCTSTR)TlsTrustPath() );
 }
 
 bool SaveTlsTrust()
 {
-	return TlsTrust.Save( std::wstring( (LPCWSTR)TlsTrustPath() ) );
+	if ( ! TlsTrust.Save( std::wstring( (LPCWSTR)TlsTrustPath() ) ) )
+		return false;
+	g_bTlsTrustInFile = true;
+	return true;
+}
+
+void SaveTlsTrustAtExit()
+{
+	// A file that could not be read is not replaced by the empty store: the user's
+	// answers were saved when they were given.
+	if ( g_bTlsTrustInFile && ! SaveTlsTrust() )
+		theApp.Message( MSG_ERROR, IDS_TLS_TRUST_SAVE_FAILED );
 }
 
 TlsVerdict EvaluateTlsPeer(TlsCertProblem nProblem, const CString& sHost, const CString& sFingerprint, bool bRequireValid)
@@ -78,6 +94,8 @@ CString TlsProblemText(TlsCertProblem nProblem)
 		return LoadString( IDS_TLS_REASON_UNTRUSTED );
 	case TlsCertProblem::Revoked:
 		return LoadString( IDS_TLS_REASON_REVOKED );
+	case TlsCertProblem::Unverifiable:
+		return LoadString( IDS_TLS_REASON_UNVERIFIABLE );
 	default:
 		return LoadString( IDS_TLS_REASON_OTHER );
 	}

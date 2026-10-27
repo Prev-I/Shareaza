@@ -449,7 +449,7 @@ BOOL CShareazaApp::InitInstance()
 		}
 		// Acquire the TLS credentials now; a failure shows when an https download connects
 		if ( ! CTlsClient::Startup() )
-			theApp.Message( MSG_ERROR, _T("Failed to acquire the TLS credentials.") );
+			theApp.Message( MSG_ERROR, IDS_TLS_CREDENTIALS_FAILED );
 	SplashStep( L"Database" );
 		PurgeDeletes();
 		CThumbCache::InitDatabase();
@@ -612,7 +612,7 @@ int CShareazaApp::ExitInstance()
 			DownloadGroups.Save();
 			Library.Save();
 			Security.Save();
-			SaveTlsTrust();
+			SaveTlsTrustAtExit();
 			HostCache.Save();
 			UploadQueues.Save();
 			DiscoveryServices.Save();

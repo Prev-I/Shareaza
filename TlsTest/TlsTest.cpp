@@ -225,6 +225,7 @@ namespace
 		case TlsCertProblem::Untrusted:	return "Untrusted";
 		case TlsCertProblem::Revoked:	return "Revoked";
 		case TlsCertProblem::Other:		return "Other";
+		case TlsCertProblem::Unverifiable:	return "Unverifiable";
 		}
 		return "?";
 	}
@@ -859,11 +860,23 @@ TLS_TEST_OFFLINE(OfflineDecideTlsVerdict)
 		CHECK( DecideTlsVerdict( nProblem, false, 7, false ) == TlsVerdict::Reject );
 		CHECK( DecideTlsVerdict( nProblem, false, 7, true ) == TlsVerdict::Reject );
 	}
+
+	// A certificate that could not be evaluated is rejected under every policy, never asked about
+	for ( DWORD nPolicy : pPolicies )
+	{
+		for ( bool bRemembered : { false, true } )
+		{
+			for ( bool bRequireValid : { false, true } )
+			{
+				CHECK( DecideTlsVerdict( TlsCertProblem::Unverifiable, bRequireValid, nPolicy, bRemembered ) == TlsVerdict::Reject );
+			}
+		}
+	}
 }
 
 TLS_TEST_OFFLINE(OfflineVerifyWithoutCertificate)
 {
-	CHECK( VerifyServerCertificate( NULL, L"host.example" ) == TlsCertProblem::Other );
+	CHECK( VerifyServerCertificate( NULL, L"host.example" ) == TlsCertProblem::Unverifiable );
 	CHECK( CertFingerprintSha256( NULL ).empty() );
 }
 

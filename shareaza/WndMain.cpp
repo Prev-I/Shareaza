@@ -3165,25 +3165,38 @@ LRESULT CMainWnd::OnTlsPrompt(WPARAM /*wParam*/, LPARAM lParam)
 
 namespace
 {
+	// The probe thread: owns its own handle to the mutex, and nothing else
 	DWORD WINAPI ProbeMutex(LPVOID pParam)
 	{
 		const HANDLE hMutex = static_cast< HANDLE >( pParam );
 		const DWORD nResult = WaitForSingleObject( hMutex, 0 );
-		if ( nResult != WAIT_OBJECT_0 && nResult != WAIT_ABANDONED )
-			return FALSE;
-		ReleaseMutex( hMutex );
-		return TRUE;
+		const BOOL bFree = ( nResult == WAIT_OBJECT_0 || nResult == WAIT_ABANDONED );
+		if ( bFree )
+			ReleaseMutex( hMutex );
+		CloseHandle( hMutex );
+		return static_cast< DWORD >( bFree );
 	}
 
 	// True if no thread holds the mutex. A Win32 mutex does not tell its owner, and a thread
 	// that owns it would just enter it again, so another thread tries it without waiting.
+	// The probe gets its own duplicate of the handle, so a probe that outlives the wait
+	// (1 second, then the mutex counts as held) touches nothing the caller frees.
 	bool IsMutexFree(HANDLE hMutex)
 	{
-		const HANDLE hThread = CreateThread( NULL, 0, ProbeMutex, hMutex, 0, NULL );
-		if ( hThread == NULL )
+		HANDLE hProbe = NULL;
+		if ( ! DuplicateHandle( GetCurrentProcess(), hMutex, GetCurrentProcess(), &hProbe,
+			0, FALSE, DUPLICATE_SAME_ACCESS ) )
 			return false;
+
+		const HANDLE hThread = CreateThread( NULL, 0, ProbeMutex, hProbe, 0, NULL );
+		if ( hThread == NULL )
+		{
+			CloseHandle( hProbe );
+			return false;
+		}
+
 		DWORD nFree = FALSE;
-		if ( WaitForSingleObject( hThread, INFINITE ) != WAIT_OBJECT_0 || ! GetExitCodeThread( hThread, &nFree ) )
+		if ( WaitForSingleObject( hThread, 1000 ) != WAIT_OBJECT_0 || ! GetExitCodeThread( hThread, &nFree ) )
 			nFree = FALSE;
 		CloseHandle( hThread );
 		return nFree != FALSE;

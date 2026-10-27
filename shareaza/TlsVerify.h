@@ -45,7 +45,8 @@ enum class TlsCertProblem
 	WrongName,		// not issued for the host
 	Untrusted,		// does not chain to a trusted root
 	Revoked,		// revoked by its issuer
-	Other			// any other reason, or the evaluation could not run
+	Other,			// any other problem with the certificate
+	Unverifiable	// the evaluation could not run: no certificate, no host, or a failing API
 };
 
 // Evaluates a server's certificate for sHost as Schannel's automatic
@@ -55,7 +56,8 @@ enum class TlsCertProblem
 // revocation information is not a problem, a certificate known to be revoked
 // is. Revocation fetches give up after 10 seconds in total. May block for
 // that long: do not call it while holding a lock other I/O needs.
-// A NULL certificate or an empty host is TlsCertProblem::Other.
+// A NULL certificate, an empty host, or a chain the system could not build or
+// check is TlsCertProblem::Unverifiable.
 TlsCertProblem VerifyServerCertificate(PCCERT_CONTEXT pCert, const std::wstring& sHost);
 
 // What to do with a server whose certificate was evaluated.
@@ -73,6 +75,8 @@ const DWORD TLS_POLICY_ASK		= 1;	// ask about any other certificate, remember th
 const DWORD TLS_POLICY_IGNORE	= 2;	// accept every certificate
 
 // Decides whether a session whose certificate has nProblem may be used.
+// TlsCertProblem::Unverifiable is rejected under every policy: there is no
+// verified certificate to accept or to ask about.
 // bRequireValid (a download that must come from a validated server) accepts
 // only TlsCertProblem::None, whatever the policy and the user's answers.
 // Otherwise TLS_POLICY_VALID accepts only None; TLS_POLICY_IGNORE accepts

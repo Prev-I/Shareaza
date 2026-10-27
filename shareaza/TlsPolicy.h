@@ -34,6 +34,9 @@ extern CTlsTrustStore TlsTrust;
 void LoadTlsTrust();
 // Saves TlsTrust to Data\TlsTrust.dat in the user's folder. False if it could not be written.
 bool SaveTlsTrust();
+// Saves TlsTrust at exit, unless the file could not be read and nothing was saved since:
+// an empty store would overwrite the user's file.
+void SaveTlsTrustAtExit();
 
 // The verdict for a TLS session with sHost whose certificate (fingerprint
 // sFingerprint) had nProblem, under the user's certificate policy and the
