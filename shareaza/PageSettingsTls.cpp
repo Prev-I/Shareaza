@@ -94,7 +94,7 @@ void CTlsSettingsPage::OnForget()
 {
 	const size_t nCount = TlsTrust.Clear();
 	if ( ! SaveTlsTrust() )
-		theApp.Message( MSG_ERROR, _T("Unable to save the accepted certificates.") );
+		theApp.Message( MSG_ERROR, IDS_TLS_TRUST_SAVE_FAILED );
 
 	CString strMessage;
 	strMessage.Format( LoadString( IDS_TLS_FORGET ), static_cast< unsigned int >( nCount ) );
