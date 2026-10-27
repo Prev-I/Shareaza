@@ -157,6 +157,9 @@ went to the provenance pass instead.
   `miniupnpc.h` still defines `MINIUPNPC_VERSION "2.0.20170509"`. Those sources miss upstream's
   2017-12 fixes for a buffer overrun in `minixml.c` and an uninitialised variable in
   `upnpreplyparse.c`.
+  - **Fixed** on 2026-10-27: the project now builds miniupnpc 2.3.3, verified against upstream's
+    signed release, with upstream's three minixml out-of-bounds read fixes applied
+    (CVE-2026-110655, CVE-2026-110656 and one without a CVE); see `MiniUPnPc/README.Shareaza.md`.
 - **Weaker G2 hit anti-spoofing.** `G2Packet.cpp:1030-1040` now accepts hits whose node address
   differs from the UDP sender, provided the sender is in the host cache.
 - **Global IPv6 address advertised.** It goes out in G2 search replies (`LocalSearch.cpp:959-963`),
@@ -221,8 +224,8 @@ went to the provenance pass instead.
 - **Vendored zlib** matches the official 1.2.12 tarball, apart from two harmless patches taken from
   1.2.13 (`crc32.c` `ZEXPORT`, and the `zlib.h` 64-bit combine declarations).
 - **`plugins/RARBuilder/unrar.h`** matches RARLab's `dll.hpp`.
-- **MiniUPnPc's** `src/` and `include/` trees match official 2.2.4, though they aren't what is
-  compiled (see Medium).
+- **MiniUPnPc's** `src/` and `include/` trees matched official 2.2.4, though they weren't what was
+  compiled (see Medium). Both trees have since been replaced by miniupnpc 2.3.3.
 - **`gvmat32.asm` and `gvmat32c.c`** match zlib 1.2.3's `contrib/masmx86` and are not built.
 - **The installer** downloads only `VC_redist` from go.microsoft.com, which predates the fork, and
   writes nothing outside `{app}` and `{userappdata}\Shareaza` beyond what it already did.
