@@ -54,7 +54,7 @@ public:
 	BOOL		m_bSelected;
 	DWORD		m_tCompleted;
 	DWORD		m_tAdded;		// The time this download was added to the client queue
-	BOOL		m_bRequireValidCert;	// https sources must present a valid certificate, whatever the policy (upgrades)
+	BOOL		m_bRequireValidCert;	// Only https sources, with a valid certificate whatever the policy (upgrades)
 	int			m_nRunCookie;
 	int			m_nGroupCookie;
 	QWORD		m_nStartFrom;

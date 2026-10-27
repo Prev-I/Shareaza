@@ -103,6 +103,9 @@ public:
 	BOOL		ResolveURL();
 	void		Serialize(CArchive& ar, int nVersion /* DOWNLOAD_SER_VERSION */);
 	BOOL		CanInitiate(BOOL bNetwork, BOOL bEstablished, bool bFirstAttempt = false);
+	// False for a source its download may not be fetched from: a download that requires
+	// a valid certificate is fetched only from https sources
+	bool		IsAllowedForDownload() const;
 	// Remove source from download, add it to failed sources if bBan == TRUE, and destroy source itself
 	void		Remove(BOOL bCloseTransfer = TRUE, BOOL bBan = FALSE, DWORD nRetryAfter = 0);
 	void		OnFailure(BOOL bNondestructive, DWORD nRetryAfter = 0);
