@@ -122,7 +122,11 @@ void CMiniUPnP::OnRun()
 					theApp.Message( MSG_DEBUG, _T("UPnP IGD found (valid and connected) : %s"), (LPCTSTR)CA2T( m_sControlURL ) );
 					break;
 				case UPNP_PRIVATEIP_IGD:
-					theApp.Message( MSG_DEBUG, _T("UPnP IGD found (valid and connected, but its external address \"%s\" is not public: there may be another NAT beyond it). Trying to continue anyway... : %s"), (LPCTSTR)CA2T( wanIPAddress ), (LPCTSTR)CA2T( m_sControlURL ) );
+					// Also returned when the gateway would not report its external address.
+					if ( wanIPAddress[ 0 ] )
+						theApp.Message( MSG_DEBUG, _T("UPnP IGD found (valid and connected, but its external address \"%s\" is not public: there may be another NAT beyond it). Trying to continue anyway... : %s"), (LPCTSTR)CA2T( wanIPAddress ), (LPCTSTR)CA2T( m_sControlURL ) );
+					else
+						theApp.Message( MSG_DEBUG, _T("UPnP IGD found (valid and connected, but its external address could not be read). Trying to continue anyway... : %s"), (LPCTSTR)CA2T( m_sControlURL ) );
 					break;
 				case UPNP_DISCONNECTED_IGD:
 					theApp.Message( MSG_DEBUG, _T("UPnP IGD found (valid but not connected) . Trying to continue anyway... : %s"), (LPCTSTR)CA2T( m_sControlURL ) );
