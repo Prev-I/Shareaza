@@ -3807,6 +3807,7 @@ END
 
 STRINGTABLE
 BEGIN
+    IDS_TLS_TRUST_SAVE_FAILED "Unable to save the accepted certificates."
     IDS_TLS_POLICY_VALID    "Refuse the server (recommended)"
     IDS_TLS_POLICY_ASK      "Ask me, and remember my answer for the server"
     IDS_TLS_POLICY_IGNORE   "Accept the certificate anyway"

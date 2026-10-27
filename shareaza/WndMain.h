@@ -100,6 +100,10 @@ protected:
 	CList< CTlsPromptRequest* > m_pTlsPrompts;	// Certificate prompts not shown yet (owned)
 	bool				m_bTlsPromptShowing;	// A certificate prompt is open
 
+	// Show the queued certificate prompts one at a time, if no prompt is open and the
+	// UI thread may block on them. False if the application began closing meanwhile:
+	// this object may then be gone.
+	bool		ShowTlsPrompts();
 	// Ask the user about one certificate, and pass the answer on. False if the
 	// application began closing meanwhile: this object may then be gone.
 	bool		ShowTlsPrompt(const CTlsPromptRequest& oRequest);

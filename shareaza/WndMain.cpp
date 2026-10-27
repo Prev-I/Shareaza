@@ -903,6 +903,10 @@ void CMainWnd::OnTimer(UINT_PTR nIDEvent)
 		return;
 	}
 
+	// Certificate prompts that could not be shown when they arrived
+	if ( ! ShowTlsPrompts() )
+		return;	// Closing: this window may be gone
+
 	// Propagate to children
 
 	if ( m_bTimer )
@@ -3154,21 +3158,64 @@ LRESULT CMainWnd::OnTlsPrompt(WPARAM /*wParam*/, LPARAM lParam)
 
 	m_pTlsPrompts.AddTail( pRequest.Detach() );
 
-	// The prompt's modal loop dispatches the prompts posted meanwhile: they wait in the
-	// queue, and the outer call shows them one at a time.
-	if ( m_bTlsPromptShowing )
-		return 0;
+	ShowTlsPrompts();
+
+	return 0;
+}
+
+namespace
+{
+	DWORD WINAPI ProbeMutex(LPVOID pParam)
+	{
+		const HANDLE hMutex = static_cast< HANDLE >( pParam );
+		const DWORD nResult = WaitForSingleObject( hMutex, 0 );
+		if ( nResult != WAIT_OBJECT_0 && nResult != WAIT_ABANDONED )
+			return FALSE;
+		ReleaseMutex( hMutex );
+		return TRUE;
+	}
+
+	// True if no thread holds the mutex. A Win32 mutex does not tell its owner, and a thread
+	// that owns it would just enter it again, so another thread tries it without waiting.
+	bool IsMutexFree(HANDLE hMutex)
+	{
+		const HANDLE hThread = CreateThread( NULL, 0, ProbeMutex, hMutex, 0, NULL );
+		if ( hThread == NULL )
+			return false;
+		DWORD nFree = FALSE;
+		if ( WaitForSingleObject( hThread, INFINITE ) != WAIT_OBJECT_0 || ! GetExitCodeThread( hThread, &nFree ) )
+			nFree = FALSE;
+		CloseHandle( hThread );
+		return nFree != FALSE;
+	}
+}
+
+bool CMainWnd::ShowTlsPrompts()
+{
+	// The prompt's modal loop dispatches the prompts posted meanwhile, and the timer: they
+	// wait in the queue, and the outer call shows them one at a time.
+	if ( m_bTlsPromptShowing || m_pTlsPrompts.IsEmpty() || theApp.m_bClosing )
+		return true;
+
+	// Not from a message loop that runs while the UI thread holds Transfers.m_pSection
+	// (SafeMessageLoop while a thread is closed under the lock, or a dialog opened under
+	// it): the transfers would stop while the prompt is open, and the answer would change
+	// the sources under code that is using them. The timer tries again every second.
+	// Transfers.m_pSection must be free, not only free of this thread: a Win32 mutex does
+	// not tell which thread owns it.
+	if ( theApp.m_bBusy || ! IsMutexFree( Transfers.m_pSection.m_hObject ) )
+		return true;
 
 	m_bTlsPromptShowing = true;
 	while ( ! m_pTlsPrompts.IsEmpty() )
 	{
 		CAutoPtr< CTlsPromptRequest > pNext( m_pTlsPrompts.RemoveHead() );
 		if ( ! ShowTlsPrompt( *pNext ) )
-			return 0;	// Closing: this window may be gone, its destruction freed the queue
+			return false;	// Closing: this window may be gone, its destruction freed the queue
 	}
 	m_bTlsPromptShowing = false;
 
-	return 0;
+	return true;
 }
 
 bool CMainWnd::ShowTlsPrompt(const CTlsPromptRequest& oRequest)
@@ -3189,7 +3236,7 @@ bool CMainWnd::ShowTlsPrompt(const CTlsPromptRequest& oRequest)
 	{
 		TlsTrust.Accept( std::wstring( (LPCWSTR)oRequest.sHost ), std::wstring( (LPCWSTR)oRequest.sFingerprint ) );
 		if ( ! SaveTlsTrust() )
-			theApp.Message( MSG_ERROR, _T("Unable to save the accepted certificates.") );
+			theApp.Message( MSG_ERROR, IDS_TLS_TRUST_SAVE_FAILED );
 	}
 
 	// The pending prompt goes under the same lock as the decision: a source that fails on
