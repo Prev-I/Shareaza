@@ -17,13 +17,14 @@ pull request noted in the
 addendum also records the fixes merged on 2026-10-26 in
 [PR #14](https://github.com/Prev-I/Shareaza/pull/14) (the Security rule list) and
 [PR #15](https://github.com/Prev-I/Shareaza/pull/15) (TLS session ownership), and a new item about
-blocking in the HTTPS connect. The only open audit item is now finding 4's missing opt-out (the
-IPv6 listeners are bound to all addresses).
+blocking in the HTTPS connect. Of the five findings, only finding 4's missing opt-out is still open
+(the IPv6 listeners are bound to all addresses). The Medium and Low items without a **Fixed** line
+are unchanged.
 
 The text below is the audit as written, apart from the dated bullets under **Disclosure**, the
 **Fixed** lines under findings 1 to 5, the new item in the Medium list, the heading of the first
-addendum's "Still open" list, and the notes under "Consequences for the oracle". What changed on 2026-10-26 is in the
-[first addendum](#addendum-2026-10-26-fixes-for-findings-3-4-and-5).
+addendum's "Still open" list, and the notes under "Consequences for the oracle". What changed on
+2026-10-26 is in the [first addendum](#addendum-2026-10-26-fixes-for-findings-3-4-and-5).
 
 **Disclosure.**
 - **Not reported upstream.** As of 2026-10-25 the findings have not been reported to ansani/Shareaza.
