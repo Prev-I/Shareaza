@@ -46,6 +46,7 @@ Fixes from upstream's `master` branch, newer than 2.3.3, each applied to
 
 | Upstream commit | Upstream subject | Advisory |
 |---|---|---|
+| `3cfb4fb78d5ac04ed0dadc8dd842fc9e448916db` | minixml.c: fix buffer read overflow | CVE-2026-110655 (`parseatt`) |
 
 ## Building
 
