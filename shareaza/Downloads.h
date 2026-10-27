@@ -105,9 +105,10 @@ public:
 	void		Save(BOOL bForce = TRUE);
 	void		OnRun();
 	BOOL		OnPush(const Hashes::Guid& oGUID, CConnection* pConnection);
-	// The user decided whether to trust the certificate with sFingerprint for sHost: the https
-	// sources of sHost waiting for that decision connect again at once if bAccepted, otherwise
-	// they are removed. Call with Transfers.m_pSection held.
+	// The user decided whether to trust the certificate with sFingerprint for sHost. If
+	// bAccepted, the https sources of sHost waiting for a decision connect again at once;
+	// otherwise those that waited on this certificate are removed. Call with
+	// Transfers.m_pSection held.
 	void		OnTlsDecision(const CString& sHost, const CString& sFingerprint, bool bAccepted);
 	bool		OnQueryHits(const CQueryHit* pHits);
 	// File was hashed and verified in the Library

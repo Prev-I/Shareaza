@@ -1150,15 +1150,16 @@ BOOL CDownloads::OnPush(const Hashes::Guid& oGUID, CConnection* pConnection)
 //////////////////////////////////////////////////////////////////////
 // CDownloads certificate decision handler
 
-void CDownloads::OnTlsDecision(const CString& sHost, const CString& /*sFingerprint*/, bool bAccepted)
+void CDownloads::OnTlsDecision(const CString& sHost, const CString& sFingerprint, bool bAccepted)
 {
 	ASSUME_LOCK( Transfers.m_pSection );
 
 	if ( sHost.IsEmpty() )
 		return;
 
-	// The sources do not record which certificate they waited on. A source whose server
-	// shows another certificate next time is asked about again.
+	// An acceptance lets every waiting source of the host connect again: one whose server
+	// shows another certificate is asked about again. A refusal removes only the sources
+	// that waited on this certificate.
 	for ( POSITION pos = GetIterator() ; pos ; )
 	{
 		CDownload* pDownload = GetNext( pos );
@@ -1173,9 +1174,10 @@ void CDownloads::OnTlsDecision(const CString& sHost, const CString& /*sFingerpri
 			if ( bAccepted )
 			{
 				pSource->m_bTlsWaiting = false;
+				pSource->m_sTlsWaitingFingerprint.Empty();
 				pSource->m_tAttempt = 0;
 			}
-			else
+			else if ( pSource->m_sTlsWaitingFingerprint.CompareNoCase( sFingerprint ) == 0 )
 			{
 				// As a certificate the policy rejects
 				pSource->Remove( TRUE, TRUE );

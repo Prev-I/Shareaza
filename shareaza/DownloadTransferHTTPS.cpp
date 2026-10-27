@@ -93,6 +93,7 @@ BOOL CDownloadTransferHTTPS::Initiate()
 
 	// Only this attempt's certificate verification may make the source wait again
 	m_pSource->m_bTlsWaiting = false;
+	m_pSource->m_sTlsWaitingFingerprint.Empty();
 	
 	if ( m_pDownload->IsCompleted() )
 	{
@@ -1749,6 +1750,7 @@ TlsVerdict CDownloadTransferHTTPS::OnTlsVerified(TlsCertProblem nProblem, const 
 		return TlsVerdict::Reject;
 
 	m_pSource->m_bTlsWaiting = true;
+	m_pSource->m_sTlsWaitingFingerprint = sFingerprint;
 	theApp.Message( MSG_WARNING, IDS_TLS_CERT_WAITING, (LPCTSTR)GetTlsHostName(),
 		(LPCTSTR)TlsProblemText( nProblem ) );
 	return TlsVerdict::AskUser;

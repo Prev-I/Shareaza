@@ -97,6 +97,7 @@ public:
 	BOOL				m_bPreviewRequestSent;
 	BOOL				m_bMetaIgnore;			// Ignore metadata from this source (for example already got)
 	bool				m_bTlsWaiting;			// Waiting for the user to decide on its server's certificate (not saved)
+	CString				m_sTlsWaitingFingerprint;	// SHA-256 of that certificate (not saved)
 
 public:
 	BOOL		ResolveURL();
