@@ -94,6 +94,8 @@ CString TlsProblemText(TlsCertProblem nProblem)
 		return LoadString( IDS_TLS_REASON_UNTRUSTED );
 	case TlsCertProblem::Revoked:
 		return LoadString( IDS_TLS_REASON_REVOKED );
+	case TlsCertProblem::Unverifiable:
+		return LoadString( IDS_TLS_REASON_UNVERIFIABLE );
 	default:
 		return LoadString( IDS_TLS_REASON_OTHER );
 	}

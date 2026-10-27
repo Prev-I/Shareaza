@@ -1745,8 +1745,10 @@ TlsVerdict CDownloadTransferHTTPS::OnTlsVerified(TlsCertProblem nProblem, const 
 		return nVerdict;
 
 	// The source waits for the user's decision, and is not retried before it. With no source
-	// to keep, or no way to ask, the certificate is rejected.
-	if ( m_pSource == NULL || ! RequestTlsDecision( GetTlsHostName(), sFingerprint, nProblem ) )
+	// to keep, no fingerprint to remember the answer by, or no way to ask, the certificate
+	// is rejected.
+	if ( m_pSource == NULL || sFingerprint.IsEmpty() ||
+		! RequestTlsDecision( GetTlsHostName(), sFingerprint, nProblem ) )
 		return TlsVerdict::Reject;
 
 	m_pSource->m_bTlsWaiting = true;

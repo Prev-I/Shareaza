@@ -55,7 +55,7 @@ struct CTlsVerifyJob
 		: sHost		( sHostName )
 		, pCert		( pCertificate )
 		, bDone		( false )
-		, nResult	( TlsCertProblem::Other )
+		, nResult	( TlsCertProblem::Unverifiable )
 	{
 	}
 
@@ -82,6 +82,9 @@ namespace
 	{
 		pJob->nResult = VerifyServerCertificate( pJob->pCert, pJob->sHost );
 		pJob->sFingerprint = CertFingerprintSha256( pJob->pCert );
+		// A problem certificate without a fingerprint cannot be remembered or asked about
+		if ( pJob->nResult != TlsCertProblem::None && pJob->sFingerprint.empty() )
+			pJob->nResult = TlsCertProblem::Unverifiable;
 		CertFreeCertificateContext( pJob->pCert );
 		pJob->pCert = NULL;
 		pJob->bDone.store( true );
@@ -542,7 +545,7 @@ void CConnection::StartTlsVerify()
 
 	if ( pCert == NULL )
 	{
-		pJob->nResult = TlsCertProblem::Other;
+		pJob->nResult = TlsCertProblem::Unverifiable;
 		pJob->bDone.store( true );
 		return;
 	}
@@ -557,7 +560,7 @@ void CConnection::StartTlsVerify()
 		InterlockedDecrement( &g_nTlsJobs );
 		CertFreeCertificateContext( pJob->pCert );
 		pJob->pCert = NULL;
-		pJob->nResult = TlsCertProblem::Other;
+		pJob->nResult = TlsCertProblem::Unverifiable;
 		pJob->bDone.store( true );
 	}
 }

@@ -2959,6 +2959,7 @@
 		<string id="16213" value="Sending query routing table to neighbour %s (%i bit = %lu[%i], %i%% full)"/>
 		<string id="16236" value="Failed to acquire the TLS credentials."/>
 		<string id="16237" value="Unable to read the accepted certificates from %s."/>
+		<string id="16238" value="the certificate check could not run"/>
 		<string id="16239" value="Unable to save the accepted certificates."/>
 		<string id="16240" value="Refuse the server (recommended)"/>
 		<string id="16241" value="Ask me, and remember my answer for the server"/>

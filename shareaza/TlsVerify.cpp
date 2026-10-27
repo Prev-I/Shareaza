@@ -134,7 +134,7 @@ namespace
 		CERT_CHAIN_POLICY_STATUS oStatus = {};
 		oStatus.cbSize = sizeof( oStatus );
 		if ( ! CertVerifyCertificateChainPolicy( CERT_CHAIN_POLICY_SSL, pChain, &oPolicy, &oStatus ) )
-			return TlsCertProblem::Other;
+			return TlsCertProblem::Unverifiable;
 		if ( oStatus.dwError != 0 )
 			return ProblemFromPolicyError( oStatus.dwError );
 
@@ -176,7 +176,7 @@ namespace
 TlsCertProblem VerifyServerCertificate(PCCERT_CONTEXT pCert, const std::wstring& sHost)
 {
 	if ( pCert == NULL || sHost.empty() )
-		return TlsCertProblem::Other;
+		return TlsCertProblem::Unverifiable;
 
 	// The usages Schannel requests for a server certificate.
 	char szServerAuth[] = szOID_PKIX_KP_SERVER_AUTH;
@@ -196,7 +196,7 @@ TlsCertProblem VerifyServerCertificate(PCCERT_CONTEXT pCert, const std::wstring&
 	if ( ! CertGetCertificateChain( NULL, pCert, NULL, pCert->hCertStore, &oChainPara,
 		TLS_CHAIN_FLAGS, NULL, &pChain ) )
 	{
-		return TlsCertProblem::Other;
+		return TlsCertProblem::Unverifiable;
 	}
 	const TlsCertProblem nProblem = EvaluateChain( pChain, sHost );
 	CertFreeCertificateChain( pChain );
@@ -207,7 +207,7 @@ TlsVerdict DecideTlsVerdict(TlsCertProblem nProblem, bool bRequireValid, DWORD n
 {
 	if ( nProblem == TlsCertProblem::None )
 		return TlsVerdict::Accept;
-	if ( bRequireValid )
+	if ( bRequireValid || nProblem == TlsCertProblem::Unverifiable )
 		return TlsVerdict::Reject;
 	switch ( nPolicy )
 	{
