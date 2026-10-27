@@ -68,7 +68,6 @@ jobs:
     - if: matrix.language == 'cpp'
       name: Build C++ Shareaza PRJ
       run: |
-        nuget restore zlibwapi/zlibwapi_143.vcxproj -PackagesDirectory zlibwapi/packages
         nuget restore vc143/Shareaza.sln
         msbuild vc143/Shareaza.sln /nologo /v:m /t:Rebuild /p:ForceImportBeforeCppTargets=vc143/ReleaseBuild.props /p:Configuration=Release /p:Platform=Win32 /fl /flp:Summary
 
