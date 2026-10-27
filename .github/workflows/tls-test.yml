@@ -1,0 +1,124 @@
+name: TLS tests
+
+# Builds TlsTest, the console test program for the Schannel TLS core, and runs
+# it offline, against public endpoints and against TlsTest/tls_server.py on
+# [::1]:8443. A network test that still cannot reach its endpoint after its
+# retries makes TlsTest exit 2, which fails the step as "endpoint unreachable",
+# distinct from a wrong result.
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'prev-i/schannel-*'
+  pull_request:
+    paths:
+      - 'shareaza/Tls*'
+      - 'TlsTest/**'
+      - '.github/workflows/tls-test.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  tls-test:
+    runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: x64
+            configuration: Release
+          - platform: Win32
+            configuration: Debug
+    env:
+      # OutDir is $(SolutionDir)TlsTest\$(Platform)\$(Configuration)\; the build
+      # sets SolutionDir to vc143/, as a build of vc143/Shareaza.sln does.
+      TLSTEST_EXE: vc143/TlsTest/${{ matrix.platform }}/${{ matrix.configuration }}/TlsTest.exe
+    steps:
+    - name: Checkout GIT sources
+      uses: actions/checkout@v4
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Build
+      id: build
+      run: msbuild TlsTest/TlsTest_143.vcxproj /nologo /v:m /p:Configuration=${{ matrix.configuration }} /p:Platform=${{ matrix.platform }} /p:SolutionDir=${{ github.workspace }}/vc143/
+
+    - name: Offline tests
+      if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+      shell: pwsh
+      run: |
+        & $env:TLSTEST_EXE --offline
+        $code = $LASTEXITCODE
+        if ($code -eq 2) { Write-Output "::error::endpoint unreachable"; exit 1 }
+        exit $code
+
+    # A self-signed certificate from Git for Windows' openssl for the local
+    # server. MSYS2_ARG_CONV_EXCL stops the MSYS runtime from rewriting
+    # /CN=localhost as a Windows path.
+    - name: Generate the local server's certificate
+      if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+      shell: pwsh
+      run: |
+        $dir = Join-Path $env:RUNNER_TEMP 'tls-server'
+        New-Item -ItemType Directory -Force -Path $dir | Out-Null
+        $openssl = Join-Path $env:ProgramFiles 'Git\usr\bin\openssl.exe'
+        if (-not (Test-Path $openssl)) { Write-Output "::error::$openssl not found"; exit 1 }
+        $env:MSYS2_ARG_CONV_EXCL = '*'
+        $env:MSYS_NO_PATHCONV = '1'
+        & $openssl req -x509 -newkey rsa:2048 -nodes -days 2 -subj /CN=localhost -keyout "$dir\key.pem" -out "$dir\cert.pem"
+        if ($LASTEXITCODE -ne 0) { exit 1 }
+        "TLS_SERVER_DIR=$dir" >> $env:GITHUB_ENV
+        "TLSTEST_SERVER_LOG=$(Join-Path $dir 'server.log')" >> $env:GITHUB_ENV
+
+    # The local servers run in the background for this step only, bound to
+    # [::1]; a process started in an earlier step does not outlive it.
+    # tls_server.py: 8443, and 8444 asking for a client certificate.
+    # openssl_driver.py: s_server on 8445 (TLS 1.2, renegotiates) and on
+    # 8446 (TLS 1.3, KeyUpdate).
+    - name: Network tests
+      if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+      shell: pwsh
+      run: |
+        $dir = $env:TLS_SERVER_DIR
+        # Start-Process joins -ArgumentList with spaces and quotes nothing.
+        $openssl = '"' + (Join-Path $env:ProgramFiles 'Git\usr\bin\openssl.exe') + '"'
+        $servers = @(
+          @{ Name = 'server'; Ready = 'listening on \[::1\]:8443$'; Args = @('TlsTest/tls_server.py', '--cert', "$dir\cert.pem", '--key', "$dir\key.pem", '--log', $env:TLSTEST_SERVER_LOG, '--optional-port', '8444') },
+          @{ Name = 'tls12'; Ready = 'listening on'; Args = @('TlsTest/openssl_driver.py', '--openssl', $openssl, '--cert', "$dir\cert.pem", '--key', "$dir\key.pem", '--port', '8445', '--protocol', 'tls1_2', '--command', 'R', '--log', "$dir\tls12.log") },
+          @{ Name = 'tls13'; Ready = 'listening on'; Args = @('TlsTest/openssl_driver.py', '--openssl', $openssl, '--cert', "$dir\cert.pem", '--key', "$dir\key.pem", '--port', '8446', '--protocol', 'tls1_3', '--command', 'K', '--log', "$dir\tls13.log") }
+        )
+        $processes = @()
+        try {
+          foreach ($s in $servers) {
+            $processes += Start-Process -FilePath python -PassThru -NoNewWindow -ArgumentList $s.Args `
+              -RedirectStandardOutput "$dir\$($s.Name).stdout.txt" -RedirectStandardError "$dir\$($s.Name).stderr.txt"
+          }
+          foreach ($s in $servers) {
+            $log = if ($s.Name -eq 'server') { $env:TLSTEST_SERVER_LOG } else { "$dir\$($s.Name).log" }
+            $ready = $false
+            for ($i = 0; $i -lt 30; $i++) {
+              if ((Test-Path $log) -and (Select-String -Path $log -Pattern $s.Ready -Quiet)) { $ready = $true; break }
+              Start-Sleep -Seconds 1
+            }
+            if (-not $ready) { Write-Output "::error::the local server $($s.Name) did not start"; exit 1 }
+          }
+          & $env:TLSTEST_EXE --network
+          $code = $LASTEXITCODE
+        } finally {
+          foreach ($p in $processes) { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
+          Get-Process openssl -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+        }
+        if ($code -eq 2) { Write-Output "::error::endpoint unreachable"; exit 1 }
+        exit $code
+
+    - name: Local server logs
+      if: ${{ always() && env.TLS_SERVER_DIR != '' }}
+      shell: pwsh
+      run: |
+        foreach ($f in Get-ChildItem $env:TLS_SERVER_DIR -Include *.log, *.txt -Recurse) {
+          Write-Output "--- $($f.Name)"
+          Get-Content $f.FullName
+        }
