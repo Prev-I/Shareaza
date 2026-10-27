@@ -1066,6 +1066,7 @@ BOOL CConnection::OnTlsRead()
 	DWORD nTotal = 0ul;
 	BYTE pChunk[ 16384 ];
 	std::vector< BYTE > oPlain;
+	bool bQueued = false;	// m_oTlsSend held ciphertext before the last call
 
 	while ( nLimit && ( m_nTlsPhase == tlsHandshaking || m_nTlsPhase == tlsEstablished ) )
 	{
@@ -1097,6 +1098,7 @@ BOOL CConnection::OnTlsRead()
 		else
 		{
 			oPlain.clear();
+			bQueued = ! m_oTlsSend.empty();
 			const TlsResult nResult = m_pTls->Decrypt( pChunk, static_cast< size_t >( nRead ), oPlain, m_oTlsSend );
 			if ( ! oPlain.empty() )
 				m_pInput->Add( oPlain.data(), oPlain.size() );
@@ -1105,8 +1107,11 @@ BOOL CConnection::OnTlsRead()
 		}
 
 		// Whatever the result, send what the session produced (handshake
-		// messages, post-handshake replies, alerts)
-		SendTls( ~0ul );
+		// messages, post-handshake replies, alerts). If application data was
+		// already queued, the reply follows it and OnWrite sends both under the
+		// output bandwidth limit.
+		if ( ! bQueued )
+			SendTls( ~0ul );
 	}
 
 	// Add the total to the statistics
