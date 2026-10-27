@@ -140,7 +140,8 @@ void CDownloadTransferHTTPS::AttachTo(CConnection* pConnection)
 	CDownloadTransfer::AttachTo( pConnection );
 
 	// An https source is fetched only over a TLS connection whose certificate was accepted.
-	if ( ! IsTls() )
+	// A TLS session is only reused for the host its certificate was verified for.
+	if ( ! IsTls() || m_pSource->GetTlsHost().CompareNoCase( GetTlsHostName() ) != 0 )
 	{
 		Close( TRI_UNKNOWN );
 		return;
@@ -182,10 +183,15 @@ void CDownloadTransferHTTPS::Close( TRISTATE bKeepSource, DWORD nRetryAfter )
 
 void CDownloadTransferHTTPS::GiveConnectionToNext()
 {
-	if ( m_hSocket == INVALID_SOCKET )
+	if ( m_hSocket == INVALID_SOCKET || m_pSource == NULL )
 		return;
 
 	ASSUME_LOCK( Transfers.m_pSection );
+
+	// A TLS session is only reused for the host its certificate was verified for
+	const CString sHost = m_pSource->GetTlsHost();
+	if ( ! IsTls() || sHost.IsEmpty() || sHost.CompareNoCase( GetTlsHostName() ) != 0 )
+		return;
 
 	for ( POSITION pos = Downloads.GetIterator() ; pos != NULL ; )
 	{
@@ -204,7 +210,9 @@ void CDownloadTransferHTTPS::GiveConnectionToNext()
 			if ( pSource->m_nBusyCount == 0 
 				 && pSource->IsSSLSource()
 				 && !pSource->IsConnected()
-				 && pSource->Equals(m_pSource) )
+				 && pSource->Equals(m_pSource)
+				 && pSource->m_nPort == m_pSource->m_nPort
+				 && pSource->GetTlsHost().CompareNoCase( sHost ) == 0 )
 			{
 				if ( pSource->GetTransfer() )
 					continue;

@@ -318,6 +318,11 @@ public:
 	bool IsTlsValidated() const;
 	// The TLS session, or NULL on a plain connection
 	const CTlsClient* GetTls() const;
+	// The host a TLS session's certificate was verified for (empty on a plain connection)
+	inline const CString& GetTlsHostName() const throw()
+	{
+		return m_sTlsHost;
+	}
 
 	// Wait up to nTimeout ms for the certificate verifications still running. Call at exit,
 	// before CTlsClient::Cleanup().
