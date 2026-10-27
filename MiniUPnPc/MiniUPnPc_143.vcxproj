@@ -91,11 +91,11 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>MINIUPNP_EXPORTS;_WIN32;_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_WINDOWS;_USRDLL;MINIUPNPC_EXPORTS;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>MINIUPNP_EXPORTS;_WIN32;_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_WINDOWS;_USRDLL;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)\miniupnpc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)miniupnpc\include;$(ProjectDir)miniupnpc\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <ExceptionHandling>false</ExceptionHandling>
       <SDLCheck>true</SDLCheck>
@@ -110,11 +110,11 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>MINIUPNP_EXPORTS;_WIN32;_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_WINDOWS;_USRDLL;MINIUPNPC_EXPORTS;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>MINIUPNP_EXPORTS;_WIN32;_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_WINDOWS;_USRDLL;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)\miniupnpc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)miniupnpc\include;$(ProjectDir)miniupnpc\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <ExceptionHandling>false</ExceptionHandling>
       <SDLCheck>true</SDLCheck>
@@ -130,11 +130,11 @@
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>MINIUPNP_EXPORTS;_WIN32;_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_WINDOWS;_USRDLL;MINIUPNPC_EXPORTS;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>MINIUPNP_EXPORTS;_WIN32;_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_WINDOWS;_USRDLL;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)\miniupnpc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)miniupnpc\include;$(ProjectDir)miniupnpc\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -155,10 +155,10 @@
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>MINIUPNP_EXPORTS;_WIN32;_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_WINDOWS;_USRDLL;MINIUPNPC_EXPORTS;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>MINIUPNP_EXPORTS;_WIN32;_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_WINDOWS;_USRDLL;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)\miniupnpc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)miniupnpc\include;$(ProjectDir)miniupnpc\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -175,39 +175,45 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="miniupnpcstrings.h" />
-    <ClInclude Include="miniupnpc\connecthostport.h" />
-    <ClInclude Include="miniupnpc\igd_desc_parse.h" />
-    <ClInclude Include="miniupnpc\minisoap.h" />
-    <ClInclude Include="miniupnpc\minissdpc.h" />
-    <ClInclude Include="miniupnpc\miniupnpc.h" />
-    <ClInclude Include="miniupnpc\miniupnpctypes.h" />
-    <ClInclude Include="miniupnpc\miniupnpc_declspec.h" />
-    <ClInclude Include="miniupnpc\miniwget.h" />
-    <ClInclude Include="miniupnpc\minixml.h" />
-    <ClInclude Include="miniupnpc\portlistingparse.h" />
-    <ClInclude Include="miniupnpc\receivedata.h" />
-    <ClInclude Include="miniupnpc\upnpcommands.h" />
-    <ClInclude Include="miniupnpc\upnpdev.h" />
-    <ClInclude Include="miniupnpc\upnperrors.h" />
-    <ClInclude Include="miniupnpc\upnpreplyparse.h" />
+    <ClInclude Include="miniupnpc\include\igd_desc_parse.h" />
+    <ClInclude Include="miniupnpc\include\miniupnpc.h" />
+    <ClInclude Include="miniupnpc\include\miniupnpc_declspec.h" />
+    <ClInclude Include="miniupnpc\include\miniupnpctypes.h" />
+    <ClInclude Include="miniupnpc\include\miniwget.h" />
+    <ClInclude Include="miniupnpc\include\portlistingparse.h" />
+    <ClInclude Include="miniupnpc\include\upnpcommands.h" />
+    <ClInclude Include="miniupnpc\include\upnpdev.h" />
+    <ClInclude Include="miniupnpc\include\upnperrors.h" />
+    <ClInclude Include="miniupnpc\include\upnpreplyparse.h" />
+    <ClInclude Include="miniupnpc\src\addr_is_reserved.h" />
+    <ClInclude Include="miniupnpc\src\codelength.h" />
+    <ClInclude Include="miniupnpc\src\connecthostport.h" />
+    <ClInclude Include="miniupnpc\src\minisoap.h" />
+    <ClInclude Include="miniupnpc\src\minissdpc.h" />
+    <ClInclude Include="miniupnpc\src\miniupnpc_socketdef.h" />
+    <ClInclude Include="miniupnpc\src\miniwget_private.h" />
+    <ClInclude Include="miniupnpc\src\minixml.h" />
+    <ClInclude Include="miniupnpc\src\receivedata.h" />
+    <ClInclude Include="miniupnpc\src\win32_snprintf.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dlldata.c" />
-    <ClCompile Include="miniupnpc\connecthostport.c" />
-    <ClCompile Include="miniupnpc\igd_desc_parse.c" />
-    <ClCompile Include="miniupnpc\minisoap.c" />
-    <ClCompile Include="miniupnpc\minissdpc.c" />
-    <ClCompile Include="miniupnpc\miniupnpc.c" />
-    <ClCompile Include="miniupnpc\miniwget.c" />
-    <ClCompile Include="miniupnpc\minixml.c" />
-    <ClCompile Include="miniupnpc\portlistingparse.c" />
-    <ClCompile Include="miniupnpc\receivedata.c" />
-    <ClCompile Include="miniupnpc\upnpcommands.c" />
-    <ClCompile Include="miniupnpc\upnpdev.c" />
-    <ClCompile Include="miniupnpc\upnperrors.c" />
-    <ClCompile Include="miniupnpc\upnpreplyparse.c" />
+    <ClCompile Include="miniupnpc\src\addr_is_reserved.c" />
+    <ClCompile Include="miniupnpc\src\connecthostport.c" />
+    <ClCompile Include="miniupnpc\src\igd_desc_parse.c" />
+    <ClCompile Include="miniupnpc\src\minisoap.c" />
+    <ClCompile Include="miniupnpc\src\minissdpc.c" />
+    <ClCompile Include="miniupnpc\src\miniupnpc.c" />
+    <ClCompile Include="miniupnpc\src\miniwget.c" />
+    <ClCompile Include="miniupnpc\src\minixml.c" />
+    <ClCompile Include="miniupnpc\src\portlistingparse.c" />
+    <ClCompile Include="miniupnpc\src\receivedata.c" />
+    <ClCompile Include="miniupnpc\src\upnpcommands.c" />
+    <ClCompile Include="miniupnpc\src\upnpdev.c" />
+    <ClCompile Include="miniupnpc\src\upnperrors.c" />
+    <ClCompile Include="miniupnpc\src\upnpreplyparse.c" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="MiniUPnPc.rc" />
