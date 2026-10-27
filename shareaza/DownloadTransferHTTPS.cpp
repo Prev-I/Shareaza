@@ -95,8 +95,8 @@ BOOL CDownloadTransferHTTPS::Initiate()
 		m_pDownload->RemoveSource( m_pSource, FALSE );
 		return FALSE;
 	}
-	// An https source is fetched only over a TLS connection.
-	else if ( m_pSource->m_pAddress.s_addr && SSLConnectTo( &m_pSource->m_pAddress, m_pSource->m_nPort ) )
+	// An https source is fetched only over a TLS connection, checked against the URL's host.
+	else if ( ConnectTls() )
 	{
 		SetState( dtsConnecting );
 		
@@ -116,6 +116,22 @@ BOOL CDownloadTransferHTTPS::Initiate()
 	}
 }
 
+// Connect to the source's IPv4 address if it has one, otherwise to its IPv6 address
+BOOL CDownloadTransferHTTPS::ConnectTls()
+{
+	const CString sHost = m_pSource->GetTlsHost();
+	if ( sHost.IsEmpty() )
+		return FALSE;
+
+	if ( m_pSource->m_pAddress.s_addr )
+		return TLSConnectTo( &m_pSource->m_pAddress, m_pSource->m_nPort, sHost );
+
+	if ( ! IN6_IS_ADDR_UNSPECIFIED( &m_pSource->m_pAddressIPv6 ) )
+		return TLSConnectTo( &m_pSource->m_pAddressIPv6, m_pSource->m_nPort, sHost );
+
+	return FALSE;
+}
+
 //////////////////////////////////////////////////////////////////////
 // CDownloadTransferHTTPS accept push
 
@@ -123,8 +139,8 @@ void CDownloadTransferHTTPS::AttachTo(CConnection* pConnection)
 {
 	CDownloadTransfer::AttachTo( pConnection );
 
-	// An https source is fetched only over a TLS connection.
-	if ( ! HasSSL() )
+	// An https source is fetched only over a TLS connection whose certificate was accepted.
+	if ( ! IsTls() )
 	{
 		Close( TRI_UNKNOWN );
 		return;
@@ -560,7 +576,7 @@ BOOL CDownloadTransferHTTPS::SendRequest()
 	
 	m_pSource->SetLastSeen();
 	
-	CDownloadTransfer::OnSSLWrite();
+	CDownloadTransfer::OnWrite();
 	
 	return TRUE;
 }
@@ -632,20 +648,11 @@ BOOL CDownloadTransferHTTPS::OnRun()
 }
 
 //////////////////////////////////////////////////////////////////////
-// CDownloadTransferHTTPS write handler
-
-// Writes on an https transfer go through TLS only.
-BOOL CDownloadTransferHTTPS::OnWrite()
-{
-	return CDownloadTransfer::OnSSLWrite();
-}
-
-//////////////////////////////////////////////////////////////////////
 // CDownloadTransferHTTPS read handler
 
 BOOL CDownloadTransferHTTPS::OnRead()
 {
-	CDownloadTransfer::OnSSLRead();
+	CDownloadTransfer::OnRead();
 	
 	switch ( m_nState )
 	{
@@ -1681,6 +1688,17 @@ BOOL CDownloadTransferHTTPS::ReadFlush()
 	}
 	
 	return TRUE;
+}
+
+//////////////////////////////////////////////////////////////////////
+// CDownloadTransferHTTPS rejected certificate handler
+
+void CDownloadTransferHTTPS::OnTlsRejected()
+{
+	ASSUME_LOCK( Transfers.m_pSection );
+
+	// CConnection logged the reason. The source cannot be fetched safely: drop it.
+	Close( TRI_FALSE );
 }
 
 //////////////////////////////////////////////////////////////////////

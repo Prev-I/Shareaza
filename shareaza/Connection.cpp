@@ -31,12 +31,91 @@
 #include "Buffer.h"
 #include "Statistics.h"
 #include "VendorCache.h"
+#include "TlsVerify.h"
+
+#include <atomic>
+#include <thread>
 
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
+
+//////////////////////////////////////////////////////////////////////
+// TLS certificate verification job
+
+// One verification of a server certificate. The connection and the worker
+// thread share it; the worker touches nothing else.
+struct CTlsVerifyJob
+{
+	CTlsVerifyJob(const std::wstring& sHostName, PCCERT_CONTEXT pCertificate)
+		: sHost		( sHostName )
+		, pCert		( pCertificate )
+		, bDone		( false )
+		, nResult	( TlsCertProblem::Other )
+	{
+	}
+
+	const std::wstring	sHost;
+	PCCERT_CONTEXT		pCert;		// A duplicate, freed by the worker
+	std::atomic< bool >	bDone;		// nResult is set
+	TlsCertProblem		nResult;
+
+private:
+	CTlsVerifyJob(const CTlsVerifyJob&);
+	CTlsVerifyJob& operator=(const CTlsVerifyJob&);
+};
+
+namespace
+{
+	// Verification jobs whose worker has not finished yet
+	volatile LONG g_nTlsJobs = 0;
+
+	// The worker: verifies the certificate, frees it and reports the result.
+	// It may block for seconds on revocation fetches, so it never holds a lock.
+	void RunTlsVerify(std::shared_ptr< CTlsVerifyJob > pJob)
+	{
+		pJob->nResult = VerifyServerCertificate( pJob->pCert, pJob->sHost );
+		CertFreeCertificateContext( pJob->pCert );
+		pJob->pCert = NULL;
+		pJob->bDone.store( true );
+		pJob.reset();
+		InterlockedDecrement( &g_nTlsJobs );
+	}
+
+	CString TlsProblemReason(TlsCertProblem nProblem)
+	{
+		switch ( nProblem )
+		{
+		case TlsCertProblem::Expired:
+			return LoadString( IDS_TLS_REASON_EXPIRED );
+		case TlsCertProblem::WrongName:
+			return LoadString( IDS_TLS_REASON_WRONGNAME );
+		case TlsCertProblem::Untrusted:
+			return LoadString( IDS_TLS_REASON_UNTRUSTED );
+		case TlsCertProblem::Revoked:
+			return LoadString( IDS_TLS_REASON_REVOKED );
+		default:
+			return LoadString( IDS_TLS_REASON_OTHER );
+		}
+	}
+
+	CString TlsStatusReason(SECURITY_STATUS nStatus)
+	{
+		// SEC_E_CERT_UNKNOWN is what CTlsClient reports when a session is used
+		// before its certificate was accepted: a programming error, never a
+		// certificate problem.
+		const TlsCertProblem nProblem = ( nStatus == SEC_E_CERT_UNKNOWN ) ?
+			TlsCertProblem::None : ProblemFromStatus( nStatus );
+		if ( nProblem != TlsCertProblem::None )
+			return TlsProblemReason( nProblem );
+
+		CString strReason;
+		strReason.Format( LoadString( IDS_TLS_REASON_STATUS ), static_cast< DWORD >( nStatus ) );
+		return strReason;
+	}
+}
 
 //////////////////////////////////////////////////////////////////////
 // CConnection construction
@@ -54,7 +133,8 @@ CConnection::CConnection(PROTOCOLID nProtocol)
 	, m_nProtocol			( nProtocol )
 	, m_nDelayCloseReason	( 0 )
 	, m_bAutoDelete			( FALSE )
-	, sslConnection			( NULL )
+	, m_nTlsPhase			( tlsNone )
+	, m_bTlsValidated		( false )
 {
 	ZeroMemory( &m_pHost, sizeof( m_pHost ) );
 	m_pHost.sin_family = AF_INET;
@@ -79,7 +159,7 @@ void CConnection::AttachTo(CConnection* pConnection)
 	ASSERT( pConnection->IsValid() );					// And make sure its socket exists
 
 	DestroyBuffers();
-	DestroySSL();
+	ResetTls();
 
 	CQuickLock oOutputLock( *pConnection->m_pOutputSection );
 	CQuickLock oInputLock( *pConnection->m_pInputSection );
@@ -104,7 +184,14 @@ void CConnection::AttachTo(CConnection* pConnection)
 	if ( m_nProtocol <= PROTOCOL_NULL && pConnection->m_nProtocol > PROTOCOL_NULL )
 		m_nProtocol		= pConnection->m_nProtocol;
 	m_nDelayCloseReason	= pConnection->m_nDelayCloseReason;
-	sslConnection		= pConnection->sslConnection;	// The TLS session goes with its socket
+
+	// The TLS session goes with its socket
+	m_pTls				= std::move( pConnection->m_pTls );
+	m_oTlsSend			= std::move( pConnection->m_oTlsSend );
+	m_pTlsJob			= std::move( pConnection->m_pTlsJob );
+	m_nTlsPhase			= pConnection->m_nTlsPhase;
+	m_sTlsHost			= pConnection->m_sTlsHost;
+	m_bTlsValidated		= pConnection->m_bTlsValidated;
 
 	// Record the current time in the input and output TCP bandwidth meters
 	m_mInput.tLast = m_mOutput.tLast = GetTickCount();
@@ -115,7 +202,7 @@ void CConnection::AttachTo(CConnection* pConnection)
 	// Null the input and output pointers, and the TLS session
 	pConnection->m_pInput	= NULL;
 	pConnection->m_pOutput	= NULL;
-	pConnection->sslConnection = NULL;
+	pConnection->ResetTls();
 
 	// Zero the memory of the input and output TCPBandwidthMeter objects
 	ZeroMemory( &pConnection->m_mInput, sizeof( m_mInput ) );
@@ -131,7 +218,7 @@ CConnection::~CConnection()
 
 	// Delete and mark null the input and output buffers
 	DestroyBuffers();
-	DestroySSL();
+	ResetTls();
 }
 
 void CConnection::LogOutgoing()
@@ -378,246 +465,208 @@ BOOL CConnection::ConnectTo(const IN6_ADDR* pAddress, WORD nPort)
 	return TRUE;
 }
 
-BOOL CConnection::SSLConnectTo(const IN_ADDR* pAddress, WORD nPort)
+// Connect as ConnectTo does, then speak TLS once the socket is connected.
+// sHost is the name the server's certificate must carry; without one there is
+// nothing to check the certificate against, so there is no connection.
+BOOL CConnection::TLSConnectTo(const IN_ADDR* pAddress, WORD nPort, const CString& sHost)
 {
-	// Make sure the socket isn't already connected somehow
-	if (IsValid())
+	if ( sHost.IsEmpty() )
 		return FALSE;
 
-	// Make sure we have an address and a nonzero port number
-	if (pAddress == NULL || nPort == 0)
+	if ( ! CConnection::ConnectTo( pAddress, nPort ) )
 		return FALSE;
 
-	// S_un.S_addr is the IP as a single unsigned 4-byte long
-	if (pAddress->S_un.S_addr == 0)
-		return FALSE;
-
-	// The IP address is in the security list of government and corporate addresses we want to avoid
-	if (Security.IsDenied(pAddress))
-	{
-		// Report that we aren't connecting to this IP address and return false
-		theApp.Message(MSG_ERROR, IDS_SECURITY_OUTGOING, (LPCTSTR)CString(inet_ntoa(*pAddress)));
-		return FALSE;
-	}
-
-	// The IN_ADDR structure we just got passed isn't the same as the one already stored in this object
-	if (pAddress != &m_pHost.sin_addr)
-	{
-		// Zero the memory of the entire SOCKADDR_IN structure m_pHost, and then copy in the sin_addr part
-		ZeroMemory(&m_pHost, sizeof(m_pHost));
-		m_pHost.sin_addr = *pAddress;
-	}
-
-	// Fill in more parts of the m_pHost structure
-	m_pHost.sin_family = AF_INET;							// PF_INET means just normal IPv4, not IPv6 yet
-	m_pHost.sin_port = htons(nPort);					// Copy the port number into the m_pHost structure
-	m_sAddress = inet_ntoa(m_pHost.sin_addr);	// Save the IP address as a string of text
-	UpdateCountry();
-
-	// Create a socket and store it in m_hSocket
-	m_hSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	if (!IsValid())	// Now, make sure it has been created
-	{
-		theApp.Message(MSG_ERROR, _T("Failed to create socket. (1st Try)"));
-		// Second attempt
-		m_hSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-		if (!IsValid())
-		{
-			theApp.Message(MSG_ERROR, _T("Failed to create socket. (2nd Try)"));
-			return FALSE;
-		}
-	}
-
-	// Disables the Nagle algorithm for send coalescing
-	//VERIFY(setsockopt(m_hSocket, IPPROTO_TCP, TCP_NODELAY, "\x01", 1) == 0);
-
-	// Allows the socket to be bound to an address that is already in use
-	//VERIFY(setsockopt(m_hSocket, SOL_SOCKET, SO_REUSEADDR, "\x01", 1) == 0);
-
-	// Choose asynchronous, non-blocking reading and writing on our new socket
-	//DWORD dwValue = 1;
-	//ioctlsocket(m_hSocket, FIONBIO, &dwValue);
-
-	// If the OutHost string in connection settings has an IP address written in it
-	if (Settings.Connection.OutHost.GetLength())
-	{
-		// Read the text and copy the IP address and port into a new local MFC SOCKADDR_IN structure called pOutgoing
-		SOCKADDR_IN pOutgoing;
-		Network.Resolve(Settings.Connection.OutHost, 0, &pOutgoing);
-
-		// S_addr is the IP address as a single long number, if it's not zero
-		if (pOutgoing.sin_addr.S_un.S_addr)
-		{
-			// Call bind in Windows Sockets to associate the local address with the socket
-			bind(
-				m_hSocket,				// Our socket
-				(SOCKADDR*)&pOutgoing,	// The IP address this computer appears to have on the Internet (do)
-				sizeof(SOCKADDR_IN));	// Tell bind how many bytes it can read at the pointer
-		}
-	}
-
-	DestroyBuffers();
-
-	// Try to connect to the remote computer
-	if (WSAConnect(
-		m_hSocket,					// Our socket
-		(SOCKADDR*)&m_pHost,		// The remote IP address and port number
-		sizeof(SOCKADDR_IN),		// How many bytes the function can read
-		NULL, NULL, NULL, NULL))	// No advanced features
-	{
-		// If no error occurs, WSAConnect returns 0, so if we're here an error happened
-		int nError = WSAGetLastError(); // Get the last Windows Sockets error number
-
-		// An error of "would block" is normal because connections can't be made instantly and this is a non-blocking socket
-		if (nError != WSAEWOULDBLOCK)
-		{
-			CNetwork::CloseSocket(m_hSocket, true);
-
-			if (nError != 0)
-				Statistics.Current.Connections.Errors++;
-
-			return FALSE;
-		}
-	}
-
-	// Initialize OpenSSL
-	theApp.Message(MSG_INFO, _T("Creating SSL context"));
-	
-	// Initialize OpenSSL
-	SSL_library_init();
-	SSL_load_error_strings();
-	const SSL_METHOD* method = TLS_client_method();
-	SSL_CTX* ctx = SSL_CTX_new(method);
-
-	// Create an SSL structure for the connection. It holds its own reference
-	// to the context, so the context is freed along with it.
-	DestroySSL();
-	sslConnection = ctx ? SSL_new(ctx) : NULL;
-	SSL_CTX_free(ctx);
-	if (sslConnection == NULL || SSL_set_fd(sslConnection, (int)m_hSocket) != 1) {
-		theApp.Message(MSG_ERROR, _T("Failed to create SSL context"));
-		DestroySSL();
-		CNetwork::CloseSocket(m_hSocket, true);
-		return FALSE;
-	}
-
-	// Perform the SSL/TLS handshake
-	if (SSL_connect(sslConnection) != 1) {
-		theApp.Message(MSG_ERROR, _T("SSL_connect failed"));
-		DestroySSL();
-		CNetwork::CloseSocket(m_hSocket, true);
-		return FALSE;
-	}
-	
-	theApp.Message(MSG_INFO, _T("SSL context created"));
-
-	CreateBuffers();
-
-	// Record that we initiated this connection, and when it happened
-	m_bInitiated = TRUE;
-	m_tConnected = GetTickCount();
-
-	// Record one more outgoing connection in the statistics
-	Statistics.Current.Connections.Outgoing++;
-
-	// The connection was successfully attempted
+	ResetTls();
+	m_pTls.reset( new CTlsClient( TlsCred::Manual, std::wstring( (LPCWSTR)sHost ) ) );
+	m_nTlsPhase	= tlsConnecting;
+	m_sTlsHost	= sHost;
 	return TRUE;
 }
 
-BOOL CConnection::SSLConnectTo(const IN6_ADDR* pAddress, WORD nPort)
+BOOL CConnection::TLSConnectTo(const IN6_ADDR* pAddress, WORD nPort, const CString& sHost)
 {
-	//TODO: make it ready for IPV6
-	if (IsValid())
+	if ( sHost.IsEmpty() )
 		return FALSE;
 
-	// Make sure we have an address and a nonzero port number
-	if (pAddress == NULL || nPort == 0)
+	if ( ! CConnection::ConnectTo( pAddress, nPort ) )
 		return FALSE;
 
-	// :: is not a host
-	if (IN6_IS_ADDR_UNSPECIFIED(pAddress))
-		return FALSE;
-
-	// The IP address is in the security list of government and corporate addresses we want to avoid
-	if (Security.IsDenied(pAddress))
-	{
-		// Report that we aren't connecting to this IP address and return false
-		theApp.Message(MSG_ERROR, IDS_SECURITY_OUTGOING, (LPCTSTR)IPv6ToString(pAddress));
-		return FALSE;
-	}
-
-	// The IN_ADDR structure we just got passed isn't the same as the one already stored in this object
-	if (pAddress != &m_pHostIPv6.sin6_addr)
-	{
-		// Zero the memory of the entire SOCKADDR_IN structure m_pHost, and then copy in the sin_addr part
-		ZeroMemory(&m_pHostIPv6, sizeof(m_pHostIPv6));
-		m_pHostIPv6.sin6_addr = *pAddress;
-	}
-
-	// Fill in more parts of the m_pHost structure
-	m_pHostIPv6.sin6_family = AF_INET6;							// AF_INET6 means just normal IPv6
-	m_pHostIPv6.sin6_port = htons(nPort);					// Copy the port number into the m_pHost structure
-	m_sAddress = IPv6ToString(&m_pHostIPv6.sin6_addr);	// Save the IP address as a string of text
-
-	// Create a socket and store it in m_hSocket
-	m_hSocket = socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP);
-	if (!IsValid())	// Now, make sure it has been created
-	{
-		theApp.Message(MSG_ERROR, _T("Failed to create socket. (1st Try)"));
-		// Second attempt
-		m_hSocket = socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP);
-		if (!IsValid())
-		{
-			theApp.Message(MSG_ERROR, _T("Failed to create socket. (2nd Try)"));
-			return FALSE;
-		}
-	}
-
-	// Disables the Nagle algorithm for send coalescing
-	//VERIFY( setsockopt( m_hSocket, IPPROTO_TCP, TCP_NODELAY, "\x01", 1 ) == 0 );
-
-	// Allows the socket to be bound to an address that is already in use
-	VERIFY(setsockopt(m_hSocket, SOL_SOCKET, SO_REUSEADDR, "\x01", 1) == 0);
-
-	// Choose asynchronous, non-blocking reading and writing on our new socket
-	DWORD dwValue = 1;
-	ioctlsocket(m_hSocket, FIONBIO, &dwValue);
-
-	DestroyBuffers();
-
-	// Try to connect to the remote computer
-	if (WSAConnect(
-		m_hSocket,					// Our socket
-		(SOCKADDR*)&m_pHostIPv6,		// The remote IP address and port number
-		sizeof(SOCKADDR_IN6),		// How many bytes the function can read
-		NULL, NULL, NULL, NULL))	// No advanced features
-	{
-		// If no error occurs, WSAConnect returns 0, so if we're here an error happened
-		int nError = WSAGetLastError(); // Get the last Windows Sockets error number
-
-		// An error of "would block" is normal because connections can't be made instantly and this is a non-blocking socket
-		if (nError != WSAEWOULDBLOCK)
-		{
-			CNetwork::CloseSocket(m_hSocket, true);
-
-			if (nError != 0)
-				Statistics.Current.Connections.Errors++;
-
-			return FALSE;
-		}
-	}
-
-	CreateBuffers();
-
-	// Record that we initiated this connection, and when it happened
-	m_bInitiated = TRUE;
-	m_tConnected = GetTickCount();
-
-	// Record one more outgoing connection in the statistics
-	Statistics.Current.Connections.Outgoing++;
-
-	// The connection was successfully attempted
+	ResetTls();
+	m_pTls.reset( new CTlsClient( TlsCred::Manual, std::wstring( (LPCWSTR)sHost ) ) );
+	m_nTlsPhase	= tlsConnecting;
+	m_sTlsHost	= sHost;
 	return TRUE;
+}
+
+//////////////////////////////////////////////////////////////////////
+// CConnection TLS state
+
+bool CConnection::IsTls() const
+{
+	return m_pTls && m_pTls->IsHandshakeComplete() && m_pTls->IsAccepted();
+}
+
+bool CConnection::IsTlsValidated() const
+{
+	return IsTls() && m_bTlsValidated;
+}
+
+const CTlsClient* CConnection::GetTls() const
+{
+	return m_pTls.get();
+}
+
+void CConnection::ResetTls()
+{
+	m_pTls.reset();
+	std::vector< BYTE >().swap( m_oTlsSend );
+	m_pTlsJob.reset();
+	m_nTlsPhase		= tlsNone;
+	m_sTlsHost.Empty();
+	m_bTlsValidated	= false;
+}
+
+void CConnection::WaitForTlsJobs(DWORD nTimeout)
+{
+	const DWORD tStart = GetTickCount();
+	while ( InterlockedCompareExchange( &g_nTlsJobs, 0, 0 ) > 0 && GetTickCount() - tStart < nTimeout )
+		Sleep( 50 );
+}
+
+// Verify the peer certificate on a worker thread. The session stays unusable
+// (no Encrypt, no Decrypt) until OnTlsRun() sees the result.
+void CConnection::StartTlsVerify()
+{
+	PCCERT_CONTEXT pCert = m_pTls->PeerCertificate();
+	if ( pCert )
+		pCert = CertDuplicateCertificateContext( pCert );
+
+	std::shared_ptr< CTlsVerifyJob > pJob( new CTlsVerifyJob( std::wstring( (LPCWSTR)m_sTlsHost ), pCert ) );
+	m_pTlsJob	= pJob;
+	m_nTlsPhase	= tlsVerifying;
+
+	if ( pCert == NULL )
+	{
+		pJob->nResult = TlsCertProblem::Other;
+		pJob->bDone.store( true );
+		return;
+	}
+
+	InterlockedIncrement( &g_nTlsJobs );
+	try
+	{
+		std::thread( RunTlsVerify, pJob ).detach();
+	}
+	catch ( ... )
+	{
+		InterlockedDecrement( &g_nTlsJobs );
+		CertFreeCertificateContext( pJob->pCert );
+		pJob->pCert = NULL;
+		pJob->nResult = TlsCertProblem::Other;
+		pJob->bDone.store( true );
+	}
+}
+
+// Send up to nLimit bytes of pending ciphertext without blocking. The caller
+// holds the output section.
+DWORD CConnection::SendTls(DWORD nLimit)
+{
+	DWORD nTotal = 0ul;
+
+	while ( nLimit && ! m_oTlsSend.empty() )
+	{
+		const size_t nPending = m_oTlsSend.size();
+		const DWORD nLength = static_cast< DWORD >( min( static_cast< size_t >( min( nLimit, static_cast< DWORD >( INT_MAX ) ) ), nPending ) );
+
+		const int nSend = CNetwork::Send( m_hSocket, reinterpret_cast< const char* >( m_oTlsSend.data() ), static_cast< int >( nLength ) );
+		if ( nSend <= 0 )
+			break;
+
+		m_oTlsSend.erase( m_oTlsSend.begin(), m_oTlsSend.begin() + nSend );
+		nTotal	+= static_cast< DWORD >( nSend );
+		nLimit	-= static_cast< DWORD >( nSend );
+	}
+
+	if ( nTotal )
+	{
+		Statistics.Current.Bandwidth.Outgoing += nTotal;
+		m_mOutput.Add( nTotal, GetTickCount() );
+	}
+
+	return nTotal;
+}
+
+// Act on what the TLS session did: a failed handshake, a session that ended,
+// or a finished certificate verification. Returns FALSE if the connection was
+// dropped; the object may then be gone.
+BOOL CConnection::OnTlsRun()
+{
+	switch ( m_nTlsPhase )
+	{
+	case tlsFailed:
+		theApp.Message( MSG_ERROR, IDS_TLS_HANDSHAKE_FAILED, (LPCTSTR)m_sTlsHost,
+			(LPCTSTR)TlsStatusReason( m_pTls->LastStatus() ) );
+		OnDropped();
+		return FALSE;
+
+	case tlsEnded:
+		theApp.Message( MSG_DEBUG, _T("TLS session with %s ended (0x%08X)."), (LPCTSTR)m_sTlsHost,
+			static_cast< DWORD >( m_pTls->LastStatus() ) );
+		OnDropped();
+		return FALSE;
+
+	case tlsVerifying:
+		break;
+
+	default:
+		return TRUE;
+	}
+
+	if ( ! m_pTlsJob || ! m_pTlsJob->bDone.load() )
+		return TRUE;
+
+	const TlsCertProblem nProblem = m_pTlsJob->nResult;
+	m_pTlsJob.reset();
+
+	if ( nProblem != TlsCertProblem::None )
+	{
+		theApp.Message( MSG_ERROR, IDS_TLS_CERT_REJECTED, (LPCTSTR)m_sTlsHost,
+			(LPCTSTR)TlsProblemReason( nProblem ) );
+		OnTlsRejected();
+		return FALSE;
+	}
+
+	TlsResult nResult;
+	{
+		CQuickLock oOutputLock( *m_pOutputSection );
+		CQuickLock oInputLock( *m_pInputSection );
+
+		m_pTls->Accept();
+		m_bTlsValidated	= true;
+		m_nTlsPhase		= tlsEstablished;
+
+		// The final flight may have carried records past the handshake
+		std::vector< BYTE > oPlain;
+		nResult = m_pTls->Decrypt( NULL, 0, oPlain, m_oTlsSend );
+		SendTls( ~0ul );
+		if ( ! oPlain.empty() )
+			m_pInput->Add( oPlain.data(), oPlain.size() );
+	}
+
+	if ( nResult == TlsResult::Closed || nResult == TlsResult::Failed )
+	{
+		m_nTlsPhase = tlsEnded;
+		OnDropped();
+		return FALSE;
+	}
+
+	if ( ! OnTlsEstablished() )
+	{
+		OnDropped();
+		return FALSE;
+	}
+
+	return OnConnected();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -712,6 +761,20 @@ void CConnection::Close(UINT nError)
 		}
 	}
 
+	if ( m_pTls )
+	{
+		CQuickLock oOutputLock( *m_pOutputSection );
+
+		// Tell the server the session ends: one attempt, without blocking
+		if ( IsValid() && m_nTlsPhase == tlsEstablished )
+		{
+			m_pTls->Shutdown( m_oTlsSend );
+			SendTls( ~0ul );
+		}
+
+		ResetTls();
+	}
+
 	CNetwork::CloseSocket( m_hSocket, false );
 
 	// This connection object isn't connected any longer
@@ -779,9 +842,22 @@ BOOL CConnection::DoRun()
 		m_bConnected = TRUE;
 		m_tConnected = m_mInput.tLast = m_mOutput.tLast = GetTickCount(); // Store the time 3 places
 
-		// Call CShakeNeighbour::OnConnected to start reading the handshake
-		if ( !OnConnected() )
-			return FALSE;
+		if ( m_pTls )
+		{
+			// A TLS connection is connected for its owner only once its certificate
+			// is accepted (OnTlsRun). Begin the handshake; OnWrite sends the ClientHello.
+			if ( m_nTlsPhase == tlsConnecting )
+			{
+				CQuickLock oOutputLock( *m_pOutputSection );
+				m_nTlsPhase = ( m_pTls->Start( m_oTlsSend ) == TlsResult::NeedMore ) ? tlsHandshaking : tlsFailed;
+			}
+		}
+		else
+		{
+			// Call CShakeNeighbour::OnConnected to start reading the handshake
+			if ( !OnConnected() )
+				return FALSE;
+		}
 
 		Network.AcquireLocalAddress( m_hSocket );
 	}
@@ -800,6 +876,10 @@ BOOL CConnection::DoRun()
 	if ( !OnWrite() )
 		return FALSE;
 	if ( !OnRead() )
+		return FALSE;
+
+	// Act on what the TLS session did: handshake failure, end of session, verified certificate
+	if ( m_pTls && !OnTlsRun() )
 		return FALSE;
 
 	// If the close event happened
@@ -850,6 +930,18 @@ void CConnection::OnDropped()
 	// Do nothing
 }
 
+// Objects that inherit from CConnection may refuse a TLS session here
+BOOL CConnection::OnTlsEstablished()
+{
+	return TRUE;
+}
+
+// A rejected certificate drops the connection unless a derived class does more
+void CConnection::OnTlsRejected()
+{
+	OnDropped();
+}
+
 // Objects that inherit from CConnection have OnRun methods that do things, unlike this one
 BOOL CConnection::OnRun()
 {
@@ -857,8 +949,8 @@ BOOL CConnection::OnRun()
 	{
 		CLockedBuffer pOutputLocked( GetOutput() );
 
-		// If there is nothing to send
-		if ( pOutputLocked->m_nLength == 0 )
+		// If there is nothing to send (m_oTlsSend is always empty on a plain connection)
+		if ( pOutputLocked->m_nLength == 0 && m_oTlsSend.empty() )
 		{
 			Close( m_nDelayCloseReason );
 			return FALSE;
@@ -874,6 +966,9 @@ BOOL CConnection::OnRun()
 // Read data waiting in the socket into the input buffer
 BOOL CConnection::OnRead()
 {
+	if ( m_pTls )
+		return OnTlsRead();
+
 	CQuickLock oInputLock( *m_pInputSection );
 
 	// Make sure the socket is valid
@@ -939,73 +1034,89 @@ BOOL CConnection::OnRead()
 	return TRUE;
 }
 
-BOOL CConnection::OnSSLRead()
+// Read ciphertext waiting in the socket into the TLS session: handshake
+// messages while handshaking, records once established (their plaintext goes
+// to the input buffer). Bandwidth limits apply to the bytes on the wire.
+BOOL CConnection::OnTlsRead()
 {
-	CQuickLock oInputLock(*m_pInputSection);
+	// Output first, then input: the order AttachTo takes them in
+	CQuickLock oOutputLock( *m_pOutputSection );
+	CQuickLock oInputLock( *m_pInputSection );
 
-	// Make sure the socket is valid and carries a TLS session
-	if (!IsValid() || !sslConnection)
+	// Make sure the socket is valid
+	if ( ! IsValid() )
 		return FALSE;
 
-	if (m_nDelayCloseReason)
+	if ( m_nDelayCloseReason )
 		return TRUE;
 
-	DWORD tNow = GetTickCount();	// The time right now
-	DWORD nLimit = ~0ul;				// Make the limit huge
+	// Before the TCP connection, while the certificate is verified and once the
+	// session is over, received bytes stay in the socket
+	if ( m_nTlsPhase != tlsHandshaking && m_nTlsPhase != tlsEstablished )
+		return TRUE;
 
-	// If we need to worry about throttling bandwidth, calculate nLimit, the number of bytes we are allowed to read now
-	if (m_mInput.pLimit							// If there is a limit
-		&& *m_mInput.pLimit							// And that limit isn't 0
-		&& Settings.Live.BandwidthScale <= 100)	// And the bandwidth scale isn't at MAX
-	{
-		// Work out what the bandwidth limit is
-		nLimit = m_mInput.CalculateLimit(tNow);
-	}
+	DWORD tNow		= GetTickCount();	// The time right now
+	DWORD nLimit	= ~0ul;				// Make the limit huge
 
-	nLimit = min(nLimit, (DWORD)INT_MAX);
+	if ( m_mInput.pLimit && *m_mInput.pLimit && Settings.Live.BandwidthScale <= 100 )
+		nLimit = m_mInput.CalculateLimit( tNow );
 
-	// Start the total at 0
+	nLimit = min( nLimit, (DWORD)INT_MAX );
+
 	DWORD nTotal = 0ul;
+	BYTE pChunk[ 16384 ];
+	std::vector< BYTE > oPlain;
 
-	// Read bytes from the socket until the limit has run out
-	while (nLimit)
+	while ( nLimit && ( m_nTlsPhase == tlsHandshaking || m_nTlsPhase == tlsEstablished ) )
 	{
-		// Limit nLength to the free buffer space or the maximum size of an int
-		DWORD nLength = m_pInput->GetBufferFree();
+		const DWORD nLength = min( nLimit, (DWORD)sizeof( pChunk ) );
+		const int nRead = CNetwork::Recv( m_hSocket, reinterpret_cast< char* >( pChunk ), static_cast< int >( nLength ) );
+		if ( nRead <= 0 )
+			break;
 
-		if (nLength)
-			// Limit nLength to the speed limit
-			nLength = min(nLimit, nLength);
+		nTotal	+= static_cast< DWORD >( nRead );
+		nLimit	-= static_cast< DWORD >( nRead );
+
+		if ( m_nTlsPhase == tlsHandshaking )
+		{
+			switch ( m_pTls->Handshake( pChunk, static_cast< size_t >( nRead ), m_oTlsSend ) )
+			{
+			case TlsResult::Ok:
+			case TlsResult::NeedMore:
+				break;
+			case TlsResult::Done:
+				// Bytes past the handshake stay in the session, and later ones in
+				// the socket, until the certificate is accepted
+				StartTlsVerify();
+				break;
+			default:
+				m_nTlsPhase = tlsFailed;
+				break;
+			}
+		}
 		else
-			// Limit nLength to the maximum receive size
-			nLength = min(nLimit, 16384ul);	// Receive up to 16KB blocks from the socket
+		{
+			oPlain.clear();
+			const TlsResult nResult = m_pTls->Decrypt( pChunk, static_cast< size_t >( nRead ), oPlain, m_oTlsSend );
+			if ( ! oPlain.empty() )
+				m_pInput->Add( oPlain.data(), oPlain.size() );
+			if ( nResult == TlsResult::Closed || nResult == TlsResult::Failed )
+				m_nTlsPhase = tlsEnded;
+		}
 
-		// Exit loop if the buffer isn't big enough to hold the data
-		if (!m_pInput->EnsureBuffer(nLength))
-			break;
-
-		// Read the bytes from the socket and record how many are actually read
-		int nRead = CNetwork::SSLRecv(sslConnection, (char*)m_pInput->GetDataEnd(), (int)nLength);
-
-		// Exit loop if nothing is left or an error occurs
-		if (nRead <= 0)
-			break;
-
-		m_pInput->m_nLength += nRead;	// Add to the buffer size
-		nTotal += nRead;	// Add to the total
-		nLimit -= nRead;	// Adjust the limit
+		// Whatever the result, send what the session produced (handshake
+		// messages, post-handshake replies, alerts)
+		SendTls( ~0ul );
 	}
 
 	// Add the total to the statistics
 	Statistics.Current.Bandwidth.Incoming += nTotal;
 
 	// If some bytes were read, add # bytes to bandwidth meter
-	if (nTotal) m_mInput.Add(nTotal, tNow);
+	if ( nTotal ) m_mInput.Add( nTotal, tNow );
 
-	// Report success
 	return TRUE;
 }
-
 
 //////////////////////////////////////////////////////////////////////
 // CConnection write event handler
@@ -1013,6 +1124,9 @@ BOOL CConnection::OnSSLRead()
 // Call to send the contents of the output buffer to the remote computer
 BOOL CConnection::OnWrite()
 {
+	if ( m_pTls )
+		return OnTlsWrite();
+
 	CQuickLock oOutputLock( *m_pOutputSection );
 
 	// Make sure the socket is valid
@@ -1071,66 +1185,61 @@ BOOL CConnection::OnWrite()
 	return TRUE;
 }
 
-BOOL CConnection::OnSSLWrite()
+// Send pending ciphertext, then encrypt the output buffer up to 16 KiB at a
+// time and send that. Bandwidth limits apply to the bytes on the wire.
+BOOL CConnection::OnTlsWrite()
 {
-	CQuickLock oOutputLock(*m_pOutputSection);
+	CQuickLock oOutputLock( *m_pOutputSection );
 
-	// Make sure the socket is valid and carries a TLS session
-	if (!IsValid() || !sslConnection)
+	// Make sure the socket is valid
+	if ( ! IsValid() )
 		return FALSE;
 
 	// If there is nothing to send, we succeed without doing anything
-	if (m_pOutput->m_nLength == 0)
+	if ( m_oTlsSend.empty() && ( m_pOutput->m_nLength == 0 || m_nTlsPhase != tlsEstablished ) )
 		return TRUE;
 
-	DWORD tNow = GetTickCount();	// The time right now
-	DWORD nLimit = ~0ul;				// Make the limit huge
+	DWORD tNow		= GetTickCount();	// The time right now
+	DWORD nLimit	= ~0ul;				// Make the limit huge
 
-	// If we need to worry about throttling bandwidth, calculate nLimit, the number of bytes we are allowed to write now
-	if (m_mOutput.pLimit							// If there is a limit
-		&& *m_mOutput.pLimit						// And that limit isn't 0
-		&& Settings.Live.BandwidthScale <= 100)	// And the bandwidth scale isn't at MAX
+	if ( m_mOutput.pLimit && *m_mOutput.pLimit && Settings.Live.BandwidthScale <= 100 )
+		nLimit = m_mOutput.CalculateLimit( tNow, Settings.Uploads.ThrottleMode == 0 );
+
+	nLimit = min( nLimit, (DWORD)INT_MAX );
+
+	while ( nLimit )
 	{
-		// Work out what the bandwidth limit is
-		nLimit = m_mOutput.CalculateLimit(tNow, Settings.Uploads.ThrottleMode == 0);
-	}
+		if ( m_oTlsSend.empty() )
+		{
+			// Application data only once the certificate is accepted, and not
+			// while a post-handshake message is being processed
+			if ( m_nTlsPhase != tlsEstablished || m_pOutput->m_nLength == 0 || ! m_pTls->IsEstablished() )
+				break;
 
-	nLimit = min(min(nLimit, m_pOutput->GetCount()), (DWORD)INT_MAX);
+			const DWORD nPlain = min( m_pOutput->m_nLength, 16384ul );
+			const TlsResult nResult = m_pTls->Encrypt( m_pOutput->m_pBuffer, nPlain, m_oTlsSend );
+			if ( nResult == TlsResult::Ok )
+			{
+				m_pOutput->Remove( nPlain );
+			}
+			else
+			{
+				// NeedMore: the plaintext stays in the output buffer for the next run
+				if ( nResult != TlsResult::NeedMore )
+					m_nTlsPhase = tlsEnded;
+				break;
+			}
+		}
 
-	// Point to the data to write
-	const BYTE* pData = m_pOutput->GetData();
-
-	// Start the total at 0
-	DWORD nTotal = 0ul;
-
-	// Write bytes to the socket until our limit has run out
-	while (nLimit)
-	{
-		// Send the bytes to the socket and record how many are actually sent
-		int nSend = CNetwork::SSLSend(sslConnection, (const char*)pData, (int)nLimit);
-
-		// Exit loop if nothing is left or an error occurs
-		if (nSend <= 0)
+		const DWORD nSent = SendTls( nLimit );
+		if ( nSent == 0 )
 			break;
-
-		pData += nSend;	// Move forward past the sent data
-		nTotal += nSend;	// Add to the total
-		nLimit -= nSend;	// Adjust the limit
+		nLimit -= nSent;
 	}
-
-	// Remove sent bytes from the buffer
-	m_pOutput->Remove(nTotal);
-
-	// Add the total to statistics
-	Statistics.Current.Bandwidth.Outgoing += nTotal;
-
-	// If some bytes were sent, add # bytes to bandwidth meter
-	if (nTotal) m_mOutput.Add(nTotal, tNow);
 
 	// Report success
 	return TRUE;
 }
-
 
 //////////////////////////////////////////////////////////////////////
 // CConnection measure

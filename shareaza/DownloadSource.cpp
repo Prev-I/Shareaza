@@ -43,6 +43,7 @@
 #include "Network.h"
 #include "QueryHit.h"
 #include "ShareazaURL.h"
+#include "TlsVerify.h"
 #include "Transfers.h"
 #include "VendorCache.h"
 
@@ -291,6 +292,14 @@ CDownloadSource::~CDownloadSource()
 {
 	ASSUME_LOCK( Transfers.m_pSection );
 	ASSERT( m_pTransfer == NULL );
+}
+
+//////////////////////////////////////////////////////////////////////
+// CDownloadSource TLS host
+
+CString CDownloadSource::GetTlsHost() const
+{
+	return CString( TlsHostFromUrl( std::wstring( (LPCWSTR)m_sURL ) ).c_str() );
 }
 
 //////////////////////////////////////////////////////////////////////

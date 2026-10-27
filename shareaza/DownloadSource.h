@@ -176,6 +176,10 @@ public:
 		return (m_nProtocol == PROTOCOL_SSL );
 	}
 
+	// The host name of an https source's URL, as TLS checks the server's certificate
+	// against it; empty if the URL names no valid https host
+	CString GetTlsHost() const;
+
 	inline bool IsIPv6Source() const
 	{
 		if ( m_pAddress.s_addr == 0 )

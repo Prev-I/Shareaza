@@ -501,6 +501,12 @@
     <ClCompile Include="ThumbCache.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TlsClient.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TlsVerify.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="Transfer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -1621,6 +1627,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ThumbCache.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TlsClient.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TlsVerify.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Transfer.h">

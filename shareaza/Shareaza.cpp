@@ -45,6 +45,7 @@
 #include "Library.h"
 #include "LibraryBuilder.h"
 #include "Neighbours.h"
+#include "Connection.h"
 #include "Network.h"
 #include "Plugins.h"
 #include "QueryHashMaster.h"
@@ -444,6 +445,9 @@ BOOL CShareazaApp::InitInstance()
 			AfxMessageBox( _T("Failed to initialize Windows Sockets."), MB_ICONHAND | MB_OK );
 			return FALSE;
 		}
+		// Acquire the TLS credentials now; a failure shows when an https download connects
+		if ( ! CTlsClient::Startup() )
+			theApp.Message( MSG_ERROR, _T("Failed to acquire the TLS credentials.") );
 	SplashStep( L"Database" );
 		PurgeDeletes();
 		CThumbCache::InitDatabase();
@@ -587,6 +591,10 @@ int CShareazaApp::ExitInstance()
 		SplashStep( L"Stopping Transfers" );
 		Transfers.StopThread();
 		Downloads.CloseTransfers();
+		// Certificate verifications still running may block on revocation fetches
+		// for up to 10 seconds; wait for them before freeing the TLS credentials
+		CConnection::WaitForTlsJobs( 15000 );
+		CTlsClient::Cleanup();
 
 		SplashStep( L"Clearing Clients" );
 		Uploads.Clear( FALSE );

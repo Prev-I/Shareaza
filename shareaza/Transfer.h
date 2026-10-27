@@ -47,8 +47,8 @@ public:
 
 	virtual BOOL	ConnectTo(const IN_ADDR* pAddress, WORD nPort);
 	virtual BOOL	ConnectToIPv6(const IN6_ADDR* pAddress, WORD nPort);
-	virtual BOOL	SSLConnectTo(const IN_ADDR* pAddress, WORD nPort);
-	virtual BOOL	SSLConnectToIPv6(const IN6_ADDR* pAddress, WORD nPort);
+	virtual BOOL	TLSConnectTo(const IN_ADDR* pAddress, WORD nPort, const CString& sHost);
+	virtual BOOL	TLSConnectTo(const IN6_ADDR* pAddress, WORD nPort, const CString& sHost);
 	virtual void	AttachTo(CConnection* pConnection);
 	virtual void	Close(UINT nError = 0);
 

@@ -3782,6 +3782,18 @@ BEGIN
     IDS_PROTOCOL_SIZE_PUSH  "Neighbour %s forwarded a push packet with invalid length, ignoring."
 END
 
+STRINGTABLE
+BEGIN
+    IDS_TLS_HANDSHAKE_FAILED "TLS handshake with %s failed: %s."
+    IDS_TLS_CERT_REJECTED   "Rejected the certificate of %s: %s."
+    IDS_TLS_REASON_EXPIRED  "the certificate has expired or is not yet valid"
+    IDS_TLS_REASON_WRONGNAME "the certificate was not issued for this host"
+    IDS_TLS_REASON_UNTRUSTED "the certificate does not chain to a trusted root"
+    IDS_TLS_REASON_REVOKED  "the certificate has been revoked"
+    IDS_TLS_REASON_OTHER    "the certificate could not be verified"
+    IDS_TLS_REASON_STATUS   "error 0x%08X"
+END
+
 STRINGTABLE 
 BEGIN
     IDS_DOWNLOAD_ADDED      "Added ""%s"" to download queue with %i source(s)."

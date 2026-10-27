@@ -141,7 +141,7 @@
       <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>bzlib.lib;regexp.lib;secur32.lib;rasapi32.lib;winmm.lib;version.lib;ws2_32.lib;wininet.lib;Iphlpapi.lib;msi.lib;powrprof.lib;mstask.lib;windowscodecs.lib;BugSplat.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>bzlib.lib;regexp.lib;secur32.lib;rasapi32.lib;winmm.lib;version.lib;ws2_32.lib;wininet.lib;Iphlpapi.lib;msi.lib;powrprof.lib;mstask.lib;windowscodecs.lib;crypt32.lib;normaliz.lib;BugSplat.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
       <AdditionalLibraryDirectories>..\BugSplat\Win32\Debug;$(OutDir)</AdditionalLibraryDirectories>
@@ -189,7 +189,7 @@
       <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>bzlib.lib;regexp.lib;secur32.lib;rasapi32.lib;winmm.lib;version.lib;ws2_32.lib;wininet.lib;Iphlpapi.lib;msi.lib;powrprof.lib;mstask.lib;windowscodecs.lib;BugSplat64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>bzlib.lib;regexp.lib;secur32.lib;rasapi32.lib;winmm.lib;version.lib;ws2_32.lib;wininet.lib;Iphlpapi.lib;msi.lib;powrprof.lib;mstask.lib;windowscodecs.lib;crypt32.lib;normaliz.lib;BugSplat64.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX64</TargetMachine>
       <KeyFile>
@@ -246,7 +246,7 @@
       <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>bzlib.lib;regexp.lib;secur32.lib;rasapi32.lib;winmm.lib;version.lib;ws2_32.lib;wininet.lib;Iphlpapi.lib;msi.lib;powrprof.lib;mstask.lib;windowscodecs.lib;BugSplat.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>bzlib.lib;regexp.lib;secur32.lib;rasapi32.lib;winmm.lib;version.lib;ws2_32.lib;wininet.lib;Iphlpapi.lib;msi.lib;powrprof.lib;mstask.lib;windowscodecs.lib;crypt32.lib;normaliz.lib;BugSplat.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -303,7 +303,7 @@
       <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>bzlib.lib;regexp.lib;secur32.lib;rasapi32.lib;winmm.lib;version.lib;ws2_32.lib;wininet.lib;Iphlpapi.lib;msi.lib;powrprof.lib;mstask.lib;windowscodecs.lib;BugSplat64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>bzlib.lib;regexp.lib;secur32.lib;rasapi32.lib;winmm.lib;version.lib;ws2_32.lib;wininet.lib;Iphlpapi.lib;msi.lib;powrprof.lib;mstask.lib;windowscodecs.lib;crypt32.lib;normaliz.lib;BugSplat64.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -507,6 +507,12 @@
     </ClCompile>
     <ClCompile Include="Strings.cpp" />
     <ClCompile Include="ThumbCache.cpp" />
+    <ClCompile Include="TlsClient.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="TlsVerify.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="Transfer.cpp" />
     <ClCompile Include="TransferFile.cpp" />
     <ClCompile Include="Transfers.cpp" />
@@ -902,6 +908,8 @@
     <ClInclude Include="Strings.h" />
     <ClInclude Include="ThreadImpl.h" />
     <ClInclude Include="ThumbCache.h" />
+    <ClInclude Include="TlsClient.h" />
+    <ClInclude Include="TlsVerify.h" />
     <ClInclude Include="Transfer.h" />
     <ClInclude Include="TransferFile.h" />
     <ClInclude Include="Transfers.h" />
@@ -1380,7 +1388,6 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="..\vc143\packages\openssl-vc140-static-32_64.1.1.1.1\build\native\openssl-vc140-static-32_64.targets" Condition="Exists('..\vc143\packages\openssl-vc140-static-32_64.1.1.1.1\build\native\openssl-vc140-static-32_64.targets')" />
     <Import Project="..\vc143\packages\boost.1.84.0\build\boost.targets" Condition="Exists('..\vc143\packages\boost.1.84.0\build\boost.targets')" />
     <Import Project="..\vc143\packages\boost_atomic-vc143.1.84.0\build\boost_atomic-vc143.targets" Condition="Exists('..\vc143\packages\boost_atomic-vc143.1.84.0\build\boost_atomic-vc143.targets')" />
     <Import Project="..\vc143\packages\boost_bzip2-vc143.1.84.0\build\boost_bzip2-vc143.targets" Condition="Exists('..\vc143\packages\boost_bzip2-vc143.1.84.0\build\boost_bzip2-vc143.targets')" />
@@ -1437,7 +1444,6 @@
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\vc143\packages\openssl-vc140-static-32_64.1.1.1.1\build\native\openssl-vc140-static-32_64.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\vc143\packages\openssl-vc140-static-32_64.1.1.1.1\build\native\openssl-vc140-static-32_64.targets'))" />
     <Error Condition="!Exists('..\vc143\packages\boost.1.84.0\build\boost.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\vc143\packages\boost.1.84.0\build\boost.targets'))" />
     <Error Condition="!Exists('..\vc143\packages\boost_atomic-vc143.1.84.0\build\boost_atomic-vc143.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\vc143\packages\boost_atomic-vc143.1.84.0\build\boost_atomic-vc143.targets'))" />
     <Error Condition="!Exists('..\vc143\packages\boost_bzip2-vc143.1.84.0\build\boost_bzip2-vc143.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\vc143\packages\boost_bzip2-vc143.1.84.0\build\boost_bzip2-vc143.targets'))" />
