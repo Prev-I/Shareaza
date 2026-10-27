@@ -108,7 +108,8 @@ public:
 	// Ignores an empty host, a host holding anything but printable ASCII
 	// other than a space, and a fingerprint that is not 64 hex digits.
 	void	Accept(const std::wstring& sHost, const std::wstring& sFingerprint);
-	void	Clear();
+	// Returns the number of entries removed.
+	size_t	Clear();
 	size_t	Count() const;
 
 	// Replaces the store with the file's entries: UTF-8, one

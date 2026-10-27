@@ -92,8 +92,7 @@ void CTlsSettingsPage::OnSelChangePolicy()
 
 void CTlsSettingsPage::OnForget()
 {
-	const size_t nCount = TlsTrust.Count();
-	TlsTrust.Clear();
+	const size_t nCount = TlsTrust.Clear();
 	if ( ! SaveTlsTrust() )
 		theApp.Message( MSG_ERROR, _T("Unable to save the accepted certificates.") );
 

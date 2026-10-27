@@ -223,7 +223,8 @@ void CDownloadTransferHTTPS::GiveConnectionToNext()
 				 && pSource->Equals(m_pSource)
 				 && pSource->m_nPort == m_pSource->m_nPort
 				 && pSource->GetTlsHost().CompareNoCase( sHost ) == 0
-				 && ( ! pDownload->m_bRequireValidCert || IsTlsValidated() ) )
+				 && ( ! pDownload->m_bRequireValidCert || IsTlsValidated() )
+				 && ( IsTlsValidated() || Settings.Connection.TlsCertPolicy == static_cast< DWORD >( TLS_CERT_IGNORE ) ) )
 			{
 				if ( pSource->GetTransfer() )
 					continue;
@@ -283,6 +284,14 @@ BOOL CDownloadTransferHTTPS::StartNextFragment()
 
 	ASSERT( this != NULL );
 	if ( this == NULL ) return FALSE;
+
+	// A download that requires a valid certificate (an upgrade) may have become one while this
+	// session, accepted under a weaker policy, was open: reconnect and verify strictly.
+	if ( m_pDownload->m_bRequireValidCert && IsTls() && ! IsTlsValidated() )
+	{
+		Close( TRI_UNKNOWN );
+		return FALSE;
+	}
 
 	m_nOffset			= SIZE_UNKNOWN;
 	m_nPosition			= 0;
@@ -1716,9 +1725,10 @@ TlsVerdict CDownloadTransferHTTPS::OnTlsVerified(TlsCertProblem nProblem, const 
 {
 	ASSUME_LOCK( Transfers.m_pSection );
 
-	// The user's certificate policy applies, unless the download requires a valid certificate
+	// The user's certificate policy applies, unless the download requires a valid certificate.
+	// Without a download, nothing says which policy applies: only a valid certificate is accepted.
 	return EvaluateTlsPeer( nProblem, GetTlsHostName(), sFingerprint,
-		m_pDownload != NULL && m_pDownload->m_bRequireValidCert );
+		m_pDownload == NULL || m_pDownload->m_bRequireValidCert );
 }
 
 void CDownloadTransferHTTPS::OnTlsRejected()

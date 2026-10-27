@@ -753,8 +753,11 @@ TLS_TEST_OFFLINE(OfflineTrustStore)
 	CHECK( oLoaded.Load( TempPath( L"missing.txt" ) ) );
 	CHECK( oLoaded.Count() == 0 );
 
-	oStore.Clear();
+	const size_t nBefore = oStore.Count();
+	CHECK( nBefore > 0 );
+	CHECK( oStore.Clear() == nBefore );
 	CHECK( oStore.Count() == 0 );
+	CHECK( oStore.Clear() == 0 );
 	CHECK( ! oStore.IsAccepted( L"host.example", FP1 ) );
 }
 

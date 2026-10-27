@@ -376,10 +376,12 @@ void CTlsTrustStore::Accept(const std::wstring& sHost, const std::wstring& sFing
 	m_oEntries.insert( oEntry );
 }
 
-void CTlsTrustStore::Clear()
+size_t CTlsTrustStore::Clear()
 {
 	CExclusiveLock oLock( m_oLock );
+	const size_t nCount = m_oEntries.size();
 	m_oEntries.clear();
+	return nCount;
 }
 
 size_t CTlsTrustStore::Count() const
