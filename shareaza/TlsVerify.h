@@ -58,6 +58,29 @@ enum class TlsCertProblem
 // A NULL certificate or an empty host is TlsCertProblem::Other.
 TlsCertProblem VerifyServerCertificate(PCCERT_CONTEXT pCert, const std::wstring& sHost);
 
+// What to do with a server whose certificate was evaluated.
+enum class TlsVerdict
+{
+	Accept,			// use the session
+	Reject,			// close it
+	AskUser			// ask the user whether to accept this certificate for the host
+};
+
+// The certificate policies the user can choose. The values are those of the
+// Connection.TlsCertPolicy setting.
+const DWORD TLS_POLICY_VALID	= 0;	// only valid certificates
+const DWORD TLS_POLICY_ASK		= 1;	// ask about any other certificate, remember the answer
+const DWORD TLS_POLICY_IGNORE	= 2;	// accept every certificate
+
+// Decides whether a session whose certificate has nProblem may be used.
+// bRequireValid (a download that must come from a validated server) accepts
+// only TlsCertProblem::None, whatever the policy and the user's answers.
+// Otherwise TLS_POLICY_VALID accepts only None; TLS_POLICY_IGNORE accepts
+// everything; TLS_POLICY_ASK accepts None or a certificate the user accepted
+// for the host before (bRemembered) and asks about anything else. Any other
+// nPolicy is TLS_POLICY_VALID.
+TlsVerdict DecideTlsVerdict(TlsCertProblem nProblem, bool bRequireValid, DWORD nPolicy, bool bRemembered);
+
 // The certificate problem a failed handshake's SECURITY_STATUS (or a
 // CERT_E_* / CRYPT_E_* / TRUST_E_* code) reports. None if the status is not
 // a certificate error.

@@ -798,7 +798,7 @@ TLS_TEST_OFFLINE(OfflineProblemFromStatus)
 
 	CHECK( ProblemFromStatus( CERT_E_EXPIRED ) == TlsCertProblem::Expired );
 	CHECK( ProblemFromStatus( CERT_E_CN_NO_MATCH ) == TlsCertProblem::WrongName );
-	CHECK( ProblemFromStatus( CERT_E_INVALID_NAME ) == TlsCertProblem::WrongName );
+	CHECK( ProblemFromStatus( CERT_E_INVALID_NAME ) == TlsCertProblem::Untrusted );
 	CHECK( ProblemFromStatus( CERT_E_UNTRUSTEDROOT ) == TlsCertProblem::Untrusted );
 	CHECK( ProblemFromStatus( CERT_E_CHAINING ) == TlsCertProblem::Untrusted );
 	CHECK( ProblemFromStatus( SEC_E_ISSUING_CA_UNTRUSTED ) == TlsCertProblem::Untrusted );
@@ -813,6 +813,49 @@ TLS_TEST_OFFLINE(OfflineProblemFromStatus)
 	CHECK( ProblemFromStatus( SEC_E_ILLEGAL_MESSAGE ) == TlsCertProblem::None );
 	CHECK( ProblemFromStatus( SEC_E_INTERNAL_ERROR ) == TlsCertProblem::None );
 	CHECK( ProblemFromStatus( SEC_E_DECRYPT_FAILURE ) == TlsCertProblem::None );
+}
+
+TLS_TEST_OFFLINE(OfflineDecideTlsVerdict)
+{
+	const TlsCertProblem None = TlsCertProblem::None;
+	const TlsCertProblem pProblems[] = { TlsCertProblem::Expired, TlsCertProblem::WrongName,
+		TlsCertProblem::Untrusted, TlsCertProblem::Revoked, TlsCertProblem::Other };
+	const DWORD pPolicies[] = { TLS_POLICY_VALID, TLS_POLICY_ASK, TLS_POLICY_IGNORE, 7 };
+
+	for ( DWORD nPolicy : pPolicies )
+	{
+		for ( bool bRemembered : { false, true } )
+		{
+			// A valid certificate is accepted under every policy, required or not
+			CHECK( DecideTlsVerdict( None, false, nPolicy, bRemembered ) == TlsVerdict::Accept );
+			CHECK( DecideTlsVerdict( None, true, nPolicy, bRemembered ) == TlsVerdict::Accept );
+
+			for ( TlsCertProblem nProblem : pProblems )
+			{
+				// A download that requires a valid certificate ignores the policy and the user's answers
+				CHECK( DecideTlsVerdict( nProblem, true, nPolicy, bRemembered ) == TlsVerdict::Reject );
+			}
+		}
+	}
+
+	for ( TlsCertProblem nProblem : pProblems )
+	{
+		// Only valid certificates
+		CHECK( DecideTlsVerdict( nProblem, false, TLS_POLICY_VALID, false ) == TlsVerdict::Reject );
+		CHECK( DecideTlsVerdict( nProblem, false, TLS_POLICY_VALID, true ) == TlsVerdict::Reject );
+
+		// Ask, unless the user accepted this certificate for the host
+		CHECK( DecideTlsVerdict( nProblem, false, TLS_POLICY_ASK, false ) == TlsVerdict::AskUser );
+		CHECK( DecideTlsVerdict( nProblem, false, TLS_POLICY_ASK, true ) == TlsVerdict::Accept );
+
+		// Accept every certificate
+		CHECK( DecideTlsVerdict( nProblem, false, TLS_POLICY_IGNORE, false ) == TlsVerdict::Accept );
+		CHECK( DecideTlsVerdict( nProblem, false, TLS_POLICY_IGNORE, true ) == TlsVerdict::Accept );
+
+		// An unknown policy is the strictest
+		CHECK( DecideTlsVerdict( nProblem, false, 7, false ) == TlsVerdict::Reject );
+		CHECK( DecideTlsVerdict( nProblem, false, 7, true ) == TlsVerdict::Reject );
+	}
 }
 
 TLS_TEST_OFFLINE(OfflineVerifyWithoutCertificate)

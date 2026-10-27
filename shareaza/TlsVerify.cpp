@@ -203,6 +203,13 @@ TlsCertProblem VerifyServerCertificate(PCCERT_CONTEXT pCert, const std::wstring&
 	return nProblem;
 }
 
+TlsVerdict DecideTlsVerdict(TlsCertProblem nProblem, bool bRequireValid, DWORD nPolicy, bool bRemembered)
+{
+	// RED stub: replaced by the real rules once the test fails
+	(void)nProblem; (void)bRequireValid; (void)nPolicy; (void)bRemembered;
+	return TlsVerdict::Reject;
+}
+
 TlsCertProblem ProblemFromStatus(SECURITY_STATUS nStatus)
 {
 	switch ( static_cast< HRESULT >( nStatus ) )
