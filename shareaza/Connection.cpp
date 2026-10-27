@@ -60,8 +60,9 @@ struct CTlsVerifyJob
 
 	const std::wstring	sHost;
 	PCCERT_CONTEXT		pCert;		// A duplicate, freed by the worker
-	std::atomic< bool >	bDone;		// nResult is set
+	std::atomic< bool >	bDone;		// nResult and sFingerprint are set
 	TlsCertProblem		nResult;
+	std::wstring		sFingerprint;	// SHA-256 of the certificate, empty without one
 
 private:
 	CTlsVerifyJob(const CTlsVerifyJob&);
@@ -73,11 +74,13 @@ namespace
 	// Verification jobs whose worker has not finished yet
 	volatile LONG g_nTlsJobs = 0;
 
-	// The worker: verifies the certificate, frees it and reports the result.
-	// It may block for seconds on revocation fetches, so it never holds a lock.
+	// The worker: verifies the certificate, takes its fingerprint, frees it and
+	// reports the result. It may block for seconds on revocation fetches, so it
+	// never holds a lock.
 	void RunTlsVerify(std::shared_ptr< CTlsVerifyJob > pJob)
 	{
 		pJob->nResult = VerifyServerCertificate( pJob->pCert, pJob->sHost );
+		pJob->sFingerprint = CertFingerprintSha256( pJob->pCert );
 		CertFreeCertificateContext( pJob->pCert );
 		pJob->pCert = NULL;
 		pJob->bDone.store( true );
@@ -607,7 +610,7 @@ BOOL CConnection::OnTlsRun()
 	case tlsFailed:
 		theApp.Message( MSG_ERROR, IDS_TLS_HANDSHAKE_FAILED, (LPCTSTR)m_sTlsHost,
 			(LPCTSTR)TlsStatusReason( m_pTls->LastStatus() ) );
-		OnDropped();
+		OnTlsRejected();
 		return FALSE;
 
 	case tlsEnded:
@@ -627,14 +630,22 @@ BOOL CConnection::OnTlsRun()
 		return TRUE;
 
 	const TlsCertProblem nProblem = m_pTlsJob->nResult;
+	const CString sFingerprint( m_pTlsJob->sFingerprint.c_str() );
 	m_pTlsJob.reset();
 
-	if ( nProblem != TlsCertProblem::None )
+	// TlsVerdict::AskUser is not wired yet: the certificate is rejected
+	if ( OnTlsVerified( nProblem, sFingerprint ) != TlsVerdict::Accept )
 	{
 		theApp.Message( MSG_ERROR, IDS_TLS_CERT_REJECTED, (LPCTSTR)m_sTlsHost,
 			(LPCTSTR)TlsProblemReason( nProblem ) );
 		OnTlsRejected();
 		return FALSE;
+	}
+
+	if ( nProblem != TlsCertProblem::None )
+	{
+		theApp.Message( MSG_DEBUG, _T("Accepted the certificate of %s by the certificate policy: %s."),
+			(LPCTSTR)m_sTlsHost, (LPCTSTR)TlsProblemReason( nProblem ) );
 	}
 
 	TlsResult nResult;
@@ -643,7 +654,7 @@ BOOL CConnection::OnTlsRun()
 		CQuickLock oInputLock( *m_pInputSection );
 
 		m_pTls->Accept();
-		m_bTlsValidated	= true;
+		m_bTlsValidated	= ( nProblem == TlsCertProblem::None );
 		m_nTlsPhase		= tlsEstablished;
 
 		// The final flight may have carried records past the handshake
@@ -937,7 +948,13 @@ BOOL CConnection::OnTlsEstablished()
 	return TRUE;
 }
 
-// A rejected certificate drops the connection unless a derived class does more
+// Without a certificate policy of its own, a connection accepts only a valid certificate
+TlsVerdict CConnection::OnTlsVerified(TlsCertProblem nProblem, const CString& /*sFingerprint*/)
+{
+	return DecideTlsVerdict( nProblem, false, TLS_POLICY_VALID, false );
+}
+
+// A failed handshake or a refused certificate drops the connection unless a derived class does more
 void CConnection::OnTlsRejected()
 {
 	OnDropped();

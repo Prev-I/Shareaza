@@ -37,6 +37,7 @@
 #include "VendorCache.h"
 #include "Transfers.h"
 #include "Security.h"
+#include "TlsPolicy.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -95,6 +96,13 @@ BOOL CDownloadTransferHTTPS::Initiate()
 		m_pDownload->RemoveSource( m_pSource, FALSE );
 		return FALSE;
 	}
+	// A source whose URL names no host cannot be checked: retrying would not help
+	else if ( m_pSource->GetTlsHost().IsEmpty() )
+	{
+		theApp.Message( MSG_ERROR, IDS_TLS_NO_HOST, (LPCTSTR)m_pSource->m_sURL );
+		Close( TRI_FALSE );
+		return FALSE;
+	}
 	// An https source is fetched only over a TLS connection, checked against the URL's host.
 	else if ( ConnectTls() )
 	{
@@ -140,8 +148,10 @@ void CDownloadTransferHTTPS::AttachTo(CConnection* pConnection)
 	CDownloadTransfer::AttachTo( pConnection );
 
 	// An https source is fetched only over a TLS connection whose certificate was accepted.
-	// A TLS session is only reused for the host its certificate was verified for.
-	if ( ! IsTls() || m_pSource->GetTlsHost().CompareNoCase( GetTlsHostName() ) != 0 )
+	// A TLS session is only reused for the host its certificate was verified for, and only
+	// if its certificate is valid when the download requires it.
+	if ( ! IsTls() || m_pSource->GetTlsHost().CompareNoCase( GetTlsHostName() ) != 0 ||
+		( m_pDownload->m_bRequireValidCert && ! IsTlsValidated() ) )
 	{
 		Close( TRI_UNKNOWN );
 		return;
@@ -212,7 +222,8 @@ void CDownloadTransferHTTPS::GiveConnectionToNext()
 				 && !pSource->IsConnected()
 				 && pSource->Equals(m_pSource)
 				 && pSource->m_nPort == m_pSource->m_nPort
-				 && pSource->GetTlsHost().CompareNoCase( sHost ) == 0 )
+				 && pSource->GetTlsHost().CompareNoCase( sHost ) == 0
+				 && ( ! pDownload->m_bRequireValidCert || IsTlsValidated() ) )
 			{
 				if ( pSource->GetTransfer() )
 					continue;
@@ -1701,11 +1712,21 @@ BOOL CDownloadTransferHTTPS::ReadFlush()
 //////////////////////////////////////////////////////////////////////
 // CDownloadTransferHTTPS rejected certificate handler
 
+TlsVerdict CDownloadTransferHTTPS::OnTlsVerified(TlsCertProblem nProblem, const CString& sFingerprint)
+{
+	ASSUME_LOCK( Transfers.m_pSection );
+
+	// The user's certificate policy applies, unless the download requires a valid certificate
+	return EvaluateTlsPeer( nProblem, GetTlsHostName(), sFingerprint,
+		m_pDownload != NULL && m_pDownload->m_bRequireValidCert );
+}
+
 void CDownloadTransferHTTPS::OnTlsRejected()
 {
 	ASSUME_LOCK( Transfers.m_pSection );
 
-	// CConnection logged the reason. The source cannot be fetched safely: drop it.
+	// CConnection logged the reason: a failed handshake or a refused certificate.
+	// The source cannot be fetched safely: drop it.
 	Close( TRI_FALSE );
 }
 

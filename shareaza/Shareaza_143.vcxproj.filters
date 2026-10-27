@@ -504,6 +504,9 @@
     <ClCompile Include="TlsClient.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TlsPolicy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="TlsVerify.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -1095,6 +1098,9 @@
     <ClCompile Include="PageSettingsAdvanced.cpp">
       <Filter>Source Files\Pages</Filter>
     </ClCompile>
+    <ClCompile Include="PageSettingsTls.cpp">
+      <Filter>Source Files\Pages</Filter>
+    </ClCompile>
     <ClCompile Include="PageSettingsUploads.cpp">
       <Filter>Source Files\Pages</Filter>
     </ClCompile>
@@ -1630,6 +1636,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TlsClient.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TlsPolicy.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TlsVerify.h">
@@ -2239,6 +2248,9 @@
       <Filter>Header Files\Pages</Filter>
     </ClInclude>
     <ClInclude Include="PageSettingsAdvanced.h">
+      <Filter>Header Files\Pages</Filter>
+    </ClInclude>
+    <ClInclude Include="PageSettingsTls.h">
       <Filter>Header Files\Pages</Filter>
     </ClInclude>
     <ClInclude Include="PageSettingsUploads.h">

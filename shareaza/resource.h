@@ -204,6 +204,7 @@
 #define IDD_DEBUG_HEX                   350
 #define IDR_XSL_DCFileListStyle         351
 #define IDR_XSL_ShareazaFileListStyle   352
+#define IDD_SETTINGS_TLS                353
 #define IDR_CHANSFRAME                  991
 #define IDD_DOWNLOAD_ACTIONS            993
 #define IDR_USERSFRAME                  995
@@ -827,6 +828,9 @@
 #define IDC_QUICKFILTER_ICON            1628
 #define IDC_FILTER_PARTIAL              1629
 #define IDC_FILTER_COMMETS              1630
+#define IDC_TLS_POLICY                  1631
+#define IDC_TLS_POLICY_WARNING          1632
+#define IDC_TLS_FORGET                  1633
 #define IDS_FILTER_DELETE_CONFIRM       7000
 #define IDS_SCHEMAS                     7001
 #define IDS_MULTIPLE_VALUES             7002
@@ -1061,6 +1065,12 @@
 #define IDS_PROTOCOL_ZERO_PUSH          16211
 #define IDS_PROTOCOL_GGEP_REQUIRED      16212
 #define IDS_PROTOCOL_QRP_SENT           16213
+#define IDS_TLS_POLICY_VALID            16240
+#define IDS_TLS_POLICY_ASK              16241
+#define IDS_TLS_POLICY_IGNORE           16242
+#define IDS_TLS_POLICY_IGNORE_WARNING   16243
+#define IDS_TLS_FORGET                  16244
+#define IDS_TLS_NO_HOST                 16245
 #define IDS_TLS_HANDSHAKE_FAILED        16248
 #define IDS_TLS_CERT_REJECTED           16249
 #define IDS_TLS_REASON_EXPIRED          16250
@@ -1962,9 +1972,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        353
+#define _APS_NEXT_RESOURCE_VALUE        354
 #define _APS_NEXT_COMMAND_VALUE         33329
-#define _APS_NEXT_CONTROL_VALUE         1631
+#define _APS_NEXT_CONTROL_VALUE         1634
 #define _APS_NEXT_SYMED_VALUE           104
 #endif
 #endif

@@ -54,6 +54,7 @@
 #include "Scheduler.h"
 #include "SchemaCache.h"
 #include "Security.h"
+#include "TlsPolicy.h"
 #include "Settings.h"
 #include "ShareazaURL.h"
 #include "SharedFile.h"
@@ -500,6 +501,7 @@ BOOL CShareazaApp::InitInstance()
 		MyProfile.Load();
 	SplashStep( L"Security Services" );
 		Security.Load();
+		LoadTlsTrust();
 		AdultFilter.Load();
 		MessageFilter.Load();
 	SplashStep( L"Query Manager" );
@@ -610,6 +612,7 @@ int CShareazaApp::ExitInstance()
 			DownloadGroups.Save();
 			Library.Save();
 			Security.Save();
+			SaveTlsTrust();
 			HostCache.Save();
 			UploadQueues.Save();
 			DiscoveryServices.Save();

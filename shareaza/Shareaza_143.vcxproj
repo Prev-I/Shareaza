@@ -510,6 +510,7 @@
     <ClCompile Include="TlsClient.cpp">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="TlsPolicy.cpp" />
     <ClCompile Include="TlsVerify.cpp">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
@@ -731,6 +732,7 @@
     <ClCompile Include="PageSettingsRich.cpp" />
     <ClCompile Include="PageSettingsSkins.cpp" />
     <ClCompile Include="PageSettingsAdvanced.cpp" />
+    <ClCompile Include="PageSettingsTls.cpp" />
     <ClCompile Include="PageSettingsUploads.cpp" />
     <ClCompile Include="PageSettingsWeb.cpp" />
     <ClCompile Include="PageTorrentFiles.cpp" />
@@ -909,6 +911,7 @@
     <ClInclude Include="ThreadImpl.h" />
     <ClInclude Include="ThumbCache.h" />
     <ClInclude Include="TlsClient.h" />
+    <ClInclude Include="TlsPolicy.h" />
     <ClInclude Include="TlsVerify.h" />
     <ClInclude Include="Transfer.h" />
     <ClInclude Include="TransferFile.h" />
@@ -1117,6 +1120,7 @@
     <ClInclude Include="PageSettingsRich.h" />
     <ClInclude Include="PageSettingsSkins.h" />
     <ClInclude Include="PageSettingsAdvanced.h" />
+    <ClInclude Include="PageSettingsTls.h" />
     <ClInclude Include="PageSettingsUploads.h" />
     <ClInclude Include="PageSettingsWeb.h" />
     <ClInclude Include="PageTorrentFiles.h" />

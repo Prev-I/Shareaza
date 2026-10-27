@@ -91,6 +91,7 @@ protected:
 	virtual BOOL	OnConnected();
 	virtual BOOL	OnRead();
 	virtual void	OnDropped();
+	virtual TlsVerdict	OnTlsVerified(TlsCertProblem nProblem, const CString& sFingerprint);
 	virtual void	OnTlsRejected();
 	virtual BOOL	OnHeaderLine(CString& strHeader, CString& strValue);
 	virtual BOOL	OnHeadersComplete();

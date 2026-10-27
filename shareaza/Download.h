@@ -21,7 +21,7 @@
 
 #pragma once
 
-#define DOWNLOAD_SER_VERSION	44
+#define DOWNLOAD_SER_VERSION	45
 // History:
 // 33 - added m_sSearchKeyword to CDownloadBase (CyberBob)
 // 34 - added m_bSeeding and m_sServingFileName to CDownloadWithTorrent (Rolandas)
@@ -35,6 +35,7 @@
 // 42 - added m_bMetaIgnore to CDownloadSource (Ryo-oh-ki)
 // 43 - added m_pAddressIPv6 and m_pIPv6ServerAddress to CDownloadSource (ivan386)
 // 44 - added m_tAdded to CDownload (ansani)
+// 45 - added m_bRequireValidCert to CDownload
 
 #include "DownloadWithExtras.h"
 
@@ -53,6 +54,7 @@ public:
 	BOOL		m_bSelected;
 	DWORD		m_tCompleted;
 	DWORD		m_tAdded;		// The time this download was added to the client queue
+	BOOL		m_bRequireValidCert;	// https sources must present a valid certificate, whatever the policy (upgrades)
 	int			m_nRunCookie;
 	int			m_nGroupCookie;
 	QWORD		m_nStartFrom;

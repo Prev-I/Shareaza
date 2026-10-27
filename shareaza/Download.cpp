@@ -82,6 +82,7 @@ CDownload::CDownload() :
 ,	m_bSelected		( FALSE )
 ,	m_tCompleted	( 0 )
 ,	m_tAdded		( GetCurrentTimeInSeconds() )
+,	m_bRequireValidCert	( FALSE )
 ,	m_nRunCookie	( 0 )
 ,	m_nGroupCookie	( 0 )
 
@@ -1091,6 +1092,7 @@ void CDownload::Serialize(CArchive& ar, int nVersion /* DOWNLOAD_SER_VERSION */)
 
 		ar << m_nSerID;
 		ar << m_tAdded;
+		ar << m_bRequireValidCert;
 	}
 	else
 	{
@@ -1104,6 +1106,7 @@ void CDownload::Serialize(CArchive& ar, int nVersion /* DOWNLOAD_SER_VERSION */)
 		DownloadGroups.Link( this );
 
 		if (nVersion >= 44) ar >> m_tAdded;
+		if ( nVersion >= 45 ) ar >> m_bRequireValidCert;
 
 
 		if ( nVersion == 32 )

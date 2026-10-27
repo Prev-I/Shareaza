@@ -33,6 +33,8 @@
 
 class CTlsClient;
 struct CTlsVerifyJob;
+enum class TlsCertProblem;
+enum class TlsVerdict;
 
 
 
@@ -353,7 +355,13 @@ public:
 	// A TLS connection's certificate was accepted; OnConnected() follows. Return FALSE to refuse
 	// the session: the connection is then dropped (OnDropped). Do not close the connection here.
 	virtual BOOL OnTlsEstablished();     // Just returns true
-	// A TLS connection's certificate was rejected. The default drops the connection (OnDropped).
+	// A TLS connection's certificate was verified: nProblem is what strict verification found
+	// (TlsCertProblem::None if the certificate is valid for the host), sFingerprint its SHA-256
+	// fingerprint. Return whether to use the session. The default accepts only a valid certificate.
+	// IsTlsValidated() reflects nProblem, whatever the verdict.
+	virtual TlsVerdict OnTlsVerified(TlsCertProblem nProblem, const CString& sFingerprint);
+	// A TLS connection failed its handshake or was refused by OnTlsVerified(); the reason is
+	// already logged. The default drops the connection (OnDropped).
 	virtual void OnTlsRejected();
 	virtual BOOL OnHeaderLine(CString& strHeader, CString& strValue); // Processes a single line from the headers
 	virtual BOOL OnHeadersComplete();    // (do) just returns true

@@ -292,6 +292,7 @@ public:
 		bool		MulticastLoop;				// Use multi-cast loopback (for debugging, default = false)
 		DWORD		MulticastTTL;				// TTL for multi-cast packets (default = 1)
 		bool		EnableBroadcast;			// Send and accept broadcast packets (for LAN, default = false)
+		DWORD		TlsCertPolicy;				// Which https server certificates are accepted (TLS_CERT_*)
 	} Connection;
 
 	struct sBandwidth
@@ -903,4 +904,9 @@ enum
 enum
 {
 	CONNECTION_AUTO, CONNECTION_FIREWALLED, CONNECTION_OPEN, CONNECTION_OPEN_TCPONLY, CONNECTION_OPEN_UDPONLY
+};
+
+enum
+{
+	TLS_CERT_VALID = 0, TLS_CERT_ASK = 1, TLS_CERT_IGNORE = 2
 };
