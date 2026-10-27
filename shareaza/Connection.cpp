@@ -33,6 +33,7 @@
 #include "VendorCache.h"
 #include "TlsClient.h"
 #include "TlsVerify.h"
+#include "TlsPolicy.h"
 
 #include <atomic>
 #include <thread>
@@ -90,19 +91,7 @@ namespace
 
 	CString TlsProblemReason(TlsCertProblem nProblem)
 	{
-		switch ( nProblem )
-		{
-		case TlsCertProblem::Expired:
-			return LoadString( IDS_TLS_REASON_EXPIRED );
-		case TlsCertProblem::WrongName:
-			return LoadString( IDS_TLS_REASON_WRONGNAME );
-		case TlsCertProblem::Untrusted:
-			return LoadString( IDS_TLS_REASON_UNTRUSTED );
-		case TlsCertProblem::Revoked:
-			return LoadString( IDS_TLS_REASON_REVOKED );
-		default:
-			return LoadString( IDS_TLS_REASON_OTHER );
-		}
+		return TlsProblemText( nProblem );
 	}
 
 	CString TlsStatusReason(SECURITY_STATUS nStatus)
