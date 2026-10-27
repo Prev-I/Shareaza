@@ -635,11 +635,16 @@ BOOL CConnection::OnTlsRun()
 	const CString sFingerprint( m_pTlsJob->sFingerprint.c_str() );
 	m_pTlsJob.reset();
 
-	// TlsVerdict::AskUser is not wired yet: the certificate is rejected
-	if ( OnTlsVerified( nProblem, sFingerprint ) != TlsVerdict::Accept )
+	// The session is used only if the certificate is accepted. On TlsVerdict::AskUser,
+	// OnTlsVerified() has asked the user and logged it; the session is not used either.
+	const TlsVerdict nVerdict = OnTlsVerified( nProblem, sFingerprint );
+	if ( nVerdict != TlsVerdict::Accept )
 	{
-		theApp.Message( MSG_ERROR, IDS_TLS_CERT_REJECTED, (LPCTSTR)m_sTlsHost,
-			(LPCTSTR)TlsProblemReason( nProblem ) );
+		if ( nVerdict != TlsVerdict::AskUser )
+		{
+			theApp.Message( MSG_ERROR, IDS_TLS_CERT_REJECTED, (LPCTSTR)m_sTlsHost,
+				(LPCTSTR)TlsProblemReason( nProblem ) );
+		}
 		OnTlsRejected();
 		return FALSE;
 	}

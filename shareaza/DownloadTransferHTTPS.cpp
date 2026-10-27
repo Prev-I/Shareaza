@@ -90,6 +90,9 @@ BOOL CDownloadTransferHTTPS::Initiate()
 	theApp.Message( MSG_INFO, IDS_DOWNLOAD_CONNECTING,
 		(LPCTSTR)CString( inet_ntoa( m_pSource->m_pAddress ) ), m_pSource->m_nPort,
 		(LPCTSTR)m_pDownload->GetDisplayName() );
+
+	// Only this attempt's certificate verification may make the source wait again
+	m_pSource->m_bTlsWaiting = false;
 	
 	if ( m_pDownload->IsCompleted() )
 	{
@@ -230,6 +233,7 @@ void CDownloadTransferHTTPS::GiveConnectionToNext()
 				 && !pSource->IsConnected()
 				 && pSource->Equals(m_pSource)
 				 && pSource->m_nPort == m_pSource->m_nPort
+				 && ! pSource->m_bTlsWaiting
 				 && pSource->GetTlsHost().CompareNoCase( sHost ) == 0
 				 && ( ! pDownload->m_bRequireValidCert || IsTlsValidated() ) )
 			{
@@ -1734,17 +1738,30 @@ TlsVerdict CDownloadTransferHTTPS::OnTlsVerified(TlsCertProblem nProblem, const 
 
 	// The user's certificate policy applies, unless the download requires a valid certificate.
 	// Without a download, nothing says which policy applies: only a valid certificate is accepted.
-	return EvaluateTlsPeer( nProblem, GetTlsHostName(), sFingerprint,
+	const TlsVerdict nVerdict = EvaluateTlsPeer( nProblem, GetTlsHostName(), sFingerprint,
 		m_pDownload == NULL || m_pDownload->m_bRequireValidCert );
+	if ( nVerdict != TlsVerdict::AskUser )
+		return nVerdict;
+
+	// The source waits for the user's decision, and is not retried before it. With no source
+	// to keep, or no way to ask, the certificate is rejected.
+	if ( m_pSource == NULL || ! RequestTlsDecision( GetTlsHostName(), sFingerprint, nProblem ) )
+		return TlsVerdict::Reject;
+
+	m_pSource->m_bTlsWaiting = true;
+	theApp.Message( MSG_WARNING, IDS_TLS_CERT_WAITING, (LPCTSTR)GetTlsHostName(),
+		(LPCTSTR)TlsProblemText( nProblem ) );
+	return TlsVerdict::AskUser;
 }
 
 void CDownloadTransferHTTPS::OnTlsRejected()
 {
 	ASSUME_LOCK( Transfers.m_pSection );
 
-	// CConnection logged the reason: a failed handshake or a refused certificate.
-	// The source cannot be fetched safely: drop it.
-	Close( TRI_FALSE );
+	// CConnection or OnTlsVerified() logged the reason. A source waiting for the user's
+	// decision on the certificate is kept; otherwise (a failed handshake or a refused
+	// certificate) the source cannot be fetched safely: drop it.
+	Close( ( m_pSource != NULL && m_pSource->m_bTlsWaiting ) ? TRI_TRUE : TRI_FALSE );
 }
 
 //////////////////////////////////////////////////////////////////////

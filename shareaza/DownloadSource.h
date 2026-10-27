@@ -96,6 +96,7 @@ public:
 	CString				m_sPreview;				// if empty it has the default /gnutella/preview/v1?urn:xyz format
 	BOOL				m_bPreviewRequestSent;
 	BOOL				m_bMetaIgnore;			// Ignore metadata from this source (for example already got)
+	bool				m_bTlsWaiting;			// Waiting for the user to decide on its server's certificate (not saved)
 
 public:
 	BOOL		ResolveURL();
@@ -263,7 +264,7 @@ public:
 	{
 		ASSUME_LOCK( Transfers.m_pSection );
 		return ( m_pTransfer ? m_pTransfer->GetStateText( bLong ) :
-			LoadString( IDS_STATUS_UNKNOWN ) );
+			LoadString( m_bTlsWaiting ? IDS_STATUS_TLS_UNTRUSTED : IDS_STATUS_UNKNOWN ) );
 	}
 
 	// Source transfer current limit (zero - no limit)

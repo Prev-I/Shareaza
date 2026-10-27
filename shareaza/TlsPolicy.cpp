@@ -36,6 +36,7 @@ static_assert( static_cast< DWORD >( TLS_CERT_ASK ) == TLS_POLICY_ASK, "TLS_CERT
 static_assert( static_cast< DWORD >( TLS_CERT_IGNORE ) == TLS_POLICY_IGNORE, "TLS_CERT_IGNORE" );
 
 CTlsTrustStore TlsTrust;
+CTlsPendingPrompts TlsPendingPrompts;
 
 namespace
 {
@@ -63,4 +64,42 @@ TlsVerdict EvaluateTlsPeer(TlsCertProblem nProblem, const CString& sHost, const 
 	const bool bRemembered = nProblem != TlsCertProblem::None && ! bRequireValid && nPolicy == TLS_POLICY_ASK &&
 		TlsTrust.IsAccepted( std::wstring( (LPCWSTR)sHost ), std::wstring( (LPCWSTR)sFingerprint ) );
 	return DecideTlsVerdict( nProblem, bRequireValid, nPolicy, bRemembered );
+}
+
+CString TlsProblemText(TlsCertProblem nProblem)
+{
+	switch ( nProblem )
+	{
+	case TlsCertProblem::Expired:
+		return LoadString( IDS_TLS_REASON_EXPIRED );
+	case TlsCertProblem::WrongName:
+		return LoadString( IDS_TLS_REASON_WRONGNAME );
+	case TlsCertProblem::Untrusted:
+		return LoadString( IDS_TLS_REASON_UNTRUSTED );
+	case TlsCertProblem::Revoked:
+		return LoadString( IDS_TLS_REASON_REVOKED );
+	default:
+		return LoadString( IDS_TLS_REASON_OTHER );
+	}
+}
+
+bool RequestTlsDecision(const CString& sHost, const CString& sFingerprint, TlsCertProblem nProblem)
+{
+	const std::wstring sKeyHost( (LPCWSTR)sHost ), sKeyFingerprint( (LPCWSTR)sFingerprint );
+
+	// The same question is already waiting: its answer covers this source too
+	if ( ! TlsPendingPrompts.Add( sKeyHost, sKeyFingerprint ) )
+		return true;
+
+	CTlsPromptRequest* pRequest = new CTlsPromptRequest;
+	pRequest->sHost			= sHost;
+	pRequest->sFingerprint	= sFingerprint;
+	pRequest->nProblem		= nProblem;
+
+	if ( PostMainWndMessage( WM_TLSPROMPT, 0, reinterpret_cast< LPARAM >( pRequest ) ) )
+		return true;
+
+	delete pRequest;
+	TlsPendingPrompts.Remove( sKeyHost, sKeyFingerprint );
+	return false;
 }

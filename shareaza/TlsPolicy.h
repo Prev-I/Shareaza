@@ -40,3 +40,29 @@ bool SaveTlsTrust();
 // certificates the user accepted. bRequireValid accepts only a valid
 // certificate, whatever the policy.
 TlsVerdict EvaluateTlsPeer(TlsCertProblem nProblem, const CString& sHost, const CString& sFingerprint, bool bRequireValid);
+
+// The text that says why a certificate was not valid: the reason the log and
+// the certificate prompt give.
+CString TlsProblemText(TlsCertProblem nProblem);
+
+// The certificate prompts waiting for the user, so that several sources failing
+// on the same host and certificate produce one prompt.
+extern CTlsPendingPrompts TlsPendingPrompts;
+
+// A question for the user: may the certificate with sFingerprint, which had
+// nProblem, be trusted for sHost? Sent to the main window with WM_TLSPROMPT,
+// which owns it from then on.
+struct CTlsPromptRequest
+{
+	CString			sHost;
+	CString			sFingerprint;
+	TlsCertProblem	nProblem;
+};
+
+// Asks the user whether to trust the certificate with sFingerprint for sHost,
+// unless the same question is already waiting for an answer. The answer reaches
+// the sources through CDownloads::OnTlsDecision(). True if a question is waiting,
+// false if none could be asked (the main window is gone): the certificate must
+// then be rejected. Call with Transfers.m_pSection held: the answer is passed
+// on under it, so a source that asks before the answer is waiting for it.
+bool RequestTlsDecision(const CString& sHost, const CString& sFingerprint, TlsCertProblem nProblem);

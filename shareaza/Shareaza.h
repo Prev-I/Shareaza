@@ -409,6 +409,7 @@ __int64 GetRandomNum<__int64>(const __int64& min, const __int64& max);
 #define WM_NOWUPLOADING		(WM_APP+117)	// New upload notification ( WPARAM: unused, LPARAM: CString* pFilename )
 #define WM_TORRENT			(WM_APP+118)	// Open torrent file ( WPARAM: LPTSTR szFilename, LPARAM: unused )
 #define WM_IMPORT			(WM_APP+119)	// Import hub list file ( WPARAM: LPTSTR szFilename, LPARAM: unused )
+#define WM_TLSPROMPT		(WM_APP+120)	// Ask the user about a TLS certificate ( WPARAM: unused, LPARAM: CTlsPromptRequest* pRequest )
 
 // WM_COPYDATA types
 #define COPYDATA_SCHEDULER	0				// Scheduler task ( lpData: LPCTSTR szTaskData - encoded string )

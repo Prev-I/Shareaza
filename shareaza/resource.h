@@ -1071,6 +1071,8 @@
 #define IDS_TLS_POLICY_IGNORE_WARNING   16243
 #define IDS_TLS_FORGET                  16244
 #define IDS_TLS_NO_HOST                 16245
+#define IDS_TLS_CERT_WAITING            16246
+#define IDS_TLS_PROMPT                  16247
 #define IDS_TLS_HANDSHAKE_FAILED        16248
 #define IDS_TLS_CERT_REJECTED           16249
 #define IDS_TLS_REASON_EXPIRED          16250
@@ -1534,6 +1536,7 @@
 #define IDS_STATUS_NEXT                 20135
 #define IDS_STATUS_Q                    20136
 #define IDS_STATUS_SOURCESOF            20137
+#define IDS_STATUS_TLS_UNTRUSTED        20138
 #define IDS_RATING_NORATING             20210
 #define IDS_RATING_1                    20211
 #define IDS_RATING_2                    20212

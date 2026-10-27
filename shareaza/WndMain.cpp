@@ -53,6 +53,7 @@
 #include "DiscoveryServices.h"
 #include "Scheduler.h"
 #include "SchemaCache.h"
+#include "TlsPolicy.h"
 
 #include "WndMain.h"
 #include "WndChild.h"
@@ -286,6 +287,7 @@ BEGIN_MESSAGE_MAP(CMainWnd, CMDIFrameWnd)
 	ON_WM_MENUCHAR()
 	ON_MESSAGE(WM_SANITY_CHECK, &CMainWnd::OnSanityCheck)
 	ON_MESSAGE(WM_NOWUPLOADING, &CMainWnd::OnNowUploading)
+	ON_MESSAGE(WM_TLSPROMPT, &CMainWnd::OnTlsPrompt)
 	ON_WM_POWERBROADCAST()
 	ON_WM_COPYDATA()
 	ON_UPDATE_COMMAND_UI(ID_PATH_EXPLORE, &CMainWnd::OnUpdatePathExplore)
@@ -304,6 +306,7 @@ CMainWnd::CMainWnd()
 	, m_bTimer			( FALSE )
 	, m_pSkin			( NULL )
 	, m_nAlpha			( 255 )
+	, m_bTlsPromptShowing	( false )
 {
 	ZeroMemory( &m_pTray, sizeof( NOTIFYICONDATA ) );
 	m_pTray.cbSize				= theApp.m_bIsVistaOrNewer ? sizeof( NOTIFYICONDATA ) : NOTIFYICONDATA_V3_SIZE;
@@ -395,6 +398,8 @@ CMainWnd::~CMainWnd()
 {
 	theApp.m_pSafeWnd = NULL;
 	theApp.m_pMainWnd = NULL;
+
+	ClearTlsPrompts();
 }
 
 void CMainWnd::SaveState()
@@ -654,6 +659,9 @@ void CMainWnd::OnClose()
 	Network.Disconnect();
 	Transfers.StopThread();
 	ChatCore.Close();
+
+	// Nothing posts certificate prompts any more
+	ClearTlsPrompts();
 
 	if ( m_wndRemoteWnd.IsVisible() ) m_wndRemoteWnd.DestroyWindow();
 
@@ -3130,6 +3138,82 @@ LRESULT CMainWnd::OnNowUploading(WPARAM /*wParam*/, LPARAM lParam)
 		}
 	}
 	return 0;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// CMainWnd certificate prompts
+
+LRESULT CMainWnd::OnTlsPrompt(WPARAM /*wParam*/, LPARAM lParam)
+{
+	CAutoPtr< CTlsPromptRequest > pRequest( reinterpret_cast< CTlsPromptRequest* >( lParam ) );
+	if ( ! pRequest )
+		return 0;
+
+	if ( theApp.m_bClosing )
+		return 0;
+
+	m_pTlsPrompts.AddTail( pRequest.Detach() );
+
+	// The prompt's modal loop dispatches the prompts posted meanwhile: they wait in the
+	// queue, and the outer call shows them one at a time.
+	if ( m_bTlsPromptShowing )
+		return 0;
+
+	m_bTlsPromptShowing = true;
+	while ( ! m_pTlsPrompts.IsEmpty() )
+	{
+		CAutoPtr< CTlsPromptRequest > pNext( m_pTlsPrompts.RemoveHead() );
+		if ( ! ShowTlsPrompt( *pNext ) )
+			return 0;	// Closing: this window may be gone, its destruction freed the queue
+	}
+	m_bTlsPromptShowing = false;
+
+	return 0;
+}
+
+bool CMainWnd::ShowTlsPrompt(const CTlsPromptRequest& oRequest)
+{
+	CString strMessage;
+	strMessage.Format( LoadString( IDS_TLS_PROMPT ), (LPCTSTR)oRequest.sHost,
+		(LPCTSTR)TlsProblemText( oRequest.nProblem ), (LPCTSTR)oRequest.sFingerprint );
+
+	// No is the default: closing the prompt does not trust the certificate
+	const bool bAccepted =
+		( AfxMessageBox( strMessage, MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2 ) == IDYES );
+
+	// The application may have begun closing while the prompt was open
+	if ( theApp.m_bClosing )
+		return false;
+
+	if ( bAccepted )
+	{
+		TlsTrust.Accept( std::wstring( (LPCWSTR)oRequest.sHost ), std::wstring( (LPCWSTR)oRequest.sFingerprint ) );
+		if ( ! SaveTlsTrust() )
+			theApp.Message( MSG_ERROR, _T("Unable to save the accepted certificates.") );
+	}
+
+	// The pending prompt goes under the same lock as the decision: a source that fails on
+	// this certificate before it is gone is waiting and gets the decision, one that fails
+	// after it asks again (or, accepted, is not asked at all).
+	CSingleLock pLock( &Transfers.m_pSection, TRUE );
+	Downloads.OnTlsDecision( oRequest.sHost, oRequest.sFingerprint, bAccepted );
+	TlsPendingPrompts.Remove( std::wstring( (LPCWSTR)oRequest.sHost ), std::wstring( (LPCWSTR)oRequest.sFingerprint ) );
+	pLock.Unlock();
+
+	return true;
+}
+
+void CMainWnd::ClearTlsPrompts()
+{
+	while ( ! m_pTlsPrompts.IsEmpty() )
+		delete m_pTlsPrompts.RemoveHead();
+
+	if ( m_hWnd )
+	{
+		MSG msg;
+		while ( ::PeekMessage( &msg, m_hWnd, WM_TLSPROMPT, WM_TLSPROMPT, PM_REMOVE ) )
+			delete reinterpret_cast< CTlsPromptRequest* >( msg.lParam );
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////

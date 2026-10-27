@@ -286,6 +286,7 @@ void CDownloadSource::Construct(const CDownload* pDownload)
 	m_bPreview				= FALSE;
 	m_bPreviewRequestSent	= FALSE;
 	m_bMetaIgnore			= FALSE;
+	m_bTlsWaiting			= false;
 }
 
 CDownloadSource::~CDownloadSource()
@@ -551,6 +552,9 @@ CDownloadTransfer* CDownloadSource::CreateTransfer(LPVOID pParam)
 BOOL CDownloadSource::CanInitiate(BOOL bNetwork, BOOL bEstablished, bool bFirstAttempt)
 {
 	if( !Network.IsConnected() ) return FALSE;
+
+	// Not until the user decides whether to trust its server's certificate
+	if ( m_bTlsWaiting ) return FALSE;
 
 	if ( Settings.Connection.RequireForTransfers )
 	{

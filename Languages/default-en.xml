@@ -2963,6 +2963,8 @@
 		<string id="16243" value="The connection stays encrypted, but anyone on the path can impersonate the server. Only files with a known hash are still verified after download."/>
 		<string id="16244" value="Forgot %u accepted certificate(s)."/>
 		<string id="16245" value="%s is not a valid https URL."/>
+		<string id="16246" value="Waiting for your decision on the certificate of %s: %s."/>
+		<string id="16247" value="The certificate of %s cannot be trusted: %s.\n\nSHA-256 fingerprint:\n%s\n\nSuch a certificate does not prove who the server is: anyone between you and the server could read or change what you download.\n\nTrust this certificate for this server from now on, and download from it?"/>
 		<string id="16248" value="TLS handshake with %s failed: %s."/>
 		<string id="16249" value="Rejected the certificate of %s: %s."/>
 		<string id="16250" value="the certificate has expired or is not yet valid"/>
@@ -3426,6 +3428,7 @@
 		<string id="20135" value="Next"/>
 		<string id="20136" value="Q"/>
 		<string id="20137" value="sources (e.g. 3/10 sources)"/>
+		<string id="20138" value="Certificate not trusted"/>
 		<string id="20210" value="(No Rating)"/>
 		<string id="20211" value="Fake / Corrupt"/>
 		<string id="20212" value="Poor"/>

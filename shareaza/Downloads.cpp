@@ -27,6 +27,7 @@
 #include "Transfers.h"
 #include "Transfer.h"
 #include "DownloadGroups.h"
+#include "DownloadSource.h"
 #include "DownloadTransfer.h"
 #include "DownloadTransferED2K.h"
 #include "DownloadTransferBT.h"
@@ -1144,6 +1145,43 @@ BOOL CDownloads::OnPush(const Hashes::Guid& oGUID, CConnection* pConnection)
 	}
 
 	return FALSE;
+}
+
+//////////////////////////////////////////////////////////////////////
+// CDownloads certificate decision handler
+
+void CDownloads::OnTlsDecision(const CString& sHost, const CString& /*sFingerprint*/, bool bAccepted)
+{
+	ASSUME_LOCK( Transfers.m_pSection );
+
+	if ( sHost.IsEmpty() )
+		return;
+
+	// The sources do not record which certificate they waited on. A source whose server
+	// shows another certificate next time is asked about again.
+	for ( POSITION pos = GetIterator() ; pos ; )
+	{
+		CDownload* pDownload = GetNext( pos );
+
+		for ( POSITION posSource = pDownload->GetIterator() ; posSource ; )
+		{
+			CDownloadSource* pSource = pDownload->GetNext( posSource );
+
+			if ( ! pSource->m_bTlsWaiting || pSource->GetTlsHost().CompareNoCase( sHost ) != 0 )
+				continue;
+
+			if ( bAccepted )
+			{
+				pSource->m_bTlsWaiting = false;
+				pSource->m_tAttempt = 0;
+			}
+			else
+			{
+				// As a certificate the policy rejects
+				pSource->Remove( TRUE, TRUE );
+			}
+		}
+	}
 }
 
 //////////////////////////////////////////////////////////////////////

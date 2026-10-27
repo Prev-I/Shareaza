@@ -3814,6 +3814,8 @@ BEGIN
                             "The connection stays encrypted, but anyone on the path can impersonate the server. Only files with a known hash are still verified after download."
     IDS_TLS_FORGET          "Forgot %u accepted certificate(s)."
     IDS_TLS_NO_HOST         "%s is not a valid https URL."
+    IDS_TLS_CERT_WAITING    "Waiting for your decision on the certificate of %s: %s."
+    IDS_TLS_PROMPT          "The certificate of %s cannot be trusted: %s.\n\nSHA-256 fingerprint:\n%s\n\nSuch a certificate does not prove who the server is: anyone between you and the server could read or change what you download.\n\nTrust this certificate for this server from now on, and download from it?"
     IDS_TLS_HANDSHAKE_FAILED "TLS handshake with %s failed: %s."
     IDS_TLS_CERT_REJECTED   "Rejected the certificate of %s: %s."
     IDS_TLS_REASON_EXPIRED  "the certificate has expired or is not yet valid"
@@ -4533,6 +4535,7 @@ BEGIN
     IDS_STATUS_NEXT         "Next"
     IDS_STATUS_Q            "Q"
     IDS_STATUS_SOURCESOF    "sources"
+    IDS_STATUS_TLS_UNTRUSTED "Certificate not trusted"
 END
 
 STRINGTABLE 

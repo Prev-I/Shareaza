@@ -364,6 +364,8 @@ public:
 	// A TLS connection's certificate was verified: nProblem is what strict verification found
 	// (TlsCertProblem::None if the certificate is valid for the host), sFingerprint its SHA-256
 	// fingerprint. Return whether to use the session. The default accepts only a valid certificate.
+	// TlsVerdict::AskUser means the override asked the user and logged why: the session is not
+	// used, and OnTlsRejected() follows as for TlsVerdict::Reject, without a rejection line.
 	// IsTlsValidated() reflects nProblem, whatever the verdict.
 	virtual TlsVerdict OnTlsVerified(TlsCertProblem nProblem, const CString& sFingerprint);
 	// A TLS connection failed its handshake or was refused by OnTlsVerified(); the reason is
