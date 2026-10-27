@@ -8,7 +8,7 @@ rem so the build needs no external archiver. Exits non-zero, and leaves no outpu
 set "GZ_SRC=%~1"
 set "GZ_DST=%~2"
 
-powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command ^
+"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command ^
   "$ErrorActionPreference = 'Stop';" ^
   "try {" ^
   "  $in = [IO.File]::OpenRead($env:GZ_SRC);" ^
