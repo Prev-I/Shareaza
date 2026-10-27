@@ -160,7 +160,7 @@ void JsonToCStringIMap(const boost::json::value& jVal, CStringIMap& map, const C
 			const auto& key = kv.key();
 			const auto& value = kv.value();
 
-			CString keyStr(key.data());  // Use data() instead of c_str()
+			CString keyStr(key.data(), static_cast<int>(key.size()));
 			JsonToCStringIMap(value, map, prefix + keyStr + _T("."));
 		}
 	}
@@ -216,12 +216,32 @@ BOOL CVersionChecker::ExecuteRequest()
 	CT2CA pszConvertedAnsiString(strOutput);
 	std::string jsonResponse(pszConvertedAnsiString);
 
-	// Parse the JSON
-	boost::json::object obj = boost::json::parse(jsonResponse).as_object();
-	JsonToCStringIMap(obj, m_pResponse);
-	
-	return TRUE;
+	// Parse the JSON. A response that is not a JSON object carries no update
+	// information: report the request as failed, as for a network error.
+	try
+	{
+		boost::json::error_code ec;
+		boost::json::value jv = boost::json::parse( jsonResponse, ec );
+		if ( ec )
+		{
+			theApp.Message( MSG_DEBUG, _T("[VersionChecker] Malformed response: %hs"), ec.message().c_str() );
+			return FALSE;
+		}
+		if ( ! jv.is_object() )
+		{
+			theApp.Message( MSG_DEBUG, _T("[VersionChecker] Unexpected response: not a JSON object") );
+			return FALSE;
+		}
+		JsonToCStringIMap( jv, m_pResponse );
+	}
+	catch ( const std::exception& e )
+	{
+		m_pResponse.RemoveAll();
+		theApp.Message( MSG_DEBUG, _T("[VersionChecker] Response not processed: %hs"), e.what() );
+		return FALSE;
+	}
 
+	return TRUE;
 }
 
 // Find URI Asset
@@ -283,7 +303,7 @@ void CVersionChecker::ProcessResponse()
 	{
 		CString versionString;
 		for (int i = 0; i < strValue.GetLength(); ++i) {
-			if (isdigit(strValue[i])) {
+			if (strValue[i] >= _T('0') && strValue[i] <= _T('9')) {  // isdigit() asserts on non-ASCII TCHARs
 				versionString = strValue.Mid(i);
 				break;
 			}
