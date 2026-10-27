@@ -52,6 +52,23 @@ Fixes from upstream's `master` branch, newer than 2.3.3, each applied to
 | `64ef08a12aabab57be0bf7e40f047c8f14dedf9c` | minixml: fix buffer overrun after namespace separator | CVE-2026-110656 (`parseelt`) |
 | `42965d7e763b4f894986dd8feb19db7920ea0766` | minixml.c: fix 1-byte out-of-bounds read | none known (`parseelt`) |
 
+## Upstream fixes not applied
+
+Two later `connecthostport.c` changes on upstream `master` do not change the
+Shareaza build, so they are left out:
+
+- `f1fc7490a6f9d0b3ea5667b7db15385fd3253b60` "Fix Windows socket timeout
+  handling in connecthostport.c" (and its follow-ups `13953fb`, `9de3fdf`,
+  `9211ef8`, `bc36b22`): the code it fixes sits inside
+  `#ifdef MINIUPNPC_SET_SOCKET_TIMEOUT`, which only upstream's Unix `Makefile`
+  defines. Neither upstream's MSVC project nor `MiniUPnPc_143.vcxproj` defines
+  it, so the Windows build never compiles that code.
+- `c157807a13d3ea10ac2ccc1d29df0f4c6a4272db` "miniupnpc: Use poll() where
+  possible + Fix FD_SET crash bug": the crash needs a POSIX descriptor at or
+  above `FD_SETSIZE`. The new checks are compiled out under `_WIN32`, where
+  `fd_set` is a counted array of sockets rather than a bitmap, and `poll()` is
+  used on POSIX systems only.
+
 ## Building
 
 `MiniUPnPc_143.vcxproj` builds `MiniUPnPc.dll` from the 14 `src/*.c` files
