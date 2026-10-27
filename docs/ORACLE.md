@@ -19,7 +19,8 @@ G2 network runs, and this fork's 2.7.10.6 build. With both installed, a GWebCach
 > **Do not leave these clients unattended on the live G2 network.** A [static audit](SECURITY-AUDIT.md)
 > of the code added since the original project found three problems. All three are in code that
 > came after 2.7.10.2, so they affect this fork's build; going by the source, not the official one:
-> - HTTPS that never verifies certificates;
+> - HTTPS that never verifies certificates (fixed in the builds that use Schannel, see
+>   [below](#https-in-the-fork));
 > - a probable remote crash from a single packet, sent over UDP by any IPv4 peer or over TCP by a
 >   connected neighbour;
 > - IPv6 paths that bypass the ban list.
@@ -256,6 +257,19 @@ seen in CI, and both are visible in Wine's `dlls/kernelbase/registry.c`:
   - Strings are still *written*: the export shows `Downloads\CompletePath`, for example. They just
     aren't read back.
 
+## HTTPS in the fork
+
+In builds that include the Schannel change, HTTPS downloads use Windows' Schannel and the Windows
+trust store; OpenSSL is gone. Whether HTTPS downloads work under Wine has not been tested.
+- **Setting:** `Connection.TlsCertPolicy` (the Certificates page in Settings), a number setting.
+  - **0, the default:** valid certificates only.
+  - **1:** ask; an accepted certificate is remembered per host and certificate.
+  - **2:** don't check.
+- **Preparing a prefix** leaves it at the default. The upgrade download always requires a valid
+  certificate.
+- The release notes say which release first has it. `previ.3` and earlier still use OpenSSL and
+  verify nothing.
+
 ## Where Shareaza keeps its data
 
 `<prefix>` is `~/.wine-shareaza-sf` or `~/.wine-shareaza-previ`.
@@ -285,8 +299,9 @@ client that isn't isolated:
    - The other choices are Gnutella Bootstrap, G1/G2 GWebCache, Server.met URL, DC++ Hub List URL
      and Blocked.
 3. Enter the URL. **Use `http://`.**
-   - The client's own check (`CheckWebCacheValid`) also accepts `https://`. But HTTPS in these builds
-     verifies no certificate, and HTTPS against a cache has not been tested.
+   - The client's own check (`CheckWebCacheValid`) also accepts `https://`. HTTPS against a cache
+     has not been tested, so use `http://`. (Cache requests go through WinINet, not through the
+     setting described under [HTTPS in the fork](#https-in-the-fork).)
    - The URL must be at least 12 characters, with a `.` after the scheme and a `/` somewhere after
      that dot.
    - **`http://localhost:8787/` is rejected** for having no dot. Use `http://127.0.0.1:8787/` for a

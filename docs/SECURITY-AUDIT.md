@@ -7,11 +7,24 @@ oracles for `gwc-edge` (see [ORACLE.md](ORACLE.md)).
 **Status, 2026-10-26.** Findings 3, 4 and 5 are fixed on `main` by
 [PR #8](https://github.com/Prev-I/Shareaza/pull/8) (merge `d2f09dd42`). The only part not fixed
 is finding 4's missing opt-out. The first release built with the fixes is `v2.7.10.6-previ.2`.
-Findings 1 and 2 are still open. All five were reported privately to ansani/Shareaza on
-2026-10-26. The text below is the audit as written, apart from the dated bullets under
-**Disclosure**, the **Fixed** lines under findings 3 to 5, and the notes under "Consequences for
-the oracle". What changed since is in the
-[addendum](#addendum-2026-10-26-fixes-for-findings-3-4-and-5).
+Findings 1 and 2 were still open then. All five were reported privately to ansani/Shareaza on
+2026-10-26.
+
+**Status, 2026-10-27.** Findings 1 and 2 are fixed by the Schannel change: HTTPS now runs over
+Windows' Schannel, and OpenSSL and the third-party NuGet package are gone. The change is in the
+pull request noted in the
+[second addendum](#addendum-2026-10-27-fixes-for-findings-1-and-2-and-other-defects). That
+addendum also records the fixes merged on 2026-10-26 in
+[PR #14](https://github.com/Prev-I/Shareaza/pull/14) (the Security rule list) and
+[PR #15](https://github.com/Prev-I/Shareaza/pull/15) (TLS session ownership), and a new item about
+blocking in the HTTPS connect. Of the five findings, only finding 4's missing opt-out is still open
+(the IPv6 listeners are bound to all addresses). The Medium and Low items without a **Fixed** line
+are unchanged.
+
+The text below is the audit as written, apart from the dated bullets under **Disclosure**, the
+**Fixed** lines under findings 1 to 5, the new item in the Medium list, the heading of the first
+addendum's "Still open" list, and the notes under "Consequences for the oracle". What changed on
+2026-10-26 is in the [first addendum](#addendum-2026-10-26-fixes-for-findings-3-4-and-5).
 
 **Disclosure.**
 - **Not reported upstream.** As of 2026-10-25 the findings have not been reported to ansani/Shareaza.
@@ -82,6 +95,8 @@ went to the provenance pass instead.
 - **What is safe:** the update *check* goes through WinINet, which validates certificates.
 - **Also in this code:** the `SSL_CTX` leaks on every connection, and `sslConnection` is never
   initialised or freed.
+- **Fixed** by the Schannel change: `CConnection` validates the server certificate and host name
+  against the Windows trust store. See the second addendum.
 
 ### 2. ✔ Third-party OpenSSL 1.1.1b linked into the client
 
@@ -94,6 +109,8 @@ went to the provenance pass instead.
 - **Why it matters:** 1.1.1 has been end-of-life since 2023-09. This build misses later CVE fixes
   including CVE-2022-0778, a remotely triggerable infinite loop. The libraries cannot be checked
   against an official build, because OpenSSL publishes source only.
+- **Fixed** by the Schannel change: OpenSSL and the NuGet package are removed from the client.
+  See the second addendum.
 
 ### 3. ✔ Probable remote crash from one UDP packet
 
@@ -150,6 +167,12 @@ went to the provenance pass instead.
     compiles the vendored 1.2.12 itself.
   - Boost 1.84.0: 45 packages from a single community publisher.
   - `7-Zip.StandaloneConsole.x64` 23.1.0, a community repack used only at build time.
+- **HTTPS connect and handshake blocked inside the transfers lock.**
+  `CDownloadTransferHTTPS::Initiate` ran the connect and the TLS handshake as blocking calls while
+  it held the transfers lock, so one slow server could stall every transfer and the UI. Found
+  while designing the Schannel change; not in the original audit.
+  - **Fixed** by the non-blocking handshake, with the certificate checked off the transfer
+    thread. See the second addendum.
 
 ## Low, or just worth knowing
 
@@ -209,8 +232,8 @@ went to the provenance pass instead.
 - **Not unattended on the live G2 network.** Findings 1, 3 and 4 mean any peer may be able to crash
   the client or slip past its ban list.
   - From `v2.7.10.6-previ.2`, findings 3 and 4 are fixed, apart from finding 4's opt-out.
-  - Finding 1 is still open, and the fixes were verified by review and a clean build, not by running
-    an attack.
+  - Finding 1 is fixed by the Schannel change (second addendum), in the release built after it.
+    The fixes were verified by review and builds, not by running an attack.
   - So the rule stands.
 - **A fresh Wine prefix per installer**, because of finding 5.
   - Releases from `previ.2` delete only the retired BugTrap files. A program that keeps its own
@@ -256,7 +279,7 @@ The crash in finding 3 was not reproduced. No exploit was written to prove the f
 document still does not spell out the trigger. The fix commit is a different matter: see
 **Disclosure** at the top.
 
-**Still open.**
+**Still open, as of 2026-10-26.** Items closed since are marked in the second addendum.
 - Findings 1 (no TLS certificate check) and 2 (third-party OpenSSL 1.1.1b).
 - The "no opt-out" point of finding 4: the IPv6 listeners always bind to `in6addr_any`.
 - **Single-address IPv6 rules can't be edited or removed** from the Security window, because
@@ -268,6 +291,64 @@ document still does not spell out the trigger. The fix commit is a different mat
   /128 rule and an IPv4 /32 one alike.
   - The edited copy goes into the address map, but the original stays in place with the same GUID.
   - So the old rule still applies after the user believes they changed it.
+
+## Addendum 2026-10-27: fixes for findings 1 and 2, and other defects
+
+Three changes landed after the first addendum.
+
+| Change | Finding | What it did |
+|---|---|---|
+| [PR #14](https://github.com/Prev-I/Shareaza/pull/14), merged 2026-10-26 | new | `CSecurity` rule-list fixes (below). |
+| [PR #15](https://github.com/Prev-I/Shareaza/pull/15), merged 2026-10-26 | 1 (partly), new | `CConnection` TLS session ownership (below). |
+| [PR #17](https://github.com/Prev-I/Shareaza/pull/17) | 1, 2, new | HTTPS runs over Windows' Schannel; OpenSSL is removed. |
+
+**PR #15: TLS session ownership.**
+- **What it was:** `CConnection`'s OpenSSL session handle was never initialised, was not freed, and
+  was not moved with the socket. The TLS read and write handlers could therefore run on an
+  indeterminate handle, and an https transfer could end up writing outside TLS.
+- **Fixed** by giving the session a single owner that frees it and moves with the socket.
+- **Superseded** by the Schannel change, which replaced this code. The ownership rule carried over:
+  one TLS session per `CConnection`, moved with the socket in `AttachTo`.
+
+**PR #14: `CSecurity` rule list.** All four defects are in code that predates the fork.
+- **Use-after-free:** a rule held in an address map could be changed in place and later freed
+  while the map still referenced it. It needed the local user's own actions in the Security window.
+- **Edits left the original rule active:** the edited copy was added and the original stayed in
+  place. Closes the "editing a rule into a single address" item listed as open above.
+- **`CSecurity::GetGUID`** did not search the map that holds single-address IPv6 rules, so such a
+  rule could not be edited or removed. Closes the second "still open" Security-window item above.
+- **`CSecurity::Check`** read a rule that could already have been freed.
+
+**Finding 1: certificate validation.** `CConnection` now speaks TLS through Windows' Schannel
+(`CTlsClient`). The server name is sent as SNI and checked against the certificate, the chain is
+built against the Windows trust store, and revocation is checked with soft failure.
+- **Setting:** `Connection.TlsCertPolicy`, on the new Certificates page of Settings.
+  - 0, the default: valid certificates only.
+  - 1, "ask": a certificate that fails validation raises a prompt. An accepted certificate is
+    remembered for that host and fingerprint in `Data\TlsTrust.dat`; a refusal is not. The page has
+    a button to forget accepted certificates.
+  - 2, "don't check": every certificate is accepted, with a warning on the page.
+- **Upgrade downloads** always require a valid certificate, whatever the setting
+  (`CDownload::m_bRequireValidCert`, set in `CUpgradeDlg::OnOK`). The requirement holds for every TLS
+  session the download uses.
+- **Renegotiation:** `CTlsClient::Decrypt` refuses a renegotiation unless the session is TLS 1.3,
+  and fails the session. TLS 1.3 post-handshake messages are processed as usual.
+- **Not changed:** the update check still goes through WinINet, and GWebCache requests are
+  unaffected.
+
+**Finding 2: OpenSSL.** The `openssl-vc140-static-32_64` package and every OpenSSL reference are
+removed from the client.
+
+**The blocking connect.** `CDownloadTransferHTTPS::Initiate` no longer connects or handshakes
+under the transfers lock. The socket is non-blocking from the start, `CConnection` drives the
+handshake from socket events, and the certificate is checked on a worker thread.
+
+**How these were checked.**
+- Unit tests for the Schannel client and the certificate verdict rules (`TlsTest`), run in CI,
+  including a local TLS server and github.com.
+- Read-only reviews and clean builds.
+- The oracle workflows and manual checks on Windows: see the release notes.
+- No attack was run against the changes.
 
 ## Evidence (`security-audit/evidence/`, `security-audit/tools/`)
 

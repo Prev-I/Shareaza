@@ -54,8 +54,10 @@ Assert-NotRunning
 Assert-SameVolume $WorkDir
 Assert-NotRestoring $WorkDir
 # The client's own URL check (DiscoveryServices.cpp, CheckWebCacheValid): at least
-# 12 characters, a dot after the scheme and a slash after that dot. http:// only:
-# HTTPS in these builds checks no certificate.
+# 12 characters, a dot after the scheme and a slash after that dot. http:// only
+# is a choice of this script, not of the client: it keeps HTTPS out of the
+# comparison. (GWebCache requests go through WinINet, which validates
+# certificates; Schannel is used for HTTPS downloads.)
 if ($CacheUrl -notmatch '^http://[^/]*\.[^/]*/' -or $CacheUrl.Length -lt 12) {
     throw "$CacheUrl is not a URL Shareaza accepts: use http://host.domain/ with a trailing slash or path."
 }
