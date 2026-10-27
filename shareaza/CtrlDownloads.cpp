@@ -1443,7 +1443,8 @@ void CDownloadsCtrl::PaintSource(CDC& dc, const CRect& rcRow, CDownload* pDownlo
 			break;
 			
 		case DOWNLOAD_COLUMN_STATUS:
-			if ( ! pSource->IsIdle() )
+			// A source waiting for the user's decision on a certificate says so
+			if ( ! pSource->IsIdle() || pSource->m_bTlsWaiting )
 				strText = pSource->GetState( FALSE );
 			else if ( pSource->m_tAttempt && pDownload->IsTrying() )
 			{
