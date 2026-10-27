@@ -46,6 +46,7 @@
 #include "LibraryBuilder.h"
 #include "Neighbours.h"
 #include "Connection.h"
+#include "TlsClient.h"
 #include "Network.h"
 #include "Plugins.h"
 #include "QueryHashMaster.h"

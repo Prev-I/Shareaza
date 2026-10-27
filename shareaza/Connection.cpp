@@ -31,6 +31,7 @@
 #include "Buffer.h"
 #include "Statistics.h"
 #include "VendorCache.h"
+#include "TlsClient.h"
 #include "TlsVerify.h"
 
 #include <atomic>

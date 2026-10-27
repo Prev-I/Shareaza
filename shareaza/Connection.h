@@ -26,12 +26,12 @@
 
 #include "Buffer.h"
 #include "Packet.h"
-#include "TlsClient.h"
 
 #include <memory>
 
 #pragma comment(lib, "ws2_32.lib")
 
+class CTlsClient;
 struct CTlsVerifyJob;
 
 
