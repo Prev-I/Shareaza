@@ -196,6 +196,7 @@ void CConnection::AttachTo(CConnection* pConnection)
 	m_nTlsPhase			= pConnection->m_nTlsPhase;
 	m_sTlsHost			= pConnection->m_sTlsHost;
 	m_bTlsValidated		= pConnection->m_bTlsValidated;
+	m_sTlsFingerprint	= pConnection->m_sTlsFingerprint;
 
 	// Record the current time in the input and output TCP bandwidth meters
 	m_mInput.tLast = m_mOutput.tLast = GetTickCount();
@@ -528,6 +529,7 @@ void CConnection::ResetTls()
 	m_nTlsPhase		= tlsNone;
 	m_sTlsHost.Empty();
 	m_bTlsValidated	= false;
+	m_sTlsFingerprint.Empty();
 }
 
 void CConnection::WaitForTlsJobs(DWORD nTimeout)
@@ -654,8 +656,9 @@ BOOL CConnection::OnTlsRun()
 		CQuickLock oInputLock( *m_pInputSection );
 
 		m_pTls->Accept();
-		m_bTlsValidated	= ( nProblem == TlsCertProblem::None );
-		m_nTlsPhase		= tlsEstablished;
+		m_bTlsValidated		= ( nProblem == TlsCertProblem::None );
+		m_sTlsFingerprint	= sFingerprint;
+		m_nTlsPhase			= tlsEstablished;
 
 		// The final flight may have carried records past the handshake
 		std::vector< BYTE > oPlain;

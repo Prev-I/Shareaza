@@ -198,9 +198,17 @@ void CDownloadTransferHTTPS::GiveConnectionToNext()
 
 	ASSUME_LOCK( Transfers.m_pSection );
 
-	// A TLS session is only reused for the host its certificate was verified for
+	// A TLS session is only reused for the host its certificate was verified for, and only
+	// while the certificate policy still accepts it: a valid certificate, every certificate,
+	// or one the user accepted for the host.
 	const CString sHost = m_pSource->GetTlsHost();
 	if ( ! IsTls() || sHost.IsEmpty() || sHost.CompareNoCase( GetTlsHostName() ) != 0 )
+		return;
+
+	const DWORD nPolicy = Settings.Connection.TlsCertPolicy;
+	if ( ! IsTlsValidated() && nPolicy != static_cast< DWORD >( TLS_CERT_IGNORE ) &&
+		! ( nPolicy == static_cast< DWORD >( TLS_CERT_ASK ) &&
+			TlsTrust.IsAccepted( std::wstring( (LPCWSTR)GetTlsHostName() ), std::wstring( (LPCWSTR)GetTlsFingerprint() ) ) ) )
 		return;
 
 	for ( POSITION pos = Downloads.GetIterator() ; pos != NULL ; )
@@ -223,8 +231,7 @@ void CDownloadTransferHTTPS::GiveConnectionToNext()
 				 && pSource->Equals(m_pSource)
 				 && pSource->m_nPort == m_pSource->m_nPort
 				 && pSource->GetTlsHost().CompareNoCase( sHost ) == 0
-				 && ( ! pDownload->m_bRequireValidCert || IsTlsValidated() )
-				 && ( IsTlsValidated() || Settings.Connection.TlsCertPolicy == static_cast< DWORD >( TLS_CERT_IGNORE ) ) )
+				 && ( ! pDownload->m_bRequireValidCert || IsTlsValidated() ) )
 			{
 				if ( pSource->GetTransfer() )
 					continue;

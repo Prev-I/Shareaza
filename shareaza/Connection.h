@@ -98,6 +98,7 @@ private:
 	TlsPhase							m_nTlsPhase;
 	CString								m_sTlsHost;		// The name the certificate is checked against
 	bool								m_bTlsValidated;	// The certificate passed strict verification
+	CString								m_sTlsFingerprint;	// SHA-256 of the accepted certificate
 
 	void	ResetTls();							// Free the TLS state, without touching the socket
 	BOOL	OnTlsRead();						// OnRead for a TLS connection
@@ -324,6 +325,11 @@ public:
 	inline const CString& GetTlsHostName() const throw()
 	{
 		return m_sTlsHost;
+	}
+	// The SHA-256 fingerprint of a TLS session's accepted certificate (empty until it is accepted)
+	inline const CString& GetTlsFingerprint() const throw()
+	{
+		return m_sTlsFingerprint;
 	}
 
 	// Wait up to nTimeout ms for the certificate verifications still running. Call at exit,
