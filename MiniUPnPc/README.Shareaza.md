@@ -42,12 +42,15 @@ the same bytes):
 ## Applied upstream fixes
 
 Fixes from upstream's `master` branch, newer than 2.3.3, each applied to
-`miniupnpc/src/minixml.c` as a separate Shareaza commit:
+`miniupnpc/src/minixml.c` as a separate Shareaza commit. With all three,
+`src/minixml.c` is identical to upstream `master` at
+`05bb29e78d882990efe13e8a5663b69313dc97fd` (2026-10-20).
 
 | Upstream commit | Upstream subject | Advisory |
 |---|---|---|
 | `3cfb4fb78d5ac04ed0dadc8dd842fc9e448916db` | minixml.c: fix buffer read overflow | CVE-2026-110655 (`parseatt`) |
 | `64ef08a12aabab57be0bf7e40f047c8f14dedf9c` | minixml: fix buffer overrun after namespace separator | CVE-2026-110656 (`parseelt`) |
+| `42965d7e763b4f894986dd8feb19db7920ea0766` | minixml.c: fix 1-byte out-of-bounds read | none known (`parseelt`) |
 
 ## Building
 
