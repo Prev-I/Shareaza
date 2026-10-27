@@ -29,7 +29,9 @@
 #include "SharedFile.h"
 #include "Transfer.h"
 #include "VersionChecker.h"
-#include <boost/json.hpp>
+// Boost.JSON is compiled here, from the headers, in this one translation unit:
+// the project defines BOOST_ALL_NO_LIB, so no prebuilt Boost library is linked.
+#include <boost/json/src.hpp>
 
 
 #ifdef _DEBUG
