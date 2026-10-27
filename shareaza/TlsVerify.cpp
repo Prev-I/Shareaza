@@ -205,9 +205,19 @@ TlsCertProblem VerifyServerCertificate(PCCERT_CONTEXT pCert, const std::wstring&
 
 TlsVerdict DecideTlsVerdict(TlsCertProblem nProblem, bool bRequireValid, DWORD nPolicy, bool bRemembered)
 {
-	// RED stub: replaced by the real rules once the test fails
-	(void)nProblem; (void)bRequireValid; (void)nPolicy; (void)bRemembered;
-	return TlsVerdict::Reject;
+	if ( nProblem == TlsCertProblem::None )
+		return TlsVerdict::Accept;
+	if ( bRequireValid )
+		return TlsVerdict::Reject;
+	switch ( nPolicy )
+	{
+	case TLS_POLICY_IGNORE:
+		return TlsVerdict::Accept;
+	case TLS_POLICY_ASK:
+		return bRemembered ? TlsVerdict::Accept : TlsVerdict::AskUser;
+	default:
+		return TlsVerdict::Reject;
+	}
 }
 
 TlsCertProblem ProblemFromStatus(SECURITY_STATUS nStatus)
@@ -220,9 +230,11 @@ TlsCertProblem ProblemFromStatus(SECURITY_STATUS nStatus)
 
 	case SEC_E_WRONG_PRINCIPAL:
 	case CERT_E_CN_NO_MATCH:
-	case CERT_E_INVALID_NAME:
 		return TlsCertProblem::WrongName;
 
+	// CERT_E_INVALID_NAME is a name-constraint violation: an authority in the
+	// chain issued a name it is not trusted for.
+	case CERT_E_INVALID_NAME:
 	case SEC_E_UNTRUSTED_ROOT:
 	case SEC_E_ISSUING_CA_UNTRUSTED:
 	case CERT_E_UNTRUSTEDROOT:
