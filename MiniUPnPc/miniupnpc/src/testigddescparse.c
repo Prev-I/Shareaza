@@ -1,4 +1,4 @@
-/* $Id: testigddescparse.c,v 1.11 2019/02/10 12:33:32 nanard Exp $ */
+/* $Id: testigddescparse.c,v 1.8 2015/02/08 08:46:06 nanard Exp $ */
 /* Project : miniupnp
  * http://miniupnp.free.fr/
  * Author : Thomas Bernard

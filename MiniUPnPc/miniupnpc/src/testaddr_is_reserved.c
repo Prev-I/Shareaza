@@ -1,4 +1,4 @@
-/* $Id: testaddr_is_reserved.c,v 1.1 2020/10/15 22:12:51 nanard Exp $ */
+/* $Id: $ */
 /* vim: tabstop=4 shiftwidth=4 noexpandtab
  * Project : miniupnp
  * Web : http://miniupnp.free.fr/ or https://miniupnp.tuxfamily.org/

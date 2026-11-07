@@ -1,4 +1,4 @@
-/* $Id: testupnpreplyparse.c,v 1.5 2017/12/12 11:18:46 nanard Exp $ */
+/* $Id: testupnpreplyparse.c,v 1.4 2014/01/27 11:45:19 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * (c) 2006-2017 Thomas Bernard

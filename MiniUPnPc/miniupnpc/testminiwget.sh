@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: testminiwget.sh,v 1.20 2022/10/21 21:09:42 nanard Exp $
+# $Id: testminiwget.sh,v 1.18 2020/05/29 21:14:22 nanard Exp $
 # vim: tabstop=4 shiftwidth=4 noexpandtab
 # project miniupnp : http://miniupnp.free.fr/
 #                    or https://miniupnp.tuxfamily.org/

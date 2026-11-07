@@ -1,4 +1,4 @@
-/* $Id: testminiwget.c,v 1.7 2018/01/16 01:01:05 nanard Exp $ */
+/* $Id: testminiwget.c,v 1.6 2017/11/02 16:52:37 nanard Exp $ */
 /* vim: tabstop=4 shiftwidth=4 noexpandtab
  * Project : miniupnp
  * Author : Thomas Bernard

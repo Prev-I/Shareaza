@@ -26,9 +26,9 @@
 #include "MiniUPnP.h"
 
 // MiniUPnPc library
-// Copyright (c) 2005-2015 Thomas Bernard
-#include "..\MiniUPnPc\miniupnpc\miniupnpc.h"
-#include "..\MiniUPnPc\miniupnpc\upnpcommands.h"
+// Copyright (c) 2005-2025 Thomas Bernard
+#include "..\MiniUPnPc\miniupnpc\include\miniupnpc.h"
+#include "..\MiniUPnPc\miniupnpc\include\upnpcommands.h"
 #pragma comment( lib, "miniupnpc" )
 
 #ifdef _DEBUG
@@ -105,8 +105,11 @@ void CMiniUPnP::OnRun()
 
 			UPNPUrls urls = {};
 			IGDdatas data = {};
-			char internalIPAddress[ 16 ] = {};
-			result = UPNP_GetValidIGD( pDevice, &urls, &data, internalIPAddress, sizeof( internalIPAddress ) );
+			// UPNP_GetValidIGD strncpy()s each address from a 40-byte buffer,
+			// so 64 bytes always leaves the result terminated.
+			char internalIPAddress[ 64 ] = {};
+			char wanIPAddress[ 64 ] = {};
+			result = UPNP_GetValidIGD( pDevice, &urls, &data, internalIPAddress, sizeof( internalIPAddress ), wanIPAddress, sizeof( wanIPAddress ) );
 			if ( result )
 			{
 				m_sServiceType = data.first.servicetype;
@@ -115,10 +118,17 @@ void CMiniUPnP::OnRun()
 
 				switch ( result )
 				{
-				case 1:
+				case UPNP_CONNECTED_IGD:
 					theApp.Message( MSG_DEBUG, _T("UPnP IGD found (valid and connected) : %s"), (LPCTSTR)CA2T( m_sControlURL ) );
 					break;
-				case 2:
+				case UPNP_PRIVATEIP_IGD:
+					// Also returned when the gateway would not report its external address.
+					if ( wanIPAddress[ 0 ] )
+						theApp.Message( MSG_DEBUG, _T("UPnP IGD found (valid and connected, but its external address \"%s\" is not public: there may be another NAT beyond it). Trying to continue anyway... : %s"), (LPCTSTR)CA2T( wanIPAddress ), (LPCTSTR)CA2T( m_sControlURL ) );
+					else
+						theApp.Message( MSG_DEBUG, _T("UPnP IGD found (valid and connected, but its external address could not be read). Trying to continue anyway... : %s"), (LPCTSTR)CA2T( m_sControlURL ) );
+					break;
+				case UPNP_DISCONNECTED_IGD:
 					theApp.Message( MSG_DEBUG, _T("UPnP IGD found (valid but not connected) . Trying to continue anyway... : %s"), (LPCTSTR)CA2T( m_sControlURL ) );
 					break;
 				default:

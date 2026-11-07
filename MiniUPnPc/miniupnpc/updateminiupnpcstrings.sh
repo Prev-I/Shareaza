@@ -1,5 +1,5 @@
 #! /bin/sh
-# $Id: updateminiupnpcstrings.sh,v 1.10 2022/10/16 05:28:15 nanard Exp $
+# $Id: updateminiupnpcstrings.sh,v 1.9 2021/09/28 21:37:53 nanard Exp $
 # project miniupnp : http://miniupnp.free.fr/
 # (c) 2009-2021 Thomas Bernard
 
