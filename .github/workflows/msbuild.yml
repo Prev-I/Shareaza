@@ -72,10 +72,6 @@ jobs:
           if ($installed -ne $version) { throw "Inno Setup reports $installed, not $version" }
           if (-not (Test-Path (Join-Path $dir 'ISCC.exe'))) { throw "ISCC.exe is not in $dir" }
 
-    - name: Restore NuGet packages (zlibwapi)
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: nuget restore zlibwapi/zlibwapi_143.vcxproj -PackagesDirectory zlibwapi/packages
-
     - name: Restore NuGet packages (Shareaza)
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: nuget restore ${{env.SOLUTION_FILE_PATH}}

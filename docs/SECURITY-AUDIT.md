@@ -22,9 +22,11 @@ blocking in the HTTPS connect. Of the five findings, only finding 4's missing op
 are unchanged.
 
 The text below is the audit as written, apart from the dated bullets under **Disclosure**, the
-**Fixed** lines under findings 1 to 5, the new item in the Medium list, the heading of the first
-addendum's "Still open" list, and the notes under "Consequences for the oracle". What changed on
-2026-10-26 is in the [first addendum](#addendum-2026-10-26-fixes-for-findings-3-4-and-5).
+**Fixed** lines under findings 1 to 5, the new item in the Medium list, the **Fixed** lines of
+2026-10-27 under "Other third-party prebuilt packages" and under the Low items on Sentry and the
+update check, the heading of the first addendum's "Still open" list, and the notes under
+"Consequences for the oracle". What changed on 2026-10-26 is in the
+[first addendum](#addendum-2026-10-26-fixes-for-findings-3-4-and-5).
 
 **Disclosure.**
 - **Not reported upstream.** As of 2026-10-25 the findings have not been reported to ansani/Shareaza.
@@ -167,6 +169,10 @@ went to the provenance pass instead.
     compiles the vendored 1.2.12 itself.
   - Boost 1.84.0: 45 packages from a single community publisher.
   - `7-Zip.StandaloneConsole.x64` 23.1.0, a community repack used only at build time.
+  - **Fixed** on 2026-10-27: zlib128 is removed, since nothing compiled or linked against it. The
+    compiled Boost packages are removed: Boost.JSON is built from source in `VersionChecker.cpp`,
+    with Boost's auto-linking disabled, and only the Boost header package remains. The 7-Zip repack
+    is replaced by Windows' built-in gzip (`GZipStream` through Windows PowerShell) in `7z.cmd`.
 - **HTTPS connect and handshake blocked inside the transfers lock.**
   `CDownloadTransferHTTPS::Initiate` ran the connect and the TLS handshake as blocking calls while
   it held the transfers lock, so one slow server could stall every transfer and the UI. Found
@@ -189,12 +195,15 @@ went to the provenance pass instead.
 - **The 7-Zip extraction DLLs** (`7zxa*.dll`) are unchanged since the baseline and unverified.
 - **Sentry 4.4.0** is the official .NET SDK but nothing in the source uses it. Its `Sentry.targets`
   is still imported at build time and does nothing unless upload properties are set.
+  - **Fixed** on 2026-10-27: the Sentry package and its import are removed.
 - **Country block by default:** `Settings.cpp:308` sets `IgnoredCountry=|TW|HK|CN|`, so hosts in
   those countries are kept out of the host cache (ivan, 2013). It is visible in Advanced settings.
 - **Connection test:** `Shareaza.h:458` points to `https://connectiontest.kirurusec.com/`, opened in
   the browser only from Help. Who owns the domain is unknown.
 - **Update check:** it queries `api.github.com/repos/ansani/Shareaza/releases/latest` and is now off
   by default. A malformed JSON response is not caught and crashes the client.
+  - **Fixed** on 2026-10-27: `CVersionChecker::ExecuteRequest` parses with the non-throwing API and
+    treats a malformed or unexpected response as no update information.
 - **The fork renames itself:** ivan386's `64541b5d5`, "Soft name change", 2017-10-03.
   - Vendor code `RAZI` (`Shareaza.h:444`), so a GWebCache sees `client=RAZI2.7.10.6` on G2
     (`DiscoveryServices.cpp:1423-1424`), not `RAZA`.
