@@ -23,8 +23,9 @@ are unchanged.
 
 The text below is the audit as written, apart from the dated bullets under **Disclosure**, the
 **Fixed** lines under findings 1 to 5, the new item in the Medium list, the **Fixed** lines of
-2026-10-27 under "Other third-party prebuilt packages" and under the Low items on Sentry and the
-update check, the heading of the first addendum's "Still open" list, and the notes under
+2026-10-27 under the Medium item on MiniUPnPc, under "Other third-party prebuilt packages" and
+under the Low items on Sentry and the update check, the sentence on miniupnpc 2.3.3 under "Checked
+and clean", the heading of the first addendum's "Still open" list, and the notes under
 "Consequences for the oracle". What changed on 2026-10-26 is in the
 [first addendum](#addendum-2026-10-26-fixes-for-findings-3-4-and-5).
 
@@ -244,7 +245,7 @@ went to the provenance pass instead.
 - **Not unattended on the live G2 network.** Findings 1, 3 and 4 mean any peer may be able to crash
   the client or slip past its ban list.
   - From `v2.7.10.6-previ.2`, findings 3 and 4 are fixed, apart from finding 4's opt-out.
-  - Finding 1 is fixed by the Schannel change (second addendum), in the release built after it.
+  - Finding 1 is fixed by the Schannel change (second addendum), from `v2.7.10.6-previ.4`.
     The fixes were verified by review and builds, not by running an attack.
   - So the rule stands.
 - **A fresh Wine prefix per installer**, because of finding 5.
