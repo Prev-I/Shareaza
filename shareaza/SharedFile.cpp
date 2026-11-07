@@ -1528,7 +1528,7 @@ BOOL CLibraryFile::PrepareDoc(LPCTSTR pszTemplate, CArray< CString >& oDocs) con
 	if ( m_oBTH )
 	{
 		if ( strMagnet.GetLength() ) strMagnet += _T("&amp;");
-		strMagnet += _T("xt=urn:btih:") + m_oMD5.toString();
+		strMagnet += _T("xt=urn:btih:") + m_oBTH.toString();
 
 		ReplaceNoCase( strDoc, _T("$meta:btih$"), m_oBTH.toString() );
 	}
