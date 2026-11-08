@@ -82,7 +82,11 @@ function Get-InstalledVersion {
 # Run a native program and judge it by its exit code alone: reg.exe and netsh print
 # success messages on stderr, which Windows PowerShell would turn into errors.
 function Invoke-Native([string] $File, [string[]] $Arguments) {
-    $p = Start-Process -FilePath $File -ArgumentList $Arguments -Wait -PassThru -NoNewWindow
+    $p = Start-Process -FilePath $File -ArgumentList $Arguments -PassThru -NoNewWindow
+    # Hold the process handle before it exits: with -Wait, Windows PowerShell 5.1 can
+    # report no exit code at all, which read as a failure of a command that succeeded.
+    $null = $p.Handle
+    $p.WaitForExit()
     return $p.ExitCode
 }
 
