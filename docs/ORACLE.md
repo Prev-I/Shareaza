@@ -22,8 +22,8 @@ G2 network runs, and this fork's build (2.7.11.0 from `previ.5`, 2.7.10.6 before
 > - HTTPS that never verifies certificates (fixed from `previ.4` on, which uses Schannel, see
 >   [below](#https-in-the-fork));
 > - a probable remote crash from a single packet, sent over UDP by any IPv4 peer or over TCP by a
->   connected neighbour;
-> - IPv6 paths that bypass the ban list.
+>   connected neighbour (fixed from `previ.2` on);
+> - IPv6 paths that bypass the ban list (fixed from `previ.2` on, and IPv6 is opt-in from `previ.5`).
 >
 > The 2.7.10.2 code itself, from 2017, was not reviewed.
 >

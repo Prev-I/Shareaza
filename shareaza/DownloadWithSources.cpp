@@ -661,6 +661,14 @@ BOOL CDownloadWithSources::AddSourceInternal(CDownloadSource* pSource)
 
 	CQuickLock pLock( Transfers.m_pSection );
 
+	// With IPv6 off, an IPv6-only source can never be used. Drop it without listing it
+	// as failed, so it is neither counted as a live source nor blocked once IPv6 is on.
+	if ( ! Settings.Connection.EnableIPv6 && ! pSource->m_bPushOnly && pSource->IsIPv6Source() )
+	{
+		delete pSource;
+		return FALSE;
+	}
+
 	if ( pSource->m_nRedirectionCount == 0 ) // Don't check for existing sources if source is a redirection
 	{
 		bool bDeleteSource = false;

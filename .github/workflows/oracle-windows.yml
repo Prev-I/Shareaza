@@ -183,9 +183,13 @@ jobs:
                         if (-not ($udp | Where-Object { $_.LocalAddress -eq '::' })) { throw 'IPv6 is on, but no UDP socket is bound to ::' }
                         'IPv6 on: TCP and UDP sockets on ::'
                     } else {
-                        $v6 = @(@($tcp) + @($udp) | Where-Object { $_.LocalAddress -match ':' })
+                        # Every TCP connection of the client, in any state, not only listeners:
+                        # an outgoing IPv6 connection must not slip past. IPv4 and loopback
+                        # addresses contain no colon.
+                        $all = @(Get-NetTCPConnection -OwningProcess $p.Id -ErrorAction SilentlyContinue)
+                        $v6 = @(@($all) + @($udp) | Where-Object { $_.LocalAddress -match ':' -or ($_.PSObject.Properties['RemoteAddress'] -and $_.RemoteAddress -match ':' -and $_.RemoteAddress -ne '::') })
                         if ($v6) { throw "IPv6 is off, but these sockets use IPv6: $(($v6 | ForEach-Object { "$($_.LocalAddress) port $($_.LocalPort)" }) -join ', ')" }
-                        'IPv6 off: no IPv6 socket'
+                        "IPv6 off: no IPv6 socket among $($all.Count) TCP connections and $($udp.Count) UDP endpoints"
                     }
                 }
                 "window: handle=$($p.MainWindowHandle) title='$($p.MainWindowTitle)' session=$($p.SessionId)"
@@ -270,7 +274,7 @@ jobs:
                 "expecting $env:EXPECT from $env:AGENT"
                 if (-not (Test-Path gwc-requests.jsonl)) { Fail 'Shareaza never queried the stub cache' }
                 $req = @(Get-Content gwc-requests.jsonl | Where-Object { $_ -match '"/gwc/\?' })
-                if ($req.Count -lt 2) { Fail "expected a query from each of the two runs, got $($req.Count)" }
+                if ($req.Count -lt 2) { Fail "expected at least one query per run, two or more in all, got $($req.Count)" }
                 if (-not ($req | Select-String -SimpleMatch $env:EXPECT)) { Fail "no request carried $env:EXPECT" }
                 if (-not ($req | Select-String -SimpleMatch "`"user_agent`": `"$env:AGENT`"")) { Fail "no request came from $env:AGENT" }
 
@@ -286,11 +290,11 @@ jobs:
                 if ($other) { Fail "queried another discovery service: $other" }
                 if ($log | Select-String -SimpleMatch '[VersionChecker] Request') { Fail 'the client still checked for updates' }
                 if ($log | Select-String -SimpleMatch 'Failed to load security rules') { Fail 'the client ran without security rules' }
-                if (-not ($log | Select-String -SimpleMatch 'port 6347.')) { Fail 'the hub run did not listen on the prepared port 6347' }
+                if (-not ($log | Select-String -SimpleMatch 'port 6347.')) { Fail 'the last run did not listen on the prepared port 6347' }
                 if ($log | Select-String -SimpleMatch 'MyTorrents') { Fail 'the client touched the private torrent folder' }
                 $reg = Get-Content "$ev\shareaza.reg"
                 $settings = ($reg -join "`n") -split '(?=\[HKEY)' | Where-Object { $_ -match '\\Shareaza\\Settings\]' }
-                if ($settings -notmatch '"Running"=dword:00000000') { Fail 'the hub run did not finish with a clean exit save' }
+                if ($settings -notmatch '"Running"=dword:00000000') { Fail 'the last run did not finish with a clean exit save' }
 
                 # Nothing but hidden folder files was ever in the shared folders.
                 $leaked = @(Get-ChildItem -File -Recurse "$env:WORK\runs" -ErrorAction SilentlyContinue |

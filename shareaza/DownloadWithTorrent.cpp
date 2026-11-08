@@ -45,6 +45,15 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
+// One version number as a peer ID character, the way BEP 20 decoders and CBTClient's
+// charint() read it: 0-9, then A-Z for 10 to 35. Larger numbers saturate at Z.
+static BYTE VersionDigit(WORD n)
+{
+	if ( n < 10 ) return static_cast< BYTE >( '0' + n );
+	if ( n < 36 ) return static_cast< BYTE >( 'A' + n - 10 );
+	return 'Z';
+}
+
 
 //////////////////////////////////////////////////////////////////////
 // CDownloadWithTorrent construction
@@ -592,10 +601,10 @@ BOOL CDownloadWithTorrent::GenerateTorrentDownloadID()
 	m_pPeerID[ 0 ] = '-';
 	m_pPeerID[ 1 ] = BT_ID1;
 	m_pPeerID[ 2 ] = BT_ID2;
-	m_pPeerID[ 3 ] = static_cast< BYTE >( '0' + theApp.m_nVersion[0] );
-	m_pPeerID[ 4 ] = static_cast< BYTE >( '0' + theApp.m_nVersion[1] );
-	m_pPeerID[ 5 ] = static_cast< BYTE >( '0' + theApp.m_nVersion[2] );
-	m_pPeerID[ 6 ] = static_cast< BYTE >( '0' + theApp.m_nVersion[3] );
+	m_pPeerID[ 3 ] = VersionDigit( theApp.m_nVersion[0] );
+	m_pPeerID[ 4 ] = VersionDigit( theApp.m_nVersion[1] );
+	m_pPeerID[ 5 ] = VersionDigit( theApp.m_nVersion[2] );
+	m_pPeerID[ 6 ] = VersionDigit( theApp.m_nVersion[3] );
 	m_pPeerID[ 7 ] = '-';
 
 	// Random characters for the rest of the Client ID

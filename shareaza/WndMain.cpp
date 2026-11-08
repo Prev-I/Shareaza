@@ -177,11 +177,6 @@ BEGIN_MESSAGE_MAP(CMainWnd, CMDIFrameWnd)
 	ON_COMMAND(ID_HELP_ABOUT, OnHelpAbout)
 	ON_COMMAND(ID_HELP_VERSION_CHECK, OnHelpVersionCheck)
 	ON_COMMAND(ID_HELP_HOMEPAGE, OnHelpHomepage)
-	ON_COMMAND(ID_HELP_WEB_1, OnHelpWeb1)
-	ON_COMMAND(ID_HELP_WEB_2, OnHelpWeb2)
-	ON_COMMAND(ID_HELP_WEB_3, OnHelpWeb3)
-	ON_COMMAND(ID_HELP_WEB_4, OnHelpWeb4)
-	ON_COMMAND(ID_HELP_WEB_5, OnHelpWeb5)
 	ON_COMMAND(ID_HELP_WEB_6, OnHelpWeb6)
 	ON_COMMAND(ID_HELP_FAQ, OnHelpFaq)
 	ON_COMMAND(ID_HELP_GUIDE, OnHelpGuide)
@@ -2857,65 +2852,19 @@ void CMainWnd::OnHelpVersionCheck()
 
 void CMainWnd::OnHelpHomepage()
 {
-	const CString strWebSite(WEB_SITE_T);
-
-	ShellExecute( GetSafeHwnd(), _T("open"), strWebSite + _T("?Version=") + theApp.m_sVersion,
-		NULL, NULL, SW_SHOWNORMAL );
-}
-
-void CMainWnd::OnHelpWeb1()
-{
-	const CString strWebSite(WEB_SITE_T);
-
-	ShellExecute( GetSafeHwnd(), _T("open"), strWebSite + _T("help/external/?link1"),
-		NULL, NULL, SW_SHOWNORMAL );
-}
-
-void CMainWnd::OnHelpWeb2()
-{
-	const CString strWebSite(WEB_SITE_T);
-
-	ShellExecute( GetSafeHwnd(), _T("open"), strWebSite + _T("help/external/?link2"),
-		NULL, NULL, SW_SHOWNORMAL );
-}
-
-void CMainWnd::OnHelpWeb3()
-{
-	const CString strWebSite(WEB_SITE_T);
-
-	ShellExecute( GetSafeHwnd(), _T("open"), strWebSite + _T("help/external/?link3"),
-		NULL, NULL, SW_SHOWNORMAL );
-}
-
-void CMainWnd::OnHelpWeb4()
-{
-	const CString strWebSite(WEB_SITE_T);
-
-	ShellExecute( GetSafeHwnd(), _T("open"), strWebSite + _T("help/external/?link4"),
-		NULL, NULL, SW_SHOWNORMAL );
-}
-
-void CMainWnd::OnHelpWeb5()
-{
-	const CString strWebSite(WEB_SITE_T);
-
-	ShellExecute( GetSafeHwnd(), _T("open"), strWebSite + _T("help/external/?link5"),
+	ShellExecute( GetSafeHwnd(), _T("open"), FORK_HOME_T,
 		NULL, NULL, SW_SHOWNORMAL );
 }
 
 void CMainWnd::OnHelpWeb6()
 {
-	const CString strWebSite(WEB_SITE_T);
-
-	ShellExecute( GetSafeHwnd(), _T("open"), strWebSite + _T("help/external/?link6"),
+	ShellExecute( GetSafeHwnd(), _T("open"), _T("https://www.deviantart.com/search?q=shareaza%20skin"),
 		NULL, NULL, SW_SHOWNORMAL );
 }
 
 void CMainWnd::OnHelpFaq()
 {
-	const CString strWebSite(WEB_SITE_T);
-
-	ShellExecute( GetSafeHwnd(), _T("open"), strWebSite + _T("help/?faq"),
+	ShellExecute( GetSafeHwnd(), _T("open"), CString( ORIGINAL_WIKI_T ) + _T("FAQ"),
 		NULL, NULL, SW_SHOWNORMAL );
 }
 
@@ -2931,57 +2880,43 @@ void CMainWnd::OnHelpConnectiontest()
 
 void CMainWnd::OnHelpGuide()
 {
-	const CString strWebSite(WEB_SITE_T);
-
-	ShellExecute( GetSafeHwnd(), _T("open"), strWebSite + _T("help/?guide"),
+	ShellExecute( GetSafeHwnd(), _T("open"), CString( ORIGINAL_WIKI_T ) + _T("QuickGuide"),
 		NULL, NULL, SW_SHOWNORMAL );
 }
 
 void CMainWnd::OnHelpForums()
 {
-	const CString strWebSite(WEB_SITE_T);
-
-	ShellExecute( GetSafeHwnd(), _T("open"), strWebSite + _T("help/?forum"),
+	ShellExecute( GetSafeHwnd(), _T("open"), ORIGINAL_SITE_T _T("phpbb/"),
 		NULL, NULL, SW_SHOWNORMAL );
 }
 
 void CMainWnd::OnHelpUpdate()
 {
-	const CString strWebSite(WEB_SITE_T);
-
-	ShellExecute( GetSafeHwnd(), _T("open"), strWebSite + _T("help/update/?Version=") + theApp.m_sVersion,
+	ShellExecute( GetSafeHwnd(), _T("open"), WEB_SITE_T,
 		NULL, NULL, SW_SHOWNORMAL );
 }
 
 void CMainWnd::OnHelpRouter()
 {
-	const CString strWebSite(WEB_SITE_T);
-
-	ShellExecute( GetSafeHwnd(), _T("open"), strWebSite + _T("help/?router"),
+	ShellExecute( GetSafeHwnd(), _T("open"), CString( ORIGINAL_WIKI_T ) + _T("FAQ.FirewallsRouters"),
 		NULL, NULL, SW_SHOWNORMAL );
 }
 
 void CMainWnd::OnHelpSecurity()
 {
-	const CString strWebSite(WEB_SITE_T);
-
-	ShellExecute( GetSafeHwnd(), _T("open"), strWebSite + _T("help/?security"),
+	ShellExecute( GetSafeHwnd(), _T("open"), CString( ORIGINAL_WIKI_T ) + _T("FAQ.Security"),
 		NULL, NULL, SW_SHOWNORMAL );
 }
 
 void CMainWnd::OnHelpCodec()
 {
-	const CString strWebSite(WEB_SITE_T);
-
-	ShellExecute( GetSafeHwnd(), _T("open"), strWebSite + _T("help/?codec"),
+	ShellExecute( GetSafeHwnd(), _T("open"), CString( ORIGINAL_WIKI_T ) + _T("Troubleshoot.VideoCodec"),
 		NULL, NULL, SW_SHOWNORMAL );
 }
 
 void CMainWnd::OnHelpTorrent()
 {
-	const CString strWebSite(WEB_SITE_T);
-
-	ShellExecute( GetSafeHwnd(), _T("open"), strWebSite + _T("help/?torrentencoding"),
+	ShellExecute( GetSafeHwnd(), _T("open"), CString( ORIGINAL_WIKI_T ) + _T("BitTorrent"),
 		NULL, NULL, SW_SHOWNORMAL );
 }
 
