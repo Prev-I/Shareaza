@@ -27,7 +27,7 @@ do not use IPv6 and it sends no IPv6 address of its own (`88f7dcce4`). HTTP requ
 Windows' WinINet (web caches, HTTP trackers, the update check) are not covered: they follow the
 system's choice of IPv4 or IPv6, so a dual-stack server can still see the machine's IPv6 address.
 The same work removes the BugSplat crash reporter
-(`fe0e88439`). Both are planned for the first 2.7.11.0 release, `v2.7.11.0-previ.5`.
+(`fe0e88439`). Both shipped in `v2.7.11.0-previ.5`, published 2026-11-08.
 
 The text below is the audit as written, apart from the dated bullets under **Disclosure**, the
 **Fixed** lines under findings 1 to 5, the new item in the Medium list, the **Fixed** lines of

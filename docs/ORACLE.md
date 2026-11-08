@@ -1,7 +1,7 @@
 # Shareaza as a protocol oracle
 
 How to run two Shareaza clients under Wine on Linux or WSL2: the official 2.7.10.2 that most of the
-G2 network runs, and this fork's build (2.7.11.0 from `previ.5`, 2.7.10.6 before). With both installed, a GWebCache such as
+G2 network runs, and this fork's build (2.7.11.1 in `previ.6`, 2.7.11.0 in `previ.5`, 2.7.10.6 before). With both installed, a GWebCache such as
 [`gwc-edge`](https://github.com/Prev-I/gwc-edge) can be exercised against real clients.
 
 `.github/workflows/oracle-wine.yml` checks these steps on `ubuntu-24.04` ([its runs](https://github.com/Prev-I/Shareaza/actions/workflows/oracle-wine.yml)). The results below come from runs on 2026-10-24 and 2026-10-25 with Wine 9.0 (`9.0~repack-4build3`) and winetricks 20240105. [Run 40138506381](https://github.com/Prev-I/Shareaza/actions/runs/40138506381) is the first that ran `docs/oracle-prepare.sh` itself.
@@ -36,7 +36,7 @@ G2 network runs, and this fork's build (2.7.11.0 from `previ.5`, 2.7.10.6 before
 | Prefix | Installer | Where it comes from | SHA-256 |
 |---|---|---|---|
 | `~/.wine-shareaza-sf` | `Shareaza_2.7.10.2_x64.exe` | [SourceForge, Shareaza-2.7.10.2](https://sourceforge.net/projects/shareaza/files/Shareaza/Shareaza-2.7.10.2/) | `d6ff141d69a3af53f8f7547b40e308a4e2aa4818eeb28da827d7545165ef3051`, as SourceForge publishes it |
-| `~/.wine-shareaza-previ` | `iShareaza_<version>_x64_Release_<build date>.exe` | this fork's [releases](https://github.com/Prev-I/Shareaza/releases), tagged `v<version>-previ.N`, currently [`v2.7.11.0-previ.5`](https://github.com/Prev-I/Shareaza/releases/tag/v2.7.11.0-previ.5), the first numbered 2.7.11.0 (earlier ones are 2.7.10.6), without BugSplat and with IPv6 off by default (see [IPv6 in the fork](#ipv6-in-the-fork)). `previ.4` was the first whose HTTPS downloads go over Schannel and check the server certificate (see [HTTPS in the fork](#https-in-the-fork)), and the first to build miniupnpc 2.3.3; `previ.3` the first to need Windows 10 and to fetch a current VC++ runtime when the installed one is missing or older than 14.44; `previ.2` the first with the fixes for audit findings 3 to 5. A new tag first makes a draft, which only the repository owner can download until it is published. | in the release's `SHA256SUMS.txt` |
+| `~/.wine-shareaza-previ` | `iShareaza_<version>_x64_Release_<build date>.exe` | this fork's [releases](https://github.com/Prev-I/Shareaza/releases), tagged `v<version>-previ.N`, currently [`v2.7.11.1-previ.6`](https://github.com/Prev-I/Shareaza/releases/tag/v2.7.11.1-previ.6), numbered 2.7.11.1. `previ.5` was the only one numbered 2.7.11.0 (earlier ones are 2.7.10.6), and the first without BugSplat and with IPv6 off by default (see [IPv6 in the fork](#ipv6-in-the-fork)); `previ.4` was the first whose HTTPS downloads go over Schannel and check the server certificate (see [HTTPS in the fork](#https-in-the-fork)), and the first to build miniupnpc 2.3.3; `previ.3` the first to need Windows 10 and to fetch a current VC++ runtime when the installed one is missing or older than 14.44; `previ.2` the first with the fixes for audit findings 3 to 5. A new tag first makes a draft, which only the repository owner can download until it is published. | in the release's `SHA256SUMS.txt` |
 
 Each client gets its own prefix, for three reasons:
 - **Same registry key.** Both clients keep their settings under `HKCU\Software\Shareaza\Shareaza`,
@@ -74,16 +74,16 @@ winetricks -q vcrun2022
 wine ~/Downloads/Shareaza_2.7.10.2_x64.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
 wineserver --wait
 
-# This fork's build, from release v2.7.11.0-previ.5
-base=https://github.com/Prev-I/Shareaza/releases/download/v2.7.11.0-previ.5
-curl -fLo ~/Downloads/iShareaza_2.7.11.0_x64_Release_2026-11-08.exe "$base/iShareaza_2.7.11.0_x64_Release_2026-11-08.exe"
+# This fork's build, from release v2.7.11.1-previ.6
+base=https://github.com/Prev-I/Shareaza/releases/download/v2.7.11.1-previ.6
+curl -fLo ~/Downloads/iShareaza_2.7.11.1_x64_Release_2026-11-08.exe "$base/iShareaza_2.7.11.1_x64_Release_2026-11-08.exe"
 curl -fLo ~/Downloads/SHA256SUMS.txt "$base/SHA256SUMS.txt"
 (cd ~/Downloads && sha256sum -c --ignore-missing SHA256SUMS.txt)   # must print the installer's name and OK
 export WINEPREFIX=~/.wine-shareaza-previ WINEARCH=win64
 wineboot --init && wineserver --wait
 winetricks -q isolate_home     # no links to your home folders: see below
 winetricks -q vcrun2022
-wine ~/Downloads/iShareaza_2.7.11.0_x64_Release_2026-11-08.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
+wine ~/Downloads/iShareaza_2.7.11.1_x64_Release_2026-11-08.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
 wineserver --wait
 ```
 
@@ -332,7 +332,8 @@ A G2 GWebCache request carries `client=` with the four-letter vendor code follow
 | Client | Vendor code | `client=` | User agent | Seen by the stub cache in CI |
 |---|---|---|---|---|
 | official 2.7.10.2 (SourceForge) | `RAZA` | `RAZA2.7.10.2` | `Shareaza 2.7.10.2` | yes: `client=RAZA2.7.10.2`, `Shareaza 2.7.10.2` ([run](https://github.com/Prev-I/Shareaza/actions/runs/40137712433)) |
-| this fork, 2.7.11.0 (`previ.5` on) | `RAZI` | `RAZI2.7.11.0` | `iShareaza 2.7.11.0` | yes: `client=RAZI2.7.11.0`, `iShareaza 2.7.11.0` ([Windows run](https://github.com/Prev-I/Shareaza/actions/runs/42503811065)) |
+| this fork, 2.7.11.1 (`previ.6`) | `RAZI` | `RAZI2.7.11.1` | `iShareaza 2.7.11.1` | yes: `client=RAZI2.7.11.1`, `iShareaza 2.7.11.1` ([Windows run](https://github.com/Prev-I/Shareaza/actions/runs/42529478344)) |
+| this fork, 2.7.11.0 (`previ.5`) | `RAZI` | `RAZI2.7.11.0` | `iShareaza 2.7.11.0` | yes: `client=RAZI2.7.11.0`, `iShareaza 2.7.11.0` ([Windows run](https://github.com/Prev-I/Shareaza/actions/runs/42503811065)) |
 | this fork, 2.7.10.6 (up to `previ.4`) | `RAZI` | `RAZI2.7.10.6` | `iShareaza 2.7.10.6` | yes: `client=RAZI2.7.10.6`, `iShareaza 2.7.10.6` ([run](https://github.com/Prev-I/Shareaza/actions/runs/40137712433)) |
 
 **The fork is `RAZI`, not `RAZA`.** ivan386's 2017 "Soft name change", which ansani/Shareaza
@@ -342,7 +343,7 @@ correlating with `gwc-edge`'s `/stats`, count `RAZI` as Shareaza too.
 A full request from either client looks like this, with only `client=` differing:
 
 ```
-GET /gwc/?get=1&hostfile=1&net=gnutella2&ping=1&pv=4&client=RAZI2.7.11.0&getleaves=1&getnetworks=1&getclusters=0&getvendors=1&getuptime=1
+GET /gwc/?get=1&hostfile=1&net=gnutella2&ping=1&pv=4&client=RAZI2.7.11.1&getleaves=1&getnetworks=1&getclusters=0&getvendors=1&getuptime=1
 ```
 
 **A reply with no hosts counts as a failure.**
