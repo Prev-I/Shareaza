@@ -21,10 +21,16 @@ blocking in the HTTPS connect. Of the five findings, only finding 4's missing op
 (the IPv6 listeners are bound to all addresses). The Medium and Low items without a **Fixed** line
 are unchanged.
 
+**Status, 2026-11-08.** All five findings are fixed in the fork. Finding 4's opt-out is the new
+setting `Connection.EnableIPv6`, off by default, with which the client opens no IPv6 socket and
+sends no IPv6 address (`88f7dcce4`). The same work removes the BugSplat crash reporter
+(`fe0e88439`). Both are planned for the first 2.7.11.0 release, `v2.7.11.0-previ.5`.
+
 The text below is the audit as written, apart from the dated bullets under **Disclosure**, the
 **Fixed** lines under findings 1 to 5, the new item in the Medium list, the **Fixed** lines of
-2026-10-27 under the Medium item on MiniUPnPc, under "Other third-party prebuilt packages" and
-under the Low items on Sentry and the update check, the sentence on miniupnpc 2.3.3 under "Checked
+2026-11-07 under the Medium item on MiniUPnPc, under "Other third-party prebuilt packages" and
+under the Low items on Sentry and the update check, the **Fixed** lines of 2026-11-08 under the
+Medium item on the global IPv6 address and the Low item on BugSplat, the sentence on miniupnpc 2.3.3 under "Checked
 and clean", the heading of the first addendum's "Still open" list, and the notes under
 "Consequences for the oracle". What changed on 2026-10-26 is in the
 [first addendum](#addendum-2026-10-26-fixes-for-findings-3-4-and-5).
@@ -141,6 +147,9 @@ went to the provenance pass instead.
 - **No opt-out:** the IPv6 listeners always bind to `in6addr_any`.
 - **Fixed**, apart from the opt-out, by `e6ad1a848`, `85be3a518`, `178100427` and `2c632d30c`.
   Three more defects found on the way are in the addendum.
+- **Opt-out fixed** on 2026-11-08 by `88f7dcce4`: `Connection.EnableIPv6`, off by default. With it
+  off, no IPv6 socket is opened, no IPv6 connection is made, and the client never learns or sends
+  an IPv6 address of its own.
 
 ### 5. ✔ The installer deletes every top-level `*.exe` and `*.dll` in the install folder
 
@@ -160,7 +169,7 @@ went to the provenance pass instead.
   `miniupnpc.h` still defines `MINIUPNPC_VERSION "2.0.20170509"`. Those sources miss upstream's
   2017-12 fixes for a buffer overrun in `minixml.c` and an uninitialised variable in
   `upnpreplyparse.c`.
-  - **Fixed** on 2026-10-27: the project now builds miniupnpc 2.3.3, verified against upstream's
+  - **Fixed** on 2026-11-07: the project now builds miniupnpc 2.3.3, verified against upstream's
     signed release, with upstream's three minixml out-of-bounds read fixes applied
     (CVE-2026-110655, CVE-2026-110656 and one without a CVE); see `MiniUPnPc/README.Shareaza.md`.
 - **Weaker G2 hit anti-spoofing.** `G2Packet.cpp:1030-1040` now accepts hits whose node address
@@ -168,12 +177,14 @@ went to the provenance pass instead.
 - **Global IPv6 address advertised.** It goes out in G2 search replies (`LocalSearch.cpp:959-963`),
   BitTorrent tracker announces (`BTTrackerRequest.cpp:356-359`), the BitTorrent extension handshake,
   and push requests. Inference: it can leak when only IPv4 is routed through a VPN.
+  - **Fixed** on 2026-11-08 by `88f7dcce4`: with `Connection.EnableIPv6` off, the default, the
+    client never learns its IPv6 address, so none of these carries one.
 - **Other third-party prebuilt packages.**
   - `zlib128-vc140-static-32_64` 1.2.8, also from apriorit. Probably vestigial, since zlibwapi
     compiles the vendored 1.2.12 itself.
   - Boost 1.84.0: 45 packages from a single community publisher.
   - `7-Zip.StandaloneConsole.x64` 23.1.0, a community repack used only at build time.
-  - **Fixed** on 2026-10-27: zlib128 is removed, since nothing compiled or linked against it. The
+  - **Fixed** on 2026-11-07: zlib128 is removed, since nothing compiled or linked against it. The
     compiled Boost packages are removed: Boost.JSON is built from source in `VersionChecker.cpp`,
     with Boost's auto-linking disabled, and only the Boost header package remains. The 7-Zip repack
     is replaced by Windows' built-in gzip (`GZipStream` through Windows PowerShell) in `7z.cmd`.
@@ -194,19 +205,22 @@ went to the provenance pass instead.
     the SDK download requires a login.
   - The resource DLL path is relative to the current directory (inference: a DLL-planting risk at
     crash time).
+  - **Fixed** on 2026-11-08 by `fe0e88439`: BugSplat and its binaries are removed, and the
+    installer deletes the files earlier releases installed. A crash falls to Windows' own error
+    reporting.
 - **UnRAR 6.11.0 DLLs** are authentic (win.rar GmbH signature, chain verified to the GlobalSign
   intermediate) but old.
 - **The 7-Zip extraction DLLs** (`7zxa*.dll`) are unchanged since the baseline and unverified.
 - **Sentry 4.4.0** is the official .NET SDK but nothing in the source uses it. Its `Sentry.targets`
   is still imported at build time and does nothing unless upload properties are set.
-  - **Fixed** on 2026-10-27: the Sentry package and its import are removed.
+  - **Fixed** on 2026-11-07: the Sentry package and its import are removed.
 - **Country block by default:** `Settings.cpp:308` sets `IgnoredCountry=|TW|HK|CN|`, so hosts in
   those countries are kept out of the host cache (ivan, 2013). It is visible in Advanced settings.
 - **Connection test:** `Shareaza.h:458` points to `https://connectiontest.kirurusec.com/`, opened in
   the browser only from Help. Who owns the domain is unknown.
 - **Update check:** it queries `api.github.com/repos/ansani/Shareaza/releases/latest` and is now off
   by default. A malformed JSON response is not caught and crashes the client.
-  - **Fixed** on 2026-10-27: `CVersionChecker::ExecuteRequest` parses with the non-throwing API and
+  - **Fixed** on 2026-11-07: `CVersionChecker::ExecuteRequest` parses with the non-throwing API and
     treats a malformed or unexpected response as no update information.
 - **The fork renames itself:** ivan386's `64541b5d5`, "Soft name change", 2017-10-03.
   - Vendor code `RAZI` (`Shareaza.h:444`), so a GWebCache sees `client=RAZI2.7.10.6` on G2
@@ -307,12 +321,13 @@ document still does not spell out the trigger. The fix commit is a different mat
 
 ## Addendum 2026-10-27: fixes for findings 1 and 2, and other defects
 
-Three changes landed after the first addendum.
+Four changes landed after the first addendum.
 
 | Change | Finding | What it did |
 |---|---|---|
 | [PR #14](https://github.com/Prev-I/Shareaza/pull/14), merged 2026-10-26 | new | `CSecurity` rule-list fixes (below). |
 | [PR #15](https://github.com/Prev-I/Shareaza/pull/15), merged 2026-10-26 | 1 (partly), new | `CConnection` TLS session ownership (below). |
+| [PR #16](https://github.com/Prev-I/Shareaza/pull/16), merged 2026-10-27 | 1, 2 (groundwork) | Schannel client core and its test program. |
 | [PR #17](https://github.com/Prev-I/Shareaza/pull/17) | 1, 2, new | HTTPS runs over Windows' Schannel; OpenSSL is removed. |
 
 **PR #15: TLS session ownership.**
