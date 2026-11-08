@@ -454,7 +454,12 @@ __int64 GetRandomNum<__int64>(const __int64& min, const __int64& max);
 #define WEB_SITE			"https://github.com/Prev-I/Shareaza/releases"
 #define WEB_SITE_T			_T( WEB_SITE )
 #define URI_UPDATE			_T("https://api.github.com/repos/Prev-I/Shareaza/releases/latest")
-#define CONNECTION_SITE_T	_T("https://connectiontest.kirurusec.com/")
+// The original Shareaza site on SourceForge: its wiki, forum, add-ons page and connection test
+// still work. This fork's own pages are on GitHub.
+#define ORIGINAL_SITE_T		_T("https://shareaza.sourceforge.net/")
+#define ORIGINAL_WIKI_T		ORIGINAL_SITE_T _T("mediawiki/")
+#define FORK_HOME_T			_T("https://github.com/Prev-I/Shareaza")
+#define CONNECTION_SITE_T	ORIGINAL_SITE_T _T("help/test/")
 
 // URLs used by Shareaza
 // -----------------------------------------------------------------------
@@ -468,26 +473,22 @@ __int64 GetRandomNum<__int64>(const __int64& min, const __int64& max);
 //
 // Help/Guides
 //
-// ID_HELP_GUIDE	help/?guide
-// ID_HELP_ROUTER	help/?router
-// ID_HELP_SECURITY	help/?security
-// ID_HELP_CODEC	help/?codec
+// ID_HELP_FAQ		ORIGINAL_WIKI_T FAQ
+// ID_HELP_GUIDE	ORIGINAL_WIKI_T QuickGuide
+// ID_HELP_ROUTER	ORIGINAL_WIKI_T FAQ.FirewallsRouters
+// ID_HELP_SECURITY	ORIGINAL_WIKI_T FAQ.Security
+// ID_HELP_CODEC	ORIGINAL_WIKI_T Troubleshoot.VideoCodec
+// ID_HELP_TORRENT	ORIGINAL_WIKI_T BitTorrent				Torrent Encoding Help
+// ID_HELP_TEST		CONNECTION_SITE_T ?port=..&lang=..&Version=..
 //
 // Help/Websites
 //
-// ID_HELP_HOMEPAGE	?Version=x.x.x.x
-// ID_HELP_FORUMS	help/?forum
-// ID_HELP_UPDATE	help/update/?Version=x.x.x.x			unused
-// ID_HELP_WEB_1	help/external/?link1					unused
-// ID_HELP_WEB_2	help/external/?link1					unused
-// ID_HELP_WEB_3	help/external/?link1					unused
-// ID_HELP_WEB_4	help/external/?link1					unused
-// ID_HELP_WEB_5	help/external/?link1					unused
-// ID_HELP_WEB_6	help/external/?link1					Skin Guide
-//
-// ID_HELP_TORRENT	help/?torrentencoding					Torrent Encoding Help
-// -				?id=support								BugTrap
-// -				version/?Version=x.x.x.x&&Platform=x	CVersionChecker
+// ID_HELP_HOMEPAGE	FORK_HOME_T
+// ID_HELP_FORUMS	ORIGINAL_SITE_T phpbb/
+// ID_HELP_UPDATE	WEB_SITE_T (this fork's releases)		Latest news
+// ID_HELP_WEB_6	DeviantArt search for Shareaza skins	Skin Site
+// -				ORIGINAL_SITE_T ?id=addon&Version=..	add-ons, from Settings
+// -				URI_UPDATE							CVersionChecker
 
 
 // Drag-n-drop stuff

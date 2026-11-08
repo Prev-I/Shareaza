@@ -205,11 +205,6 @@ protected:
 	afx_msg void OnHelpAbout();
 	afx_msg void OnHelpVersionCheck();
 	afx_msg void OnHelpHomepage();
-	afx_msg void OnHelpWeb1();
-	afx_msg void OnHelpWeb2();
-	afx_msg void OnHelpWeb3();
-	afx_msg void OnHelpWeb4();
-	afx_msg void OnHelpWeb5();
 	afx_msg void OnHelpWeb6();
 	afx_msg void OnHelpFaq();
 	afx_msg void OnHelpConnectiontest();

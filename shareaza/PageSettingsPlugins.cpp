@@ -200,10 +200,10 @@ void CPluginsSettingsPage::OnPluginsSetup()
 
 void CPluginsSettingsPage::OnPluginsWeb()
 {
-	const CString strWebSite(WEB_SITE_T);
+	const CString strAddons( ORIGINAL_SITE_T _T("?id=addon&Version=") );
 
 	ShellExecute( GetSafeHwnd(), _T("open"),
-		strWebSite + _T("?id=addon&Version=") + theApp.m_sVersion,
+		strAddons + theApp.m_sVersion,
 		NULL, NULL, SW_SHOWNORMAL );
 }
 
