@@ -169,7 +169,7 @@ AppCopyright=Copyright � {#Publisher}. All rights reserved.
 ; Links to website for software panel
 AppPublisherURL=http://shareaza.sourceforge.net/
 AppSupportURL=http://shareaza.sourceforge.net/?id=support
-AppUpdatesURL=http://shareaza.sourceforge.net/?id=download
+AppUpdatesURL=https://github.com/Prev-I/Shareaza/releases
 
 #if ConfigurationName == "Release"
   #include SourcePath + "..\..\" + Compiler + "\vcredist\vcredist.iss"

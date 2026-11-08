@@ -451,9 +451,9 @@ __int64 GetRandomNum<__int64>(const __int64& min, const __int64& max);
 #define BT_ID1				'i'
 #define BT_ID2				'S'
 
-#define WEB_SITE			"https://github.com/ansani/Shareaza/releases"
+#define WEB_SITE			"https://github.com/Prev-I/Shareaza/releases"
 #define WEB_SITE_T			_T( WEB_SITE )
-#define URI_UPDATE			_T("https://api.github.com/repos/ansani/Shareaza/releases/latest")
+#define URI_UPDATE			_T("https://api.github.com/repos/Prev-I/Shareaza/releases/latest")
 #define CONNECTION_SITE_T	_T("https://connectiontest.kirurusec.com/")
 
 // URLs used by Shareaza

@@ -32,7 +32,7 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
-#define SMART_VERSION	61
+#define SMART_VERSION	62
 
 #define Kilo	( 1024 )
 #define Mega	( Kilo * 1024 )
@@ -1219,6 +1219,13 @@ void CSettings::SmartUpgrade()
 			// ClickOnce application
 			if ( ! IsIn( Library.PrivateTypes, _T( "application" ) ) )
 				Library.PrivateTypes.insert( _T( "application" ) );
+		}
+
+		if ( General.SmartVersion < 62 )
+		{
+			// 2.7.11.0: the update check moved from upstream's repository to this fork's.
+			// Every setting is saved with its value, so a stored URL needs replacing.
+			SetDefault( &VersionCheck.UpdateCheckURL );
 		}
 	}
 
