@@ -135,7 +135,9 @@ BOOL CHandshakes::Listen()
 
 	Network.AcquireLocalAddress( m_hSocket );
 
-	ListenIPv6();
+	// IPv6 is opt-in: with it off, no IPv6 socket is opened
+	if ( Settings.Connection.EnableIPv6 )
+		ListenIPv6();
 
 	// Create a new thread to run the ThreadStart method, passing it a pointer to this C
 	return BeginThread( "Handshakes" );
@@ -154,7 +156,11 @@ BOOL CHandshakes::ListenIPv6()
 	setsockopt( m_hSocketIPv6, IPPROTO_TCP, TCP_NODELAY, "\x01", 1);
 
 	if ( bind( m_hSocketIPv6, (SOCKADDR*)&saHost, sizeof( saHost ) ) != 0 )
+	{
+		// An unbound socket must not count as listening
+		CNetwork::CloseSocket( m_hSocketIPv6, false );
 		return FALSE;
+	}
 
 	theApp.Message( MSG_INFO, IDS_NETWORK_LISTENING_TCP, (LPCTSTR) IPv6ToString( &saHost.sin6_addr ), htons( saHost.sin6_port ) );
 
@@ -410,6 +416,9 @@ BOOL CHandshakes::AcceptConnection()
 
 BOOL CHandshakes::AcceptConnectionIPv6()
 {
+	if ( m_hSocketIPv6 == INVALID_SOCKET )
+		return FALSE;
+
 	SOCKADDR_IN6 pHost = { AF_INET6 };
 	SOCKET hSocket = CNetwork::AcceptSocket( m_hSocketIPv6, &pHost, AcceptCheck );
 	if ( hSocket == INVALID_SOCKET )

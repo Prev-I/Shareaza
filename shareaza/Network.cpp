@@ -599,6 +599,9 @@ BOOL CNetwork::AcquireLocalAddress(const IN_ADDR& pAddress, WORD nPort, const IN
 
 BOOL CNetwork::AcquireLocalAddress(const IN6_ADDR& pAddress, WORD nPort, const IN6_ADDR* pFromAddress)
 {
+	// IPv6 is opt-in: with it off, our IPv6 address stays unknown and is never sent
+	if ( ! Settings.Connection.EnableIPv6 )
+		return FALSE;
 
 	if ( nPort )
 		m_pHostIPv6.sin6_port = htons( nPort );
