@@ -875,7 +875,7 @@ void CEDClient::SendHello(BYTE nType)
 	DWORD nVersion = ( ( ( ED2K_CLIENT_ID & 0xFF ) << 24 ) |
 					   ( ( theApp.m_nVersion[0] & 0x7F ) << 17 ) |
 					   ( ( theApp.m_nVersion[1] & 0x7F ) << 10 ) |
-					   ( ( theApp.m_nVersion[2] & 0x07 ) << 7  ) |
+					   ( ( min( theApp.m_nVersion[2], (WORD)7 ) ) << 7  ) |	// 3 bits: capped, not wrapped
 					   ( ( theApp.m_nVersion[3] & 0x7F )       ) );
 	CEDTag( ED2K_CT_SOFTWAREVERSION, nVersion ).Write( pPacket );
 
