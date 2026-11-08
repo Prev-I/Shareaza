@@ -375,7 +375,8 @@ BOOL CConnection::ConnectTo(const IN6_ADDR* pAddress, WORD nPort)
 	// IPv6 is opt-in: with it off, no IPv6 connection is made
 	if ( ! Settings.Connection.EnableIPv6 )
 	{
-		theApp.Message( MSG_DEBUG, _T("Not connecting to [%s]: IPv6 is off (Connection.EnableIPv6)"), pAddress ? (LPCTSTR)IPv6ToString( pAddress ) : _T("") );
+		// A notice, so a user who typed an IPv6 address sees why nothing happens
+		theApp.Message( MSG_NOTICE, _T("Not connecting to [%s]: IPv6 is off (Connection.EnableIPv6)"), pAddress ? (LPCTSTR)IPv6ToString( pAddress ) : _T("") );
 		return FALSE;
 	}
 

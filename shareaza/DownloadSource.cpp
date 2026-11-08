@@ -567,6 +567,10 @@ BOOL CDownloadSource::CanInitiate(BOOL bNetwork, BOOL bEstablished, bool bFirstA
 {
 	if( !Network.IsConnected() ) return FALSE;
 
+	// With IPv6 off, an IPv6-only source is skipped rather than tried and marked failed.
+	// A source known only by host name has no address yet and is not IPv6-only.
+	if ( ! Settings.Connection.EnableIPv6 && IsIPv6Source() ) return FALSE;
+
 	// Not until the user decides whether to trust its server's certificate
 	if ( m_bTlsWaiting ) return FALSE;
 
