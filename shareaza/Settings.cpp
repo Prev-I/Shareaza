@@ -859,7 +859,8 @@ void CSettings::SmartUpgrade()
 
 	if ( General.SmartVersion < SMART_VERSION )
 	{
-		Uploads.SharePartials = true;
+		// An upgrade leaves Uploads.SharePartials alone: it is the user's choice, and
+		// forcing it on here used to undo that choice on every settings upgrade.
 
 		// 'SmartUpgrade' settings updates- change any settings that were mis-set in previous versions
 		if ( General.SmartVersion < 20 )
