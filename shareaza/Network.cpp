@@ -599,6 +599,9 @@ BOOL CNetwork::AcquireLocalAddress(const IN_ADDR& pAddress, WORD nPort, const IN
 
 BOOL CNetwork::AcquireLocalAddress(const IN6_ADDR& pAddress, WORD nPort, const IN6_ADDR* pFromAddress)
 {
+	// IPv6 is opt-in: with it off, our IPv6 address stays unknown and is never sent
+	if ( ! Settings.Connection.EnableIPv6 )
+		return FALSE;
 
 	if ( nPort )
 		m_pHostIPv6.sin6_port = htons( nPort );
@@ -1380,6 +1383,12 @@ void CNetwork::PostRun()
 
 	CQuickLock oHALock( m_pHASection );
 	m_pHostAddresses.RemoveAll();
+
+	// Forget our IPv6 address too, so a reconnect with Connection.EnableIPv6 off
+	// does not keep sending the one learned while it was on
+	m_pHostAddressesIPv6.clear();
+	ZeroMemory( &m_pHostIPv6, sizeof( m_pHostIPv6 ) );
+	m_pHostIPv6.sin6_family = AF_INET6;
 
 	// Act like regular application
 	SetThreadExecutionState( ES_CONTINUOUS );

@@ -372,6 +372,13 @@ BOOL CConnection::ConnectTo(const IN6_ADDR* pAddress, WORD nPort)
 	if ( IsValid() )
 		return FALSE;
 
+	// IPv6 is opt-in: with it off, no IPv6 connection is made
+	if ( ! Settings.Connection.EnableIPv6 )
+	{
+		theApp.Message( MSG_DEBUG, _T("Not connecting to [%s]: IPv6 is off (Connection.EnableIPv6)"), pAddress ? (LPCTSTR)IPv6ToString( pAddress ) : _T("") );
+		return FALSE;
+	}
+
 	// Make sure we have an address and a nonzero port number
 	if ( pAddress == NULL || nPort == 0 )
 		return FALSE;

@@ -34,9 +34,11 @@ jobs:
                     agent: Shareaza 2.7.10.2
                     # The folder Shareaza shares on its first run: its default CompletePath.
                     shared: Downloads
+                  # {version} comes from the installer's file name, so the same check serves
+                  # every fork release.
                   - client: previ
-                    expect: client=RAZI2.7.10.6&
-                    agent: iShareaza 2.7.10.6
+                    expect: client=RAZI{version}&
+                    agent: iShareaza {version}
                     shared: Downloads/Shareaza
         env:
             WINEPREFIX: /home/runner/.wine-shareaza-${{ matrix.client }}
@@ -86,6 +88,9 @@ jobs:
                   || { echo "::error::no published release $TAG"; exit 1; }
                 [ "$(echo "$exe" | grep -c .)" = 1 ] || { echo "::error::expected one x64 installer in $TAG, found: ${exe//$'\n'/, }"; exit 1; }
                 echo "release $TAG, installer $exe"
+                version=$(sed -nE 's/^iShareaza_([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)_x64_Release_.*\.exe$/\1/p' <<<"$exe")
+                [ -n "$version" ] || { echo "::error::no version in the installer name $exe"; exit 1; }
+                echo "CLIENT_VERSION=$version" >> "$GITHUB_ENV"
                 # The same public downloads and check that docs/ORACLE.md gives.
                 base="https://github.com/$GITHUB_REPOSITORY/releases/download/$TAG"
                 mkdir -p installer && cd installer
@@ -246,6 +251,9 @@ jobs:
                 AGENT: ${{ matrix.agent }}
             run: |
                 fail() { echo "::error::$*"; exit 1; }
+                EXPECT=${EXPECT//\{version\}/$CLIENT_VERSION}
+                AGENT=${AGENT//\{version\}/$CLIENT_VERSION}
+                echo "expecting $EXPECT from $AGENT"
                 [ -s out/gwc-requests.jsonl ] || fail "Shareaza never queried the stub cache"
                 grep -F -- "$EXPECT" out/gwc-requests.jsonl || fail "no request carried $EXPECT"
                 grep -F -- "\"user_agent\": \"$AGENT\"" out/gwc-requests.jsonl || fail "no request came from $AGENT"

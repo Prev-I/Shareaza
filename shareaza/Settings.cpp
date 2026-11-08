@@ -273,6 +273,7 @@ void CSettings::Load()
 	Add( _T("Connection"), _T("DetectConnectionLoss"), &Connection.DetectConnectionLoss, true );
 	Add( _T("Connection"), _T("DetectConnectionReset"), &Connection.DetectConnectionReset, false );
 	Add( _T("Connection"), _T("EnableFirewallException"), &Connection.EnableFirewallException, true );
+	Add( _T("Connection"), _T("EnableIPv6"), &Connection.EnableIPv6, false );
 	Add( _T("Connection"), _T("EnableUPnP"), &Connection.EnableUPnP, true );
 	Add( _T("Connection"), _T("FailureLimit"), &Connection.FailureLimit, 3, 1, 1, 512 );
 	Add( _T("Connection"), _T("FailurePenalty"), &Connection.FailurePenalty, 300, 1, 30, 3600, _T(" s") );
@@ -859,7 +860,8 @@ void CSettings::SmartUpgrade()
 
 	if ( General.SmartVersion < SMART_VERSION )
 	{
-		Uploads.SharePartials = true;
+		// An upgrade leaves Uploads.SharePartials alone: it is the user's choice, and
+		// forcing it on here used to undo that choice on every settings upgrade.
 
 		// 'SmartUpgrade' settings updates- change any settings that were mis-set in previous versions
 		if ( General.SmartVersion < 20 )

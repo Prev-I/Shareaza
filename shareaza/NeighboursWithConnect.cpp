@@ -1242,6 +1242,7 @@ void CNeighboursWithConnect::Maintain()
 				CHostCacheHostPtr pHost = (*i);
 
 				if ( pHost->m_bPriority &&
+					( Settings.Connection.EnableIPv6 || ! pHost->IsIPv6Host() ) &&
 					pHost->CanConnect( tNow ) &&
 					pHost->ConnectTo( TRUE ) )
 				{
@@ -1275,6 +1276,7 @@ void CNeighboursWithConnect::Maintain()
 					CHostCacheHostPtr pHost = (*i);
 
 					if ( ! pHost->m_bPriority &&
+						( Settings.Connection.EnableIPv6 || ! pHost->IsIPv6Host() ) &&
 						pHost->CanConnect( tNow ) &&
 						pHost->ConnectTo( TRUE ) )
 					{

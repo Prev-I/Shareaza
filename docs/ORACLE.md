@@ -225,8 +225,9 @@ closes it cleanly, so it saves `Discovery.dat` and `HostCache.dat`.
 - **The cache's hosts.** Once the cache under test returns hosts, the client connects to them. A
   live `gwc-edge` returns real G2 hosts, so the client joins the live network. To stay off it,
   the cache must hand out only hosts you control, behind a host firewall.
-- **Crash reports.** Both clients ship one: BugSplat in the fork, BugTrap in 2.7.10.2. After a crash
-  or hang it can offer to upload a report. Whether it asks first was not checked.
+- **Crash reports.** 2.7.10.2 ships BugTrap, which after a crash can offer to upload a report;
+  whether it asks first was not checked. The fork ships none from `previ.5` on; up to `previ.4` it
+  shipped BugSplat, which reported to upstream's account.
 
 ### Settings and Wine
 
@@ -269,6 +270,14 @@ gone. Whether HTTPS downloads work under Wine has not been tested.
   certificate.
 - `previ.4` is the first release that has it. `previ.3` and earlier still use OpenSSL and verify
   nothing.
+
+## IPv6 in the fork
+
+From `previ.5` on, `Connection.EnableIPv6` (Advanced settings) is off by default: the client opens
+no IPv6 listener, makes no peer-to-peer connection over IPv6 and sends no IPv6 address of its own.
+HTTP requests through Windows' WinINet, including web-cache queries, follow the system's choice of
+IPv4 or IPv6 either way. Preparing a prefix leaves the setting at its default. `previ.4` and
+earlier always listen on IPv6.
 
 ## Where Shareaza keeps its data
 

@@ -1016,6 +1016,9 @@ BOOL CChatSession::ReadG2()
 
 BOOL CChatSession::OnProfileChallenge(CG2Packet* /*pPacket*/)
 {
+	// With profile serving off, a profile challenge goes unanswered
+	if ( ! Settings.Community.ServeProfile ) return TRUE;
+
 	if ( ! MyProfile.IsValid() ) return TRUE;
 
 	CG2Packet* pProfile = CG2Packet::New( G2_PACKET_PROFILE_DELIVERY, TRUE );

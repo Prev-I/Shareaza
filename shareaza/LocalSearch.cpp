@@ -1015,7 +1015,8 @@ CG2Packet* CLocalSearch::CreatePacketG2()
 	CString strNick = MyProfile.GetNick();
 	if ( strNick.GetLength() > 32 ) strNick = strNick.Left( 32 );
 
-	if ( strNick.GetLength() )
+	// With profile serving off, the nickname stays out of our hits
+	if ( Settings.Community.ServeProfile && strNick.GetLength() )
 	{
 		int nNick = pPacket->GetStringLen( strNick );
 		pPacket->WritePacket( G2_PACKET_PROFILE, nNick + 6, TRUE );

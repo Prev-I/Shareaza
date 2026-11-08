@@ -90,6 +90,7 @@ CDatagrams::CDatagrams()
 {
 	for ( int i = 0; i < _countof( m_hSocket ); ++i )
 		m_hSocket[ i ] = INVALID_SOCKET;
+	m_hSocketIPv6 = INVALID_SOCKET;
 }
 
 CDatagrams::~CDatagrams()
@@ -264,7 +265,9 @@ BOOL CDatagrams::Listen()
 		}
 	}
 
-	ListenIPv6();
+	// IPv6 is opt-in: with it off, no IPv6 socket is opened
+	if ( Settings.Connection.EnableIPv6 )
+		ListenIPv6();
 
 	m_nBufferBuffer	= Settings.Gnutella2.UdpBuffers; // 256;
 	m_pBufferBuffer	= new CBuffer[ m_nBufferBuffer ];
@@ -319,6 +322,8 @@ BOOL CDatagrams::Listen()
 BOOL CDatagrams::ListenIPv6()
 {
 	m_hSocketIPv6 = socket( AF_INET6, SOCK_DGRAM, IPPROTO_UDP );
+	if ( m_hSocketIPv6 == INVALID_SOCKET )
+		return FALSE;
 
 	SOCKADDR_IN6 saHost = { AF_INET6 };
 
@@ -333,6 +338,8 @@ BOOL CDatagrams::ListenIPv6()
 		if ( bind( m_hSocketIPv6, (SOCKADDR*)&saHost, sizeof( saHost ) ) != 0 )
 		{
 			theApp.Message( MSG_ERROR, IDS_NETWORK_CANT_LISTEN, (LPCTSTR)CString( IPv6ToString( &saHost.sin6_addr ) ), htons( saHost.sin6_port ) );
+			// An unbound socket must not count as listening
+			CNetwork::CloseSocket( m_hSocketIPv6, false );
 			return FALSE;
 		}
 	}
@@ -349,7 +356,11 @@ BOOL CDatagrams::ListenIPv6()
 
 void CDatagrams::Disconnect()
 {
-	if ( ! IsValid() ) return;
+	if ( ! IsValid() )
+	{
+		CNetwork::CloseSocket( m_hSocketIPv6, false );
+		return;
+	}
 
 	DHT.Disconnect();
 

@@ -422,7 +422,8 @@ BOOL CDownloadTransferHTTP::SendRequest()
 	{
 		if ( m_bInitiated ) SendMyAddress();
 		
-		strLine = MyProfile.GetNick().Left( 255 );
+		// With profile serving off, the nickname stays out of our headers
+		strLine = Settings.Community.ServeProfile ? MyProfile.GetNick().Left( 255 ) : CString();
 		
 		if ( strLine.GetLength() > 0 )
 		{
