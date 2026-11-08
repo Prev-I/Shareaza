@@ -82,12 +82,21 @@ function Get-InstalledVersion {
 # Run a native program and judge it by its exit code alone: reg.exe and netsh print
 # success messages on stderr, which Windows PowerShell would turn into errors.
 function Invoke-Native([string] $File, [string[]] $Arguments) {
-    $p = Start-Process -FilePath $File -ArgumentList $Arguments -PassThru -NoNewWindow
-    # Hold the process handle before it exits: with -Wait, Windows PowerShell 5.1 can
-    # report no exit code at all, which read as a failure of a command that succeeded.
-    $null = $p.Handle
-    $p.WaitForExit()
-    return $p.ExitCode
+    # The kit owns the process from its creation, so its exit code is always known.
+    # Start-Process could lose a process that exits at once (reg.exe export does) and
+    # then report no exit code, which read as a failure of a command that succeeded.
+    # Arguments are joined with spaces, as Start-Process joined them.
+    $psi = New-Object System.Diagnostics.ProcessStartInfo
+    $psi.FileName = $File
+    $psi.Arguments = $Arguments -join ' '
+    $psi.UseShellExecute = $false
+    $p = [System.Diagnostics.Process]::Start($psi)
+    try {
+        $p.WaitForExit()
+        return $p.ExitCode
+    } finally {
+        $p.Dispose()
+    }
 }
 
 # Move a folder, retrying while Windows or an antivirus still holds a file in it.
