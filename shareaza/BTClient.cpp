@@ -1087,7 +1087,8 @@ void CBTClient::SendBeHandshake()
 	CBENode* pRoot = pPacket->m_pNode.get();
 	ASSERT( pRoot );
 
-	CString strNick = MyProfile.GetNick().Left( 255 ); // Truncate to 255 characters
+	// With profile serving off, the nickname stays out of the handshake
+	CString strNick = Settings.Community.ServeProfile ? MyProfile.GetNick().Left( 255 ) : CString(); // Truncate to 255 characters
 	if ( strNick.GetLength() )
 		pRoot->Add( BT_DICT_NICKNAME )->SetString( strNick );
 

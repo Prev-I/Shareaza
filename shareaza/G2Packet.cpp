@@ -1332,9 +1332,10 @@ BOOL CG2Packet::OnCrawlRequest(const SOCKADDR_IN* pHost)
 	CString vendorCode;
 	CString currentVersion;
 
-	if ( bWantNames ) strNick = MyProfile.GetNick().Left( 255 ); //trim if over 255 characters
+	// With profile serving off, our nickname and location stay out of crawl answers
+	if ( bWantNames && Settings.Community.ServeProfile ) strNick = MyProfile.GetNick().Left( 255 ); //trim if over 255 characters
 
-	if ( bWantGPS ) nGPS = MyProfile.GetPackedGPS();
+	if ( bWantGPS && Settings.Community.ServeProfile ) nGPS = MyProfile.GetPackedGPS();
 
 	if ( bWantREXT )
 	{

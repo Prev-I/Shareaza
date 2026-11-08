@@ -1014,7 +1014,8 @@ void CUploadTransferHTTP::SendDefaultHeaders()
 		strLine.Format( _T("X-PerHost: %lu\r\n"), Settings.Uploads.MaxPerHost );
 		Write( strLine );
 
-		strLine = MyProfile.GetNick().Left( 255 );
+		// With profile serving off, the nickname stays out of our headers
+		strLine = Settings.Community.ServeProfile ? MyProfile.GetNick().Left( 255 ) : CString();
 
 		if ( strLine.GetLength() > 0 )
 		{
