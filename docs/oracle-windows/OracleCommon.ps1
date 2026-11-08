@@ -86,6 +86,11 @@ function Invoke-Native([string] $File, [string[]] $Arguments) {
     # Start-Process could lose a process that exits at once (reg.exe export does) and
     # then report no exit code, which read as a failure of a command that succeeded.
     # Arguments are joined with spaces, as Start-Process joined them.
+    # A bare name is resolved the way PowerShell resolves commands, never from the current
+    # folder: the kit runs elevated, and CreateProcess would look there before System32.
+    if (-not [IO.Path]::IsPathRooted($File)) {
+        $File = (Get-Command -Name $File -CommandType Application -ErrorAction Stop | Select-Object -First 1).Path
+    }
     $psi = New-Object System.Diagnostics.ProcessStartInfo
     $psi.FileName = $File
     $psi.Arguments = $Arguments -join ' '
