@@ -311,37 +311,6 @@ CShareazaApp::~CShareazaApp()
 	}
 }
 
-void CShareazaApp::RegisterBugReporting()
-{
-	// BUGSPLAT INITIALIZATION
-	const DWORD flags = MDSF_PREVENTHIJACKING;
-
-	mpSender = new MiniDmpSender(L"shareaza", MOD_CLIENT_NAME_T, m_sVersionLong.GetString(), NULL, flags);
-
-
-	// Call each of the exposed methods
-	mpSender->enableExceptionFilter(false);
-	ASSERT(FALSE == mpSender->isExceptionFilterEnabled());
-
-	mpSender->enableExceptionFilter();
-	ASSERT(TRUE == mpSender->isExceptionFilterEnabled());
-
-	mpSender->enableExceptionFilter(true);
-	ASSERT(TRUE == mpSender->isExceptionFilterEnabled());
-
-
-	//! Use to set full path for BsSndRpt's resource DLL (allows dialog customizations, e.g. language); default is ./BugSplatRc.dll (or ./BugSplatRc64.dll).
-#ifdef _WIN64	
-	wchar_t* path = L"./BugSplatRc64.dll";
-#else
-	wchar_t* path = L"./BugSplatRc.dll";
-#endif // _WIN64
-	mpSender->setResourceDllPath(path);
-
-	//! Must call setFlags with MDSF_DETECTHANGS and other flags after calling setHangDetectionTimeout
-	mpSender->setFlags(MDSF_DETECTHANGS | flags);
-}
-
 /////////////////////////////////////////////////////////////////////////////
 // CShareazaApp initialization
 
@@ -358,7 +327,6 @@ BOOL CShareazaApp::InitInstance()
 	//AfxEnableControlContainer(m_pFontManager); // Enable support for containment of OLE controls.
 	AfxEnableControlContainer();
 	InitResources();			// Loads theApp settings.
-	RegisterBugReporting();
 	Settings.Load();			// Loads settings. Depends on InitResources().
 
 	if ( m_pfnSetCurrentProcessExplicitAppUserModelID )

@@ -200,19 +200,6 @@ Source: "{#Compiler}\{#PlatformName}\{#ConfigurationName}\zlibwapi.dll"; DestDir
 ; BZLib
 Source: "{#Compiler}\{#PlatformName}\{#ConfigurationName}\bzlib.dll"; DestDir: "{app}"; Flags: overwritereadonly replacesameversion restartreplace uninsremovereadonly sortfilesbyextension
 
-; BugSplat
-#if PlatformName == "Win32"
-Source: "BugSplat\{#PlatformName}\{#ConfigurationName}\BugSplat.dll" ; DestDir: "{app}"; Flags: overwritereadonly replacesameversion restartreplace uninsremovereadonly sortfilesbyextension
-Source: "BugSplat\{#PlatformName}\{#ConfigurationName}\BsSndRpt.exe" ; DestDir: "{app}"; Flags: overwritereadonly replacesameversion restartreplace uninsremovereadonly sortfilesbyextension
-Source: "BugSplat\{#PlatformName}\{#ConfigurationName}\BugSplatRC.dll" ; DestDir: "{app}"; Flags: overwritereadonly replacesameversion restartreplace uninsremovereadonly sortfilesbyextension
-Source: "BugSplat\{#PlatformName}\{#ConfigurationName}\BugSplatHD.exe" ; DestDir: "{app}"; Flags: overwritereadonly replacesameversion restartreplace uninsremovereadonly sortfilesbyextension
-#elif PlatformName == "x64"
-Source: "BugSplat\{#PlatformName}\{#ConfigurationName}\BugSplat64.dll" ; DestDir: "{app}"; Flags: overwritereadonly replacesameversion restartreplace uninsremovereadonly sortfilesbyextension
-Source: "BugSplat\{#PlatformName}\{#ConfigurationName}\BsSndRpt64.exe" ; DestDir: "{app}"; Flags: overwritereadonly replacesameversion restartreplace uninsremovereadonly sortfilesbyextension
-Source: "BugSplat\{#PlatformName}\{#ConfigurationName}\BugSplatRC64.dll" ; DestDir: "{app}"; Flags: overwritereadonly replacesameversion restartreplace uninsremovereadonly sortfilesbyextension
-Source: "BugSplat\{#PlatformName}\{#ConfigurationName}\BugSplatHD64.exe" ; DestDir: "{app}"; Flags: overwritereadonly replacesameversion restartreplace uninsremovereadonly sortfilesbyextension
-#endif
-
 ; HashLib
 Source: "{#Compiler}\{#PlatformName}\{#ConfigurationName}\HashLib.dll"; DestDir: "{app}"; DestName: "HashLib.dll"; Flags: overwritereadonly replacesameversion restartreplace uninsremovereadonly sortfilesbyextension
 
@@ -543,6 +530,11 @@ Type: files; Name: "{app}\*.bmp"
 ; BugTrap, replaced by BugSplat
 Type: files; Name: "{app}\BugTrap*.dll"
 Type: files; Name: "{app}\dbghelp.dll"
+; BugSplat, removed in 2.7.11.0 (previ.5); previ.4 was the last release to install it
+Type: files; Name: "{app}\BugSplat*.dll"
+Type: files; Name: "{app}\BsSndRpt*.exe"
+Type: files; Name: "{app}\BugSplatHD*.exe"
+Type: files; Name: "{app}\BugSplatRc*.dll"
 Type: files; Name: "{app}\Data\*.url"
 Type: filesandordirs; Name: "{app}\Uninstall"
 Type: filesandordirs; Name: "{app}\Plugins"
