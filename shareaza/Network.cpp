@@ -1384,6 +1384,12 @@ void CNetwork::PostRun()
 	CQuickLock oHALock( m_pHASection );
 	m_pHostAddresses.RemoveAll();
 
+	// Forget our IPv6 address too, so a reconnect with Connection.EnableIPv6 off
+	// does not keep sending the one learned while it was on
+	m_pHostAddressesIPv6.clear();
+	ZeroMemory( &m_pHostIPv6, sizeof( m_pHostIPv6 ) );
+	m_pHostIPv6.sin6_family = AF_INET6;
+
 	// Act like regular application
 	SetThreadExecutionState( ES_CONTINUOUS );
 
