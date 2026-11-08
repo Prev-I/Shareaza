@@ -288,7 +288,7 @@ public:
 		bool		SkipWANIPSetup;				// UPnP: Skip WANIPConn1 device setup
 		DWORD		ZLibCompressionLevel;		// ZLib compression level: 0(none/fastest)..9(best/slowest)
 		string_set	IgnoredCountry;
-		bool		EnableIPv6;					// Listen, connect and advertise over IPv6. Off: no IPv6 socket, connection or own address (default = false). Takes effect at the next connect
+		bool		EnableIPv6;					// Listen, connect to peers and advertise over IPv6. Off: no IPv6 listener, peer connection or own address (default = false). WinINet HTTP requests are not covered. Takes effect at the next connect
 		bool		EnableMulticast;			// Send and accept multi-cast packets (default = true)
 		bool		MulticastLoop;				// Use multi-cast loopback (for debugging, default = false)
 		DWORD		MulticastTTL;				// TTL for multi-cast packets (default = 1)

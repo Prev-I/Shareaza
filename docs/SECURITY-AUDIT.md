@@ -22,8 +22,11 @@ blocking in the HTTPS connect. Of the five findings, only finding 4's missing op
 are unchanged.
 
 **Status, 2026-11-08.** All five findings are fixed in the fork. Finding 4's opt-out is the new
-setting `Connection.EnableIPv6`, off by default, with which the client opens no IPv6 socket and
-sends no IPv6 address (`88f7dcce4`). The same work removes the BugSplat crash reporter
+setting `Connection.EnableIPv6`, off by default, with which the client's own peer-to-peer sockets
+do not use IPv6 and it sends no IPv6 address of its own (`88f7dcce4`). HTTP requests made through
+Windows' WinINet (web caches, HTTP trackers, the update check) are not covered: they follow the
+system's choice of IPv4 or IPv6, so a dual-stack server can still see the machine's IPv6 address.
+The same work removes the BugSplat crash reporter
 (`fe0e88439`). Both are planned for the first 2.7.11.0 release, `v2.7.11.0-previ.5`.
 
 The text below is the audit as written, apart from the dated bullets under **Disclosure**, the
@@ -148,8 +151,9 @@ went to the provenance pass instead.
 - **Fixed**, apart from the opt-out, by `e6ad1a848`, `85be3a518`, `178100427` and `2c632d30c`.
   Three more defects found on the way are in the addendum.
 - **Opt-out fixed** on 2026-11-08 by `88f7dcce4`: `Connection.EnableIPv6`, off by default. With it
-  off, no IPv6 socket is opened, no IPv6 connection is made, and the client never learns or sends
-  an IPv6 address of its own.
+  off, no IPv6 listener is opened, no peer-to-peer connection is made over IPv6, and the client
+  never learns or sends an IPv6 address of its own; `CNetwork::PostRun` forgets one learned while
+  the setting was on. HTTP requests through WinINet are outside the setting (see the status).
 
 ### 5. ✔ The installer deletes every top-level `*.exe` and `*.dll` in the install folder
 

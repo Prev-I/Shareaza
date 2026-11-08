@@ -274,8 +274,10 @@ gone. Whether HTTPS downloads work under Wine has not been tested.
 ## IPv6 in the fork
 
 From `previ.5` on, `Connection.EnableIPv6` (Advanced settings) is off by default: the client opens
-no IPv6 socket, makes no IPv6 connection and sends no IPv6 address. Preparing a prefix leaves it at
-the default, so the oracle runs over IPv4. `previ.4` and earlier always listen on IPv6.
+no IPv6 listener, makes no peer-to-peer connection over IPv6 and sends no IPv6 address of its own.
+HTTP requests through Windows' WinINet, including web-cache queries, follow the system's choice of
+IPv4 or IPv6 either way. Preparing a prefix leaves the setting at its default. `previ.4` and
+earlier always listen on IPv6.
 
 ## Where Shareaza keeps its data
 
