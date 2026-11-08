@@ -211,6 +211,15 @@ explorer.exe "$env:ProgramFiles\Shareaza\Shareaza.exe"
 
 **Passes if** the query line carries `client=RAZI2.7.10.6`, and `/stats` lists `RAZI 2.7.10.6`.
 
+To test a build that is not published, give `-InstallerDir` instead of a release: a folder holding
+the build's x64 installer and the `SHA256SUMS.txt` naming it, such as the
+`Shareaza Windows x64 Release` artifact of a `release.yml` run started by hand. The installer is
+checked against that file; no pinned hash applies.
+
+```powershell
+.\Install-Shareaza.ps1 -Client Fork -InstallerDir .\build
+```
+
 ## Finishing
 
 Close Shareaza (**File → Exit**), then, in the elevated window:

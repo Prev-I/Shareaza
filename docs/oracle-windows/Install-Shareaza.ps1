@@ -7,7 +7,9 @@
 .DESCRIPTION
     Official: Shareaza 2.7.10.2 x64 from SourceForge, checked against the SHA-256
     SourceForge publishes. Fork: this fork's x64 build from a published GitHub
-    release, checked against the release's SHA256SUMS.txt.
+    release, checked against the release's SHA256SUMS.txt. With -InstallerDir, the
+    fork's build comes from a local folder instead, such as an unpublished build's
+    artifact, checked against the SHA256SUMS.txt in that folder.
 
     Before installing, it saves your existing Shareaza settings, data folder,
     DefaultServices.dat and installed version (once per test session), because
@@ -22,6 +24,8 @@
     .\Install-Shareaza.ps1 -Client Official
 .EXAMPLE
     .\Install-Shareaza.ps1 -Client Fork -ReleaseTag v2.7.10.6-previ.4
+.EXAMPLE
+    .\Install-Shareaza.ps1 -Client Fork -InstallerDir .\build
 #>
 [CmdletBinding()]
 param(
@@ -29,6 +33,8 @@ param(
     [string] $Client = 'Official',
     [string] $ReleaseTag = 'v2.7.10.6-previ.4',
     [string] $Repository = 'Prev-I/Shareaza',
+    # A folder holding one *_x64_Release_*.exe and a SHA256SUMS.txt naming it.
+    [string] $InstallerDir = '',
     [string] $WorkDir = (Join-Path $env:USERPROFILE 'ShareazaOracle')
 )
 . (Join-Path $PSScriptRoot 'OracleCommon.ps1')
@@ -37,6 +43,19 @@ Assert-Admin
 Assert-NotRunning
 Assert-SameVolume $WorkDir
 Assert-NotRestoring $WorkDir
+
+if ($InstallerDir -and $Client -ne 'Fork') { throw '-InstallerDir applies to -Client Fork only.' }
+if ($InstallerDir -and $PSBoundParameters.ContainsKey('ReleaseTag')) { throw 'Give -InstallerDir or -ReleaseTag, not both.' }
+
+# The one x64 Release installer a SHA256SUMS.txt names: its file name and upper-case hash.
+function Get-X64Installer([string] $Sums, [string] $Source) {
+    # Lines are "<hash> <name>" or "<hash> *<name>".
+    $lines = @(Get-Content $Sums | Where-Object { $_ -match '^[0-9a-fA-F]{64} [ *][^\\/:*?"<>|\s]+_x64_Release_[^\\/:*?"<>|\s]+\.exe$' })
+    if ($lines.Count -ne 1) { throw "Expected one x64 installer in $Source's SHA256SUMS.txt, found $($lines.Count)." }
+    $name = ($lines[0] -replace '^[0-9a-fA-F]{64} [ *]', '')
+    if ([IO.Path]::GetFileName($name) -ne $name) { throw "Unexpected installer name in SHA256SUMS.txt: $name" }
+    return @{ Name = $name; Hash = ($lines[0] -split ' ')[0].ToUpperInvariant() }
+}
 
 $downloads = Join-Path $WorkDir 'installers'
 New-Item -ItemType Directory -Force -Path $downloads | Out-Null
@@ -51,6 +70,14 @@ if ($Client -eq 'Official') {
     $exe = Join-Path $downloads $name
     Write-Host "Downloading $name from SourceForge"
     Invoke-WebRequest -UseBasicParsing -UserAgent $agent -Uri $url -OutFile $exe
+} elseif ($InstallerDir) {
+    # An unpublished build: its own SHA256SUMS.txt, written by the build job, names the installer.
+    $dir = (Resolve-Path -LiteralPath $InstallerDir).Path
+    $found = Get-X64Installer (Join-Path $dir 'SHA256SUMS.txt') $dir
+    $name = $found.Name; $expected = $found.Hash
+    $exe = Join-Path $dir $name
+    if (-not (Test-Path -LiteralPath $exe)) { throw "$name is listed in SHA256SUMS.txt but not in $dir." }
+    Write-Host "Using $name from $dir"
 } else {
     # The release's own SHA256SUMS.txt names its installers, so no GitHub API call
     # is needed: the API's anonymous limit is easily reached on a shared address.
@@ -58,12 +85,8 @@ if ($Client -eq 'Official') {
     $sums = Join-Path $downloads 'SHA256SUMS.txt'
     Write-Host "Downloading SHA256SUMS.txt from $ReleaseTag"
     Invoke-WebRequest -UseBasicParsing -UserAgent $agent -Uri "$base/SHA256SUMS.txt" -OutFile $sums
-    # Lines are "<hash> <name>" or "<hash> *<name>".
-    $lines = @(Get-Content $sums | Where-Object { $_ -match '^[0-9a-fA-F]{64} [ *][^\\/:*?"<>|\s]+_x64_Release_[^\\/:*?"<>|\s]+\.exe$' })
-    if ($lines.Count -ne 1) { throw "Expected one x64 installer in $ReleaseTag's SHA256SUMS.txt, found $($lines.Count)." }
-    $expected = ($lines[0] -split ' ')[0].ToUpperInvariant()
-    $name = ($lines[0] -replace '^[0-9a-fA-F]{64} [ *]', '')
-    if ([IO.Path]::GetFileName($name) -ne $name) { throw "Unexpected installer name in SHA256SUMS.txt: $name" }
+    $found = Get-X64Installer $sums $ReleaseTag
+    $name = $found.Name; $expected = $found.Hash
     # The default release's hash is pinned here as well, so a replaced release is caught.
     $pinned = @{
         'v2.7.10.6-previ.1' = '731FCA2A95BEF41F2A3EFC83837B8FA164C7482D82896ED6CA32F8F36EF8DEDF'

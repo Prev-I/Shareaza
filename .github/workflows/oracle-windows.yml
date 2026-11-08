@@ -14,6 +14,10 @@ on:
           description: 'Published release tag for the fork installer'
           required: false
           default: 'v2.7.10.6-previ.4'
+        build_run:
+          description: 'ID of a release.yml run whose x64 installer to test instead of a release (an unpublished build)'
+          required: false
+          default: ''
     pull_request:
       paths:
         - docs/oracle-windows/**
@@ -21,6 +25,8 @@ on:
 
 permissions:
     contents: read
+    # gh run download, for the build_run input.
+    actions: read
 
 jobs:
     oracle:
@@ -33,9 +39,11 @@ jobs:
                   - client: Official
                     expect: client=RAZA2.7.10.2&
                     agent: Shareaza 2.7.10.2
+                  # {version} is the installed Shareaza.exe's version, so the same check
+                  # serves every fork release and unpublished build.
                   - client: Fork
-                    expect: client=RAZI2.7.10.6&
-                    agent: iShareaza 2.7.10.6
+                    expect: client=RAZI{version}&
+                    agent: iShareaza {version}
         defaults:
             run:
                 # Windows PowerShell 5.1, the version on Windows 10.
@@ -69,15 +77,50 @@ jobs:
                 New-Item -ItemType Directory -Force -Path "$env:APPDATA\Shareaza\Data" | Out-Null
                 Set-Content -Path "$env:APPDATA\Shareaza\Data\marker.txt" -Value 'mine'
 
+        -   name: Fetch an unpublished build
+            if: inputs.build_run != '' && matrix.client == 'Fork'
+            env:
+                GH_TOKEN: ${{ github.token }}
+                BUILD_RUN: ${{ inputs.build_run }}
+            run: |
+                $ErrorActionPreference = 'Stop'
+                if ($env:BUILD_RUN -notmatch '^[0-9]+$') { throw "build_run must be a run ID, not '$env:BUILD_RUN'" }
+                & gh run download $env:BUILD_RUN -R $env:GITHUB_REPOSITORY -n 'Shareaza Windows x64 Release' -D build
+                if ($LASTEXITCODE -ne 0) { throw "could not download the x64 installer of run $env:BUILD_RUN" }
+                Get-ChildItem build | ForEach-Object { "build: $($_.Name)" }
+
         -   name: Install the client with the kit
             env:
                 TAG: ${{ inputs.release_tag || 'v2.7.10.6-previ.4' }}
             run: |
                 $ErrorActionPreference = 'Stop'
-                & "$env:KIT\Install-Shareaza.ps1" -Client ${{ matrix.client }} -ReleaseTag $env:TAG -WorkDir $env:WORK
+                if (Test-Path build) {
+                    & "$env:KIT\Install-Shareaza.ps1" -Client ${{ matrix.client }} -InstallerDir build -WorkDir $env:WORK
+                } else {
+                    & "$env:KIT\Install-Shareaza.ps1" -Client ${{ matrix.client }} -ReleaseTag $env:TAG -WorkDir $env:WORK
+                }
                 if (-not (Test-Path "$env:WORK\session\manifest.json")) { throw 'no sealed backup after installing' }
                 $app = (Get-ItemProperty 'HKCU:\Software\Shareaza\Shareaza').Path
                 (Get-FileHash "$app\Data\DefaultServices.dat").Hash | Set-Content stock-defaults.sha256
+                # The version the client reports, as CShareazaApp builds it from the file version.
+                $vi = (Get-Item "$app\Shareaza.exe").VersionInfo
+                $version = '{0}.{1}.{2}.{3}' -f $vi.FileMajorPart, $vi.FileMinorPart, $vi.FileBuildPart, $vi.FilePrivatePart
+                "installed version $version"
+                Add-Content -Path $env:GITHUB_ENV -Value "CLIENT_VERSION=$version"
+                # Builds that know Connection.EnableIPv6 (2.7.11.0-previ.5 on) get the IPv6 and
+                # BugSplat checks; the official client and earlier fork releases do not.
+                $bytes = [IO.File]::ReadAllBytes("$app\Shareaza.exe")
+                $text = [Text.Encoding]::GetEncoding(28591).GetString($bytes)
+                $needle = [Text.Encoding]::GetEncoding(28591).GetString([Text.Encoding]::Unicode.GetBytes('EnableIPv6'))
+                if ($text.Contains($needle)) {
+                    Add-Content -Path $env:GITHUB_ENV -Value 'HAS_IPV6_SETTING=1'
+                    $left = @(Get-ChildItem -Path "$app\BugSplat*", "$app\BsSndRpt*" -ErrorAction SilentlyContinue)
+                    if ($left) { throw "BugSplat files are installed: $($left.Name -join ', ')" }
+                    'no BugSplat files installed'
+                } else {
+                    Add-Content -Path $env:GITHUB_ENV -Value 'HAS_IPV6_SETTING=0'
+                    '::notice::this build has no Connection.EnableIPv6 setting: the IPv6 and BugSplat checks are skipped'
+                }
 
         -   name: Start a stub cache
             run: |
@@ -108,7 +151,7 @@ jobs:
                 Remove-Item gwc-requests.jsonl   # the readiness probe is not a client request
                 # A helper the run steps share: start Shareaza, wait for a query, watch, close it cleanly.
                 @'
-                param([string] $Name)
+                param([string] $Name, [switch] $ExpectIPv6)
                 $ErrorActionPreference = 'Stop'
                 $before = if (Test-Path gwc-requests.jsonl) { @(Get-Content gwc-requests.jsonl).Count } else { 0 }
                 $app = (Get-ItemProperty 'HKCU:\Software\Shareaza\Shareaza').Path
@@ -129,6 +172,22 @@ jobs:
                 if ($files) { throw "files appeared in the shared folders: $($files.Name -join ', ')" }
                 $p = Get-Process -Name Shareaza -ErrorAction SilentlyContinue
                 if (-not $p) { throw 'Shareaza was not running' }
+                # Which addresses the client's sockets use, for builds with the IPv6 setting.
+                if ($env:HAS_IPV6_SETTING -eq '1') {
+                    $tcp = @(Get-NetTCPConnection -State Listen -OwningProcess $p.Id -ErrorAction SilentlyContinue)
+                    $udp = @(Get-NetUDPEndpoint -OwningProcess $p.Id -ErrorAction SilentlyContinue)
+                    $tcp | ForEach-Object { "tcp listen: $($_.LocalAddress) port $($_.LocalPort)" }
+                    $udp | ForEach-Object { "udp: $($_.LocalAddress) port $($_.LocalPort)" }
+                    if ($ExpectIPv6) {
+                        if (-not ($tcp | Where-Object { $_.LocalAddress -eq '::' })) { throw 'IPv6 is on, but no TCP socket listens on ::' }
+                        if (-not ($udp | Where-Object { $_.LocalAddress -eq '::' })) { throw 'IPv6 is on, but no UDP socket is bound to ::' }
+                        'IPv6 on: TCP and UDP sockets on ::'
+                    } else {
+                        $v6 = @(@($tcp) + @($udp) | Where-Object { $_.LocalAddress -match ':' })
+                        if ($v6) { throw "IPv6 is off, but these sockets use IPv6: $(($v6 | ForEach-Object { "$($_.LocalAddress) port $($_.LocalPort)" }) -join ', ')" }
+                        'IPv6 off: no IPv6 socket'
+                    }
+                }
                 "window: handle=$($p.MainWindowHandle) title='$($p.MainWindowTitle)' session=$($p.SessionId)"
                 Add-Type -AssemblyName System.Windows.Forms, System.Drawing
                 $b = [Windows.Forms.SystemInformation]::VirtualScreen
@@ -166,6 +225,15 @@ jobs:
             timeout-minutes: 10
             run: .\run-client.ps1 -Name hub
 
+        -   name: Run 3, with IPv6 on
+            # Only builds that know the setting. Restore-Oracle.ps1 removes it with the rest.
+            if: env.HAS_IPV6_SETTING == '1'
+            timeout-minutes: 10
+            run: |
+                $ErrorActionPreference = 'Stop'
+                New-ItemProperty -Path 'HKCU:\Software\Shareaza\Shareaza\Connection' -Name EnableIPv6 -Value 1 -PropertyType DWord -Force | Out-Null
+                .\run-client.ps1 -Name ipv6 -ExpectIPv6
+
         -   name: Prepare must refuse while a restore is unfinished
             run: |
                 $marker = "$env:WORK\session\restoring"
@@ -197,6 +265,9 @@ jobs:
             run: |
                 $ErrorActionPreference = 'Stop'
                 function Fail($m) { Write-Host "::error::$m"; exit 1 }
+                $env:EXPECT = $env:EXPECT.Replace('{version}', "$env:CLIENT_VERSION")
+                $env:AGENT = $env:AGENT.Replace('{version}', "$env:CLIENT_VERSION")
+                "expecting $env:EXPECT from $env:AGENT"
                 if (-not (Test-Path gwc-requests.jsonl)) { Fail 'Shareaza never queried the stub cache' }
                 $req = @(Get-Content gwc-requests.jsonl | Where-Object { $_ -match '"/gwc/\?' })
                 if ($req.Count -lt 2) { Fail "expected a query from each of the two runs, got $($req.Count)" }
