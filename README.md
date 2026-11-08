@@ -1,61 +1,67 @@
-# Compiling Shareaza
+# Shareaza, Prev-I fork
 
-## Microsoft Visual Studio
+Shareaza is a peer-to-peer client for Windows that downloads from Gnutella2, Gnutella, eDonkey2000,
+BitTorrent and HTTP sources. This is a personal fork. It builds Shareaza's Windows installers on
+GitHub Actions and carries the fixes from a static security audit of the code added after the
+original project ended ([docs/SECURITY-AUDIT.md](docs/SECURITY-AUDIT.md)). It also serves as a
+reference client for testing GWebCaches ([docs/ORACLE.md](docs/ORACLE.md)).
 
-### Install Visual Studio
+Installers: [Releases](https://github.com/Prev-I/Shareaza/releases). They need Windows 10 or later.
 
-This release of Shareaza _must_ be compiled by VS2022. http://www.microsoft.com/visualstudio/en-us/products
-(Previous releases was dropped)
+## History and credits
 
-#### Install Visual Studio 2022
+This fork stands on the work of others:
 
-##### Microsoft Visual Studio 2022 Full Edition
+- **The original Shareaza project** on SourceForge, with its source in Subversion:
+  [sourceforge.net/p/shareaza/code](https://sourceforge.net/p/shareaza/code/), trunk at
+  `https://svn.code.sf.net/p/shareaza/code/trunk`. Its site, wiki and forum are at
+  [shareaza.sourceforge.net](https://shareaza.sourceforge.net/), and the Help menu still points
+  there.
+- **ivan386**, who imported SVN build 9329 to Git in 2013 and kept it going:
+  [github.com/ivan386/Shareaza](https://github.com/ivan386/Shareaza).
+- **ansani**, who continued it as 2.7.10.x with a Visual Studio 2022 build, HTTPS downloads and
+  GitHub releases: [github.com/ansani/Shareaza](https://github.com/ansani/Shareaza). This
+  repository is a fork of ansani's; its `master` branch is that code as imported.
 
-This needs to be a Full Edition preferably Team Edition and not the Express Release.
+## Building
 
-If you want to compile to 64-bit, make sure to enable it during the install process under Add or Remove Features (`Language Tools -> Visual C++ -> X64 Compilers and Tools`).
+The reference setup is the release workflow, [.github/workflows/release.yml](.github/workflows/release.yml),
+which builds both installers on a `windows-2022` runner. To build by hand you need:
 
-##### Windows SDK for Windows Server 2022
+- **Visual Studio 2022** with the *Desktop development with C++* workload, including the **v143**
+  toolset and its **ATL** and **MFC** libraries. Newer Visual Studio images ship the v143 compiler
+  without v143 ATL and MFC, and cannot build this solution.
+- **Inno Setup 6**, version 6.3 or later, installed in its default folder,
+  `C:\Program Files (x86)\Inno Setup 6`: the installer project calls `ISCC.exe` by that path.
+  CI uses 6.7.3; Inno Setup 7 would need a project change.
+- **NuGet**, to restore the packages the solution uses.
 
-If you are installing a Full Edition of Visual Studio you should by default get Windows SDK installed.
+Then, from a Developer Command Prompt for VS 2022:
 
-##### Microsoft DirectX SDK
+```bat
+nuget restore vc143\Shareaza.sln
+set CL=/D_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING
+msbuild vc143\Shareaza.sln /t:Rebuild /p:Configuration=Release /p:Platform=x64 ^
+  /p:ForceImportBeforeCppTargets=%CD%\vc143\ReleaseBuild.props
+```
 
-Must be August 2007 or earlier version, newer versions including current March 2008, are missing a needed file � dxtrans.h
-You can download August 2007 from
-http://www.microsoft.com/downloads/details.aspx?FamilyID=529f03be-1339-48c4-bd5a-8506e5acf571&displaylang=en
-or by using this direct link
-http://download.microsoft.com/download/3/3/f/33f1af6e-c61b-4f14-a0de-3e9096ed4b3a/dxsdk_aug2007.exe
+- `CL` silences a Visual Studio 17.8+ deprecation that the project's SDL checks would turn into an
+  error.
+- `ReleaseBuild.props` marks the build as a release. Without it the client is an alpha build: it
+  shows an alpha-test warning at every start, and from seven days after it was compiled also a
+  message that the test period has ended.
+- Use `/p:Platform=Win32` for the 32-bit build, and `Debug` for a debug build.
+- Opening `vc143\Shareaza.sln` in Visual Studio works too, for an alpha build.
+- The installer lands in `setup\builds`.
 
-### gzip
+Building x64 on 32-bit Windows fails while registering the 64-bit DLLs, and you could not test the
+result there anyway.
 
-Download & copy gzip.exe into your windows path eg. `C:\WINDOWS\system32`
+### No longer needed
 
-I am using version 1.2.4 which you can download from http://www.gzip.org/.
+Older instructions asked for more, and none of it is needed now:
 
-On some systems, possibly related to Windows 7 or Windows 64-bit, placing gzip in system32 will not be recognized. In that case, just put it somewhere else in Visual Studio's executable path, such as under 'Microsoft Visual Studio 9.0/Common7/Tools'.
-
-### Download and install Unicode Inno Setup QuickStart Pack self-installing package
-
-from http://www.jrsoftware.org/isdl.php.
-
-Make sure you install the "Unicode Inno Setup QuickStart Pack" not the standard setup/install.
-
-The "Unicode Inno Setup QuickStart Pack" incudes additional componets that are required that the standard setup does not include.
-
-Also make sure you install Inno on your C drive. I generally install my programs on another drive but found when setting up VS2005 last time that the visual studio project file used to build shareaza used a script reference to access Inno. This script assumed that Inno was installed on C drive, so not having Inno installed on C drive caused an error in compiling. To avoid this potential problem I installed Inno on my C drive this time and had no problems.
-
-### Compile
-
-Once all the above is in place you can compile.
-
-Open in VS2022 the following source file `\vc143\Shareaza.sln`
-This will open the "Solution"
-Go into `Build -> Configuration Manager` and set Shareaza build config
-eg `Configuration = Debug / Platform = Win32` or `Configuration = Debug / Platform = x64`.
-Then select "Rebuild Solution" to start to compile.
-At the end of a successful compile you will find a newly compiled installer in \setup\builds folder.
-
-Note: If you try compiling an x64 build on a 32bit machine you will get the following repeated error "Project : error PRJ0019: A tool returned an error code from "Performing registration". This error occurs because you can not register 64bit DLLs on a 32bit machine! It is not advisable to compile a 64-bit build on 32-bit windows, as you cannot test what you are compiling.
-
-Enjoy ;)
+- **gzip.exe:** files are compressed by [7z.cmd](7z.cmd), with the compression built into Windows
+  PowerShell.
+- **The DirectX SDK (August 2007):** nothing in the source uses it any more.
+- **The "Unicode Inno Setup QuickStart Pack":** Inno Setup 6 is Unicode-only.
