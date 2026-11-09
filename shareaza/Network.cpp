@@ -149,31 +149,21 @@ BOOL CNetwork::Init()
 		Cleanup();
 	}
 
-	// Setup Windows Firewall for Shareaza itself and for UPnP service
-	if ( Firewall->Init() &&
-		 ( Settings.Connection.EnableUPnP ||
-		   Settings.Connection.EnableFirewallException ) )
+	// Check, without changing anything, that Windows Firewall lets Shareaza receive traffic. The
+	// client has no administrator rights: the installer's firewall option creates the rule.
+	if ( Settings.Connection.EnableFirewallException && Firewall->Init() && Firewall->IsFirewallOn() )
 	{
-		if ( Firewall->AreExceptionsAllowed() )
-		{
-			if ( Settings.Connection.EnableUPnP )
-			{
-				if ( Firewall->SetupService( NET_FW_SERVICE_UPNP ) )
-					theApp.Message( MSG_INFO, _T("Windows Firewall setup for UPnP succeeded.") );
-				else
-					theApp.Message( MSG_ERROR, _T("Windows Firewall setup for UPnP failed.") );
-			}
+		BOOL bTCP = TRUE, bUDP = TRUE;
+		const LONG nPort = static_cast< LONG >( Settings.Connection.InPort );
+		const BOOL bChecked =
+			Firewall->IsInboundAllowed( theApp.m_strBinaryPath, nPort, NET_FW_IP_PROTOCOL_TCP, &bTCP ) &&
+			Firewall->IsInboundAllowed( theApp.m_strBinaryPath, nPort, NET_FW_IP_PROTOCOL_UDP, &bUDP );
 
-			if ( Settings.Connection.EnableFirewallException )
-			{
-				if ( Firewall->SetupProgram( theApp.m_strBinaryPath, CLIENT_NAME_T, FALSE ) )
-					theApp.Message( MSG_INFO, _T("Windows Firewall setup for application succeeded.") );
-				else
-					theApp.Message( MSG_ERROR, _T("Windows Firewall setup for application failed.") );
-			}
-		}
-		else
-			theApp.Message( MSG_INFO, _T("Windows Firewall is not available.") );
+		if ( ! bChecked )
+			theApp.Message( MSG_INFO, _T("Windows Firewall: could not check whether incoming connections are allowed.") );
+		else if ( ! bTCP || ! bUDP )
+			theApp.Message( MSG_NOTICE, _T("Windows Firewall blocks incoming %s for Shareaza on this network. If Windows treats this network as Public, set it to Private; otherwise run the installer again with the firewall option, or allow Shareaza.exe in Windows Firewall."),
+				! bTCP && ! bUDP ? _T("TCP and UDP") : ( ! bTCP ? _T("TCP") : _T("UDP") ) );
 	}
 
 	return TRUE;
@@ -183,10 +173,6 @@ void CNetwork::Clear()
 {
 	// Remove port mappings
 	DeletePorts();
-
-	// Remove application from the firewall exception list
-	if ( Settings.Connection.DeleteFirewallException )
-		Firewall->SetupProgram( theApp.m_strBinaryPath, CLIENT_NAME_T, TRUE );
 
 	Firewall.Free();
 	UPnPFinder.Free();

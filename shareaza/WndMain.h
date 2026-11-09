@@ -52,6 +52,12 @@ public:
 	// Set GUI mode GUI_WINDOWED, GUI_TABBED or GUI_BASIC
 	void		SetGUIMode(int nMode, BOOL bSaveState = TRUE);
 
+protected:
+	BOOL		HasSavedBarLayout() const;	// SaveBarState() has run in this profile
+	void		PlaceMonitorOnMenuRow();		// dock the monitor bar at the right end of the menu row
+
+public:
+
 	// Open main window from tray
 	void		OpenFromTray(int nShowCmd = SW_SHOW);
 

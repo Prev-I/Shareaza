@@ -29,6 +29,7 @@
 #include "SharedFile.h"
 #include "Transfer.h"
 #include "VersionChecker.h"
+#include "ReleaseNotes.h"
 // Boost.JSON is compiled here, from the headers, in this one translation unit:
 // the project defines BOOST_ALL_NO_LIB, so no prebuilt Boost library is linked.
 #include <boost/json/src.hpp>
@@ -75,6 +76,7 @@ void CVersionChecker::ClearVersionCheck()
 	Settings.VersionCheck.UpgradeSize.Empty();
 	Settings.VersionCheck.UpgradeSources.Empty();
 	Settings.VersionCheck.UpgradeVersion.Empty();
+	Settings.VersionCheck.UpgradeNotesURL.Empty();
 }
 
 BOOL CVersionChecker::IsVersionNewer()
@@ -154,13 +156,27 @@ void CVersionChecker::OnRun()
 	}
 }
 
+// boost::json keeps UTF-8; decode it as UTF-8, not with the ANSI code page
+static CString Utf8ToCString( const char* pszText, size_t nLength )
+{
+	if ( nLength == 0 ) return CString();
+	int nWide = MultiByteToWideChar( CP_UTF8, 0, pszText, static_cast< int >( nLength ), NULL, 0 );
+	CString str;
+	if ( nWide > 0 )
+	{
+		MultiByteToWideChar( CP_UTF8, 0, pszText, static_cast< int >( nLength ), str.GetBuffer( nWide ), nWide );
+		str.ReleaseBuffer( nWide );
+	}
+	return str;
+}
+
 void JsonToCStringIMap(const boost::json::value& jVal, CStringIMap& map, const CString& prefix = _T("")) {
 	if (jVal.is_object()) {
 		for (const auto& kv : jVal.as_object()) {
 			const auto& key = kv.key();
 			const auto& value = kv.value();
 
-			CString keyStr(key.data(), static_cast<int>(key.size()));
+			CString keyStr = Utf8ToCString(key.data(), key.size());
 			JsonToCStringIMap(value, map, prefix + keyStr + _T("."));
 		}
 	}
@@ -173,14 +189,14 @@ void JsonToCStringIMap(const boost::json::value& jVal, CStringIMap& map, const C
 		}
 	}
 	else if (jVal.is_string()) {
-		CString valueStr(jVal.as_string().data(), static_cast<int>(jVal.as_string().size()));
+		CString valueStr = Utf8ToCString(jVal.as_string().data(), jVal.as_string().size());
 		CString finalKey = prefix;
 		finalKey.TrimRight(_T("."));
 		map[finalKey] = valueStr;
 	}
 	else {
 		std::string narrowStr = boost::json::serialize(jVal);
-		CString valueStr = CA2W(narrowStr.c_str());
+		CString valueStr = Utf8ToCString(narrowStr.data(), narrowStr.size());
 		CString finalKey = prefix;
 		finalKey.TrimRight(_T("."));
 		map[finalKey] = valueStr;
@@ -217,8 +233,9 @@ BOOL CVersionChecker::ExecuteRequest()
 	// information: report the request as failed, as for a network error.
 	try
 	{
-		CT2CA pszConvertedAnsiString(strOutput);
-		std::string jsonResponse(pszConvertedAnsiString);
+		// UTF-8, as the response came: the ANSI code page turned characters it lacks into '?'
+		CT2CA pszUtf8( strOutput, CP_UTF8 );
+		std::string jsonResponse( pszUtf8 );
 
 		boost::json::error_code ec;
 		boost::json::value jv = boost::json::parse( jsonResponse, ec );
@@ -294,15 +311,13 @@ void CVersionChecker::ProcessResponse()
 		Settings.VersionCheck.Quote = strValue;
 	}
 	
-	//SystemMsg
+	// The release notes are Markdown: keep a plain summary of their first paragraph, and log it.
+	// The text is the release's, never a format string.
+	CString strSummary;
 	if ( m_pResponse.Lookup( _T("body"), strValue ) )
 	{
-		for ( strValue += '\n' ; strValue.GetLength() ; )
-		{
-			CString strLine	= strValue.SpanExcluding( _T("\r\n") );
-			strValue		= strValue.Mid( strLine.GetLength() + 1 );
-			if ( strLine.GetLength() ) theApp.Message( MSG_NOTICE, strLine );
-		}
+		strSummary = ReleaseNotes::Summary( (LPCTSTR)strValue ).c_str();
+		if ( strSummary.GetLength() ) theApp.Message( MSG_NOTICE, _T("%s"), (LPCTSTR)strSummary );
 	}
 	
 	//UpgradePrompt
@@ -317,13 +332,18 @@ void CVersionChecker::ProcessResponse()
 		}
 //		versionString = strValue;
 
-		Settings.VersionCheck.UpgradePrompt = _T("New version available: ") + versionString;
-		Settings.VersionCheck.UpgradePrompt.Append(_T("\r\nRelease date: "));
-		m_pResponse.Lookup(_T("published_at"), strValue);
-		Settings.VersionCheck.UpgradePrompt.Append(strValue);
-		Settings.VersionCheck.UpgradePrompt.Append(_T("\r\nChangelog: "));
-		m_pResponse.Lookup(_T("body"), strValue);
-		Settings.VersionCheck.UpgradePrompt.Append(strValue);
+		// One paragraph, no line breaks: "Version 2.7.11.2-previ.7, released 2026-11-10. <summary>"
+		Settings.VersionCheck.UpgradePrompt = _T("Version ") + versionString;
+		if ( m_pResponse.Lookup( _T("published_at"), strValue ) && strValue.GetLength() )
+			Settings.VersionCheck.UpgradePrompt += CString( _T(", released ") ) + ReleaseNotes::DatePart( (LPCTSTR)strValue ).c_str();
+		Settings.VersionCheck.UpgradePrompt += _T(".");
+		if ( strSummary.GetLength() )
+			Settings.VersionCheck.UpgradePrompt += _T(" ") + strSummary;
+
+		// The release's page, for the Home page's link: https only, as GitHub serves it
+		Settings.VersionCheck.UpgradeNotesURL.Empty();
+		if ( m_pResponse.Lookup( _T("html_url"), strValue ) && _tcsnicmp( strValue, _T("https://"), 8 ) == 0 )
+			Settings.VersionCheck.UpgradeNotesURL = strValue;
 
 
 		CString s_platform =

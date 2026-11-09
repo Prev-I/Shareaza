@@ -1,31 +1,26 @@
-M http://disobscure.velum-ultra.com/skulls.php
-M http://gwc.centrump2p.com/skulls.php
-M http://gwctest.zapto.org:1337/
-M http://skulls-milanesi.rhcloud.com/skulls.php
-M http://tenafly5k.com/gwc/skulls.php
-
-2 http://au.gnutella.dyslexicfish.net:3559/
-2 http://cache.ce3c.be/
-2 http://cache.ibel.de/
+2 http://bj.ddns.net/beacon/gwc.php
+2 http://bj.ddns.net/cachechu/
+2 http://bj.ddns.net/perlcache/perlgcache.cgi
+2 http://bj.ddns.net/skulls/skulls.php
+2 http://cache.jayl.de/g2/gwc.php
 2 http://dkac.trillinux.org/dkac/dkac.php
-2 http://ping.pongwar.com/
-2 http://uk.gnutella.dyslexicfish.net:3559/
-2 http://useast.gnutella.dyslexicfish.net:3559/
-2 http://uswest.gnutella.dyslexicfish.net:3559/
-2 http://www.k33bz.com/g2/bazooka.php
+2 http://gwc-edge.net/
+2 http://gweb.4octets.co.uk/skulls.php
+2 http://gweb3.4octets.co.uk/gwc.php
+2 http://midian.jayl.de/g2/bazooka.php
+2 http://midian.jayl.de/g2/gwc.php
+2 http://p2p.findclan.net/skulls.php
+2 http://skulls.gwc.dyslexicfish.net/skulls.php
 
-1 http://au.gnutella.dyslexicfish.net:3558/
-1 http://uk.gnutella.dyslexicfish.net:3558/
-1 http://useast.gnutella.dyslexicfish.net:3558/
-1 http://uswest.gnutella.dyslexicfish.net:3558/
+1 http://gweb4.4octets.co.uk/
+1 http://gweb4.4octets.co.uk/gwc.php
 
-D http://peerates.net/servers.php
+D http://peerates.net/servers.met
 D http://upd.emule-security.org/server.met
 D http://www.gruk.org/server.met
 
 C http://dchublist.com/hublist.xml.bz2
 C http://dchublist.ru/hublist.xml.bz2
-C http://www.hublista.hu/hublist.xml.bz2
 
 # Bad / Broken:
 X http://59.175.238.8:9030/beacon2/gwc.php
@@ -33,7 +28,6 @@ X http://cache-doxu.rhcloud.com/
 X http://cache.trillinux.org/g2/bazooka.php
 X http://fascination77.free.fr/cachechu/
 X http://p2p.findclan.org/
-X http://p2p.findclan.net/skulls.php
 
 # Duplicates:
 X http://gwc.gallaxial.com/beacon2/gwc
@@ -68,7 +62,6 @@ X http://gwc.iblinx.com:2108/gwc/cgi-bin/fc
 X http://gwc.marksieklucki.com/skulls.php
 X http://gwc.mccarragher.org/skulls/skulls.php
 X http://gwc2.wodi.org/skulls.php
-X http://gweb.4octets.co.uk/skulls.php
 X http://gweb.dwbo.nl/
 X http://gweb2.4octets.co.uk/gwc.php
 X http://gwebcache.ns1.net/
@@ -78,7 +71,6 @@ X http://jayl.de/gweb/g2/bazooka.php
 X http://karma.cloud.bishopston.net:33559/
 X http://mcache.mccarragher.org/cachechu/
 X http://mccarragher.org/cachechu/
-X http://midian.jayl.de/g2/bazooka.php
 X http://news.gallaxial.com/cachechu/
 X http://news.mccarragher.org/cachechu/
 X http://news.spacesst.com/cachechu/
@@ -98,7 +90,7 @@ X https://gwc-ale5000.rhcloud.com/skulls.php
 
 #
 # Keep these comments at the end
-# Last updated 24 Apr 2016
+# Last updated 9 Nov 2026, from caches tested working that day
 #
 # Make sure the different lists are kept sorted in alphabetical order.
 #
@@ -114,4 +106,4 @@ X https://gwc-ale5000.rhcloud.com/skulls.php
 # U = BootStrap (uhc, ukhl, gnutella1 host, gnutella2 host)
 # X = banned
 #
-# Get latest version at https://svn.code.sf.net/p/shareaza/code/trunk/Data/DefaultServices.dat
+# Get latest version at https://github.com/Prev-I/Shareaza/blob/main/Data/DefaultServices.dat

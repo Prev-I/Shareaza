@@ -131,6 +131,7 @@ void CSettings::Load()
 	Add( _T("VersionCheck"), _T("UpgradeSources"), &VersionCheck.UpgradeSources );
 	Add( _T("VersionCheck"), _T("UpgradeTiger"), &VersionCheck.UpgradeTiger );
 	Add( _T("VersionCheck"), _T("UpgradeVersion"), &VersionCheck.UpgradeVersion );
+	Add( _T("VersionCheck"), _T("UpgradeNotesURL"), &VersionCheck.UpgradeNotesURL );
 
 	Add( _T("Interface"), _T("AutoComplete"), &Interface.AutoComplete, true );
 	Add( _T("Interface"), _T("CoolMenuEnable"), &Interface.CoolMenuEnable, true );
@@ -268,7 +269,6 @@ void CSettings::Load()
 
 	Add( _T("Connection"), _T("AutoConnect"), &Connection.AutoConnect, true );
 	Add( _T("Connection"), _T("ConnectThrottle"), &Connection.ConnectThrottle, 250, 1, 0, 5000, _T(" ms") );
-	Add( _T("Connection"), _T("DeleteFirewallException"), &Connection.DeleteFirewallException, false );
 	Add( _T("Connection"), _T("DeleteUPnPPorts"), &Connection.DeleteUPnPPorts, true );
 	Add( _T("Connection"), _T("DetectConnectionLoss"), &Connection.DetectConnectionLoss, true );
 	Add( _T("Connection"), _T("DetectConnectionReset"), &Connection.DetectConnectionReset, false );
@@ -346,6 +346,7 @@ void CSettings::Load()
 	Add( _T("Discovery"), _T("DefaultUpdate"), &Discovery.DefaultUpdate, 60*60, 60, 1, 60*24, _T(" m") );
 	Add( _T("Discovery"), _T("FailureLimit"), &Discovery.FailureLimit, 2, 1, 1, 512 );
 	Add( _T("Discovery"), _T("Lowpoint"), &Discovery.Lowpoint, 10, 1, 1, 512 );
+	Add( _T("Discovery"), _T("DefaultsVersion"), &Discovery.DefaultsVersion, 0, 1, 0, 1000 );
 	Add( _T("Discovery"), _T("AccessPeriod"), &Discovery.AccessPeriod, 30*60, 60, 1, 60*24, _T(" m") );
 
 	Add( _T("Gnutella"), _T("ConnectFactor"), &Gnutella.ConnectFactor, 4, 1, 1, 20, _T("x") );

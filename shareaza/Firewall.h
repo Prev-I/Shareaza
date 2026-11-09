@@ -19,63 +19,31 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
-// CFirewall wraps Windows COM components to change Windows Firewall settings, and talk UPnP to a NAT router
+// CFirewall asks Windows Firewall, through its COM interface, whether Shareaza may accept incoming
+// connections. It reads only: the installer owns the firewall rule.
 // http://shareazasecurity.be/wiki/index.php?title=Developers.Code.CFirewall
 
 #pragma once
 
 
-// Control the Windows Firewall, and talk UPnP to the NAT router to setup port forwarding
+// Reads Windows Firewall state. The client runs without administrator rights, so it never
+// changes firewall policy: the installer owns the rule that lets Shareaza receive traffic.
 class CFirewall
 {
 public:
 	CFirewall();
 	~CFirewall();
 
-	// Windows Firewall COM interfaces accessed with the object
-    CComPtr< INetFwMgr >					FwManager;
-    CComPtr< INetFwPolicy >					Policy;
-	CComPtr< INetFwProfile >				Profile;
-	CComPtr< INetFwServices >				ServiceList;
-	CComPtr< INetFwAuthorizedApplications >	ProgramList;
-    CComPtr< INetFwOpenPorts >				PortList;
+	// Windows Firewall COM interfaces
+	CComPtr< INetFwMgr >		FwManager;
+	CComPtr< INetFwPolicy >		Policy;
+	CComPtr< INetFwProfile >	Profile;
 
-	// Windows Firewall COM interfaces accessed in methods
-	CComPtr< INetFwService >				Service;
-	CComPtr< INetFwAuthorizedApplication >	Program;
-    CComPtr< INetFwOpenPort >				Port;
-
-	// Examples controlling Windows Firewall
-	//
-	//	// Let a program listen on a socket without Windows Firewall poping up a warning
-	//	CFirewall firewall;
-	//	firewall.SetupProgram( "C:\\Program Files\\Outlook Express\\msimn.exe", "Outlook Express" );
-	//
-	//	// Enable the UPnP service in Windows Firewall so we can talk UPnP through it
-	//	firewall.SetupService( NET_FW_SERVICE_UPNP );
-
-	// Windows Firewall Methods
-
-	// Initialization
+	// Initialization: TRUE when the firewall manager and the current profile are available
 	BOOL Init();
-	// Find out if the system is in no-exceptions mode
-	BOOL AreExceptionsAllowed() const;
-	// Check a box for a service on the Windows Firewall exceptions list
-	BOOL SetupService(NET_FW_SERVICE_TYPE service);
-	// List a program and check its box
-	BOOL SetupProgram(const CString& path, const CString& name, BOOL bRemove);
-	// Determine if a program is on the exceptions list
-	BOOL IsProgramListed(const CString& path, BOOL* listed);
-	// Determine if a service is checked
-	BOOL IsServiceEnabled(NET_FW_SERVICE_TYPE service, BOOL* enabled);
-	// Determine if a listed program is checked
-	BOOL IsProgramEnabled(const CString& path, BOOL* enabled);
-	// Add a program to the list with a checked box
-	BOOL AddProgram(const CString& path, const CString& name);
-	// Add a program to the list with a checked box
-	BOOL RemoveProgram(const CString& path);
-	// Check the box for a service
-	BOOL EnableService(NET_FW_SERVICE_TYPE service);
-	// Check the box for a program
-	BOOL EnableProgram(const CString& path);
+	// TRUE when the firewall is on for the profile currently in effect
+	BOOL IsFirewallOn() const;
+	// Whether the program may receive inbound traffic on the port with the protocol
+	// (NET_FW_IP_PROTOCOL_TCP or _UDP). Returns FALSE when the check could not run.
+	BOOL IsInboundAllowed(const CString& path, LONG nPort, NET_FW_IP_PROTOCOL nProtocol, BOOL* pbAllowed) const;
 };

@@ -509,6 +509,8 @@ int CMainWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_wndMonitorBar.SetWindowText( _T("Monitor") );
 	m_wndMonitorBar.EnableDocking( CBRS_ALIGN_TOP | CBRS_ALIGN_BOTTOM );
 	DockControlBar( &m_wndMonitorBar, AFX_IDW_DOCKBAR_TOP );
+	m_wndMenuBar.m_pShareRowWith = &m_wndMonitorBar;
+	m_wndMonitorBar.m_pMenuBar = &m_wndMenuBar;
 
 	// Default Size
 	int iXSize, iYSize;
@@ -553,7 +555,14 @@ int CMainWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	Settings.LoadWindow( _T("CMainWnd"), this );
 
+	// Without a saved layout the monitor bar goes to the right end of the menu row; a layout the
+	// user has saved is restored as it is
+	const BOOL bSavedLayout = HasSavedBarLayout();
+
 	LoadBarState( _T("Toolbars\\CoolBar") );
+
+	if ( ! bSavedLayout )
+		PlaceMonitorOnMenuRow();
 
 	if ( ! m_wndMenuBar.IsVisible() ) ShowControlBar( &m_wndMenuBar, TRUE, TRUE );
 	if ( ! m_wndNavBar.IsVisible() && ! m_wndToolBar.IsVisible() )
@@ -2949,6 +2958,39 @@ void CMainWnd::OnSize(UINT nType, int cx, int cy)
 		m_pSkin->OnSize( this );
 
 	CMDIFrameWnd::OnSize( nType, cx, cy );
+}
+
+BOOL CMainWnd::HasSavedBarLayout() const
+{
+	// SaveBarState( "Toolbars\\CoolBar" ) writes the bar count to the "Toolbars\\CoolBar-Summary"
+	// section; when in doubt, treat the layout as saved, so a user's own layout is never moved
+	// (GetProfileInt returns a UINT: compare it as an int, or the missing value -1 reads as saved)
+	return static_cast< int >( theApp.GetProfileInt( _T("Toolbars\\CoolBar-Summary"), _T("Bars"), -1 ) ) >= 0;
+}
+
+void CMainWnd::PlaceMonitorOnMenuRow()
+{
+	if ( ! m_wndMenuBar.GetSafeHwnd() || ! m_wndMonitorBar.GetSafeHwnd() ) return;
+
+	RecalcLayout();
+
+	// The right end of the menu bar's own dock bar: the dock bar lays its bars out within its
+	// client area, which is narrower than the window and its frame
+	CWnd* pDockBar = m_wndMenuBar.GetParent();
+	if ( ! pDockBar ) return;
+
+	CRect rcDock, rcBar;
+	pDockBar->GetWindowRect( &rcDock );
+	m_wndMenuBar.GetWindowRect( &rcBar );
+	rcBar.left	= rcDock.right - 128;
+	rcBar.right	= rcDock.right;
+
+	// Afterwards the dock bar's own layout keeps it at the end of the row on every resize: the
+	// menu bar leaves exactly its width (CCoolBarCtrl::CalcFixedLayout)
+	DockControlBar( &m_wndMonitorBar, pDockBar->GetDlgCtrlID(), &rcBar );
+
+	// Once both share the row, the menu bar leaves room for the monitor: lay out again
+	RecalcLayout();
 }
 
 void CMainWnd::OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS FAR* lpncsp)

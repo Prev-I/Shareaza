@@ -263,7 +263,7 @@
 				<item id="ID_HELP_CODEC" text="_Codec Help"/>
 			</menu>
 			<menu text="_Websites">
-				<item id="ID_HELP_HOMEPAGE" text="_Shareaza.com"/>
+				<item id="ID_HELP_HOMEPAGE" text="_Shareaza site"/>
 				<separator/>
 				<item id="ID_HELP_FORUMS" text="Shareaza _Forums"/>
 				<item id="ID_HELP_UPDATE" text="Latest news"/>

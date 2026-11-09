@@ -1009,16 +1009,16 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,225,76,60,16
 END
 
-IDD_UPGRADE DIALOGEX 0, 0, 292, 124
+IDD_UPGRADE DIALOGEX 0, 0, 292, 140
 STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Upgrade Alert"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
     LTEXT           "A new version of Shareaza is now available.  Would you like to upgrade?",IDC_MESSAGE,20,10,252,60
     LTEXT           "If you select Upgrade Now, Shareaza will add the upgrade to your download queue and automatically begin downloading it.",IDC_STATIC,20,75,252,20
-    DEFPUSHBUTTON   "&Upgrade Now",IDOK,7,101,70,16
-    CONTROL         "Don't check for new versions",IDC_DONT_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,90,100,110,15
-    PUSHBUTTON      "Don't Upgrade",IDCANCEL,215,101,70,16
+    DEFPUSHBUTTON   "&Upgrade Now",IDOK,7,117,70,16
+    CONTROL         "Postpone checks for 31 days",IDC_DONT_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,20,99,252,12
+    PUSHBUTTON      "Don't Upgrade",IDCANCEL,215,117,70,16
 END
 
 IDD_SETTINGS_COMMUNITY DIALOGEX 0, 0, 282, 220

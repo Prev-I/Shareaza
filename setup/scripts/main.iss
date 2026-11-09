@@ -441,9 +441,26 @@ Root: HKCU; Subkey: "Software\Intervideo\Common\AudioDec\Shareaza"; Flags: dontc
 ; Delete NSIS entry on software panel
 Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Shareaza"; Flags: dontcreatekey deletekey
 
-; Clear version check key
-Root: HKCU; Subkey: "Software\Shareaza\Shareaza\VersionCheck"; Flags: dontcreatekey deletekey
-Root: HKLM; Subkey: "Software\Shareaza\Shareaza\VersionCheck"; Flags: dontcreatekey deletekey
+; Clear a stale upgrade offer, and check again at the next start. UpdateCheck, UpdateCheckURL and
+; Quote are the user's: deleting the whole key switched the update check off at every install.
+Root: HKCU; Subkey: "Software\Shareaza\Shareaza\VersionCheck"; ValueType: none; ValueName: "UpgradePrompt"; Flags: dontcreatekey deletevalue
+Root: HKCU; Subkey: "Software\Shareaza\Shareaza\VersionCheck"; ValueType: none; ValueName: "UpgradeFile"; Flags: dontcreatekey deletevalue
+Root: HKCU; Subkey: "Software\Shareaza\Shareaza\VersionCheck"; ValueType: none; ValueName: "UpgradeSHA1"; Flags: dontcreatekey deletevalue
+Root: HKCU; Subkey: "Software\Shareaza\Shareaza\VersionCheck"; ValueType: none; ValueName: "UpgradeTiger"; Flags: dontcreatekey deletevalue
+Root: HKCU; Subkey: "Software\Shareaza\Shareaza\VersionCheck"; ValueType: none; ValueName: "UpgradeSize"; Flags: dontcreatekey deletevalue
+Root: HKCU; Subkey: "Software\Shareaza\Shareaza\VersionCheck"; ValueType: none; ValueName: "UpgradeSources"; Flags: dontcreatekey deletevalue
+Root: HKCU; Subkey: "Software\Shareaza\Shareaza\VersionCheck"; ValueType: none; ValueName: "UpgradeVersion"; Flags: dontcreatekey deletevalue
+Root: HKCU; Subkey: "Software\Shareaza\Shareaza\VersionCheck"; ValueType: none; ValueName: "UpgradeNotesURL"; Flags: dontcreatekey deletevalue
+Root: HKCU; Subkey: "Software\Shareaza\Shareaza\VersionCheck"; ValueType: none; ValueName: "NextCheck"; Flags: dontcreatekey deletevalue
+Root: HKLM; Subkey: "Software\Shareaza\Shareaza\VersionCheck"; ValueType: none; ValueName: "UpgradePrompt"; Flags: dontcreatekey deletevalue
+Root: HKLM; Subkey: "Software\Shareaza\Shareaza\VersionCheck"; ValueType: none; ValueName: "UpgradeFile"; Flags: dontcreatekey deletevalue
+Root: HKLM; Subkey: "Software\Shareaza\Shareaza\VersionCheck"; ValueType: none; ValueName: "UpgradeSHA1"; Flags: dontcreatekey deletevalue
+Root: HKLM; Subkey: "Software\Shareaza\Shareaza\VersionCheck"; ValueType: none; ValueName: "UpgradeTiger"; Flags: dontcreatekey deletevalue
+Root: HKLM; Subkey: "Software\Shareaza\Shareaza\VersionCheck"; ValueType: none; ValueName: "UpgradeSize"; Flags: dontcreatekey deletevalue
+Root: HKLM; Subkey: "Software\Shareaza\Shareaza\VersionCheck"; ValueType: none; ValueName: "UpgradeSources"; Flags: dontcreatekey deletevalue
+Root: HKLM; Subkey: "Software\Shareaza\Shareaza\VersionCheck"; ValueType: none; ValueName: "UpgradeVersion"; Flags: dontcreatekey deletevalue
+Root: HKLM; Subkey: "Software\Shareaza\Shareaza\VersionCheck"; ValueType: none; ValueName: "UpgradeNotesURL"; Flags: dontcreatekey deletevalue
+Root: HKLM; Subkey: "Software\Shareaza\Shareaza\VersionCheck"; ValueType: none; ValueName: "NextCheck"; Flags: dontcreatekey deletevalue
 
 ; Delete Generic Video thumbnailer plugin
 Root: HKCU; Subkey: "Software\Shareaza\Shareaza\Plugins"; ValueName: "{{17BF74FD-69AF-4BD5-A982-EA6DE6F3449C}"; Flags: dontcreatekey deletevalue
@@ -617,8 +634,6 @@ const
   KeyLoc1 = 'SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Shareaza_is1';
   KeyLoc2 = 'SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Shareaza';
   KeyName = 'UninstallString';
-  NET_FW_SCOPE_ALL = 0;
-  NET_FW_IP_VERSION_ANY       = 2;
   SERVICE_QUERY_CONFIG        = $1;
   SERVICE_CHANGE_CONFIG       = $2;
   SERVICE_QUERY_STATUS        = $4;
@@ -634,7 +649,6 @@ var
   CurrentPath: string;
   Installed: Boolean;
   MalwareDetected: Boolean;
-  FirewallFailed: string;
   HasUserPrivileges: Boolean;
 
 { NT API functions for services }
@@ -864,24 +878,36 @@ Begin
   DelayDeleteFile(Filename,3);
 End;
 
+{ Windows Firewall: one inbound allow rule "Shareaza" for Shareaza.exe, on Private and Domain
+  networks. netsh's delete matches the rule name and the program on every profile, so it also
+  removes the TCP and UDP pair that the old firewall code created for whichever profile
+  was active at install time. }
+Function RemoveFirewallRule(const Prog: string): Boolean;
+var
+  ResultCode: Integer;
+Begin
+  { netsh exits with 1 when no rule matches: having nothing to remove is not a failure }
+  Result := Exec(ExpandConstant('{sys}\netsh.exe'),
+    'advfirewall firewall delete rule name="Shareaza" dir=in program="' + Prog + '"',
+    '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+End;
+
+Function AddFirewallRule(const Prog: string): Boolean;
+var
+  ResultCode: Integer;
+Begin
+  RemoveFirewallRule(Prog);
+  Result := Exec(ExpandConstant('{sys}\netsh.exe'),
+    'advfirewall firewall add rule name="Shareaza" dir=in action=allow program="' + Prog + '" enable=yes profile=private,domain edge=no',
+    '', SW_HIDE, ewWaitUntilTerminated, ResultCode) and (ResultCode = 0);
+End;
+
 Procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 var
-  InstallFolder: string;
-  FirewallManager: Variant;
-  FirewallProfile: Variant;
   Wnd: HWND;
 Begin
   if CurUninstallStep = usUninstall then begin
-    { Only for Windows XP and above }
-    if ( GetWindowsVersion >= $05010000 ) then begin
-      try
-        InstallFolder := ExpandConstant('{app}\Shareaza.exe');
-        FirewallManager := CreateOleObject('HNetCfg.FwMgr');
-        FirewallProfile := FirewallManager.LocalPolicy.CurrentProfile;
-        FirewallProfile.AuthorizedApplications.Remove(InstallFolder);
-      except
-      End;
-    End;
+    RemoveFirewallRule(ExpandConstant('{app}\Shareaza.exe'));
     Wnd := FindWindowByClassName('ShareazaMainWnd');
     if Wnd <> 0 then begin
       SendMessage(Wnd, WM_CLOSE, 0, 0);
@@ -949,47 +975,14 @@ end;
 
 Procedure CurStepChanged(CurStep: TSetupStep);
 var
-  InstallFolder: string;
-  FirewallObject: Variant;
-  FirewallManager: Variant;
-  FirewallProfile: Variant;
   Reset: boolean;
   Success: boolean;
   Path: string;
 Begin
   if CurStep=ssPostInstall then begin
     if IsTaskSelected('firewall') then begin
-      if WizardSilent = True then begin
-        try
-          FirewallObject := CreateOleObject('HNetCfg.FwAuthorizedApplication');
-          InstallFolder := ExpandConstant('{app}\Shareaza.exe');
-          FirewallObject.ProcessImageFileName := InstallFolder;
-          FirewallObject.Name := 'Shareaza';
-          FirewallObject.Scope := NET_FW_SCOPE_ALL;
-          FirewallObject.IpVersion := NET_FW_IP_VERSION_ANY;
-          FirewallObject.Enabled := True;
-          FirewallManager := CreateOleObject('HNetCfg.FwMgr');
-          FirewallProfile := FirewallManager.LocalPolicy.CurrentProfile;
-          FirewallProfile.AuthorizedApplications.Add(FirewallObject);
-        except
-        End;
-      End else begin
-        FirewallFailed := ExpandConstant('{cm:dialog_firewall}')
-        try
-          FirewallObject := CreateOleObject('HNetCfg.FwAuthorizedApplication');
-          InstallFolder := ExpandConstant('{app}\Shareaza.exe');
-          FirewallObject.ProcessImageFileName := InstallFolder;
-          FirewallObject.Name := 'Shareaza';
-          FirewallObject.Scope := NET_FW_SCOPE_ALL;
-          FirewallObject.IpVersion := NET_FW_IP_VERSION_ANY;
-          FirewallObject.Enabled := True;
-          FirewallManager := CreateOleObject('HNetCfg.FwMgr');
-          FirewallProfile := FirewallManager.LocalPolicy.CurrentProfile;
-          FirewallProfile.AuthorizedApplications.Add(FirewallObject);
-        except
-          MsgBox(FirewallFailed, mbInformation, MB_OK);
-        End;
-      End;
+      if not AddFirewallRule(ExpandConstant('{app}\Shareaza.exe')) and not WizardSilent then
+        MsgBox(ExpandConstant('{cm:dialog_firewall}'), mbInformation, MB_OK);
     End;
     if IsTaskSelected('upnp') then begin
       if (HasUserPrivileges) then begin
@@ -1014,18 +1007,8 @@ Begin
     end;
   End;
   if CurStep=ssInstall then begin
-    if not IsTaskSelected('firewall') then begin
-      { Only for Windows XP and above }
-      if ( GetWindowsVersion >= $05010000 ) then begin
-        try
-          InstallFolder := ExpandConstant('{app}\Shareaza.exe');
-          FirewallManager := CreateOleObject('HNetCfg.FwMgr');
-          FirewallProfile := FirewallManager.LocalPolicy.CurrentProfile;
-          FirewallProfile.AuthorizedApplications.Remove(InstallFolder);
-        except
-        End;
-      End;
-    End;
+    if not IsTaskSelected('firewall') then
+      RemoveFirewallRule(ExpandConstant('{app}\Shareaza.exe'));
   End;
 
   { Check if the needed paths exist otherwise delete it from the registry (They will be recreated later in the installation process) }

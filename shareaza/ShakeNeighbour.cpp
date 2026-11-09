@@ -131,7 +131,8 @@ BOOL CShakeNeighbour::ConnectTo(const IN6_ADDR* pAddress, WORD nPort, BOOL bAuto
 	else
 	{
 		// Report the connection failure
-		theApp.Message( MSG_ERROR, IDS_CONNECTION_CONNECT_FAIL, (LPCTSTR)IPv6ToString( &m_pHostIPv6.sin6_addr ) );
+		// The address asked for: m_pHostIPv6 is not set when the connect is refused early
+		theApp.Message( MSG_ERROR, IDS_CONNECTION_CONNECT_FAIL, (LPCTSTR)IPv6ToString( pAddress ) );
 		return FALSE;
 	}
 
