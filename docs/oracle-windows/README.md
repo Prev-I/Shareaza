@@ -199,7 +199,7 @@ Close Shareaza with **File → Exit** before going on.
 
 ## Optional: the fork's build as a leaf
 
-This shows the `RAZI2.7.11.1` client string reaching the cache (`RAZI2.7.11.0` in `previ.5`, `RAZI2.7.10.6` up to `previ.4`). Use a port that is **not**
+This shows the `RAZI2.7.11.2` client string reaching the cache (`RAZI2.7.11.1` in `previ.6`, `RAZI2.7.11.0` in `previ.5`, `RAZI2.7.10.6` up to `previ.4`). Use a port that is **not**
 forwarded, and keep the run short:
 
 ```powershell
@@ -209,7 +209,7 @@ explorer.exe "$env:ProgramFiles\Shareaza\Shareaza.exe"
 .\Watch-Oracle.ps1 -Hours 0.5
 ```
 
-**Passes if** the query line carries `client=RAZI2.7.11.1`, and `/stats` lists `RAZI 2.7.11.1`.
+**Passes if** the query line carries `client=RAZI2.7.11.2`, and `/stats` lists `RAZI 2.7.11.2`.
 
 To test a build that is not published, give `-InstallerDir` instead of a release: a folder holding
 the build's x64 installer and the `SHA256SUMS.txt` naming it, such as the
@@ -233,7 +233,7 @@ It writes `%USERPROFILE%\ShareazaOracle\evidence-<time>.zip`, then:
 - puts back your own settings, data folder and discovery list;
 - keeps the test runs' data under `ShareazaOracle\runs\`.
 
-The installer's own firewall exception for Shareaza stays, as it would after any install.
+The installer's own firewall exception for Shareaza stays, as it would after any install. From `previ.7` on, the fork's installer makes it one inbound rule, `Shareaza`, on Private and Domain networks only.
 
 The zip holds `Shareaza.log`, `Discovery.dat`, `HostCache.dat`, a settings export, and the
 watcher's log and `/stats` snapshots. **The log and host cache contain hubs' public IP addresses

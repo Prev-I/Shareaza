@@ -23,7 +23,7 @@
 .EXAMPLE
     .\Install-Shareaza.ps1 -Client Official
 .EXAMPLE
-    .\Install-Shareaza.ps1 -Client Fork -ReleaseTag v2.7.11.1-previ.6
+    .\Install-Shareaza.ps1 -Client Fork -ReleaseTag v2.7.11.2-previ.7
 .EXAMPLE
     .\Install-Shareaza.ps1 -Client Fork -InstallerDir .\build
 #>
@@ -31,7 +31,7 @@
 param(
     [ValidateSet('Official', 'Fork')]
     [string] $Client = 'Official',
-    [string] $ReleaseTag = 'v2.7.11.1-previ.6',
+    [string] $ReleaseTag = 'v2.7.11.2-previ.7',
     [string] $Repository = 'Prev-I/Shareaza',
     # A folder holding one *_x64_Release_*.exe and a SHA256SUMS.txt naming it.
     [string] $InstallerDir = '',
@@ -95,6 +95,7 @@ if ($Client -eq 'Official') {
         'v2.7.10.6-previ.4' = '92EC881A9A85E3819A4F238845BA30BEB2F3FF8B67675B60A7E88DED0134CB02'
         'v2.7.11.0-previ.5' = 'D53E5878248A8F4660AB19521C127CC555BCDE9072F3CAF0C56A81E2871F98E8'
         'v2.7.11.1-previ.6' = 'C1879EB653597D5D9D8183B2B85E35E22B534CD5D9532881A5A8029B46863C33'
+        'v2.7.11.2-previ.7' = 'ABB4354B5A74470201156FA9CCA52E6EEBFA0F816D7AD2B1BB9A513A4266C511'
     }
     if ($pinned.ContainsKey($ReleaseTag) -and $pinned[$ReleaseTag] -ne $expected) {
         throw "SHA256SUMS.txt of $ReleaseTag lists $expected, not the pinned $($pinned[$ReleaseTag]). Not installing."
