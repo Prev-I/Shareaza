@@ -9,7 +9,6 @@ on:
 env:
     # Path to the solution file relative to the root of the project.
     SOLUTION_FILE_PATH: vc143/Shareaza.sln
-    RELEASEBUILD_FILE_PATH: vc143/ReleaseBuild.props
 
 permissions:
     contents: read
@@ -80,11 +79,13 @@ jobs:
             # VS 2022 17.8+ deprecates stdext::make_checked_array_iterator (STL4043),
             # which SDLCheck turns into error C4996 in shareaza/BTInfo.cpp. cl.exe
             # appends CL to every compile, so this opts out without a source change.
+            # RELEASE_BUILD=1 makes this a release, not an alpha build (StdAfx.h). It is not
+            # taken from vc143/ReleaseBuild.props: that also imports WindowsXP.props.
             env:
-                CL: /D_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING
+                CL: /D_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING /DRELEASE_BUILD=1
             # Add additional options to the MSBuild command line here (like platform or verbosity level).
             # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
-            run: msbuild ${{env.SOLUTION_FILE_PATH}} /nologo /v:m /t:Rebuild /p:ForceImportBeforeCppTargets=${{env.RELEASEBUILD_FILE_PATH}} /p:Configuration=${{ matrix.type }} /p:Platform=${{ matrix.platform }} /p:DefineConstants=BUILDFROMMSBUILD /p:RevisionSHA=${{ steps.gitversion.outputs.shortSha }} /p:RevisionDate=${{ steps.gitversion.outputs.commitDate }} /fl /flp:Summary
+            run: msbuild ${{env.SOLUTION_FILE_PATH}} /nologo /v:m /t:Rebuild /p:Configuration=${{ matrix.type }} /p:Platform=${{ matrix.platform }} /p:DefineConstants=BUILDFROMMSBUILD /p:RevisionSHA=${{ steps.gitversion.outputs.shortSha }} /p:RevisionDate=${{ steps.gitversion.outputs.commitDate }} /fl /flp:Summary
 
         -   name: Compute SHA-256 manifest
             shell: bash

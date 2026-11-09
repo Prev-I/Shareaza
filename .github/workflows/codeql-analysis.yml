@@ -67,9 +67,11 @@ jobs:
 
     - if: matrix.language == 'cpp'
       name: Build C++ Shareaza PRJ
+      env:
+        CL: /D_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING /DRELEASE_BUILD=1
       run: |
         nuget restore vc143/Shareaza.sln
-        msbuild vc143/Shareaza.sln /nologo /v:m /t:Rebuild /p:ForceImportBeforeCppTargets=vc143/ReleaseBuild.props /p:Configuration=Release /p:Platform=Win32 /fl /flp:Summary
+        msbuild vc143/Shareaza.sln /nologo /v:m /t:Rebuild /p:Configuration=Release /p:Platform=Win32 /fl /flp:Summary
 
 
     # ℹ️ Command-line programs to run using the OS shell.

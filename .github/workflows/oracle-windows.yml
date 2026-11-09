@@ -111,6 +111,13 @@ jobs:
                 # BugSplat checks; the official client and earlier fork releases do not.
                 $bytes = [IO.File]::ReadAllBytes("$app\Shareaza.exe")
                 $text = [Text.Encoding]::GetEncoding(28591).GetString($bytes)
+                # A release build has no alpha warning (Shareaza.cpp, #if ! RELEASE_BUILD). Checked for
+                # unpublished builds and for releases from 2.7.11.2 on, the first built as releases.
+                if ((Test-Path build) -or ([version]$version -ge [version]'2.7.11.2')) {
+                    $alpha = [Text.Encoding]::GetEncoding(28591).GetString([Text.Encoding]::Unicode.GetBytes('ALPHA TEST version'))
+                    if ($text.Contains($alpha)) { throw "Shareaza.exe $version is an alpha build: it contains the alpha-test warning" }
+                    'release build: no alpha-test warning'
+                }
                 $needle = [Text.Encoding]::GetEncoding(28591).GetString([Text.Encoding]::Unicode.GetBytes('EnableIPv6'))
                 if ($text.Contains($needle)) {
                     Add-Content -Path $env:GITHUB_ENV -Value 'HAS_IPV6_SETTING=1'

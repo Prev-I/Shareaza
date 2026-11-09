@@ -14,7 +14,6 @@ on:
 env:
   # Path to the solution file relative to the root of the project.
   SOLUTION_FILE_PATH: vc143/Shareaza.sln
-  RELEASEBUILD_FILE_PATH: vc143/ReleaseBuild.props
 
 permissions:
   contents: read
@@ -86,10 +85,12 @@ jobs:
       # which SDLCheck turns into error C4996 in shareaza/BTInfo.cpp. cl.exe
       # appends CL to every compile, so this opts out without a source change.
       env:
-          CL: /D_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING
+          # RELEASE_BUILD=1: a release, not an alpha build (StdAfx.h); not via ReleaseBuild.props,
+          # which also imports WindowsXP.props.
+          CL: /D_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING /DRELEASE_BUILD=1
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
-      run: msbuild ${{env.SOLUTION_FILE_PATH}} /nologo /v:m /t:Rebuild /p:ForceImportBeforeCppTargets=${{env.RELEASEBUILD_FILE_PATH}} /p:Configuration=${{ matrix.type }} /p:Platform=${{ matrix.platform }} /p:DefineConstants=BUILDFROMMSBUILD /p:RevisionSHA=${{ steps.gitversion.outputs.ShortSha }} /p:RevisionDate=${{ steps.gitversion.outputs.commitDate }} /fl /flp:Summary
+      run: msbuild ${{env.SOLUTION_FILE_PATH}} /nologo /v:m /t:Rebuild /p:Configuration=${{ matrix.type }} /p:Platform=${{ matrix.platform }} /p:DefineConstants=BUILDFROMMSBUILD /p:RevisionSHA=${{ steps.gitversion.outputs.ShortSha }} /p:RevisionDate=${{ steps.gitversion.outputs.commitDate }} /fl /flp:Summary
 
     - name: Test the installer and its VC++ runtime check
       # Installs the build, then a second build of the same script with the

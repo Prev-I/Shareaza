@@ -40,18 +40,19 @@ Then, from a Developer Command Prompt for VS 2022:
 
 ```bat
 nuget restore vc143\Shareaza.sln
-set CL=/D_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING
-msbuild vc143\Shareaza.sln /t:Rebuild /p:Configuration=Release /p:Platform=x64 ^
-  /p:ForceImportBeforeCppTargets=%CD%\vc143\ReleaseBuild.props
+set CL=/D_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING /DRELEASE_BUILD=1
+msbuild vc143\Shareaza.sln /t:Rebuild /p:Configuration=Release /p:Platform=x64
 ```
 
-- `CL` silences a Visual Studio 17.8+ deprecation that the project's SDL checks would turn into an
-  error.
-- `ReleaseBuild.props` marks the build as a release. Without it the client is an alpha build: it
-  shows an alpha-test warning at every start, and from seven days after it was compiled also a
-  message that the test period has ended.
+- `CL` is added to every compile. Its first define silences a Visual Studio 17.8+ deprecation that
+  the project's SDL checks would turn into an error.
+- `RELEASE_BUILD=1` marks the build as a release. Without it the client is an alpha build: it shows
+  an alpha-test warning at every start, and from seven days after it was compiled also a message
+  that the test period has ended. CI defines it the same way. `vc143\ReleaseBuild.props` is not
+  used: it also imports `WindowsXP.props`, which targets Windows XP for the 32-bit build.
 - Use `/p:Platform=Win32` for the 32-bit build, and `Debug` for a debug build.
-- Opening `vc143\Shareaza.sln` in Visual Studio works too, for an alpha build.
+- Opening `vc143\Shareaza.sln` in Visual Studio works too; set `CL` the same way first, in the
+  environment Visual Studio starts from, or you get an alpha build.
 - The installer lands in `setup\builds`.
 
 Building x64 on 32-bit Windows fails while registering the 64-bit DLLs, and you could not test the

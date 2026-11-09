@@ -19,7 +19,6 @@ jobs:
       BUILD_WRAPPER_OUT_DIR: build_wrapper_output_directory # Directory where build-wrapper output will be placed
       # Path to the solution file relative to the root of the project.
       SOLUTION_FILE_PATH: vc143/Shareaza.sln
-      RELEASEBUILD_FILE_PATH: vc143/ReleaseBuild.props
 
     steps:
       - uses: actions/checkout@v2
@@ -50,8 +49,10 @@ jobs:
         working-directory: ${{env.GITHUB_WORKSPACE}}
         run: nuget restore ${{env.SOLUTION_FILE_PATH}}
       - name: Run build-wrapper
+        env:
+          CL: /D_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING /DRELEASE_BUILD=1
         run: |
-          build-wrapper-win-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} msbuild ${{env.SOLUTION_FILE_PATH}} /nologo /v:m /t:Rebuild /p:ForceImportBeforeCppTargets=${{env.RELEASEBUILD_FILE_PATH}} /p:Configuration=${{ matrix.type }} /p:Platform=${{ matrix.platform }} /fl /flp:Summary
+          build-wrapper-win-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} msbuild ${{env.SOLUTION_FILE_PATH}} /nologo /v:m /t:Rebuild /p:Configuration=${{ matrix.type }} /p:Platform=${{ matrix.platform }} /fl /flp:Summary
 
       - name: Run sonar-scanner
         env:
