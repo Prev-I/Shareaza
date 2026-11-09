@@ -76,6 +76,23 @@ jobs:
                 New-ItemProperty -Path "$k\Connection" -Name RandomPort -Value 1 -PropertyType DWord -Force | Out-Null
                 New-Item -ItemType Directory -Force -Path "$env:APPDATA\Shareaza\Data" | Out-Null
                 Set-Content -Path "$env:APPDATA\Shareaza\Data\marker.txt" -Value 'mine'
+                # The fork's earlier installers made a TCP and UDP pair "Shareaza" through the old
+                # firewall API, for the profile active at install time. Plant it the same way, so the
+                # firewall check after installing shows the new installer replaces it.
+                if ('${{ matrix.client }}' -eq 'Fork') {
+                    $exe = Join-Path $env:ProgramFiles 'Shareaza\Shareaza.exe'
+                    $legacy = New-Object -ComObject HNetCfg.FwAuthorizedApplication
+                    $legacy.ProcessImageFileName = $exe
+                    $legacy.Name = 'Shareaza'
+                    $legacy.Scope = 0       # NET_FW_SCOPE_ALL
+                    $legacy.IpVersion = 2   # NET_FW_IP_VERSION_ANY
+                    $legacy.Enabled = $true
+                    (New-Object -ComObject HNetCfg.FwMgr).LocalPolicy.CurrentProfile.AuthorizedApplications.Add($legacy)
+                    $planted = @(Get-NetFirewallRule -DisplayName 'Shareaza' -ErrorAction SilentlyContinue |
+                        Where-Object { ($_ | Get-NetFirewallApplicationFilter).Program -eq $exe })
+                    $planted | ForEach-Object { "legacy firewall rule: $($_.Direction) $($_.Action), profiles $($_.Profile), protocol $(($_ | Get-NetFirewallPortFilter).Protocol)" }
+                    if (-not $planted) { throw 'the legacy firewall rule pair was not created' }
+                }
 
         -   name: Fetch an unpublished build
             if: inputs.build_run != '' && matrix.client == 'Fork'
@@ -123,8 +140,9 @@ jobs:
                 @'
                 param([string] $Program, [switch] $Absent)
                 $ErrorActionPreference = 'Stop'
-                $rules = @(Get-NetFirewallRule -DisplayName 'Shareaza' -Direction Inbound -ErrorAction SilentlyContinue |
-                    Where-Object { ($_ | Get-NetFirewallApplicationFilter).Program -eq $Program })
+                # -DisplayName and -Direction belong to different parameter sets: filter the direction here.
+                $rules = @(Get-NetFirewallRule -DisplayName 'Shareaza' -ErrorAction SilentlyContinue |
+                    Where-Object { "$($_.Direction)" -eq 'Inbound' -and ($_ | Get-NetFirewallApplicationFilter).Program -eq $Program })
                 $rules | ForEach-Object { "rule '$($_.DisplayName)': $($_.Action), enabled $($_.Enabled), profiles $($_.Profile), edge $($_.EdgeTraversalPolicy), protocol $(($_ | Get-NetFirewallPortFilter).Protocol)" }
                 if ($Absent) {
                     if ($rules) { throw "$($rules.Count) firewall rule(s) 'Shareaza' for $Program remain" }

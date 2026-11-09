@@ -162,7 +162,7 @@ BOOL CNetwork::Init()
 		if ( ! bChecked )
 			theApp.Message( MSG_INFO, _T("Windows Firewall: could not check whether incoming connections are allowed.") );
 		else if ( ! bTCP || ! bUDP )
-			theApp.Message( MSG_NOTICE, _T("Windows Firewall blocks incoming %s for Shareaza on this network: run the installer again with the firewall option, or allow Shareaza.exe in Windows Firewall."),
+			theApp.Message( MSG_NOTICE, _T("Windows Firewall blocks incoming %s for Shareaza on this network. If Windows treats this network as Public, set it to Private; otherwise run the installer again with the firewall option, or allow Shareaza.exe in Windows Firewall."),
 				! bTCP && ! bUDP ? _T("TCP and UDP") : ( ! bTCP ? _T("TCP") : _T("UDP") ) );
 	}
 
