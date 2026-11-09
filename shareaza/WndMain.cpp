@@ -302,6 +302,7 @@ CMainWnd::CMainWnd()
 	, m_pSkin			( NULL )
 	, m_nAlpha			( 255 )
 	, m_bTlsPromptShowing	( false )
+	, m_bMonitorAtEnd	( FALSE )
 {
 	ZeroMemory( &m_pTray, sizeof( NOTIFYICONDATA ) );
 	m_pTray.cbSize				= theApp.m_bIsVistaOrNewer ? sizeof( NOTIFYICONDATA ) : NOTIFYICONDATA_V3_SIZE;
@@ -509,8 +510,6 @@ int CMainWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_wndMonitorBar.SetWindowText( _T("Monitor") );
 	m_wndMonitorBar.EnableDocking( CBRS_ALIGN_TOP | CBRS_ALIGN_BOTTOM );
 	DockControlBar( &m_wndMonitorBar, AFX_IDW_DOCKBAR_TOP );
-	m_wndMenuBar.m_pShareRowWith = &m_wndMonitorBar;
-	m_wndMonitorBar.m_pMenuBar = &m_wndMenuBar;
 
 	// Default Size
 	int iXSize, iYSize;
@@ -555,14 +554,11 @@ int CMainWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	Settings.LoadWindow( _T("CMainWnd"), this );
 
-	// Without a saved layout the monitor bar goes to the right end of the menu row; a layout the
-	// user has saved is restored as it is
+	// Without a saved layout the monitor bar goes to the right end of the navigation bar's row (the
+	// toolbar's in windowed mode); a layout the user has saved is restored as it is
 	const BOOL bSavedLayout = HasSavedBarLayout();
 
 	LoadBarState( _T("Toolbars\\CoolBar") );
-
-	if ( ! bSavedLayout )
-		PlaceMonitorOnMenuRow();
 
 	if ( ! m_wndMenuBar.IsVisible() ) ShowControlBar( &m_wndMenuBar, TRUE, TRUE );
 	if ( ! m_wndNavBar.IsVisible() && ! m_wndToolBar.IsVisible() )
@@ -570,6 +566,10 @@ int CMainWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		ShowControlBar( &m_wndNavBar, Settings.General.GUIMode != GUI_WINDOWED, TRUE );
 		ShowControlBar( &m_wndToolBar, Settings.General.GUIMode == GUI_WINDOWED, TRUE );
 	}
+
+	if ( ! bSavedLayout )
+		PlaceMonitorBesideMainBar();
+
 	if ( ! m_wndTabBar.IsVisible() ) ShowControlBar( &m_wndTabBar, TRUE, FALSE );
 
 	if ( Settings.Toolbars.ShowRemote )
@@ -2957,7 +2957,28 @@ void CMainWnd::OnSize(UINT nType, int cx, int cy)
 	if ( m_pSkin )
 		m_pSkin->OnSize( this );
 
+	// A monitor bar that moved since the last resize, because the user dragged it or a layout
+	// changed, is kept at the row end only if that is where it now is
+	if ( nType != SIZE_MINIMIZED && m_wndMonitorBar.GetSafeHwnd() )
+	{
+		CRect rcMonitor;
+		m_wndMonitorBar.GetWindowRect( &rcMonitor );
+		if ( rcMonitor != m_rcMonitor )
+			m_bMonitorAtEnd = IsMonitorAtRowEnd();
+	}
+
 	CMDIFrameWnd::OnSize( nType, cx, cy );
+
+	// The navigation bar does not stretch, so a monitor bar beside it would stay where it is when
+	// the window grows, and a narrow window pushes it next to the navigation bar or onto a row of
+	// its own: once the row has room for both, it goes back to the right end
+	if ( nType != SIZE_MINIMIZED && m_wndMonitorBar.GetSafeHwnd() )
+	{
+		if ( m_bMonitorAtEnd && m_wndMonitorBar.IsVisible() && ! IsMonitorAtRowEnd() &&
+			MonitorFitsBesideMainBar() )
+			PlaceMonitorBesideMainBar();
+		m_wndMonitorBar.GetWindowRect( &m_rcMonitor );
+	}
 }
 
 BOOL CMainWnd::HasSavedBarLayout() const
@@ -2968,29 +2989,76 @@ BOOL CMainWnd::HasSavedBarLayout() const
 	return static_cast< int >( theApp.GetProfileInt( _T("Toolbars\\CoolBar-Summary"), _T("Bars"), -1 ) ) >= 0;
 }
 
-void CMainWnd::PlaceMonitorOnMenuRow()
+CControlBar* CMainWnd::MainBar()
 {
-	if ( ! m_wndMenuBar.GetSafeHwnd() || ! m_wndMonitorBar.GetSafeHwnd() ) return;
+	// As SetGUIMode docks them: the navigation bar, or the toolbar in windowed mode
+	if ( m_wndNavBar.GetSafeHwnd() && m_wndNavBar.IsVisible() )
+		return &m_wndNavBar;
+	return &m_wndToolBar;
+}
+
+void CMainWnd::PlaceMonitorBesideMainBar()
+{
+	CControlBar* pMainBar = MainBar();
+	if ( ! pMainBar->GetSafeHwnd() || ! m_wndMonitorBar.GetSafeHwnd() ) return;
 
 	RecalcLayout();
 
-	// The right end of the menu bar's own dock bar: the dock bar lays its bars out within its
-	// client area, which is narrower than the window and its frame
-	CWnd* pDockBar = m_wndMenuBar.GetParent();
-	if ( ! pDockBar ) return;
+	CWnd* pDockBar = pMainBar->GetParent();
+	if ( ! pDockBar || ! pMainBar->IsVisible() ) return;
 
+	// The main bar's row, at the right end of its dock bar's client area, where the dock bar
+	// lays its bars out
 	CRect rcDock, rcBar;
-	pDockBar->GetWindowRect( &rcDock );
-	m_wndMenuBar.GetWindowRect( &rcBar );
-	rcBar.left	= rcDock.right - 128;
+	pDockBar->GetClientRect( &rcDock );
+	pDockBar->ClientToScreen( &rcDock );
+	pMainBar->GetWindowRect( &rcBar );
+	const int nWidth = m_wndMonitorBar.CalcFixedLayout( FALSE, TRUE ).cx;
+	rcBar.left	= rcDock.right - nWidth;
 	rcBar.right	= rcDock.right;
 
-	// Afterwards the dock bar's own layout keeps it at the end of the row on every resize: the
-	// menu bar leaves exactly its width (CCoolBarCtrl::CalcFixedLayout)
 	DockControlBar( &m_wndMonitorBar, pDockBar->GetDlgCtrlID(), &rcBar );
-
-	// Once both share the row, the menu bar leaves room for the monitor: lay out again
 	RecalcLayout();
+
+	m_bMonitorAtEnd = TRUE;
+	m_wndMonitorBar.GetWindowRect( &m_rcMonitor );
+}
+
+BOOL CMainWnd::IsMonitorAtRowEnd()
+{
+	CControlBar* pMainBar = MainBar();
+	if ( ! pMainBar->GetSafeHwnd() || ! m_wndMonitorBar.GetSafeHwnd() ) return FALSE;
+	if ( ! pMainBar->IsVisible() || ! m_wndMonitorBar.IsVisible() ) return FALSE;
+
+	CWnd* pDockBar = m_wndMonitorBar.GetParent();
+	if ( ! pDockBar || pDockBar != pMainBar->GetParent() ) return FALSE;
+
+	CRect rcDock, rcMain, rcMonitor;
+	pDockBar->GetClientRect( &rcDock );
+	pDockBar->ClientToScreen( &rcDock );
+	pMainBar->GetWindowRect( &rcMain );
+	m_wndMonitorBar.GetWindowRect( &rcMonitor );
+
+	// On the main bar's row, with its right edge at the dock bar's or past it: MFC right-justifies
+	// the last bar of a row 2 pixels (cxBorder2) past the edge, and a row too narrow for both bars
+	// pushes it further out
+	return abs( rcMonitor.top - rcMain.top ) <= 2 && rcMonitor.right >= rcDock.right - 2;
+}
+
+BOOL CMainWnd::MonitorFitsBesideMainBar()
+{
+	CControlBar* pMainBar = MainBar();
+	if ( ! pMainBar->GetSafeHwnd() || ! pMainBar->IsVisible() ) return FALSE;
+
+	CWnd* pDockBar = pMainBar->GetParent();
+	if ( ! pDockBar ) return FALSE;
+
+	CRect rcDock, rcMain;
+	pDockBar->GetClientRect( &rcDock );
+	pMainBar->GetWindowRect( &rcMain );
+	pDockBar->ScreenToClient( &rcMain );
+
+	return rcDock.right - rcMain.right >= m_wndMonitorBar.CalcFixedLayout( FALSE, TRUE ).cx;
 }
 
 void CMainWnd::OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS FAR* lpncsp)
