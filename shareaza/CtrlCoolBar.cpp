@@ -371,12 +371,14 @@ CSize CCoolBarCtrl::CalcFixedLayout(BOOL bStretch, BOOL /*bHorz*/)
 			if ( rc.Width() > 32 ) size.cx = rc.Width() + 2;
 		}
 
-		// Leave room for a bar docked beside this one, such as the monitor on the menu row
-		if ( BarsShareRow( this, m_pShareRowWith ) )
+		// Leave room for a bar docked beside this one, such as the monitor on the menu row: the
+		// dock bar lays its bars out within its client area, narrower than the window's frame
+		if ( BarsShareRow( this, m_pShareRowWith ) && GetParent() )
 		{
-			CRect rcOther;
+			CRect rcDock, rcOther;
+			GetParent()->GetClientRect( &rcDock );
 			m_pShareRowWith->GetWindowRect( &rcOther );
-			size.cx = max( 32, size.cx - rcOther.Width() - 2 );
+			size.cx = max( 32, rcDock.Width() - rcOther.Width() );
 		}
 
 		m_czLast = size;

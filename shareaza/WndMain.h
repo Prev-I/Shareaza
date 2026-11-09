@@ -55,7 +55,6 @@ public:
 protected:
 	BOOL		HasSavedBarLayout() const;	// SaveBarState() has run in this profile
 	void		PlaceMonitorOnMenuRow();		// dock the monitor bar at the right end of the menu row
-	bool		IsMonitorOnMenuRow() const;
 
 public:
 

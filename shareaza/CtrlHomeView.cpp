@@ -129,6 +129,8 @@ void CHomeViewCtrl::UpdateReleaseNotesLink()
 		// Remove() takes an element out of the document without freeing it
 		if ( m_peUpgradeNotes ) { m_pDocument.Remove( m_peUpgradeNotes ); delete m_peUpgradeNotes; }
 		if ( m_peUpgradeNotesBreak ) { m_pDocument.Remove( m_peUpgradeNotesBreak ); delete m_peUpgradeNotesBreak; }
+		if ( m_peUpgradeNotes || m_peUpgradeNotesBreak )
+			SetDocument( &m_pDocument );	// drops the view's hover pointer and fragments
 		m_peUpgradeNotes = m_peUpgradeNotesBreak = NULL;
 		return;
 	}

@@ -2958,22 +2958,14 @@ void CMainWnd::OnSize(UINT nType, int cx, int cy)
 		m_pSkin->OnSize( this );
 
 	CMDIFrameWnd::OnSize( nType, cx, cy );
-
-	// Keep the monitor bar at the right end of the menu row when the window is resized
-	if ( nType != SIZE_MINIMIZED && IsMonitorOnMenuRow() )
-		PlaceMonitorOnMenuRow();
 }
 
 BOOL CMainWnd::HasSavedBarLayout() const
 {
 	// SaveBarState( "Toolbars\\CoolBar" ) writes the bar count to the "Toolbars\\CoolBar-Summary"
 	// section; when in doubt, treat the layout as saved, so a user's own layout is never moved
-	return theApp.GetProfileInt( _T("Toolbars\\CoolBar-Summary"), _T("Bars"), -1 ) >= 0;
-}
-
-bool CMainWnd::IsMonitorOnMenuRow() const
-{
-	return BarsShareRow( &m_wndMonitorBar, &m_wndMenuBar );
+	// (GetProfileInt returns a UINT: compare it as an int, or the missing value -1 reads as saved)
+	return static_cast< int >( theApp.GetProfileInt( _T("Toolbars\\CoolBar-Summary"), _T("Bars"), -1 ) ) >= 0;
 }
 
 void CMainWnd::PlaceMonitorOnMenuRow()
@@ -2982,13 +2974,20 @@ void CMainWnd::PlaceMonitorOnMenuRow()
 
 	RecalcLayout();
 
-	CRect rcWnd, rcBar;
-	GetWindowRect( &rcWnd );
-	m_wndMenuBar.GetWindowRect( &rcBar );
-	rcBar.left	= rcWnd.right - 128;
-	rcBar.right	= rcWnd.right;
+	// The right end of the menu bar's own dock bar: the dock bar lays its bars out within its
+	// client area, which is narrower than the window and its frame
+	CWnd* pDockBar = m_wndMenuBar.GetParent();
+	if ( ! pDockBar ) return;
 
-	DockControlBar( &m_wndMonitorBar, AFX_IDW_DOCKBAR_TOP, &rcBar );
+	CRect rcDock, rcBar;
+	pDockBar->GetWindowRect( &rcDock );
+	m_wndMenuBar.GetWindowRect( &rcBar );
+	rcBar.left	= rcDock.right - 128;
+	rcBar.right	= rcDock.right;
+
+	// Afterwards the dock bar's own layout keeps it at the end of the row on every resize: the
+	// menu bar leaves exactly its width (CCoolBarCtrl::CalcFixedLayout)
+	DockControlBar( &m_wndMonitorBar, pDockBar->GetDlgCtrlID(), &rcBar );
 
 	// Once both share the row, the menu bar leaves room for the monitor: lay out again
 	RecalcLayout();
