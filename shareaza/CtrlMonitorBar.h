@@ -39,7 +39,6 @@ public:
 // Attributes
 public:
 	CControlBar*	m_pSnapBar[2];
-	CControlBar*	m_pMenuBar;		// on the menu's row, the bar takes the menu's height
 	CGraphItem*		m_pTxItem;
 	CGraphItem*		m_pRxItem;
 	DWORD			m_nMaximum;

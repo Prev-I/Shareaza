@@ -64,6 +64,10 @@ lists or inline styles.
 The menu bar stretches to the full row by default, so the second is needed either way. The
 first then places the monitor bar.
 
+*Superseded:* the owner meant the navigation bar's row (item 10). Neither the navigation bar nor
+the toolbar stretches, so only the first way is needed there: a docking rectangle at the row's
+right end, and a resize step that keeps a right-aligned bar at the end.
+
 ## Pull request A: `prev-i/previ7`
 
 ### 1. Real release builds
@@ -210,27 +214,37 @@ existing install would never see gwc-edge or the lifted bans.
   - Old defaults no longer in the list stay on existing installs until the client's own failure
     count removes them (`IDS_DISCOVERY_FAIL_REMOVE`). Dead caches go away by themselves.
 
-### 10. The monitor bar on the menu row
+### 10. The monitor bar beside the navigation bar
 
-When no saved bar layout exists, the monitor bar sits at the far right of the main menu's row.
-This changes its position only: whether it is shown follows `Toolbars.ShowMonitor` and the GUI
-mode exactly as today. The menu bar leaves room only while the monitor bar is visible on its row.
+When no saved bar layout exists, the monitor bar sits at the far right of the navigation bar's row,
+the row with Home … Chat, or of the toolbar's row in windowed mode. This is where `SetGUIMode`
+already docks it on a mode switch. It changes the position only: whether the bar is shown follows
+`Toolbars.ShowMonitor` and the GUI mode exactly as today.
 
-- **Detecting no saved layout:** before `LoadBarState`, check for the registry key that
-  `SaveBarState` writes under `HKCU\Software\Shareaza\Shareaza\Toolbars`. The exact value names
-  are MFC's, and the builder confirms them.
-- **The menu bar's width:** `CCoolMenuBarCtrl` (through `CCoolBarCtrl::CalcFixedLayout`)
-  returns the main window's width minus the monitor bar's width while the monitor bar is docked
-  on its row, and the full width otherwise.
-- **The monitor bar's height:** `CMonitorBarCtrl::CalcFixedLayout` returns the menu bar's height
-  while it is docked on the menu row, and keeps today's snap otherwise.
-- **Resizing:** `CMainWnd::OnSize` keeps the monitor bar at the row's right end.
-- **Every GUI mode** (tabbed, windowed, basic) uses the same default. `SetGUIMode`'s existing
-  placement on the navigation row stays for an explicit mode switch *(designer's call: the owner
-  asked for the default; a user's own layout and mode switches keep working as before)*.
-- **Evidence:** the oracle already saves a screenshot of each run, `screen-*.png`. The pull
-  request shows one from a fresh profile in a mode where the monitor bar is visible, with the bar
-  on the menu row.
+*(Owner, 2026-11-09, after seeing the first build: the bar meant was the navigation bar, not the
+main menu; the right-end alignment is right. A first version put the monitor on the menu row; it
+was replaced in a follow-up pull request, and the menu-row sizing code went back to upstream's.)*
+
+- **Detecting no saved layout:** before `LoadBarState`, `CMainWnd::HasSavedBarLayout` reads MFC's
+  own summary value, `Toolbars\CoolBar-Summary\Bars`.
+- **Placing it:** after the navigation bar or toolbar has been shown, the monitor bar is docked
+  into that bar's row with a rectangle at the right end of the dock bar's client area.
+- **Height:** unchanged; the monitor bar already snaps to the navigation bar's or toolbar's height.
+- **Resizing** *(designer's call, revised at review)*: neither bar stretches, so a docked bar
+  keeps its place when the window grows, and a narrow window pushes it next to the navigation bar
+  or onto a row of its own. `CMainWnd` remembers whether the monitor bar belongs at the row's
+  right end, and after a resize puts it back there once the row has room for both bars.
+  - The intent is set when the default placement runs, and otherwise read from where the bar sits:
+    it is re-read only when the bar has moved since the last resize, so a bar the user drags
+    elsewhere stays where they put it, and one they drag to the end stays at the end.
+  - This applies to saved layouts too: loading one is untouched, but a monitor bar it puts at the
+    row end is kept there on resize.
+  - A hidden monitor bar is not moved; shown again, it goes back to the end at the next resize.
+  - Right-to-left layouts are not handled, as in upstream's `SetGUIMode`.
+- **Every GUI mode** uses the same default. Mode switches keep working as before.
+- **Evidence:** the oracle's screenshots, `screen-*.png`: one from a fresh profile, with the bar
+  at the right end of the navigation bar's row, and one from the layout the previous run saved,
+  unchanged.
 
 ### 11. Small fixes
 

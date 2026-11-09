@@ -24,7 +24,6 @@
 #include "Settings.h"
 #include "GraphItem.h"
 #include "CoolInterface.h"
-#include "CtrlCoolBar.h"
 #include "CtrlMonitorBar.h"
 #include "Skin.h"
 
@@ -51,7 +50,6 @@ CMonitorBarCtrl::CMonitorBarCtrl()
 {
 	m_pSnapBar[0]	= NULL;
 	m_pSnapBar[1]	= NULL;
-	m_pMenuBar		= NULL;
 	m_pTxItem		= new CGraphItem( GRC_TOTAL_BANDWIDTH_OUT, 1.0f, CoolInterface.m_crMonitorUploadBar );
 	m_pRxItem		= new CGraphItem( GRC_TOTAL_BANDWIDTH_IN, 1.0f, CoolInterface.m_crMonitorDownloadBar );
 	m_nMaximum		= 0;
@@ -115,13 +113,6 @@ CSize CMonitorBarCtrl::CalcFixedLayout(BOOL /*bStretch*/, BOOL /*bHorz*/)
 {
 	int nHeight = Settings.General.GUIMode == GUI_WINDOWED ? 30 : 38;
 	CSize size( 128, nHeight );
-
-	// Docked on the menu's row: take the menu's height, so the row does not grow
-	if ( BarsShareRow( this, m_pMenuBar ) )
-	{
-		size.cy = m_pMenuBar->CalcFixedLayout( FALSE, TRUE ).cy;
-		return size;
-	}
 
 	for ( int nSnap = 1 ; nSnap >= 0 ; nSnap-- )
 	{

@@ -54,7 +54,10 @@ public:
 
 protected:
 	BOOL		HasSavedBarLayout() const;	// SaveBarState() has run in this profile
-	void		PlaceMonitorOnMenuRow();		// dock the monitor bar at the right end of the menu row
+	CControlBar*	MainBar();				// the navigation bar, or the toolbar in windowed mode
+	void		PlaceMonitorBesideMainBar();	// dock the monitor bar at the right end of the main bar's row
+	BOOL		IsMonitorAtRowEnd();			// the monitor bar is on the main bar's row, at or past its right end
+	BOOL		MonitorFitsBesideMainBar();		// the main bar's row has room for the monitor bar after the main bar
 
 public:
 
@@ -105,6 +108,8 @@ protected:
 	CBrush				m_brshDockbar;
 	CList< CTlsPromptRequest* > m_pTlsPrompts;	// Certificate prompts not shown yet (owned)
 	bool				m_bTlsPromptShowing;	// A certificate prompt is open
+	BOOL				m_bMonitorAtEnd;		// Keep the monitor bar at the right end of the main bar's row
+	CRect				m_rcMonitor;			// Where the last resize left the monitor bar, to tell a move
 
 	// Show the queued certificate prompts one at a time, if no prompt is open and the
 	// UI thread may block on them. False if the application began closing meanwhile:

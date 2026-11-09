@@ -29,17 +29,6 @@
 class CCoolBarItem;
 
 
-// True when two visible bars are docked side by side in the same row of the same dock bar
-inline bool BarsShareRow(const CControlBar* pA, const CControlBar* pB)
-{
-	if ( ! pA || ! pB || ! pA->IsVisible() || ! pB->IsVisible() ) return false;
-	if ( pA->GetParent() != pB->GetParent() ) return false;
-	CRect rcA, rcB;
-	pA->GetWindowRect( &rcA );
-	pB->GetWindowRect( &rcB );
-	return abs( rcA.top - rcB.top ) <= 2;
-}
-
 class CCoolBarCtrl : public CControlBar
 {
 // Construction
@@ -50,9 +39,6 @@ public:
 	DECLARE_DYNAMIC(CCoolBarCtrl)
 
 // Attributes
-public:
-	CControlBar*	m_pShareRowWith;	// a bar that may share this bar's row: a stretching bar leaves room for it
-
 protected:
 	CList< CCoolBarItem* >	m_pItems;
 	int				m_nHeight;
