@@ -131,6 +131,7 @@ void CSettings::Load()
 	Add( _T("VersionCheck"), _T("UpgradeSources"), &VersionCheck.UpgradeSources );
 	Add( _T("VersionCheck"), _T("UpgradeTiger"), &VersionCheck.UpgradeTiger );
 	Add( _T("VersionCheck"), _T("UpgradeVersion"), &VersionCheck.UpgradeVersion );
+	Add( _T("VersionCheck"), _T("UpgradeNotesURL"), &VersionCheck.UpgradeNotesURL );
 
 	Add( _T("Interface"), _T("AutoComplete"), &Interface.AutoComplete, true );
 	Add( _T("Interface"), _T("CoolMenuEnable"), &Interface.CoolMenuEnable, true );

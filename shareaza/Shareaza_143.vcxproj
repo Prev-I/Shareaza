@@ -930,6 +930,7 @@
     <ClInclude Include="UPnPFinder.h" />
     <ClInclude Include="UPnPNAT.h" />
     <ClInclude Include="VendorCache.h" />
+    <ClInclude Include="ReleaseNotes.h" />
     <ClInclude Include="VersionChecker.h" />
     <ClInclude Include="WindowManager.h" />
     <ClInclude Include="WndPrivateChat.h" />

@@ -91,6 +91,7 @@ public:
 		CString		UpgradeSize;
 		CString		UpgradeSources;
 		CString		UpgradeVersion;
+		CString		UpgradeNotesURL;			// The release's page on GitHub (https only)
 	} VersionCheck;
 
 	struct sInterface

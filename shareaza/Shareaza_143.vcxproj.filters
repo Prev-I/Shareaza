@@ -1686,6 +1686,9 @@
     <ClInclude Include="VendorCache.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ReleaseNotes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="VersionChecker.h">
       <Filter>Header Files</Filter>
     </ClInclude>

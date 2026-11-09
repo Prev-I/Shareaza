@@ -59,6 +59,7 @@ END_MESSAGE_MAP()
 CHomeViewCtrl::CHomeViewCtrl()
 {
 	m_peHeader = m_peSearch = m_peUpgrade = NULL;
+	m_peUpgradeNotes = m_peUpgradeNotesBreak = NULL;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -87,6 +88,7 @@ void CHomeViewCtrl::OnSkinChange()
 {
 	m_pDocument.Clear();
 	m_peHeader = m_peSearch = m_peUpgrade = m_peRemote1 = m_peRemote2 = NULL;
+	m_peUpgradeNotes = m_peUpgradeNotesBreak = NULL;	// freed by Clear()
 
 	CXMLElement* pXML = Skin.GetDocument( _T("CHomeViewCtrl") );
 	CElementMap pMap;
@@ -116,6 +118,51 @@ void CHomeViewCtrl::Activate()
 		m_wndSearch.Activate();
 }
 
+// Adds, updates or removes the "Release notes" link after the upgrade link, in the upgrade group.
+// The skin's template has no element for it, so every language's Home page gets it the same way.
+void CHomeViewCtrl::UpdateReleaseNotesLink()
+{
+	const CString& strURL = Settings.VersionCheck.UpgradeNotesURL;
+
+	if ( strURL.IsEmpty() )
+	{
+		// Remove() takes an element out of the document without freeing it
+		if ( m_peUpgradeNotes ) { m_pDocument.Remove( m_peUpgradeNotes ); delete m_peUpgradeNotes; }
+		if ( m_peUpgradeNotesBreak ) { m_pDocument.Remove( m_peUpgradeNotesBreak ); delete m_peUpgradeNotesBreak; }
+		m_peUpgradeNotes = m_peUpgradeNotesBreak = NULL;
+		return;
+	}
+
+	if ( m_peUpgradeNotes )
+	{
+		m_peUpgradeNotes->m_sLink = strURL;
+		return;
+	}
+
+	// Find the upgrade group's own link, and the line break that precedes it
+	CRichElement* pUpgradeLink = NULL;
+	CRichElement* pBreakBefore = NULL;
+	CRichElement* pPrevious = NULL;
+	for ( POSITION pos = m_pDocument.GetIterator() ; pos ; )
+	{
+		CRichElement* pElement = m_pDocument.GetNext( pos );
+		if ( pElement->m_nGroup == GROUP_UPGRADE && pElement->m_nType == retLink )
+		{
+			pUpgradeLink = pElement;
+			if ( pPrevious && pPrevious->m_nType == retNewline ) pBreakBefore = pPrevious;
+			break;
+		}
+		pPrevious = pElement;
+	}
+	if ( ! pUpgradeLink ) return;
+
+	POSITION posAfter = m_pDocument.Find( pUpgradeLink );
+	m_pDocument.GetNext( posAfter );	// now the element after the upgrade link, or NULL
+
+	m_peUpgradeNotesBreak = m_pDocument.Add( retNewline, pBreakBefore ? (LPCTSTR)pBreakBefore->m_sText : _T("6"), NULL, 0, GROUP_UPGRADE, posAfter );
+	m_peUpgradeNotes = m_pDocument.Add( retLink, _T("Release notes"), strURL, 0, GROUP_UPGRADE, posAfter );
+}
+
 void CHomeViewCtrl::Update()
 {
 	BOOL bConnected = Network.IsConnected();
@@ -137,6 +184,7 @@ void CHomeViewCtrl::Update()
 	if ( VersionChecker.IsUpgradeAvailable() )
 	{
 		if ( m_peUpgrade ) m_peUpgrade->SetText( Settings.VersionCheck.UpgradePrompt );
+		UpdateReleaseNotesLink();
 		m_pDocument.ShowGroup( GROUP_UPGRADE, TRUE );
 	}
 	else

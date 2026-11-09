@@ -39,12 +39,19 @@ public:
 	CRichElement*	m_peUpgrade;
 	CRichElement*	m_peRemote1;
 	CRichElement*	m_peRemote2;
+	CRichElement*	m_peUpgradeNotes;		// "Release notes" link, added at run time
+	CRichElement*	m_peUpgradeNotesBreak;	// the line break before it
 	CHomeSearchCtrl	m_wndSearch;
 
 	virtual BOOL	Create(const RECT& rect, CWnd* pParentWnd);
 	void			OnSkinChange();
 	void			Activate();
 	void			Update();
+
+protected:
+	void			UpdateReleaseNotesLink();
+
+public:
 
 protected:
 	virtual void	OnLayoutComplete();

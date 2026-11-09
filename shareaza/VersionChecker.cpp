@@ -29,6 +29,7 @@
 #include "SharedFile.h"
 #include "Transfer.h"
 #include "VersionChecker.h"
+#include "ReleaseNotes.h"
 // Boost.JSON is compiled here, from the headers, in this one translation unit:
 // the project defines BOOST_ALL_NO_LIB, so no prebuilt Boost library is linked.
 #include <boost/json/src.hpp>
@@ -75,6 +76,7 @@ void CVersionChecker::ClearVersionCheck()
 	Settings.VersionCheck.UpgradeSize.Empty();
 	Settings.VersionCheck.UpgradeSources.Empty();
 	Settings.VersionCheck.UpgradeVersion.Empty();
+	Settings.VersionCheck.UpgradeNotesURL.Empty();
 }
 
 BOOL CVersionChecker::IsVersionNewer()
@@ -309,16 +311,13 @@ void CVersionChecker::ProcessResponse()
 		Settings.VersionCheck.Quote = strValue;
 	}
 	
-	//SystemMsg
+	// The release notes are Markdown: keep a plain summary of their first paragraph, and log it.
+	// The text is the release's, never a format string.
+	CString strSummary;
 	if ( m_pResponse.Lookup( _T("body"), strValue ) )
 	{
-		for ( strValue += '\n' ; strValue.GetLength() ; )
-		{
-			CString strLine	= strValue.SpanExcluding( _T("\r\n") );
-			strValue		= strValue.Mid( strLine.GetLength() + 1 );
-			// The text is the release's, never a format string
-			if ( strLine.GetLength() ) theApp.Message( MSG_NOTICE, _T("%s"), (LPCTSTR)strLine );
-		}
+		strSummary = ReleaseNotes::Summary( (LPCTSTR)strValue ).c_str();
+		if ( strSummary.GetLength() ) theApp.Message( MSG_NOTICE, _T("%s"), (LPCTSTR)strSummary );
 	}
 	
 	//UpgradePrompt
@@ -333,13 +332,18 @@ void CVersionChecker::ProcessResponse()
 		}
 //		versionString = strValue;
 
-		Settings.VersionCheck.UpgradePrompt = _T("New version available: ") + versionString;
-		Settings.VersionCheck.UpgradePrompt.Append(_T("\r\nRelease date: "));
-		m_pResponse.Lookup(_T("published_at"), strValue);
-		Settings.VersionCheck.UpgradePrompt.Append(strValue);
-		Settings.VersionCheck.UpgradePrompt.Append(_T("\r\nChangelog: "));
-		m_pResponse.Lookup(_T("body"), strValue);
-		Settings.VersionCheck.UpgradePrompt.Append(strValue);
+		// One paragraph, no line breaks: "Version 2.7.11.2-previ.7, released 2026-11-10. <summary>"
+		Settings.VersionCheck.UpgradePrompt = _T("Version ") + versionString;
+		if ( m_pResponse.Lookup( _T("published_at"), strValue ) && strValue.GetLength() )
+			Settings.VersionCheck.UpgradePrompt += CString( _T(", released ") ) + ReleaseNotes::DatePart( (LPCTSTR)strValue ).c_str();
+		Settings.VersionCheck.UpgradePrompt += _T(".");
+		if ( strSummary.GetLength() )
+			Settings.VersionCheck.UpgradePrompt += _T(" ") + strSummary;
+
+		// The release's page, for the Home page's link: https only, as GitHub serves it
+		Settings.VersionCheck.UpgradeNotesURL.Empty();
+		if ( m_pResponse.Lookup( _T("html_url"), strValue ) && _tcsnicmp( strValue, _T("https://"), 8 ) == 0 )
+			Settings.VersionCheck.UpgradeNotesURL = strValue;
 
 
 		CString s_platform =
