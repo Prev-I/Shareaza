@@ -154,13 +154,27 @@ void CVersionChecker::OnRun()
 	}
 }
 
+// boost::json keeps UTF-8; decode it as UTF-8, not with the ANSI code page
+static CString Utf8ToCString( const char* pszText, size_t nLength )
+{
+	if ( nLength == 0 ) return CString();
+	int nWide = MultiByteToWideChar( CP_UTF8, 0, pszText, static_cast< int >( nLength ), NULL, 0 );
+	CString str;
+	if ( nWide > 0 )
+	{
+		MultiByteToWideChar( CP_UTF8, 0, pszText, static_cast< int >( nLength ), str.GetBuffer( nWide ), nWide );
+		str.ReleaseBuffer( nWide );
+	}
+	return str;
+}
+
 void JsonToCStringIMap(const boost::json::value& jVal, CStringIMap& map, const CString& prefix = _T("")) {
 	if (jVal.is_object()) {
 		for (const auto& kv : jVal.as_object()) {
 			const auto& key = kv.key();
 			const auto& value = kv.value();
 
-			CString keyStr(key.data(), static_cast<int>(key.size()));
+			CString keyStr = Utf8ToCString(key.data(), key.size());
 			JsonToCStringIMap(value, map, prefix + keyStr + _T("."));
 		}
 	}
@@ -173,14 +187,14 @@ void JsonToCStringIMap(const boost::json::value& jVal, CStringIMap& map, const C
 		}
 	}
 	else if (jVal.is_string()) {
-		CString valueStr(jVal.as_string().data(), static_cast<int>(jVal.as_string().size()));
+		CString valueStr = Utf8ToCString(jVal.as_string().data(), jVal.as_string().size());
 		CString finalKey = prefix;
 		finalKey.TrimRight(_T("."));
 		map[finalKey] = valueStr;
 	}
 	else {
 		std::string narrowStr = boost::json::serialize(jVal);
-		CString valueStr = CA2W(narrowStr.c_str());
+		CString valueStr = Utf8ToCString(narrowStr.data(), narrowStr.size());
 		CString finalKey = prefix;
 		finalKey.TrimRight(_T("."));
 		map[finalKey] = valueStr;
@@ -217,8 +231,9 @@ BOOL CVersionChecker::ExecuteRequest()
 	// information: report the request as failed, as for a network error.
 	try
 	{
-		CT2CA pszConvertedAnsiString(strOutput);
-		std::string jsonResponse(pszConvertedAnsiString);
+		// UTF-8, as the response came: the ANSI code page turned characters it lacks into '?'
+		CT2CA pszUtf8( strOutput, CP_UTF8 );
+		std::string jsonResponse( pszUtf8 );
 
 		boost::json::error_code ec;
 		boost::json::value jv = boost::json::parse( jsonResponse, ec );
