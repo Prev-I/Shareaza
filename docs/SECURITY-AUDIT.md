@@ -272,8 +272,10 @@ went to the provenance pass instead.
   - A fresh prefix is still needed for a clean comparison between clients.
 - **Revision string:** the fork's builds show ` Release 64-bit (commit <sha> of <date>)` in the About
   box.
-- **Identifying the client:** they identify to caches as `RAZI2.7.10.6`, as ansani's own builds do.
-  The official SourceForge 2.7.10.2 sends `RAZA2.7.10.2`.
+- **Identifying the client:** they identify to caches as `RAZI` and their version: `RAZI2.7.10.6`
+  up to `previ.4` (as ansani's own builds do), `RAZI2.7.11.0` in `previ.5` and `RAZI2.7.11.1` from
+  `v2.7.11.1-previ.6`, with user agents `iShareaza 2.7.11.0` and `iShareaza 2.7.11.1`. The official
+  SourceForge 2.7.10.2 sends `RAZA2.7.10.2`.
 
 ## Addendum 2026-10-26: fixes for findings 3, 4 and 5
 
