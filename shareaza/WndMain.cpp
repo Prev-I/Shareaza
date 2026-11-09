@@ -3013,7 +3013,7 @@ void CMainWnd::PlaceMonitorBesideMainBar()
 	pDockBar->GetClientRect( &rcDock );
 	pDockBar->ClientToScreen( &rcDock );
 	pMainBar->GetWindowRect( &rcBar );
-	const int nWidth = m_wndMonitorBar.CalcFixedLayout( FALSE, TRUE ).cx;
+	const int nWidth = static_cast< CControlBar& >( m_wndMonitorBar ).CalcFixedLayout( FALSE, TRUE ).cx;
 	rcBar.left	= rcDock.right - nWidth;
 	rcBar.right	= rcDock.right;
 
@@ -3058,7 +3058,7 @@ BOOL CMainWnd::MonitorFitsBesideMainBar()
 	pMainBar->GetWindowRect( &rcMain );
 	pDockBar->ScreenToClient( &rcMain );
 
-	return rcDock.right - rcMain.right >= m_wndMonitorBar.CalcFixedLayout( FALSE, TRUE ).cx;
+	return rcDock.right - rcMain.right >= static_cast< CControlBar& >( m_wndMonitorBar ).CalcFixedLayout( FALSE, TRUE ).cx;
 }
 
 void CMainWnd::OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS FAR* lpncsp)
