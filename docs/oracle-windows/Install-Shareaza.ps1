@@ -113,8 +113,8 @@ $log = Join-Path $WorkDir "install-$Client.log"
 $arguments = @('/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/SP-',
                '/MERGETASKS="firewall,!upnp,!desktopicon,!quicklaunch"', "/LOG=`"$log`"")
 Write-Host "Installing $name silently"
-$p = Start-Process -FilePath $exe -ArgumentList $arguments -Wait -PassThru
-if ($p.ExitCode -ne 0) { throw "The installer exited with $($p.ExitCode); see $log" }
+$code = Invoke-Native $exe $arguments
+if ($code -ne 0) { throw "The installer exited with $code; see $log" }
 if (-not (Select-String -Path $log -SimpleMatch 'Installation process succeeded.' -Quiet)) {
     throw "The installer did not report success; see $log"
 }
