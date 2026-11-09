@@ -118,6 +118,31 @@ jobs:
                     if ($text.Contains($alpha)) { throw "Shareaza.exe $version is an alpha build: it contains the alpha-test warning" }
                     'release build: no alpha-test warning'
                 }
+                # The installer's Windows Firewall rule, for the fork from 2.7.11.2 on: one inbound
+                # rule "Shareaza" for Shareaza.exe, on Private and Domain networks, never Public.
+                @'
+                param([string] $Program, [switch] $Absent)
+                $ErrorActionPreference = 'Stop'
+                $rules = @(Get-NetFirewallRule -DisplayName 'Shareaza' -Direction Inbound -ErrorAction SilentlyContinue |
+                    Where-Object { ($_ | Get-NetFirewallApplicationFilter).Program -eq $Program })
+                $rules | ForEach-Object { "rule '$($_.DisplayName)': $($_.Action), enabled $($_.Enabled), profiles $($_.Profile), edge $($_.EdgeTraversalPolicy), protocol $(($_ | Get-NetFirewallPortFilter).Protocol)" }
+                if ($Absent) {
+                    if ($rules) { throw "$($rules.Count) firewall rule(s) 'Shareaza' for $Program remain" }
+                    "no firewall rule 'Shareaza' for $Program"
+                    return
+                }
+                if ($rules.Count -ne 1) { throw "expected one inbound firewall rule 'Shareaza' for $Program, found $($rules.Count)" }
+                $r = $rules[0]
+                if ("$($r.Action)" -ne 'Allow') { throw "the firewall rule does not allow: $($r.Action)" }
+                if ("$($r.Enabled)" -ne 'True') { throw 'the firewall rule is disabled' }
+                if ([int]$r.Profile -ne 3) { throw "the firewall rule is for profiles $($r.Profile), not Domain and Private only" }
+                if ("$(($r | Get-NetFirewallPortFilter).Protocol)" -ne 'Any') { throw 'the firewall rule is not for any protocol' }
+                'one firewall rule: inbound, allow, Domain and Private'
+                '@ | Set-Content -Encoding ASCII check-firewall.ps1
+                if ('${{ matrix.client }}' -eq 'Fork' -and ((Test-Path build) -or ([version]$version -ge [version]'2.7.11.2'))) {
+                    Add-Content -Path $env:GITHUB_ENV -Value 'FIREWALL_RULE=1'
+                    .\check-firewall.ps1 -Program "$app\Shareaza.exe"
+                }
                 $needle = [Text.Encoding]::GetEncoding(28591).GetString([Text.Encoding]::Unicode.GetBytes('EnableIPv6'))
                 if ($text.Contains($needle)) {
                     Add-Content -Path $env:GITHUB_ENV -Value 'HAS_IPV6_SETTING=1'
@@ -333,9 +358,24 @@ jobs:
                 if ($code -eq 0) { Fail "a second Restore-Oracle.ps1 did not refuse: $out" }
                 if ($out -notmatch 'nothing to restore') { Fail "a second Restore-Oracle.ps1 failed for another reason: $out" }
                 if ((Get-ItemProperty $k).OracleMarker -ne 'mine') { Fail 'the second restore damaged the setup' }
+                # The client only checks the firewall now: the runs must not have added rules.
+                if ($env:FIREWALL_RULE -eq '1') { .\check-firewall.ps1 -Program "$app\Shareaza.exe" }
                 Write-Host 'All checks passed.'
                 # The refused restore above left $LASTEXITCODE at 1, which the step would report.
                 exit 0
+
+        -   name: Uninstall and check the firewall rule is gone
+            # Last, because uninstalling deletes the settings and data the kit restored.
+            if: env.FIREWALL_RULE == '1'
+            run: |
+                $ErrorActionPreference = 'Stop'
+                $app = Join-Path $env:ProgramFiles 'Shareaza'
+                $p = Start-Process -FilePath "$app\Uninstall\unins000.exe" -ArgumentList '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART' -Wait -PassThru
+                if ($p.ExitCode -ne 0) { throw "the uninstaller exited with $($p.ExitCode)" }
+                # unins000.exe hands over to a copy of itself in %TEMP%: wait for that to finish too.
+                foreach ($i in 1..60) { if (-not (Test-Path "$app\Shareaza.exe")) { break }; Start-Sleep 2 }
+                if (Test-Path "$app\Shareaza.exe") { throw 'Shareaza.exe is still installed after uninstalling' }
+                .\check-firewall.ps1 -Program "$app\Shareaza.exe" -Absent
 
         -   name: Gather the evidence into the workspace
             # upload-artifact takes files from under the workspace only.
