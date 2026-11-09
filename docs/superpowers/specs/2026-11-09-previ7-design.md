@@ -27,6 +27,9 @@ collects those fixes and ships them as 2.7.11.2:
   - a confusing IPv6 log line;
   - a stale Skin+ label.
 - **A rebuilt default cache list**, from caches the owner tested on 2026-11-09, gwc-edge included.
+- **The Windows Firewall rule** *(owner, added 2026-11-09 after a live diagnosis)*.
+  - The installer's exception covers only the network profile active at install time.
+  - The client tries to change firewall policy, which it has no rights to do, and logs a failure at every start.
 
 ## Constraints
 
@@ -235,6 +238,55 @@ mode exactly as today. The menu bar leaves room only while the monitor bar is vi
   address, not the unset `m_pHostIPv6`.
 - `Skins/Skin+/Skin+.xml`: the homepage item reads "_Shareaza site", as in `Default.xml`.
 - `docs/ORACLE.md`: the update-check note names this fork's repository, not ansani's.
+
+### 12. The Windows Firewall rule
+
+*(owner, 2026-11-09; full findings in the SDD addendum `addendum-12-firewall.md`)*
+
+**The installer owns one inbound allow rule** named `Shareaza`:
+
+- program `{app}\Shareaza.exe`;
+- any protocol and any remote address;
+- profiles **Private and Domain**, not Public;
+- no edge traversal.
+
+**With the `firewall` task:**
+
+- it first deletes every inbound rule named `Shareaza` for that program, from any profile. That
+  covers the legacy TCP and UDP pair from `HNetCfg.FwMgr`'s current-profile-only API, and a rule
+  made by hand;
+- it then adds the rule.
+
+**Without the task, and on uninstall:** the same delete, and nothing is added.
+
+**Mechanism** *(designer's call, as the addendum suggests)*:
+`netsh advfirewall firewall delete rule name=Shareaza dir=in program="…"`, then `… add rule …
+profile=private,domain`, through `Exec`. The `delete` matches name and program across all
+profiles. Exit codes are checked, not localized output. The duplicated silent and interactive
+branches of `main.iss` merge into one; a failure in interactive mode still shows
+`{cm:dialog_firewall}`. The legacy `HNetCfg.FwMgr` code in `main.iss` goes.
+
+**The client stops changing firewall policy.** It runs as invoker, so an add always failed.
+
+- `CFirewall` loses `AddProgram`, `EnableProgram`, `RemoveProgram`, `EnableService` and
+  `SetupService`, with its `Sleep(3000)`.
+- `CNetwork::Clear` no longer removes the exception.
+- `Connection.DeleteFirewallException` is dropped.
+- At startup, when `Connection.EnableFirewallException` is on and the firewall is on for the
+  current profile, the client asks `INetFwMgr::IsPortAllowed` whether `Shareaza.exe` may receive
+  TCP and UDP on `Connection.InPort`. This needs no admin rights.
+- If either is blocked, it logs one `MSG_NOTICE`: "Windows Firewall blocks incoming TCP/UDP for
+  Shareaza on this network: run the installer again with the firewall option, or allow
+  Shareaza.exe in Windows Firewall."
+- When traffic is allowed, or the firewall is off, it logs nothing.
+- A check that could not run gives at most an info line, never an error.
+
+**Evidence:** for builds with this installer, the Windows oracle asserts the rule after installing:
+exactly one rule `Shareaza` for the installed exe, Inbound, Allow, Enabled, profiles Domain and
+Private, not Public. It also uninstalls at the end and asserts that no such rule is left.
+
+**Out of scope:** the installer's `upnp` task, which sets the UPnP Device Host service to start
+automatically.
 
 ## Pull request B: `prev-i/version-2.7.11.2`
 
