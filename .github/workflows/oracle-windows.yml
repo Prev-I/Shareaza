@@ -81,6 +81,12 @@ jobs:
                 # firewall check after installing shows the new installer replaces it.
                 if ('${{ matrix.client }}' -eq 'Fork') {
                     $exe = Join-Path $env:ProgramFiles 'Shareaza\Shareaza.exe'
+                    # The old installer ran this after copying its files, and the old API needs the program's folder
+                    # to exist: an empty placeholder stands in, and goes before installing.
+                    $dir = Split-Path $exe
+                    $madeDir = -not (Test-Path $dir)
+                    New-Item -ItemType Directory -Force $dir | Out-Null
+                    New-Item -ItemType File -Force $exe | Out-Null
                     $legacy = New-Object -ComObject HNetCfg.FwAuthorizedApplication
                     $legacy.ProcessImageFileName = $exe
                     $legacy.Name = 'Shareaza'
@@ -88,6 +94,8 @@ jobs:
                     $legacy.IpVersion = 2   # NET_FW_IP_VERSION_ANY
                     $legacy.Enabled = $true
                     (New-Object -ComObject HNetCfg.FwMgr).LocalPolicy.CurrentProfile.AuthorizedApplications.Add($legacy)
+                    Remove-Item -LiteralPath $exe
+                    if ($madeDir) { Remove-Item -LiteralPath $dir }
                     $planted = @(Get-NetFirewallRule -DisplayName 'Shareaza' -ErrorAction SilentlyContinue |
                         Where-Object { ($_ | Get-NetFirewallApplicationFilter).Program -eq $exe })
                     $planted | ForEach-Object { "legacy firewall rule: $($_.Direction) $($_.Action), profiles $($_.Profile), protocol $(($_ | Get-NetFirewallPortFilter).Protocol)" }
