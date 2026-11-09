@@ -162,6 +162,7 @@ protected:
 	BOOL				SendWebCacheRequest(const CString& strURL);
 	BOOL				EnoughServices() const;
 	void				AddDefaults();
+	void				MergeNewDefaults();
 	void				MergeURLs();
 
 	friend class CDiscoveryService;

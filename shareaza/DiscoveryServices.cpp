@@ -450,6 +450,9 @@ void CDiscoveryServices::Stop()
 //////////////////////////////////////////////////////////////////////
 // CDiscoveryServices load and save
 
+// Raise this when DefaultServices.dat gains caches or loses bans that existing installs should get
+static const DWORD DISCOVERY_DEFAULTS_VERSION = 1;
+
 BOOL CDiscoveryServices::Load()
 {
 	CString strFile = Settings.General.UserPath + _T("\\Data\\Discovery.dat");
@@ -487,6 +490,14 @@ BOOL CDiscoveryServices::Load()
 	else
 		theApp.Message( MSG_ERROR, _T("Failed to load discovery service list: %s"), (LPCTSTR)strFile );
 
+	// Merge a newer default list into this install once: new caches, lifted bans
+	if ( Settings.Discovery.DefaultsVersion < DISCOVERY_DEFAULTS_VERSION )
+	{
+		MergeNewDefaults();
+		Settings.Discovery.DefaultsVersion = DISCOVERY_DEFAULTS_VERSION;
+		Save();
+	}
+
 	// Check we have the minimum number of services (in case of file corruption, etc)
 	if ( ! EnoughServices() )
 	{
@@ -495,6 +506,43 @@ BOOL CDiscoveryServices::Load()
 	}
 
 	return TRUE;
+}
+
+// Brings an existing install's list up to date with DefaultServices.dat. Its caches are added
+// and its bans applied by AddDefaults(), which otherwise runs only when the list runs short.
+// Caches whose ban was lifted are first removed if stored as blocked, so AddDefaults() adds
+// them back as caches.
+void CDiscoveryServices::MergeNewDefaults()
+{
+	static LPCTSTR const pszUnbanned[] =
+	{
+		// Banned as dead or broken in 2013 and 2017, working again when tested on 2026-11-09
+		_T("http://p2p.findclan.net/skulls.php"),
+		_T("http://gweb.4octets.co.uk/skulls.php"),
+		_T("http://midian.jayl.de/g2/bazooka.php")
+	};
+
+	{
+		CQuickLock pLock( Network.m_pSection );
+
+		for ( POSITION pos = m_pList.GetHeadPosition() ; pos ; )
+		{
+			CDiscoveryService* pService = m_pList.GetNext( pos );
+			if ( pService->m_nType != CDiscoveryService::dsBlocked ) continue;
+
+			for ( int i = 0 ; i < _countof( pszUnbanned ) ; ++i )
+			{
+				if ( pService->m_sAddress.CompareNoCase( pszUnbanned[ i ] ) == 0 )
+				{
+					theApp.Message( MSG_DEBUG, _T("[DiscoveryServices] Ban lifted: %s"), (LPCTSTR)pService->m_sAddress );
+					Remove( pService, FALSE );
+					break;
+				}
+			}
+		}
+	}
+
+	AddDefaults();
 }
 
 BOOL CDiscoveryServices::Save()

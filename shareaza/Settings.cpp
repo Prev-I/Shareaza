@@ -347,6 +347,7 @@ void CSettings::Load()
 	Add( _T("Discovery"), _T("DefaultUpdate"), &Discovery.DefaultUpdate, 60*60, 60, 1, 60*24, _T(" m") );
 	Add( _T("Discovery"), _T("FailureLimit"), &Discovery.FailureLimit, 2, 1, 1, 512 );
 	Add( _T("Discovery"), _T("Lowpoint"), &Discovery.Lowpoint, 10, 1, 1, 512 );
+	Add( _T("Discovery"), _T("DefaultsVersion"), &Discovery.DefaultsVersion, 0, 1, 0, 1000 );
 	Add( _T("Discovery"), _T("AccessPeriod"), &Discovery.AccessPeriod, 30*60, 60, 1, 60*24, _T(" m") );
 
 	Add( _T("Gnutella"), _T("ConnectFactor"), &Gnutella.ConnectFactor, 4, 1, 1, 20, _T("x") );

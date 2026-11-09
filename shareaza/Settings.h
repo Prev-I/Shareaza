@@ -334,6 +334,7 @@ public:
 		DWORD		DefaultUpdate;
 		DWORD		BootstrapCount;
 		DWORD		CacheCount;					// Limit ability to learn new caches
+		DWORD		DefaultsVersion;			// Default service list last merged into this install (CDiscoveryServices::Load)
 	} Discovery;
 
 	struct sGnutella
