@@ -276,14 +276,18 @@ branches of `main.iss` merge into one; a failure in interactive mode still shows
   current profile, the client asks `INetFwMgr::IsPortAllowed` whether `Shareaza.exe` may receive
   TCP and UDP on `Connection.InPort`. This needs no admin rights.
 - If either is blocked, it logs one `MSG_NOTICE`: "Windows Firewall blocks incoming TCP/UDP for
-  Shareaza on this network: run the installer again with the firewall option, or allow
-  Shareaza.exe in Windows Firewall."
+  Shareaza on this network. If Windows treats this network as Public, set it to Private;
+  otherwise run the installer again with the firewall option, or allow Shareaza.exe in Windows
+  Firewall." The rule leaves Public networks out, so a Public network is the likeliest cause, and
+  reinstalling does not help there (wording revised at review).
 - When traffic is allowed, or the firewall is off, it logs nothing.
 - A check that could not run gives at most an info line, never an error.
 
 **Evidence:** for builds with this installer, the Windows oracle asserts the rule after installing:
 exactly one rule `Shareaza` for the installed exe, Inbound, Allow, Enabled, profiles Domain and
-Private, not Public. It also uninstalls at the end and asserts that no such rule is left.
+Private, not Public. Before installing, it plants the TCP and UDP pair the old installer made, so
+that check also shows the pair is replaced. It also uninstalls at the end and asserts that no such
+rule is left.
 
 **Out of scope:** the installer's `upnp` task, which sets the UPnP Device Host service to start
 automatically.
