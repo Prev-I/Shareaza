@@ -509,6 +509,8 @@ int CMainWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_wndMonitorBar.SetWindowText( _T("Monitor") );
 	m_wndMonitorBar.EnableDocking( CBRS_ALIGN_TOP | CBRS_ALIGN_BOTTOM );
 	DockControlBar( &m_wndMonitorBar, AFX_IDW_DOCKBAR_TOP );
+	m_wndMenuBar.m_pShareRowWith = &m_wndMonitorBar;
+	m_wndMonitorBar.m_pMenuBar = &m_wndMenuBar;
 
 	// Default Size
 	int iXSize, iYSize;
@@ -553,7 +555,14 @@ int CMainWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	Settings.LoadWindow( _T("CMainWnd"), this );
 
+	// Without a saved layout the monitor bar goes to the right end of the menu row; a layout the
+	// user has saved is restored as it is
+	const BOOL bSavedLayout = HasSavedBarLayout();
+
 	LoadBarState( _T("Toolbars\\CoolBar") );
+
+	if ( ! bSavedLayout )
+		PlaceMonitorOnMenuRow();
 
 	if ( ! m_wndMenuBar.IsVisible() ) ShowControlBar( &m_wndMenuBar, TRUE, TRUE );
 	if ( ! m_wndNavBar.IsVisible() && ! m_wndToolBar.IsVisible() )
@@ -2949,6 +2958,40 @@ void CMainWnd::OnSize(UINT nType, int cx, int cy)
 		m_pSkin->OnSize( this );
 
 	CMDIFrameWnd::OnSize( nType, cx, cy );
+
+	// Keep the monitor bar at the right end of the menu row when the window is resized
+	if ( nType != SIZE_MINIMIZED && IsMonitorOnMenuRow() )
+		PlaceMonitorOnMenuRow();
+}
+
+BOOL CMainWnd::HasSavedBarLayout() const
+{
+	// SaveBarState( "Toolbars\\CoolBar" ) writes the bar count to the "Toolbars\\CoolBar-Summary"
+	// section; when in doubt, treat the layout as saved, so a user's own layout is never moved
+	return theApp.GetProfileInt( _T("Toolbars\\CoolBar-Summary"), _T("Bars"), -1 ) >= 0;
+}
+
+bool CMainWnd::IsMonitorOnMenuRow() const
+{
+	return BarsShareRow( &m_wndMonitorBar, &m_wndMenuBar );
+}
+
+void CMainWnd::PlaceMonitorOnMenuRow()
+{
+	if ( ! m_wndMenuBar.GetSafeHwnd() || ! m_wndMonitorBar.GetSafeHwnd() ) return;
+
+	RecalcLayout();
+
+	CRect rcWnd, rcBar;
+	GetWindowRect( &rcWnd );
+	m_wndMenuBar.GetWindowRect( &rcBar );
+	rcBar.left	= rcWnd.right - 128;
+	rcBar.right	= rcWnd.right;
+
+	DockControlBar( &m_wndMonitorBar, AFX_IDW_DOCKBAR_TOP, &rcBar );
+
+	// Once both share the row, the menu bar leaves room for the monitor: lay out again
+	RecalcLayout();
 }
 
 void CMainWnd::OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS FAR* lpncsp)

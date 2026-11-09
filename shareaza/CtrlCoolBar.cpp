@@ -63,7 +63,8 @@ END_MESSAGE_MAP()
 // CCoolBar construction
 
 CCoolBarCtrl::CCoolBarCtrl()
-	: m_bStretch	( FALSE )
+	: m_pShareRowWith( NULL )
+	, m_bStretch	( FALSE )
 	, m_nHeight		( DEFAULT_HEIGHT )
 	, m_bGripper	( FALSE )
 	, m_bBold		( FALSE )
@@ -368,6 +369,14 @@ CSize CCoolBarCtrl::CalcFixedLayout(BOOL bStretch, BOOL /*bHorz*/)
 			CRect rc;
 			pParent->GetWindowRect( &rc );
 			if ( rc.Width() > 32 ) size.cx = rc.Width() + 2;
+		}
+
+		// Leave room for a bar docked beside this one, such as the monitor on the menu row
+		if ( BarsShareRow( this, m_pShareRowWith ) )
+		{
+			CRect rcOther;
+			m_pShareRowWith->GetWindowRect( &rcOther );
+			size.cx = max( 32, size.cx - rcOther.Width() - 2 );
 		}
 
 		m_czLast = size;
