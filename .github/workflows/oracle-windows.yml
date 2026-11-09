@@ -188,7 +188,7 @@ jobs:
                         # addresses contain no colon.
                         $all = @(Get-NetTCPConnection -OwningProcess $p.Id -ErrorAction SilentlyContinue)
                         $v6 = @(@($all) + @($udp) | Where-Object { $_.LocalAddress -match ':' -or ($_.PSObject.Properties['RemoteAddress'] -and $_.RemoteAddress -match ':' -and $_.RemoteAddress -ne '::') })
-                        if ($v6) { throw "IPv6 is off, but these sockets use IPv6: $(($v6 | ForEach-Object { "$($_.LocalAddress) port $($_.LocalPort)" }) -join ', ')" }
+                        if ($v6) { throw "IPv6 is off, but these sockets use IPv6: $(($v6 | ForEach-Object { $r = if ($_.PSObject.Properties['RemoteAddress']) { " to $($_.RemoteAddress) port $($_.RemotePort)" } else { '' }; "$($_.LocalAddress) port $($_.LocalPort)$r" }) -join ', ')" }
                         "IPv6 off: no IPv6 socket among $($all.Count) TCP connections and $($udp.Count) UDP endpoints"
                     }
                 }
@@ -274,7 +274,7 @@ jobs:
                 "expecting $env:EXPECT from $env:AGENT"
                 if (-not (Test-Path gwc-requests.jsonl)) { Fail 'Shareaza never queried the stub cache' }
                 $req = @(Get-Content gwc-requests.jsonl | Where-Object { $_ -match '"/gwc/\?' })
-                if ($req.Count -lt 2) { Fail "expected at least one query per run, two or more in all, got $($req.Count)" }
+                if ($req.Count -lt 2) { Fail "expected two or more queries in all, got $($req.Count)" }
                 if (-not ($req | Select-String -SimpleMatch $env:EXPECT)) { Fail "no request carried $env:EXPECT" }
                 if (-not ($req | Select-String -SimpleMatch "`"user_agent`": `"$env:AGENT`"")) { Fail "no request came from $env:AGENT" }
 

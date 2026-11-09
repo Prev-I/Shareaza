@@ -29,8 +29,8 @@ The reference setup is the release workflow, [.github/workflows/release.yml](.gi
 which builds both installers on a `windows-2022` runner. To build by hand you need:
 
 - **Visual Studio 2022** with the *Desktop development with C++* workload, including the **v143**
-  toolset and its **ATL** and **MFC** libraries. Newer Visual Studio images ship the v143 compiler
-  without v143 ATL and MFC, and cannot build this solution.
+  toolset and its **ATL** and **MFC** libraries. GitHub's newer runner images (`windows-latest`,
+  `windows-2025`) ship the v143 compiler without v143 ATL and MFC, and cannot build this solution.
 - **Inno Setup 6**, version 6.3 or later, installed in its default folder,
   `C:\Program Files (x86)\Inno Setup 6`: the installer project calls `ISCC.exe` by that path.
   CI uses 6.7.3; Inno Setup 7 would need a project change.
@@ -63,5 +63,6 @@ Older instructions asked for more, and none of it is needed now:
 
 - **gzip.exe:** files are compressed by [7z.cmd](7z.cmd), with the compression built into Windows
   PowerShell.
-- **The DirectX SDK (August 2007):** nothing in the source uses it any more.
+- **The DirectX SDK (August 2007):** the one header still used from it, a trimmed `qedit.h`, is in
+  the repository (`plugins/MediaImageServices` and `plugins/MediaLibraryBuilder`).
 - **The "Unicode Inno Setup QuickStart Pack":** Inno Setup 6 is Unicode-only.

@@ -466,11 +466,6 @@ __int64 GetRandomNum<__int64>(const __int64& min, const __int64& max);
 // ID					URL								Notes
 // -----------------------------------------------------------------------
 //
-// Help
-//
-// ID_HELP_FAQ		help/?faq
-// ID_HELP_TEST		help/test/?port=x&lang=x&Version=x.x.x.x
-//
 // Help/Guides
 //
 // ID_HELP_FAQ		ORIGINAL_WIKI_T FAQ
