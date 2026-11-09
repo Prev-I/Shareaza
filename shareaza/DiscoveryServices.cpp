@@ -114,6 +114,15 @@ DWORD CDiscoveryServices::GetCount(CDiscoveryService::Type nType, PROTOCOLID nPr
 //////////////////////////////////////////////////////////////////////
 // CDiscoveryServices list modification
 
+// A web cache is queried as its address plus "?get=1&...", so an http(s) address that already
+// has a query or a fragment would give a doubled query, and be passed on to other caches.
+static bool HasQueryOrFragment(LPCTSTR pszAddress)
+{
+	if ( _tcsnicmp( pszAddress, _T("http://"), 7 ) != 0 && _tcsnicmp( pszAddress, _T("https://"), 8 ) != 0 )
+		return false;
+	return _tcspbrk( pszAddress, _T("?#") ) != NULL;
+}
+
 BOOL CDiscoveryServices::Add(LPCTSTR pszAddress, CDiscoveryService::Type nType, PROTOCOLID nProtocol)
 {
 	CSingleLock pLock( &Network.m_pSection, FALSE );
@@ -144,7 +153,7 @@ BOOL CDiscoveryServices::Add(LPCTSTR pszAddress, CDiscoveryService::Type nType, 
 	switch ( nType )
 	{
 	case CDiscoveryService::dsWebCache:
-		if ( CheckWebCacheValid( pszAddress ) )
+		if ( CheckWebCacheValid( pszAddress ) && ! HasQueryOrFragment( strAddress ) )
 			pService = new CDiscoveryService( nType, strAddress );
 		break;
 
@@ -253,6 +262,14 @@ BOOL CDiscoveryServices::Add(CDiscoveryService* pService)
 	}
 
 	CQuickLock pLock( Network.m_pSection );
+
+	// A web cache address with a query or fragment is refused (and dropped if it was listed)
+	if ( pService->m_nType == CDiscoveryService::dsWebCache && HasQueryOrFragment( pService->m_sAddress ) )
+	{
+		theApp.Message( MSG_DEBUG, _T("[DiscoveryServices] Web cache address with a query or fragment not added: %s"), (LPCTSTR)pService->m_sAddress );
+		Remove( pService, FALSE );
+		return FALSE;
+	}
 
 	// Stop if we already have enough caches
 	if ( ( pService->m_bGnutella2 && ( GetCount( pService->m_nType, PROTOCOL_G2 ) >= Settings.Discovery.CacheCount ) ) ||
@@ -569,6 +586,12 @@ void CDiscoveryServices::Serialize(CArchive& ar)
 			try
 			{
 				pService->Serialize( ar, nVersion );
+				if ( pService->m_nType == CDiscoveryService::dsWebCache && HasQueryOrFragment( pService->m_sAddress ) )
+				{
+					// Saved before such addresses were refused: drop it
+					theApp.Message( MSG_DEBUG, _T("[DiscoveryServices] Dropped stored web cache with a query or fragment: %s"), (LPCTSTR)pService->m_sAddress );
+					continue;
+				}
 				m_pList.AddTail( pService.release() );
 			}
 			catch ( CException* pException )
