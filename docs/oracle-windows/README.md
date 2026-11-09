@@ -199,7 +199,7 @@ Close Shareaza with **File → Exit** before going on.
 
 ## Optional: the fork's build as a leaf
 
-This shows the `RAZI2.7.11.0` client string reaching the cache (`RAZI2.7.10.6` up to `previ.4`). Use a port that is **not**
+This shows the `RAZI2.7.11.1` client string reaching the cache (`RAZI2.7.11.0` in `previ.5`, `RAZI2.7.10.6` up to `previ.4`). Use a port that is **not**
 forwarded, and keep the run short:
 
 ```powershell
@@ -209,7 +209,7 @@ explorer.exe "$env:ProgramFiles\Shareaza\Shareaza.exe"
 .\Watch-Oracle.ps1 -Hours 0.5
 ```
 
-**Passes if** the query line carries `client=RAZI2.7.11.0`, and `/stats` lists `RAZI 2.7.11.0`.
+**Passes if** the query line carries `client=RAZI2.7.11.1`, and `/stats` lists `RAZI 2.7.11.1`.
 
 To test a build that is not published, give `-InstallerDir` instead of a release: a folder holding
 the build's x64 installer and the `SHA256SUMS.txt` naming it, such as the
