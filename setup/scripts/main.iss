@@ -441,9 +441,26 @@ Root: HKCU; Subkey: "Software\Intervideo\Common\AudioDec\Shareaza"; Flags: dontc
 ; Delete NSIS entry on software panel
 Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Shareaza"; Flags: dontcreatekey deletekey
 
-; Clear version check key
-Root: HKCU; Subkey: "Software\Shareaza\Shareaza\VersionCheck"; Flags: dontcreatekey deletekey
-Root: HKLM; Subkey: "Software\Shareaza\Shareaza\VersionCheck"; Flags: dontcreatekey deletekey
+; Clear a stale upgrade offer, and check again at the next start. UpdateCheck, UpdateCheckURL and
+; Quote are the user's: deleting the whole key switched the update check off at every install.
+Root: HKCU; Subkey: "Software\Shareaza\Shareaza\VersionCheck"; ValueType: none; ValueName: "UpgradePrompt"; Flags: dontcreatekey deletevalue
+Root: HKCU; Subkey: "Software\Shareaza\Shareaza\VersionCheck"; ValueType: none; ValueName: "UpgradeFile"; Flags: dontcreatekey deletevalue
+Root: HKCU; Subkey: "Software\Shareaza\Shareaza\VersionCheck"; ValueType: none; ValueName: "UpgradeSHA1"; Flags: dontcreatekey deletevalue
+Root: HKCU; Subkey: "Software\Shareaza\Shareaza\VersionCheck"; ValueType: none; ValueName: "UpgradeTiger"; Flags: dontcreatekey deletevalue
+Root: HKCU; Subkey: "Software\Shareaza\Shareaza\VersionCheck"; ValueType: none; ValueName: "UpgradeSize"; Flags: dontcreatekey deletevalue
+Root: HKCU; Subkey: "Software\Shareaza\Shareaza\VersionCheck"; ValueType: none; ValueName: "UpgradeSources"; Flags: dontcreatekey deletevalue
+Root: HKCU; Subkey: "Software\Shareaza\Shareaza\VersionCheck"; ValueType: none; ValueName: "UpgradeVersion"; Flags: dontcreatekey deletevalue
+Root: HKCU; Subkey: "Software\Shareaza\Shareaza\VersionCheck"; ValueType: none; ValueName: "UpgradeNotesURL"; Flags: dontcreatekey deletevalue
+Root: HKCU; Subkey: "Software\Shareaza\Shareaza\VersionCheck"; ValueType: none; ValueName: "NextCheck"; Flags: dontcreatekey deletevalue
+Root: HKLM; Subkey: "Software\Shareaza\Shareaza\VersionCheck"; ValueType: none; ValueName: "UpgradePrompt"; Flags: dontcreatekey deletevalue
+Root: HKLM; Subkey: "Software\Shareaza\Shareaza\VersionCheck"; ValueType: none; ValueName: "UpgradeFile"; Flags: dontcreatekey deletevalue
+Root: HKLM; Subkey: "Software\Shareaza\Shareaza\VersionCheck"; ValueType: none; ValueName: "UpgradeSHA1"; Flags: dontcreatekey deletevalue
+Root: HKLM; Subkey: "Software\Shareaza\Shareaza\VersionCheck"; ValueType: none; ValueName: "UpgradeTiger"; Flags: dontcreatekey deletevalue
+Root: HKLM; Subkey: "Software\Shareaza\Shareaza\VersionCheck"; ValueType: none; ValueName: "UpgradeSize"; Flags: dontcreatekey deletevalue
+Root: HKLM; Subkey: "Software\Shareaza\Shareaza\VersionCheck"; ValueType: none; ValueName: "UpgradeSources"; Flags: dontcreatekey deletevalue
+Root: HKLM; Subkey: "Software\Shareaza\Shareaza\VersionCheck"; ValueType: none; ValueName: "UpgradeVersion"; Flags: dontcreatekey deletevalue
+Root: HKLM; Subkey: "Software\Shareaza\Shareaza\VersionCheck"; ValueType: none; ValueName: "UpgradeNotesURL"; Flags: dontcreatekey deletevalue
+Root: HKLM; Subkey: "Software\Shareaza\Shareaza\VersionCheck"; ValueType: none; ValueName: "NextCheck"; Flags: dontcreatekey deletevalue
 
 ; Delete Generic Video thumbnailer plugin
 Root: HKCU; Subkey: "Software\Shareaza\Shareaza\Plugins"; ValueName: "{{17BF74FD-69AF-4BD5-A982-EA6DE6F3449C}"; Flags: dontcreatekey deletevalue

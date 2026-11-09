@@ -187,9 +187,11 @@ closes it cleanly, so it saves `Discovery.dat` and `HostCache.dat`.
      ([run 40132278270](https://github.com/Prev-I/Shareaza/actions/runs/40132278270)). A reply can
      also add discovery services (`VersionChecker.cpp`).
    - **The fork's update check is off by default.** When enabled, it queries
-     `api.github.com/repos/ansani/Shareaza`.
-   - **Each install undoes part of this.** It deletes `VersionCheck` and rewrites `EnableUPnP` from
-     its *UPnP* task, which is why the script runs after every install.
+     `api.github.com/repos/Prev-I/Shareaza`, this fork's latest release (ansani's up to `previ.4`).
+   - **Each install undoes part of this.** It rewrites `EnableUPnP` from its *UPnP* task. 2.7.10.2
+     and fork installers up to `previ.6` also delete `VersionCheck`; from `previ.7` on, an install
+     clears only a stale upgrade offer and keeps the update-check setting. That is why the script
+     runs after every install.
 3. **Unattended start.** Both are needed:
    - **`Windows\RunWizard`, not `FirstRun`, decides whether the QuickStart wizard opens**
      (`WndMain.cpp`).
