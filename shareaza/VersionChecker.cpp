@@ -301,7 +301,8 @@ void CVersionChecker::ProcessResponse()
 		{
 			CString strLine	= strValue.SpanExcluding( _T("\r\n") );
 			strValue		= strValue.Mid( strLine.GetLength() + 1 );
-			if ( strLine.GetLength() ) theApp.Message( MSG_NOTICE, strLine );
+			// The text is the release's, never a format string
+			if ( strLine.GetLength() ) theApp.Message( MSG_NOTICE, _T("%s"), (LPCTSTR)strLine );
 		}
 	}
 	
