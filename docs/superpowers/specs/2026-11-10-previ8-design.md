@@ -333,7 +333,7 @@ not reviewed by native speakers.
 
 **Who does what** *(designer's call)*. The session executes every step, but each outward step
 (a tag push, a repository-settings change, publishing, opening the kits pull request) waits for
-the owner's explicit go at that step, as the workspace's rules require. Publishing the release is
+the owner's explicit go at that step, as the owner requires. Publishing the release is
 the owner's own act in the GitHub interface, after the oracle runs and the notes review.
 
 **Rehearsal before previ.8** *(owner, 2026-11-10)*.
@@ -357,7 +357,7 @@ the owner's own act in the GitHub interface, after the oracle runs and the notes
 5. Publish. `verify-release.yml` runs; it must pass.
 6. Run both oracles against the release, then open the kits pull request.
 7. Before the announcement: switch on Issues and private vulnerability reporting.
-8. Record previ.8 in the workspace's disclosure record.
+8. Record previ.8 in the owner's disclosure record.
 
 **If the tag's build fails, or the draft is bad, before publication** *(designer's call)*: switch
 the ruleset off, delete the draft and the tag, fix through a pull request, tag again, switch the
