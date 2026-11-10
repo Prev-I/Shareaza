@@ -31,7 +31,7 @@ permissions:
 jobs:
     oracle:
         runs-on: windows-2022
-        timeout-minutes: 40
+        timeout-minutes: 60
         strategy:
             fail-fast: false
             matrix:
@@ -209,7 +209,7 @@ jobs:
                 Remove-Item gwc-requests.jsonl   # the readiness probe is not a client request
                 # A helper the run steps share: start Shareaza, wait for a query, watch, close it cleanly.
                 @'
-                param([string] $Name, [switch] $ExpectIPv6)
+                param([string] $Name, [switch] $ExpectIPv6, [switch] $Resize)
                 $ErrorActionPreference = 'Stop'
                 $before = if (Test-Path gwc-requests.jsonl) { @(Get-Content gwc-requests.jsonl).Count } else { 0 }
                 $app = (Get-ItemProperty 'HKCU:\Software\Shareaza\Shareaza').Path
@@ -253,6 +253,47 @@ jobs:
                 "window: handle=$($p.MainWindowHandle) title='$($p.MainWindowTitle)' session=$($p.SessionId)"
                 Add-Type -AssemblyName System.Windows.Forms, System.Drawing
                 $b = [Windows.Forms.SystemInformation]::VirtualScreen
+                # The monitor bar must follow the window: shrink the main window, then widen it, and
+                # take the screenshot after widening. Shareaza's hidden 'Shareaza Remote' window is
+                # what MainWindowHandle may report, so find the largest visible window of the process.
+                if ($Resize) {
+                    Add-Type -TypeDefinition (@(
+                        'using System;',
+                        'using System.Runtime.InteropServices;',
+                        'public static class OracleWin {',
+                        '    delegate bool EnumProc(IntPtr h, IntPtr l);',
+                        '    [StructLayout(LayoutKind.Sequential)] struct RECT { public int Left, Top, Right, Bottom; }',
+                        '    [DllImport("user32.dll")] static extern bool EnumWindows(EnumProc p, IntPtr l);',
+                        '    [DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(IntPtr h, out uint pid);',
+                        '    [DllImport("user32.dll")] static extern bool IsWindowVisible(IntPtr h);',
+                        '    [DllImport("user32.dll")] static extern bool GetWindowRect(IntPtr h, out RECT r);',
+                        '    [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr h, int cmd);',
+                        '    [DllImport("user32.dll")] public static extern bool SetWindowPos(IntPtr h, IntPtr after, int x, int y, int cx, int cy, uint flags);',
+                        '    public static IntPtr Largest(uint pid) {',
+                        '        IntPtr best = IntPtr.Zero; long area = 0;',
+                        '        EnumWindows(delegate(IntPtr h, IntPtr l) {',
+                        '            uint owner; GetWindowThreadProcessId(h, out owner);',
+                        '            RECT r;',
+                        '            if (owner == pid && IsWindowVisible(h) && GetWindowRect(h, out r)) {',
+                        '                long a = (long)(r.Right - r.Left) * (r.Bottom - r.Top);',
+                        '                if (a > area) { area = a; best = h; }',
+                        '            }',
+                        '            return true;',
+                        '        }, IntPtr.Zero);',
+                        '        return best;',
+                        '    }',
+                        '}') -join "`n")
+                    $h = [OracleWin]::Largest([uint32]$p.Id)
+                    if ($h -eq [IntPtr]::Zero) { throw 'no visible window of Shareaza to resize' }
+                    $wide = [Math]::Min(1280, $b.Width); $tall = [Math]::Min(800, $b.Height)
+                    [void][OracleWin]::ShowWindow($h, 9)   # SW_RESTORE: a maximized window ignores the size
+                    # SWP_NOZORDER | SWP_SHOWWINDOW
+                    [void][OracleWin]::SetWindowPos($h, [IntPtr]::Zero, 0, 0, 640, 480, 0x44)
+                    Start-Sleep 3
+                    [void][OracleWin]::SetWindowPos($h, [IntPtr]::Zero, 0, 0, $wide, $tall, 0x44)
+                    Start-Sleep 3
+                    "resized window $h to 640x480, then ${wide}x$tall"
+                }
                 $bmp = New-Object Drawing.Bitmap $b.Width, $b.Height
                 [Drawing.Graphics]::FromImage($bmp).CopyFromScreen($b.Left, $b.Top, 0, 0, $bmp.Size)
                 $bmp.Save("$env:WORK\screen-$Name.png")
@@ -295,6 +336,100 @@ jobs:
                 $ErrorActionPreference = 'Stop'
                 New-ItemProperty -Path 'HKCU:\Software\Shareaza\Shareaza\Connection' -Name EnableIPv6 -Value 1 -PropertyType DWord -Force | Out-Null
                 .\run-client.ps1 -Name ipv6 -ExpectIPv6
+
+        -   name: Run with incoming traffic blocked
+            # The client only reports a blocked firewall: with the rules off, its log must say so.
+            # Only builds with the installer's rule have the notice.
+            if: env.FIREWALL_RULE == '1'
+            timeout-minutes: 10
+            run: |
+                $ErrorActionPreference = 'Stop'
+                $app = (Get-ItemProperty 'HKCU:\Software\Shareaza\Shareaza').Path
+                $exe = "$app\Shareaza.exe"
+                $log = "$env:APPDATA\Shareaza\Data\Shareaza.log"
+                # The kit's rules, and the installer's own, which is for this program only.
+                $rules = @(Get-NetFirewallRule -DisplayName 'Shareaza oracle *' -ErrorAction SilentlyContinue) +
+                    @(Get-NetFirewallRule -DisplayName 'Shareaza' -ErrorAction SilentlyContinue |
+                        Where-Object { "$($_.Direction)" -eq 'Inbound' -and ($_ | Get-NetFirewallApplicationFilter).Program -eq $exe })
+                $rules | ForEach-Object { "rule '$($_.DisplayName)': $($_.Direction) $($_.Action), enabled $($_.Enabled)" }
+                if (-not ($rules | Where-Object { $_.DisplayName -like 'Shareaza oracle *' })) { throw 'the kit made no firewall rule to disable' }
+                if (-not ($rules | Where-Object { $_.DisplayName -eq 'Shareaza' })) { throw "no firewall rule 'Shareaza' to disable" }
+                # Shareaza opens its log exclusively for each message, so a read can collide with
+                # a write: skip that round. Only what this run adds counts. The log is UTF-16 LE.
+                $offset = if (Test-Path $log) { (Get-Item $log).Length - ((Get-Item $log).Length % 2) } else { 0L }
+                function Read-NewLog {
+                    if (-not (Test-Path $log)) { return '' }
+                    try { $fs = [IO.File]::Open($log, [IO.FileMode]::Open, [IO.FileAccess]::Read, [IO.FileShare]'ReadWrite, Delete') } catch [IO.IOException] { return '' }
+                    try {
+                        $from = if ($fs.Length -lt $offset) { 0L } else { $offset }
+                        $count = [int][Math]::Min($fs.Length - $from, 64MB)
+                        $count -= $count % 2
+                        if ($count -le 0) { return '' }
+                        $buffer = New-Object byte[] $count
+                        [void]$fs.Seek($from, [IO.SeekOrigin]::Begin)
+                        $read = $fs.Read($buffer, 0, $count)
+                        return [Text.Encoding]::Unicode.GetString($buffer, 0, $read - ($read % 2))
+                    } finally { $fs.Dispose() }
+                }
+                try {
+                    $rules | Disable-NetFirewallRule
+                    Start-Process -FilePath explorer.exe -ArgumentList "`"$exe`""
+                    foreach ($i in 1..15) { if (Get-Process -Name Shareaza -ErrorAction SilentlyContinue) { break }; Start-Sleep 2 }
+                    if (-not (Get-Process -Name Shareaza -ErrorAction SilentlyContinue)) {
+                        '::warning::explorer.exe did not start Shareaza on this runner; starting it directly, elevated'
+                        Start-Process -FilePath $exe -WorkingDirectory $app
+                    }
+                    # Until the log shows the network started, or three minutes pass.
+                    $text = ''
+                    foreach ($i in 1..36) { $text = Read-NewLog; if ($text.Contains('Starting Shareaza network core')) { break }; Start-Sleep 5 }
+                    if (-not $text.Contains('Starting Shareaza network core')) { throw 'the log never showed the network starting within three minutes' }
+                    'the network started'
+                    # The check runs on the network thread once the listeners are up: allow it a minute.
+                    foreach ($i in 1..12) { $text = Read-NewLog; if ($text.Contains('Windows Firewall')) { break }; Start-Sleep 5 }
+                    $notice = @($text -split "`r?`n" | Where-Object { $_ -match 'Windows Firewall' })
+                    $notice | ForEach-Object { "log: $_" }
+                    $notice | Set-Content -Encoding UTF8 "$env:WORK\blocked-notice.txt"
+                    if (-not ($notice | Where-Object { $_ -match 'Windows Firewall blocks incoming' })) { throw "the log has no 'Windows Firewall blocks incoming' line with the rules disabled" }
+                    'the client reported the blocked firewall'
+                    # Close it cleanly with WM_CLOSE, as run-client.ps1 does.
+                    $exited = $false
+                    foreach ($attempt in 1..6) {
+                        & taskkill.exe /IM Shareaza.exe 2>&1 | ForEach-Object { "taskkill $attempt`: $_" }
+                        foreach ($i in 1..6) { Start-Sleep 5; if (-not (Get-Process -Name Shareaza -ErrorAction SilentlyContinue)) { $exited = $true; break } }
+                        if ($exited) { "closed by taskkill, attempt $attempt"; break }
+                    }
+                    if (-not $exited) { throw 'Shareaza did not exit after six WM_CLOSE attempts' }
+                } finally {
+                    # Whatever happened: the rules come back, and no client is left running.
+                    if (Get-Process -Name Shareaza -ErrorAction SilentlyContinue) { Stop-Process -Name Shareaza -Force; Start-Sleep 5 }
+                    $rules | Enable-NetFirewallRule
+                    $rules | ForEach-Object { "re-enabled '$($_.DisplayName)'" }
+                }
+
+        -   name: Run 4, with a right-to-left layout on a fresh bar layout
+            # The client saves its bar layout on exit; without one it places the bars by default.
+            # Restore-Oracle.ps1 removes the whole settings key, so this setting does not outlive the run.
+            timeout-minutes: 10
+            run: |
+                $ErrorActionPreference = 'Stop'
+                $k = 'HKCU:\Software\Shareaza\Shareaza'
+                Get-ChildItem "$k\Toolbars" -ErrorAction SilentlyContinue | Where-Object { $_.PSChildName -like 'CoolBar-*' } | Remove-Item -Recurse
+                New-Item -Path "$k\General" -Force | Out-Null
+                New-ItemProperty -Path "$k\General" -Name LanguageRTL -Value 1 -PropertyType DWord -Force | Out-Null
+                try {
+                    # IPv6 is still on from run 3, on builds that have the setting.
+                    .\run-client.ps1 -Name rtl -ExpectIPv6
+                } finally {
+                    Remove-ItemProperty -Path "$k\General" -Name LanguageRTL -ErrorAction SilentlyContinue
+                }
+
+        -   name: Run with the window resized
+            timeout-minutes: 10
+            run: |
+                $ErrorActionPreference = 'Stop'
+                $k = 'HKCU:\Software\Shareaza\Shareaza'
+                Get-ChildItem "$k\Toolbars" -ErrorAction SilentlyContinue | Where-Object { $_.PSChildName -like 'CoolBar-*' } | Remove-Item -Recurse
+                .\run-client.ps1 -Name resize -ExpectIPv6 -Resize
 
         -   name: Prepare must refuse while a restore is unfinished
             run: |
@@ -393,6 +528,7 @@ jobs:
         -   name: Uninstall and check the firewall rule is gone
             # Last, because uninstalling deletes the settings and data the kit restored.
             if: env.FIREWALL_RULE == '1'
+            timeout-minutes: 10
             run: |
                 $ErrorActionPreference = 'Stop'
                 $app = Join-Path $env:ProgramFiles 'Shareaza'
@@ -402,13 +538,25 @@ jobs:
                 foreach ($i in 1..60) { if (-not (Test-Path "$app\Shareaza.exe")) { break }; Start-Sleep 2 }
                 if (Test-Path "$app\Shareaza.exe") { throw 'Shareaza.exe is still installed after uninstalling' }
                 .\check-firewall.ps1 -Program "$app\Shareaza.exe" -Absent
+                # Under any name: a rule made by another installer or a prompt must go too. The kit's
+                # own rules are already gone, and are excluded in case one is left.
+                $left = @(Get-NetFirewallApplicationFilter |
+                    Where-Object { "$($_.Program)" -ieq "$app\Shareaza.exe" } |
+                    Get-NetFirewallRule |
+                    Where-Object { "$($_.Direction)" -eq 'Inbound' -and $_.DisplayName -notlike 'Shareaza oracle*' })
+                $left | ForEach-Object { "rule '$($_.DisplayName)' still allows or blocks Shareaza.exe" }
+                if ($left) { throw "$($left.Count) inbound firewall rule(s) for $app\Shareaza.exe remain under another name" }
+                "no inbound firewall rule of any name for $app\Shareaza.exe"
 
         -   name: Gather the evidence into the workspace
             # upload-artifact takes files from under the workspace only.
             if: always()
             run: |
                 New-Item -ItemType Directory -Force evidence | Out-Null
-                foreach ($p in "$env:WORK\evidence-*.zip", "$env:WORK\install-*.log", "$env:WORK\screen-*.png", 'gwc-requests.jsonl') {
+                # Which profile Windows gave the runner's network: Public blocks what Private allows.
+                Get-NetConnectionProfile | Format-List * | Out-File -Encoding UTF8 evidence\network-profile.txt
+                Get-Content evidence\network-profile.txt
+                foreach ($p in "$env:WORK\evidence-*.zip", "$env:WORK\install-*.log", "$env:WORK\screen-*.png", "$env:WORK\blocked-notice.txt", 'gwc-requests.jsonl') {
                     Copy-Item $p evidence -ErrorAction SilentlyContinue
                 }
 

@@ -17,6 +17,7 @@ covers stages 2 and 3 of gwc-edge's `docs/field-test-plan.md`. On Linux, use
 stub cache:
 - install, prepare as a leaf, run;
 - prepare again as a hub, run;
+- with IPv6 on, with incoming traffic blocked, with a right-to-left layout, and with the window resized;
 - restore, then a second restore, which must refuse.
 
 It plants a fake "own setup" first, including a private torrent folder. It checks:

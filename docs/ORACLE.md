@@ -363,3 +363,21 @@ GET /gwc/?get=1&hostfile=1&net=gnutella2&ping=1&pv=4&client=RAZI2.7.11.2&getleav
 **The About box** of a fork build shows the commit it was built from, for example
 `Release 64-bit (commit 0dbc19d of 2026-10-25)` for `v2.7.10.6-previ.1`. That string was read
 from the built `Shareaza.exe`, not from a screenshot.
+
+## Evidence from the Windows run
+
+`.github/workflows/oracle-windows.yml` uploads these with each run, besides the cache requests and
+the kit's evidence zip:
+- **Network profile:** `network-profile.txt`, the output of `Get-NetConnectionProfile`. A Public
+  network blocks what a Private one allows, so it tells which case the firewall checks ran in.
+- **Blocked-case notice:** the step *Run with incoming traffic blocked* turns off the kit's
+  `Shareaza oracle *` rules and the installer's `Shareaza` rule, starts the client, and waits up to
+  three minutes for its log to show the network starting. It then requires a line containing
+  `Windows Firewall blocks incoming` in `Shareaza.log`. The rules come back in a `finally`, and the
+  matching lines are kept in `blocked-notice.txt`. Only builds with the installer's rule run it.
+- **Monitor bar screenshots:** `screen-rtl.png` is a run with `General\LanguageRTL` = 1 and no saved
+  bar layout (the `Toolbars\CoolBar-*` keys removed first), so the default placement runs;
+  `screen-resize.png` is taken after the main window is shrunk and then widened with
+  `SetWindowPos`. The other runs leave `screen-leaf.png`, `screen-hub.png` and `screen-ipv6.png`.
+- **Rules under any name:** after uninstalling, the run fails on any inbound rule whose program is
+  the installed `Shareaza.exe`, whatever its name, except names starting `Shareaza oracle`.
