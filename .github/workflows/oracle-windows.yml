@@ -386,18 +386,20 @@ jobs:
                         return [Text.Encoding]::Unicode.GetString($buffer, 0, $read - ($read % 2))
                     } finally { $fs.Dispose() }
                 }
-                # Without a firewall on the active profile, or with a default of Allow, no notice can come:
-                # say so here, so that a missing notice is not taken for a client regression.
-                Get-NetFirewallProfile | Select-Object Name, Enabled, DefaultInboundAction, AllowInboundRules | Format-Table | Out-String | Write-Host
+                # With the firewall off on the active profile, or a default of Allow, no notice can come, and a
+                # runner property must not fail the gate: record the profile, set it to block inbound for the
+                # run, and put the recorded values back in the finally below.
+                $before = Get-NetFirewallProfile | Select-Object Name, Enabled, DefaultInboundAction, AllowInboundRules
+                'firewall profiles before:'; $before | Format-Table | Out-String | Write-Host
                 $profiles = @(Get-NetConnectionProfile)
                 $profiles | ForEach-Object { "connection profile: $($_.Name), $($_.NetworkCategory), $($_.InterfaceAlias)" }
-                $active = @(Get-NetFirewallProfile -Name ($profiles | ForEach-Object { "$($_.NetworkCategory)" -replace '^DomainAuthenticated$', 'Domain' } | Sort-Object -Unique))
-                if (-not $active) { throw 'no active network profile to read the firewall settings of' }
-                foreach ($f in $active) {
-                    if ("$($f.Enabled)" -ne 'True') { throw "firewall off on the runner's active profile $($f.Name): the blocked case cannot be tested here" }
-                    if ("$($f.DefaultInboundAction)" -eq 'Allow') { throw "default inbound action is Allow on the runner's active profile $($f.Name): the blocked case cannot be tested here" }
-                }
+                $names = @($profiles | ForEach-Object { "$($_.NetworkCategory)" -replace '^DomainAuthenticated$', 'Domain' } | Sort-Object -Unique)
+                if (-not $names) { throw 'no active network profile to set the firewall of' }
+                $saved = @($before | Where-Object { $names -contains "$($_.Name)" })
+                if (-not $saved) { throw "no firewall profile named like the active network profile: $($names -join ', ')" }
                 try {
+                    Set-NetFirewallProfile -Name $saved.Name -Enabled True -DefaultInboundAction Block
+                    'firewall profiles during the run:'; Get-NetFirewallProfile | Select-Object Name, Enabled, DefaultInboundAction, AllowInboundRules | Format-Table | Out-String | Write-Host
                     $rules | Disable-NetFirewallRule
                     Start-Process -FilePath explorer.exe -ArgumentList "`"$exe`""
                     foreach ($i in 1..15) { if (Get-Process -Name Shareaza -ErrorAction SilentlyContinue) { break }; Start-Sleep 2 }
@@ -430,6 +432,10 @@ jobs:
                     if (Get-Process -Name Shareaza -ErrorAction SilentlyContinue) { Stop-Process -Name Shareaza -Force; Start-Sleep 5 }
                     $rules | Enable-NetFirewallRule
                     $rules | ForEach-Object { "re-enabled '$($_.DisplayName)'" }
+                    foreach ($f in $saved) {
+                        Set-NetFirewallProfile -Name $f.Name -Enabled "$($f.Enabled)" -DefaultInboundAction "$($f.DefaultInboundAction)"
+                    }
+                    'firewall profiles restored:'; Get-NetFirewallProfile | Select-Object Name, Enabled, DefaultInboundAction, AllowInboundRules | Format-Table | Out-String | Write-Host
                 }
 
         -   name: Run 4, with a right-to-left layout on a fresh bar layout
