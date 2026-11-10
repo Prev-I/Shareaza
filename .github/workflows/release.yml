@@ -159,7 +159,7 @@ jobs:
             fi
             : > body.md
             if [ -n "$ANALYSIS" ]; then
-              echo "🛡 VirusTotal analysis:" >> body.md
+              echo "VirusTotal analysis:" >> body.md
               # Entries are file=url. Split on the first '=' only: analysis ids are
               # base64 and can end in '='.
               echo "$ANALYSIS" | tr ',' '\n' | while read -r entry; do
@@ -172,10 +172,10 @@ jobs:
             if [ -s body.md ]; then echo >> body.md; fi
             {
               echo "Verify:"
-              echo "* Built by this repository's release workflow: gh attestation verify <file> --repo Prev-I/Shareaza"
-              echo "* Unchanged since publication: gh release verify-asset ${GITHUB_REF_NAME} <file> --repo Prev-I/Shareaza"
-              echo "* Without gh: Get-FileHash <file> -Algorithm SHA256, compared with SHA256SUMS.txt or the sha256 shown beside each file"
-              echo "* gh 2.81.0 or later is needed."
+              echo "* Built by this repository's release workflow: \`gh attestation verify <file> --repo Prev-I/Shareaza --signer-workflow Prev-I/Shareaza/.github/workflows/release.yml\`"
+              echo "* Unchanged since publication: \`gh release verify-asset ${GITHUB_REF_NAME} <file> --repo Prev-I/Shareaza\`"
+              echo "* Without gh: \`Get-FileHash <file> -Algorithm SHA256\`, compared with SHA256SUMS.txt or the sha256 shown beside each file"
+              echo "* \`gh\` 2.81.0 or later is needed."
             } >> body.md
             cat body.md
         - name: Attest build provenance
