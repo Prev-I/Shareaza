@@ -2819,8 +2819,19 @@ void CMainWnd::OnWindowMonitor()
 	// PlaceMonitorBesideMainBar lays the frame out first, which shows the bar. A row without room
 	// for it leaves it where the dock bar puts it, still marked for the row end, so OnSize places
 	// it once the window is wide enough
-	if ( bVisible && m_bMonitorAtEnd && MonitorFitsBesideMainBar() )
-		PlaceMonitorBesideMainBar();
+	if ( bVisible && m_bMonitorAtEnd )
+	{
+		if ( MonitorFitsBesideMainBar() )
+			PlaceMonitorBesideMainBar();
+		else
+		{
+			// Lay the bar out now and note where that put it: the dock bar may wrap it onto a row
+			// of its own, and OnSize would otherwise take that move for the user's and stop
+			// keeping it at the row end
+			RecalcLayout();
+			m_wndMonitorBar.GetWindowRect( &m_rcMonitor );
+		}
+	}
 }
 
 void CMainWnd::OnUpdateWindowRemote(CCmdUI *pCmdUI)
