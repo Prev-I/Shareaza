@@ -1,0 +1,116 @@
+# Proves, after the owner publishes a release, that what GitHub now serves is what
+# the build produced: the installers match SHA256SUMS.txt and the digests GitHub
+# records for them, carry a build provenance attestation signed by release.yml for
+# this tag, and the release itself and each installer verify against GitHub's
+# release attestation.
+#
+# A failure is a signal for the owner to inspect, not an automatic verdict. If the
+# files are wrong, the fix is the next previ.N. If it is tooling or timing (an
+# attestation not yet visible, a gh problem), re-run it by workflow_dispatch with
+# the tag. A dispatch cannot see a draft release: the API does not return a draft
+# by tag, so run it against a published release only.
+name: Verify release
+
+on:
+    release:
+        types: [ published ]
+    workflow_dispatch:
+        inputs:
+            tag:
+                description: Tag of the published release to verify
+                type: string
+                required: true
+
+permissions:
+    contents: read
+
+jobs:
+    verify:
+        runs-on: ubuntu-latest
+        env:
+            GH_TOKEN: ${{ github.token }}
+            GH_REPO: ${{ github.repository }}
+            TAG: ${{ github.event.release.tag_name || inputs.tag }}
+        steps:
+        -   name: Check the gh version
+            run: |
+                gh --version
+                have=$(gh --version | head -n 1 | awk '{print $3}')
+                need=2.81.0
+                if [ "$(printf '%s\n%s\n' "$need" "$have" | sort -V | head -n 1)" != "$need" ]; then
+                    echo "gh $have is older than $need, which 'gh release verify' needs" >&2
+                    exit 1
+                fi
+
+        -   name: Download the release assets
+            run: |
+                mkdir dist
+                cd dist
+                gh release download "$TAG" --pattern '*.exe' --pattern SHA256SUMS.txt
+                ls -l
+                [ -s SHA256SUMS.txt ] || { echo "SHA256SUMS.txt is missing or empty" >&2; exit 1; }
+                ls ./*.exe >/dev/null
+
+        -   name: Check the files against SHA256SUMS.txt
+            working-directory: dist
+            run: sha256sum -c SHA256SUMS.txt
+
+        -   name: Compare the digests GitHub recorded with the manifest
+            working-directory: dist
+            run: |
+                gh api "repos/$GH_REPO/releases/tags/$TAG" --jq '.assets[] | "\(.name) \(.digest)"' > digests.txt
+                cat digests.txt
+                for f in *.exe; do
+                    want=$(awk -v f="$f" '$2 == f { print "sha256:" $1 }' SHA256SUMS.txt)
+                    got=$(awk -v f="$f" '$1 == f { print $2 }' digests.txt)
+                    if [ -z "$want" ]; then echo "$f has no line in SHA256SUMS.txt" >&2; exit 1; fi
+                    if [ -z "$got" ] || [ "$got" = null ]; then echo "$f has no digest in the release" >&2; exit 1; fi
+                    if [ "$want" != "$got" ]; then echo "$f: manifest $want, release $got" >&2; exit 1; fi
+                    echo "$f digest ok"
+                done
+
+        -   name: Verify the build provenance attestations
+            working-directory: dist
+            run: |
+                retry() {
+                    n=1
+                    until "$@"; do
+                        if [ "$n" -ge 10 ]; then echo "giving up after $n tries: $*" >&2; return 1; fi
+                        n=$((n + 1))
+                        sleep 30
+                    done
+                }
+                for f in *.exe; do
+                    retry gh attestation verify "$f" \
+                        --repo Prev-I/Shareaza \
+                        --signer-workflow Prev-I/Shareaza/.github/workflows/release.yml \
+                        --source-ref "refs/tags/$TAG" \
+                        --deny-self-hosted-runners
+                done
+
+        -   name: Verify the release attestation
+            run: |
+                retry() {
+                    n=1
+                    until "$@"; do
+                        if [ "$n" -ge 10 ]; then echo "giving up after $n tries: $*" >&2; return 1; fi
+                        n=$((n + 1))
+                        sleep 30
+                    done
+                }
+                retry gh release verify "$TAG"
+
+        -   name: Verify each installer against the release attestation
+            working-directory: dist
+            run: |
+                retry() {
+                    n=1
+                    until "$@"; do
+                        if [ "$n" -ge 10 ]; then echo "giving up after $n tries: $*" >&2; return 1; fi
+                        n=$((n + 1))
+                        sleep 30
+                    done
+                }
+                for f in *.exe; do
+                    retry gh release verify-asset "$TAG" "$f"
+                done
