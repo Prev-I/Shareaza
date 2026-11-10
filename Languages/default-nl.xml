@@ -4529,7 +4529,7 @@
 			<control caption="Er is een nieuwe versie van Shareaza verkrijgbaar. Wil je upgraden?"/>
 			<control caption="Wanneer je &quot;Nu upgraden&quot; selecteert, zal Shareaza de upgrade toevoegen aan je downloadlijst en zal het automatisch worden gedownload."/>
 			<control caption="Nu _upgraden"/>
-			<control caption="Niet controleren op nieuwe versies"/>
+			<control caption="Controles 31 dagen uitstellen"/>
 			<control caption="Niet upgraden"/>
 		</dialog>
 		<dialog name="CDownloadReviewDlg" cookie="BuSyEd" caption="Downloadcommentaar">

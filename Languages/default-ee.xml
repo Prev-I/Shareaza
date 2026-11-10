@@ -4534,7 +4534,7 @@
 			<control caption="Uus Shareaza versioon on saadaval.  Kas soovid uuendada?"/>
 			<control caption="Kui sa valid Uuenda Kohe, lisab Shareaza uuenduse sinu allalaadimiste järjekorda ja alustab ise selle tõmbamist."/>
 			<control caption="_Uuenda Kohe"/>
-			<control caption="Ära kontrolli uut versiooni"/>
+			<control caption="Lükka kontrollid 31 päeva edasi"/>
 			<control caption="Ära uuenda"/>
 		</dialog>
 		<dialog name="CDownloadReviewDlg" cookie="BuSyEd" caption="Allalaadimiste ülevaated">

@@ -9628,8 +9628,8 @@ msgid "_Upgrade Now"
 msgstr "_Обновить сейчас"
 
 #: cupgradedlg;control;4
-msgid "Don't check for new versions"
-msgstr "Не проверять новые версии"
+msgid "Postpone checks for 31 days"
+msgstr "Отложить проверки на 31 день"
 
 #: cupgradedlg;control;5
 msgid "Don't Upgrade"

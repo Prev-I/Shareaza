@@ -4513,7 +4513,7 @@
 			<control caption="现在已存在一个新的 Shareaza 版本。您要升级吗？"/>
 			<control caption="现在已存在一个新的 Shareaza 版本。您要升级吗？"/>
 			<control caption="如果您选择立即升级，Shareaza 将把此更新添加到您的下载队列中并自动下载。"/>
-			<control caption="立即升级(_U)"/>
+			<control caption="推迟检查 31 天"/>
 			<control caption="不要检测新版本"/>
 		</dialog>
 		<dialog name="CDownloadReviewDlg" cookie="BuSyEd" caption="下载评价">

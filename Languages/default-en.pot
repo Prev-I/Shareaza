@@ -8945,7 +8945,7 @@ msgid "_Upgrade Now"
 msgstr ""
 
 #: cupgradedlg;control;4
-msgid "Don't check for new versions"
+msgid "Postpone checks for 31 days"
 msgstr ""
 
 #: cupgradedlg;control;5

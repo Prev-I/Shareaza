@@ -4535,7 +4535,7 @@
 			<control caption="Na voljo je nova različica programa Shareaza. Jo želite posodobiti?"/>
 			<control caption="Če boste izbrali Posodobi takoj, bo Shareaza dodala posodobitev v vašo prenosno čakalno vrsto in bo tudi samodejno pričela s prenosom."/>
 			<control caption="_Posodobi takoj"/>
-			<control caption="Ne preverjaj po novih posodobitvah"/>
+			<control caption="Preloži preverjanja za 31 dni"/>
 			<control caption="Ne posodobi"/>
 		</dialog>
 		<dialog name="CDownloadReviewDlg" cookie="BuSyEd" caption="Ocene prenosov">

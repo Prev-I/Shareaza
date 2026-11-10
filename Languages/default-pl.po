@@ -9632,8 +9632,8 @@ msgid "_Upgrade Now"
 msgstr "Aktualizuj teraz"
 
 #: cupgradedlg;control;4
-msgid "Don't check for new versions"
-msgstr "Nie sprawdzaj czy są nowe wersje"
+msgid "Postpone checks for 31 days"
+msgstr "Odłóż sprawdzanie o 31 dni"
 
 #: cupgradedlg;control;5
 msgid "Don't Upgrade"

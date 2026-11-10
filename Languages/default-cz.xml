@@ -4536,7 +4536,7 @@
 			<control caption="Je k dispozici nová verze Shareazy. Chcete program aktualizovat?"/>
 			<control caption="Jestliže teď zvolíte aktualizaci, Shareaza přidá vaši frontu stahování a automaticky začne stahovat potřebné soubory."/>
 			<control caption="_Aktualizovat"/>
-			<control caption="Nekontrolovat nové verze"/>
+			<control caption="Odložit kontroly o 31 dní"/>
 			<control caption="Nechci aktualizaci"/>
 		</dialog>
 		<dialog name="CDownloadReviewDlg" cookie="BuSyEd" caption="Prohlédnout stahování">

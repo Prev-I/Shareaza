@@ -9714,8 +9714,8 @@ msgid "_Upgrade Now"
 msgstr "_Posodobi takoj"
 
 #: cupgradedlg;control;4
-msgid "Don't check for new versions"
-msgstr "Ne preverjaj po novih posodobitvah"
+msgid "Postpone checks for 31 days"
+msgstr "Preloži preverjanja za 31 dni"
 
 #: cupgradedlg;control;5
 msgid "Don't Upgrade"

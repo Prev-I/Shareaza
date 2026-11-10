@@ -4533,7 +4533,7 @@
 			<control caption="'n Nuwe weergawe van Shareaza is nou beskikbaar. Wil jy graag opgradeer?"/>
 			<control caption="As jy Opgradeer Nou kliek sal Shareaza die opgradering by jou aflaailys byvoeg en dit outomaties begin aflaai."/>
 			<control caption="Opgradeer _Nou"/>
-			<control caption="Ignoreer nuwe weergawes"/>
+			<control caption="Stel kontroles 31 dae uit"/>
 			<control caption="Moenie Opgradeer Nie"/>
 		</dialog>
 		<dialog name="CDownloadReviewDlg" cookie="BuSyEd" caption="Aflaai Resensies">

@@ -9609,8 +9609,8 @@ msgid "_Upgrade Now"
 msgstr "如果您选择立即升级，Shareaza 将把此更新添加到您的下载队列中并自动下载。"
 
 #: cupgradedlg;control;4
-msgid "Don't check for new versions"
-msgstr "立即升级(_U)"
+msgid "Postpone checks for 31 days"
+msgstr "推迟检查 31 天"
 
 #: cupgradedlg;control;5
 msgid "Don't Upgrade"

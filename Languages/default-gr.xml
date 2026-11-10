@@ -4533,7 +4533,7 @@
 			<control caption="Μια νέα έκδοση του Shareaza είναι διαθέσιμη. Θέλετε να αναβαθμίσετε;"/>
 			<control caption="Αν επιλέξετε Άμεση Αναβάθμιση, το Shareaza θα προσθέση την αναβάθμιση στη λίστα λήψεων και θα ξεκινήσει αυτόματα να τη λαμβάνει."/>
 			<control caption="_Άμεση Αναβάθμιση"/>
-			<control caption="Μη έλεγχος για νέες εκδόσεις"/>
+			<control caption="Αναβολή ελέγχων για 31 ημέρες"/>
 			<control caption="Μη αναβάθμιση"/>
 		</dialog>
 		<dialog name="CDownloadReviewDlg" cookie="BuSyEd" caption="Κριτικές Λήψης">

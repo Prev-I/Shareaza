@@ -9623,8 +9623,8 @@ msgid "_Upgrade Now"
 msgstr "Jetzt _aktualisieren"
 
 #: cupgradedlg;control;4
-msgid "Don't check for new versions"
-msgstr "Nicht nach Updates suchen"
+msgid "Postpone checks for 31 days"
+msgstr "Prüfungen 31 Tage aufschieben"
 
 #: cupgradedlg;control;5
 msgid "Don't Upgrade"

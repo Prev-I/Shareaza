@@ -4533,7 +4533,7 @@
 			<control caption="Una nova versió de Shareaza està disponible. Vols actualitzar el programa?"/>
 			<control caption="Si selecciones actualitzar ara, Shareaza afegirà l' actualització a la teva cua de descàrrega i, automàticament, es descarregarà."/>
 			<control caption="_Actualitza ara"/>
-			<control caption="No comproves si hi ha noves versions"/>
+			<control caption="Posposa les comprovacions 31 dies"/>
 			<control caption="No vull actualitzar"/>
 		</dialog>
 		<dialog name="CDownloadReviewDlg" cookie="BuSyEd" caption="Descarrega ressenyes">

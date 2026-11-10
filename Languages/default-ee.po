@@ -9710,8 +9710,8 @@ msgid "_Upgrade Now"
 msgstr "_Uuenda Kohe"
 
 #: cupgradedlg;control;4
-msgid "Don't check for new versions"
-msgstr "Ära kontrolli uut versiooni"
+msgid "Postpone checks for 31 days"
+msgstr "Lükka kontrollid 31 päeva edasi"
 
 #: cupgradedlg;control;5
 msgid "Don't Upgrade"

@@ -4534,7 +4534,7 @@
 			<control caption="Появилась новая версия Shareaza. Хотите ли обновиться?"/>
 			<control caption="Если вы нажмёте Обновить Сейчас, Shareaza добавит обновление в очередь списка загрузок и автоматически начнет загрузку."/>
 			<control caption="_Обновить сейчас"/>
-			<control caption="Не проверять новые версии"/>
+			<control caption="Отложить проверки на 31 день"/>
 			<control caption="Не обновлять"/>
 		</dialog>
 		<dialog name="CDownloadReviewDlg" cookie="BuSyEd" caption="Оценки закрузки">

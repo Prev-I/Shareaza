@@ -9718,8 +9718,8 @@ msgid "_Upgrade Now"
 msgstr "_Atnaujinti dabar"
 
 #: cupgradedlg;control;4
-msgid "Don't check for new versions"
-msgstr "  Netikrinti naujesnių versijų"
+msgid "Postpone checks for 31 days"
+msgstr "  Atidėti tikrinimą 31 dieną"
 
 #: cupgradedlg;control;5
 msgid "Don't Upgrade"

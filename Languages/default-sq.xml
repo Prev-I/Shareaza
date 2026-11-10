@@ -4533,7 +4533,7 @@
 			<control caption="Për Shareaza-n ka dalë një version i ri. Do e përmirësoni?"/>
 			<control caption="Nëse zgjidhet Përmirëso Tani, Shareaza do e shtojë përmirësimin në radhën tuaj të punëve për shkarkim dhe do nisë ta shkarkojë atë automatikisht."/>
 			<control caption="_Përmirëso Tani"/>
-			<control caption="Mos verifiko versionet e reja"/>
+			<control caption="Shtyji kontrollet për 31 ditë"/>
 			<control caption="Mos Përmirëso"/>
 		</dialog>
 		<dialog name="CDownloadReviewDlg" cookie="BuSyEd" caption="Vlerësimet e Shkarkesës">
