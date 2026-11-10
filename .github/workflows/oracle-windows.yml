@@ -390,7 +390,14 @@ jobs:
                 # runner property must not fail the gate: record the profile, set it to block inbound for the
                 # run, and put the recorded values back in the finally below.
                 $before = Get-NetFirewallProfile | Select-Object Name, Enabled, DefaultInboundAction, AllowInboundRules
-                'firewall profiles before:'; $before | Format-Table | Out-String | Write-Host
+                # The tables go to the log and to a file the evidence keeps.
+                function Save-Profiles($label) {
+                    $t = (Get-NetFirewallProfile | Select-Object Name, Enabled, DefaultInboundAction, AllowInboundRules | Format-Table | Out-String)
+                    "firewall profiles $label`:"; $t | Write-Host
+                    Add-Content -Path "$env:WORK\firewall-profiles-blocked.txt" -Value "firewall profiles $label`:`r`n$t"
+                }
+                Save-Profiles 'before'
+                $restoreErrors = New-Object Collections.Generic.List[string]
                 $profiles = @(Get-NetConnectionProfile)
                 $profiles | ForEach-Object { "connection profile: $($_.Name), $($_.NetworkCategory), $($_.InterfaceAlias)" }
                 $names = @($profiles | ForEach-Object { "$($_.NetworkCategory)" -replace '^DomainAuthenticated$', 'Domain' } | Sort-Object -Unique)
@@ -399,7 +406,7 @@ jobs:
                 if (-not $saved) { throw "no firewall profile named like the active network profile: $($names -join ', ')" }
                 try {
                     Set-NetFirewallProfile -Name $saved.Name -Enabled True -DefaultInboundAction Block
-                    'firewall profiles during the run:'; Get-NetFirewallProfile | Select-Object Name, Enabled, DefaultInboundAction, AllowInboundRules | Format-Table | Out-String | Write-Host
+                    Save-Profiles 'during the run'
                     $rules | Disable-NetFirewallRule
                     Start-Process -FilePath explorer.exe -ArgumentList "`"$exe`""
                     foreach ($i in 1..15) { if (Get-Process -Name Shareaza -ErrorAction SilentlyContinue) { break }; Start-Sleep 2 }
@@ -428,15 +435,23 @@ jobs:
                     }
                     if (-not $exited) { throw 'Shareaza did not exit after six WM_CLOSE attempts' }
                 } finally {
-                    # Whatever happened: the rules come back, and no client is left running.
-                    if (Get-Process -Name Shareaza -ErrorAction SilentlyContinue) { Stop-Process -Name Shareaza -Force; Start-Sleep 5 }
-                    $rules | Enable-NetFirewallRule
-                    $rules | ForEach-Object { "re-enabled '$($_.DisplayName)'" }
+                    # Whatever happened: the rules and the profiles come back, and no client is left running.
+                    # Each restore stands alone: one failing must not skip the rest, nor replace the
+                    # exception of the run above, which propagates when this block ends.
+                    try { Stop-Process -Name Shareaza -Force -ErrorAction SilentlyContinue; Start-Sleep 5 } catch { $restoreErrors.Add("stopping Shareaza: $_") }
+                    try {
+                        $rules | Enable-NetFirewallRule
+                        $rules | ForEach-Object { "re-enabled '$($_.DisplayName)'" }
+                    } catch { $restoreErrors.Add("re-enabling the firewall rules: $_") }
                     foreach ($f in $saved) {
-                        Set-NetFirewallProfile -Name $f.Name -Enabled "$($f.Enabled)" -DefaultInboundAction "$($f.DefaultInboundAction)"
+                        try { Set-NetFirewallProfile -Name $f.Name -Enabled "$($f.Enabled)" -DefaultInboundAction "$($f.DefaultInboundAction)" }
+                        catch { $restoreErrors.Add("restoring the firewall profile $($f.Name): $_") }
                     }
-                    'firewall profiles restored:'; Get-NetFirewallProfile | Select-Object Name, Enabled, DefaultInboundAction, AllowInboundRules | Format-Table | Out-String | Write-Host
+                    try { Save-Profiles 'restored' } catch { $restoreErrors.Add("reading the restored profiles: $_") }
+                    $restoreErrors | ForEach-Object { Write-Warning "restore failed: $_" }
                 }
+                # Reached only when the run above succeeded: a restore that failed then fails the step.
+                if ($restoreErrors.Count -gt 0) { throw "the firewall was not fully restored: $($restoreErrors -join '; ')" }
 
         -   name: Run 4, with a right-to-left layout on a fresh bar layout
             # The client saves its bar layout on exit; without one it places the bars by default.
@@ -587,7 +602,7 @@ jobs:
             if: always()
             run: |
                 New-Item -ItemType Directory -Force evidence | Out-Null
-                foreach ($p in "$env:WORK\evidence-*.zip", "$env:WORK\install-*.log", "$env:WORK\screen-*.png", "$env:WORK\blocked-notice.txt", 'gwc-requests.jsonl') {
+                foreach ($p in "$env:WORK\evidence-*.zip", "$env:WORK\install-*.log", "$env:WORK\screen-*.png", "$env:WORK\blocked-notice.txt", "$env:WORK\firewall-profiles-blocked.txt", 'gwc-requests.jsonl') {
                     Copy-Item $p evidence -ErrorAction SilentlyContinue
                 }
                 # Which profile Windows gave the runner's network: Public blocks what Private allows.

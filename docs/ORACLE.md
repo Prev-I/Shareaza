@@ -368,13 +368,19 @@ from the built `Shareaza.exe`, not from a screenshot.
 
 `.github/workflows/oracle-windows.yml` uploads these with each run, besides the cache requests and
 the kit's evidence zip:
-- **Network profile:** `network-profile.txt`, the output of `Get-NetConnectionProfile`. A Public
+- **Network profile:** `network-profile.txt`, the output of `Get-NetConnectionProfile`, with
+  `firewall-profiles.txt`, the firewall profiles at the end of the job. A Public
   network blocks what a Private one allows, so it tells which case the firewall checks ran in.
 - **Blocked-case notice:** the step *Run with incoming traffic blocked* turns off the kit's
   `Shareaza oracle *` rules and the installer's `Shareaza` rule, starts the client, and waits up to
   three minutes for its log to show the network starting. It then requires a line containing
   `Windows Firewall blocks incoming` in `Shareaza.log`. The rules come back in a `finally`, and the
   matching lines are kept in `blocked-notice.txt`. Only builds with the installer's rule run it.
+  The runner's firewall state does not fail the step: it records `Enabled` and `DefaultInboundAction`
+  of the active profile, sets `Enabled` True and `DefaultInboundAction` Block for the run, and puts
+  the recorded values back in the `finally` with the rules. Each restore is isolated, so one failing
+  does not skip the others; a failed restore fails the step only if the run itself passed. The
+  profile tables before, during and after are in `firewall-profiles-blocked.txt`.
 - **Monitor bar screenshots:** `screen-rtl.png` is a run with `Settings\LanguageRTL` = 1 (the section the client reads it from;
   the run checks that the main window has `WS_EX_LAYOUTRTL`) and no saved
   bar layout (the `Toolbars\CoolBar-*` keys removed first), so the default placement runs;
@@ -384,6 +390,3 @@ the kit's evidence zip:
   the installed `Shareaza.exe`, whatever its name, except names starting `Shareaza oracle`.
   The blocked run is the only time Shareaza listens with no allow rule, so a Windows Firewall
   prompt could create a rule under another name; the any-name check then fails, which is intended.
-  Before disabling the rules the step logs the firewall profiles and fails if the active profile has
-  the firewall off or a default inbound action of Allow, so a missing notice is not mistaken for a
-  client regression.
