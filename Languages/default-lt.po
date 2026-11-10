@@ -9719,7 +9719,7 @@ msgstr "_Atnaujinti dabar"
 
 #: cupgradedlg;control;4
 msgid "Postpone checks for 31 days"
-msgstr "  Atidėti tikrinimą 31 dieną"
+msgstr "  Atidėti tikrinimą 31 dienai"
 
 #: cupgradedlg;control;5
 msgid "Don't Upgrade"

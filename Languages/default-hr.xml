@@ -4534,7 +4534,7 @@
 			<control caption="Dostupna je nova verzija Shareaze. Želite li je unaprijediti?"/>
 			<control caption="Ako odaberete Unaprijedi Sad, Shareaza će dodati novu verziju u za skinuti i automatski započeti skidanje."/>
 			<control caption="_Unaprijedi Sad"/>
-			<control caption="Odgodi provjere 31 dan"/>
+			<control caption="Odgodi provjere za 31 dan"/>
 			<control caption="Nemoj Unaprijedit"/>
 		</dialog>
 		<dialog name="CDownloadReviewDlg" cookie="BuSyEd" caption="Skini Kritike">

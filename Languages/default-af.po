@@ -9726,7 +9726,7 @@ msgstr "Opgradeer _Nou"
 
 #: cupgradedlg;control;4
 msgid "Postpone checks for 31 days"
-msgstr "Stel kontroles 31 dae uit"
+msgstr "Stel kontroles vir 31 dae uit"
 
 #: cupgradedlg;control;5
 msgid "Don't Upgrade"

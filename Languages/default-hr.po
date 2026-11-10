@@ -9710,7 +9710,7 @@ msgstr "_Unaprijedi Sad"
 
 #: cupgradedlg;control;4
 msgid "Postpone checks for 31 days"
-msgstr "Odgodi provjere 31 dan"
+msgstr "Odgodi provjere za 31 dan"
 
 #: cupgradedlg;control;5
 msgid "Don't Upgrade"

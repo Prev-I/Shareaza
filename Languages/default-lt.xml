@@ -4534,7 +4534,7 @@
 			<control caption="Pasirodė nauja „Shareaza“ versija. Ar norite atnaujinti?"/>
 			<control caption="Jei pasirinksite „Atnaujinti dabar“, „Shareaza“ pridės atnaujinimą prie atsisiuntimų ir pradės jį siųsti."/>
 			<control caption="_Atnaujinti dabar"/>
-			<control caption="  Atidėti tikrinimą 31 dieną"/>
+			<control caption="  Atidėti tikrinimą 31 dienai"/>
 			<control caption="Neatnaujinti"/>
 		</dialog>
 		<dialog name="CDownloadReviewDlg" cookie="BuSyEd" caption="Atsisiuntimų įvertinimai">

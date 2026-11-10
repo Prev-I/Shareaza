@@ -9714,7 +9714,7 @@ msgstr "_Unapredi Sad"
 
 #: cupgradedlg;control;4
 msgid "Postpone checks for 31 days"
-msgstr "Odloži provere 31 dan"
+msgstr "Odloži provere za 31 dan"
 
 #: cupgradedlg;control;5
 msgid "Don't Upgrade"
