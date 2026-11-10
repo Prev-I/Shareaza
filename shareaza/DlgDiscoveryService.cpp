@@ -118,7 +118,8 @@ void CDiscoveryServiceDlg::OnChangeAddress()
 	UpdateData();
 
 	m_wndOK.EnableWindow( m_nType ?
-		_tcsncmp( m_sAddress, _T("http://"), 7 ) == 0 :
+		( _tcsncmp( m_sAddress, _T("http://"), 7 ) == 0 &&
+		  ! ( m_nType <= 3 && CDiscoveryServices::HasQueryOrFragment( m_sAddress ) ) ) :
 		_tcschr( m_sAddress, '.' ) != NULL );
 }
 
@@ -130,6 +131,20 @@ void CDiscoveryServiceDlg::OnSelChangeServiceType()
 void CDiscoveryServiceDlg::OnOK()
 {
 	UpdateData();
+
+	// Refuse an address another service already has. Checked before the modal box and the
+	// modification, and the network lock is released before the box is shown.
+	bool bDuplicate = false;
+	{
+		CQuickLock pCheckLock( Network.m_pSection );
+		const CDiscoveryService* pOther = DiscoveryServices.GetByAddress( m_sAddress );
+		bDuplicate = ( pOther != NULL && pOther != m_pService );
+	}
+	if ( bDuplicate )
+	{
+		MsgBox( IDS_DISCOVERY_DUPLICATE, MB_ICONEXCLAMATION );
+		return;
+	}
 
 	CSingleLock pLock( &Network.m_pSection, TRUE );
 

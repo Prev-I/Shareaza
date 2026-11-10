@@ -57,7 +57,8 @@ CDiscoveryServices::CDiscoveryServices() :
 	m_nLastUpdateProtocol ( PROTOCOL_NULL ),
 	m_bFirstTime	( TRUE ),
 	m_tExecute		( 0 ),
-	m_tQueried		( 0 )
+	m_tQueried		( 0 ),
+	m_bBeyondCap	( FALSE )
 {
 }
 
@@ -116,7 +117,7 @@ DWORD CDiscoveryServices::GetCount(CDiscoveryService::Type nType, PROTOCOLID nPr
 
 // A web cache is queried as its address plus "?get=1&...", so an http(s) address that already
 // has a query or a fragment would give a doubled query, and be passed on to other caches.
-static bool HasQueryOrFragment(LPCTSTR pszAddress)
+bool CDiscoveryServices::HasQueryOrFragment(LPCTSTR pszAddress)
 {
 	if ( _tcsnicmp( pszAddress, _T("http://"), 7 ) != 0 && _tcsnicmp( pszAddress, _T("https://"), 8 ) != 0 )
 		return false;
@@ -271,9 +272,9 @@ BOOL CDiscoveryServices::Add(CDiscoveryService* pService)
 		return FALSE;
 	}
 
-	// Stop if we already have enough caches
-	if ( ( pService->m_bGnutella2 && ( GetCount( pService->m_nType, PROTOCOL_G2 ) >= Settings.Discovery.CacheCount ) ) ||
-		 ( pService->m_bGnutella1 && ( GetCount( pService->m_nType, PROTOCOL_G1 ) >= Settings.Discovery.CacheCount ) ) )
+	// Stop if we already have enough caches (AddDefaults( TRUE ) lets the shipped defaults past the cap)
+	if ( ! m_bBeyondCap && ( ( pService->m_bGnutella2 && ( GetCount( pService->m_nType, PROTOCOL_G2 ) >= Settings.Discovery.CacheCount ) ) ||
+		 ( pService->m_bGnutella1 && ( GetCount( pService->m_nType, PROTOCOL_G1 ) >= Settings.Discovery.CacheCount ) ) ) )
 	{
 		// Check if the service is already in the list.
 		if ( m_pList.Find( pService ) == NULL )
@@ -510,8 +511,8 @@ BOOL CDiscoveryServices::Load()
 
 // Brings an existing install's list up to date with DefaultServices.dat. Its caches are added
 // and its bans applied by AddDefaults(), which otherwise runs only when the list runs short.
-// Caches whose ban was lifted are first removed if stored as blocked, so AddDefaults() adds
-// them back as caches.
+// Caches whose ban was lifted are first converted in place from blocked to G2 web caches, so
+// AddDefaults() finds them listed and no cache is dropped. Defaults go past the CacheCount cap.
 void CDiscoveryServices::MergeNewDefaults()
 {
 	static LPCTSTR const pszUnbanned[] =
@@ -535,14 +536,16 @@ void CDiscoveryServices::MergeNewDefaults()
 				if ( pService->m_sAddress.CompareNoCase( pszUnbanned[ i ] ) == 0 )
 				{
 					theApp.Message( MSG_DEBUG, _T("[DiscoveryServices] Ban lifted: %s"), (LPCTSTR)pService->m_sAddress );
-					Remove( pService, FALSE );
+					pService->m_nType = CDiscoveryService::dsWebCache;
+					pService->m_bGnutella2 = TRUE;
+					pService->m_bGnutella1 = FALSE;
 					break;
 				}
 			}
 		}
 	}
 
-	AddDefaults();
+	AddDefaults( TRUE );
 }
 
 BOOL CDiscoveryServices::Save()
@@ -698,8 +701,19 @@ BOOL CDiscoveryServices::EnoughServices() const
 //////////////////////////////////////////////////////////////////////
 // CDiscoveryServices defaults
 
-void CDiscoveryServices::AddDefaults()
+void CDiscoveryServices::AddDefaults(BOOL bBeyondCap)
 {
+	// Reset on every exit path
+	struct CBeyondCapGuard
+	{
+		BOOL& m_bFlag;
+		BOOL m_bOld;
+		CBeyondCapGuard(BOOL& bFlag, BOOL bValue) : m_bFlag( bFlag ), m_bOld( bFlag ) { m_bFlag = bValue; }
+		~CBeyondCapGuard() { m_bFlag = m_bOld; }
+	private:
+		CBeyondCapGuard& operator=(const CBeyondCapGuard&);
+	} pGuard( m_bBeyondCap, bBeyondCap );
+
 	CString strFile = Settings.General.Path + _T("\\Data\\DefaultServices.dat");
 
 	CFile pFile;

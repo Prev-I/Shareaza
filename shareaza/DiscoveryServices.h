@@ -123,6 +123,7 @@ protected:
 	BOOL				m_bFirstTime;
 	DWORD				m_tExecute;					// Time the Execute() function was last run
 	DWORD				m_tQueried;					// Time a webcache/MET was last queried
+	BOOL				m_bBeyondCap;				// AddDefaults() in progress: Add() skips the CacheCount cap
 
 public:
 	POSITION			GetIterator() const;
@@ -133,6 +134,7 @@ public:
 	BOOL				CheckMinimumServices();
 //	DWORD				MetQueried() const;
 	DWORD				LastExecute() const;
+	static bool			HasQueryOrFragment(LPCTSTR pszAddress);
 	CDiscoveryService*	GetByAddress(LPCTSTR pszAddress) const;
 	CDiscoveryService*	GetByAddress(const IN_ADDR* pAddress, WORD nPort, CDiscoveryService::SubType nSubType );
 	BOOL				Load();
@@ -161,7 +163,7 @@ protected:
 	BOOL				RunWebCacheFile();
 	BOOL				SendWebCacheRequest(const CString& strURL);
 	BOOL				EnoughServices() const;
-	void				AddDefaults();
+	void				AddDefaults(BOOL bBeyondCap = FALSE);
 	void				MergeNewDefaults();
 	void				MergeURLs();
 
