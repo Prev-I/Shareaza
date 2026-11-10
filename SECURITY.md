@@ -8,7 +8,7 @@ Please report a vulnerability privately. Do not open an issue for it.
 2. Choose **Report a vulnerability**. This is GitHub's private vulnerability reporting.
 3. Describe what you found and how you found it.
 
-Only the maintainer can read a private report.
+The report stays private between you and the maintainer.
 
 ## Supported versions
 

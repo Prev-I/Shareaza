@@ -9,7 +9,7 @@ reference client for testing GWebCaches ([docs/ORACLE.md](docs/ORACLE.md)).
 ## Download and verify
 
 This is an unofficial personal fork. It is not the original Shareaza project, and the original
-project's authors have nothing to do with it.
+project's authors are not involved in it and do not endorse it.
 
 The [Releases](https://github.com/Prev-I/Shareaza/releases) page is the only place this fork
 publishes installers. Do not trust an installer from anywhere else. The installers need Windows 10
@@ -26,7 +26,9 @@ download:
 - Without `gh`: `Get-FileHash <file> -Algorithm SHA256`, compared with `SHA256SUMS.txt` or the
   sha256 GitHub shows beside each file.
 
-The `gh` checks need `gh` 2.81.0 or later. The release process and the file contract are in
+The `gh` checks need GitHub CLI installed and signed in (`gh auth login`), version 2.81.0 or later.
+`Get-FileHash` runs in PowerShell and prints uppercase hex, while `SHA256SUMS.txt` is lowercase; the
+case does not matter. The release process and the file contract are in
 [docs/RELEASING.md](docs/RELEASING.md). To report a security problem, see
 [SECURITY.md](SECURITY.md).
 

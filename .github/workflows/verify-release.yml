@@ -7,8 +7,9 @@
 # A failure is a signal for the owner to inspect, not an automatic verdict. If the
 # files are wrong, the fix is the next previ.N. If it is tooling or timing (an
 # attestation not yet visible, a gh problem), re-run it by workflow_dispatch with
-# the tag. A dispatch cannot see a draft release: the API does not return a draft
-# by tag, so run it against a published release only.
+# the tag. If the workflow itself is wrong, fix it through a pull request, then
+# re-run by workflow_dispatch. A dispatch cannot see a draft release: the API does
+# not return a draft by tag, so run it against a published release only.
 name: Verify release
 
 on:
