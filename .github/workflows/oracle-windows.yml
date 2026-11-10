@@ -31,7 +31,8 @@ permissions:
 jobs:
     oracle:
         runs-on: windows-2022
-        timeout-minutes: 60
+        # Seven client runs of about 7 minutes each, with headroom for the install and the checks.
+        timeout-minutes: 70
         strategy:
             fail-fast: false
             matrix:
@@ -388,11 +389,12 @@ jobs:
                 }
                 # With the firewall off on the active profile, or a default of Allow, no notice can come, and a
                 # runner property must not fail the gate: record the profile, set it to block inbound for the
-                # run, and put the recorded values back in the finally below.
-                $before = Get-NetFirewallProfile | Select-Object Name, Enabled, DefaultInboundAction, AllowInboundRules
+                # run, and put the recorded values back in the finally below. NotifyOnListen goes off for the
+                # run too, so no Windows Security Alert can make an allow rule under another name.
+                $before = Get-NetFirewallProfile | Select-Object Name, Enabled, DefaultInboundAction, AllowInboundRules, NotifyOnListen
                 # The tables go to the log and to a file the evidence keeps.
                 function Save-Profiles($label) {
-                    $t = (Get-NetFirewallProfile | Select-Object Name, Enabled, DefaultInboundAction, AllowInboundRules | Format-Table | Out-String)
+                    $t = (Get-NetFirewallProfile | Select-Object Name, Enabled, DefaultInboundAction, AllowInboundRules, NotifyOnListen | Format-Table | Out-String)
                     "firewall profiles $label`:"; $t | Write-Host
                     Add-Content -Path "$env:WORK\firewall-profiles-blocked.txt" -Value "firewall profiles $label`:`r`n$t"
                 }
@@ -405,7 +407,7 @@ jobs:
                 $saved = @($before | Where-Object { $names -contains "$($_.Name)" })
                 if (-not $saved) { throw "no firewall profile named like the active network profile: $($names -join ', ')" }
                 try {
-                    Set-NetFirewallProfile -Name $saved.Name -Enabled True -DefaultInboundAction Block
+                    Set-NetFirewallProfile -Name $saved.Name -Enabled True -DefaultInboundAction Block -NotifyOnListen False
                     Save-Profiles 'during the run'
                     $rules | Disable-NetFirewallRule
                     Start-Process -FilePath explorer.exe -ArgumentList "`"$exe`""
@@ -446,6 +448,8 @@ jobs:
                     foreach ($f in $saved) {
                         try { Set-NetFirewallProfile -Name $f.Name -Enabled "$($f.Enabled)" -DefaultInboundAction "$($f.DefaultInboundAction)" }
                         catch { $restoreErrors.Add("restoring the firewall profile $($f.Name): $_") }
+                        try { Set-NetFirewallProfile -Name $f.Name -NotifyOnListen "$($f.NotifyOnListen)" }
+                        catch { $restoreErrors.Add("restoring NotifyOnListen of the firewall profile $($f.Name): $_") }
                     }
                     try { Save-Profiles 'restored' } catch { $restoreErrors.Add("reading the restored profiles: $_") }
                     $restoreErrors | ForEach-Object { Write-Warning "restore failed: $_" }
@@ -479,6 +483,22 @@ jobs:
                 Get-ChildItem "$k\Toolbars" -ErrorAction SilentlyContinue | Where-Object { $_.PSChildName -like 'CoolBar-*' } | Remove-Item -Recurse
                 Remove-ItemProperty -Path "$k\Settings" -Name LanguageRTL -ErrorAction SilentlyContinue   # the client wrote it back on exit
                 .\run-client.ps1 -Name resize -ExpectIPv6 -Resize
+
+        -   name: Run with an RTL layout and the window resized
+            # Both at once: the monitor bar must follow a mirrored window as it is shrunk and widened.
+            # As run 4, on a fresh bar layout, and the setting is removed again whatever happens.
+            timeout-minutes: 10
+            run: |
+                $ErrorActionPreference = 'Stop'
+                $k = 'HKCU:\Software\Shareaza\Shareaza'
+                Get-ChildItem "$k\Toolbars" -ErrorAction SilentlyContinue | Where-Object { $_.PSChildName -like 'CoolBar-*' } | Remove-Item -Recurse
+                New-Item -Path "$k\Settings" -Force | Out-Null
+                New-ItemProperty -Path "$k\Settings" -Name LanguageRTL -Value 1 -PropertyType DWord -Force | Out-Null
+                try {
+                    .\run-client.ps1 -Name rtl-resize -ExpectIPv6 -ExpectRTL -Resize
+                } finally {
+                    Remove-ItemProperty -Path "$k\Settings" -Name LanguageRTL -ErrorAction SilentlyContinue
+                }
 
         -   name: Prepare must refuse while a restore is unfinished
             run: |
