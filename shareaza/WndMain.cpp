@@ -303,6 +303,7 @@ CMainWnd::CMainWnd()
 	, m_nAlpha			( 255 )
 	, m_bTlsPromptShowing	( false )
 	, m_bMonitorAtEnd	( FALSE )
+	, m_pMonitorBeside	( NULL )
 {
 	ZeroMemory( &m_pTray, sizeof( NOTIFYICONDATA ) );
 	m_pTray.cbSize				= theApp.m_bIsVistaOrNewer ? sizeof( NOTIFYICONDATA ) : NOTIFYICONDATA_V3_SIZE;
@@ -2807,12 +2808,18 @@ void CMainWnd::OnWindowMonitor()
 	// Shown again where it was hidden: at the row end if it was there. A bar the user moved since
 	// the last resize has not been looked at yet, so look now, while it is still visible
 	if ( ! bVisible )
+	{
 		m_bMonitorAtEnd = IsMonitorAtRowEnd();
+		if ( m_bMonitorAtEnd )
+			m_pMonitorBeside = MainBar();
+	}
 
 	ShowControlBar( &m_wndMonitorBar, bVisible, TRUE );
 
-	// PlaceMonitorBesideMainBar lays the frame out first, which shows the bar
-	if ( bVisible && m_bMonitorAtEnd )
+	// PlaceMonitorBesideMainBar lays the frame out first, which shows the bar. A row without room
+	// for it leaves it where the dock bar puts it, still marked for the row end, so OnSize places
+	// it once the window is wide enough
+	if ( bVisible && m_bMonitorAtEnd && MonitorFitsBesideMainBar() )
 		PlaceMonitorBesideMainBar();
 }
 
@@ -2975,7 +2982,11 @@ void CMainWnd::OnSize(UINT nType, int cx, int cy)
 		m_wndMonitorBar.GetWindowRect( &rcMonitor );
 		// (a hidden bar keeps what OnWindowMonitor recorded when it hid it)
 		if ( rcMonitor != m_rcMonitor && m_wndMonitorBar.IsVisible() )
+		{
 			m_bMonitorAtEnd = IsMonitorAtRowEnd();
+			if ( m_bMonitorAtEnd )
+				m_pMonitorBeside = MainBar();
+		}
 	}
 
 	CMDIFrameWnd::OnSize( nType, cx, cy );
@@ -3003,7 +3014,9 @@ BOOL CMainWnd::HasSavedBarLayout() const
 CControlBar* CMainWnd::MainBar()
 {
 	// The navigation bar or the toolbar whose row the monitor bar is on, when both are shown; on
-	// neither, as SetGUIMode docks them: the navigation bar, or the toolbar in windowed mode
+	// neither, the one it was last at the end of, since a narrow window may have wrapped it onto a
+	// row of its own; else as SetGUIMode docks them: the navigation bar, or the toolbar in
+	// windowed mode
 	if ( m_wndMonitorBar.GetSafeHwnd() && m_wndMonitorBar.IsVisible() )
 	{
 		CWnd* pMonitorDock = m_wndMonitorBar.GetParent();
@@ -3022,6 +3035,10 @@ CControlBar* CMainWnd::MainBar()
 				return pBars[ i ];
 		}
 	}
+
+	if ( m_pMonitorBeside && m_pMonitorBeside->GetSafeHwnd() && m_pMonitorBeside->IsVisible() &&
+		! m_pMonitorBeside->IsFloating() )
+		return m_pMonitorBeside;
 
 	if ( m_wndNavBar.GetSafeHwnd() && m_wndNavBar.IsVisible() )
 		return &m_wndNavBar;
@@ -3063,8 +3080,9 @@ void CMainWnd::PlaceMonitorBesideMainBar()
 		// Already after the main bar on its row: move it along the row instead of docking it
 		// again, which would remove and re-insert it on every resize step and flicker. The dock
 		// bar takes each bar's place in a row from its current window rect at the next layout
-		// (CDockBar::CalcFixedLayout), and right-justifies a bar that would pass the end
-		if ( rcMonitor.left != rcDock.right - nWidth )
+		// (CDockBar::CalcFixedLayout), and right-justifies a bar that would pass the end, the
+		// last one cxBorder2 past it: within 2 pixels of the end is already there
+		if ( abs( rcMonitor.left - ( rcDock.right - nWidth ) ) > 2 )
 		{
 			m_wndMonitorBar.SetWindowPos( NULL, rcDock.right - nWidth, rcMonitor.top, 0, 0,
 				SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE );
@@ -3082,6 +3100,7 @@ void CMainWnd::PlaceMonitorBesideMainBar()
 	}
 
 	m_bMonitorAtEnd = TRUE;
+	m_pMonitorBeside = pMainBar;
 	m_wndMonitorBar.GetWindowRect( &m_rcMonitor );
 }
 
