@@ -6,7 +6,27 @@ GitHub Actions and carries the fixes from a static security audit of the code ad
 original project ended ([docs/SECURITY-AUDIT.md](docs/SECURITY-AUDIT.md)). It also serves as a
 reference client for testing GWebCaches ([docs/ORACLE.md](docs/ORACLE.md)).
 
-Installers: [Releases](https://github.com/Prev-I/Shareaza/releases). They need Windows 10 or later.
+## Download and verify
+
+This is an unofficial personal fork. It is not the original Shareaza project, and the original
+project's authors have nothing to do with it.
+
+The [Releases](https://github.com/Prev-I/Shareaza/releases) page is the only place this fork
+publishes installers. Do not trust an installer from anywhere else. The installers need Windows 10
+or later.
+
+Each release lists these checks. Run any of them on a download:
+
+- Built by this repository's release workflow:
+  `gh attestation verify <file> --repo Prev-I/Shareaza --signer-workflow Prev-I/Shareaza/.github/workflows/release.yml`
+- Unchanged since publication:
+  `gh release verify-asset <tag> <file> --repo Prev-I/Shareaza`
+- Without `gh`: `Get-FileHash <file> -Algorithm SHA256`, compared with `SHA256SUMS.txt` or the
+  sha256 GitHub shows beside each file.
+
+The `gh` checks need `gh` 2.81.0 or later. The release process and the file contract are in
+[docs/RELEASING.md](docs/RELEASING.md). To report a security problem, see
+[SECURITY.md](SECURITY.md).
 
 ## History and credits
 
