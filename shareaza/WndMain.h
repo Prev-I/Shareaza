@@ -54,9 +54,9 @@ public:
 
 protected:
 	BOOL		HasSavedBarLayout() const;	// SaveBarState() has run in this profile
-	CControlBar*	MainBar();				// the navigation bar, or the toolbar in windowed mode
-	void		PlaceMonitorBesideMainBar();	// dock the monitor bar at the right end of the main bar's row
-	BOOL		IsMonitorAtRowEnd();			// the monitor bar is on the main bar's row, at or past its right end
+	CControlBar*	MainBar();				// the navigation bar or toolbar on the monitor bar's row, else the navigation bar, or the toolbar in windowed mode
+	void		PlaceMonitorBesideMainBar();	// move or dock the monitor bar to the end of the main bar's row
+	BOOL		IsMonitorAtRowEnd();			// the monitor bar is on the main bar's row, at or past its end
 	BOOL		MonitorFitsBesideMainBar();		// the main bar's row has room for the monitor bar after the main bar
 
 public:

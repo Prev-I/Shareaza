@@ -2803,7 +2803,17 @@ void CMainWnd::OnWindowMonitor()
 {
 	BOOL bVisible = ! m_wndMonitorBar.IsVisible();
 	Settings.Toolbars.ShowMonitor = ( bVisible != FALSE );
+
+	// Shown again where it was hidden: at the row end if it was there. A bar the user moved since
+	// the last resize has not been looked at yet, so look now, while it is still visible
+	if ( ! bVisible )
+		m_bMonitorAtEnd = IsMonitorAtRowEnd();
+
 	ShowControlBar( &m_wndMonitorBar, bVisible, TRUE );
+
+	// PlaceMonitorBesideMainBar lays the frame out first, which shows the bar
+	if ( bVisible && m_bMonitorAtEnd )
+		PlaceMonitorBesideMainBar();
 }
 
 void CMainWnd::OnUpdateWindowRemote(CCmdUI *pCmdUI)
@@ -2963,7 +2973,8 @@ void CMainWnd::OnSize(UINT nType, int cx, int cy)
 	{
 		CRect rcMonitor;
 		m_wndMonitorBar.GetWindowRect( &rcMonitor );
-		if ( rcMonitor != m_rcMonitor )
+		// (a hidden bar keeps what OnWindowMonitor recorded when it hid it)
+		if ( rcMonitor != m_rcMonitor && m_wndMonitorBar.IsVisible() )
 			m_bMonitorAtEnd = IsMonitorAtRowEnd();
 	}
 
@@ -2991,7 +3002,27 @@ BOOL CMainWnd::HasSavedBarLayout() const
 
 CControlBar* CMainWnd::MainBar()
 {
-	// As SetGUIMode docks them: the navigation bar, or the toolbar in windowed mode
+	// The navigation bar or the toolbar whose row the monitor bar is on, when both are shown; on
+	// neither, as SetGUIMode docks them: the navigation bar, or the toolbar in windowed mode
+	if ( m_wndMonitorBar.GetSafeHwnd() && m_wndMonitorBar.IsVisible() )
+	{
+		CWnd* pMonitorDock = m_wndMonitorBar.GetParent();
+		CRect rcMonitor;
+		m_wndMonitorBar.GetWindowRect( &rcMonitor );
+
+		CControlBar* pBars[ 2 ] = { &m_wndNavBar, &m_wndToolBar };
+		for ( int i = 0 ; i < 2 ; i++ )
+		{
+			if ( ! pBars[ i ]->GetSafeHwnd() || ! pBars[ i ]->IsVisible() ) continue;
+			if ( pBars[ i ]->GetParent() != pMonitorDock ) continue;
+
+			CRect rcBar;
+			pBars[ i ]->GetWindowRect( &rcBar );
+			if ( abs( rcBar.top - rcMonitor.top ) <= 2 )
+				return pBars[ i ];
+		}
+	}
+
 	if ( m_wndNavBar.GetSafeHwnd() && m_wndNavBar.IsVisible() )
 		return &m_wndNavBar;
 	return &m_wndToolBar;
@@ -3002,23 +3033,53 @@ void CMainWnd::PlaceMonitorBesideMainBar()
 	CControlBar* pMainBar = MainBar();
 	if ( ! pMainBar->GetSafeHwnd() || ! m_wndMonitorBar.GetSafeHwnd() ) return;
 
+	// A floating main bar has no row to share
+	if ( pMainBar->IsFloating() ) return;
+
 	RecalcLayout();
 
 	CWnd* pDockBar = pMainBar->GetParent();
 	if ( ! pDockBar || ! pMainBar->IsVisible() ) return;
 
-	// The main bar's row, at the right end of its dock bar's client area, where the dock bar
-	// lays its bars out
-	CRect rcDock, rcBar;
+	// The main bar's row, at the end of its dock bar's client area, where the dock bar lays its
+	// bars out. Client coordinates, not screen ones: Windows mirrors them under WS_EX_LAYOUTRTL
+	// (and CWnd::ScreenToClient swaps the edges back), so the client right end is the row's
+	// logical end, on the left of the screen in a right-to-left layout
+	CRect rcDock, rcMain, rcMonitor;
 	pDockBar->GetClientRect( &rcDock );
-	pDockBar->ClientToScreen( &rcDock );
-	pMainBar->GetWindowRect( &rcBar );
+	pMainBar->GetWindowRect( &rcMain );
+	pDockBar->ScreenToClient( &rcMain );
+	m_wndMonitorBar.GetWindowRect( &rcMonitor );
 	const int nWidth = static_cast< CControlBar& >( m_wndMonitorBar ).CalcFixedLayout( FALSE, TRUE ).cx;
-	rcBar.left	= rcDock.right - nWidth;
-	rcBar.right	= rcDock.right;
 
-	DockControlBar( &m_wndMonitorBar, pDockBar->GetDlgCtrlID(), &rcBar );
-	RecalcLayout();
+	// (a floating monitor bar's parent is its mini frame's dock bar, never the main bar's)
+	CWnd* pMonitorDock = m_wndMonitorBar.GetParent();
+	if ( pMonitorDock == pDockBar )
+		pDockBar->ScreenToClient( &rcMonitor );
+
+	if ( pMonitorDock == pDockBar && m_wndMonitorBar.IsVisible() &&
+		abs( rcMonitor.top - rcMain.top ) <= 2 && rcMonitor.left >= rcMain.right - 2 )
+	{
+		// Already after the main bar on its row: move it along the row instead of docking it
+		// again, which would remove and re-insert it on every resize step and flicker. The dock
+		// bar takes each bar's place in a row from its current window rect at the next layout
+		// (CDockBar::CalcFixedLayout), and right-justifies a bar that would pass the end
+		if ( rcMonitor.left != rcDock.right - nWidth )
+		{
+			m_wndMonitorBar.SetWindowPos( NULL, rcDock.right - nWidth, rcMonitor.top, 0, 0,
+				SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE );
+			RecalcLayout();
+		}
+	}
+	else
+	{
+		// On another dock bar, another row, or before the main bar: dock it at the row's end.
+		// DockControlBar takes a screen rect; CWnd::ClientToScreen keeps it right under mirroring
+		CRect rcBar( rcDock.right - nWidth, rcMain.top, rcDock.right, rcMain.bottom );
+		pDockBar->ClientToScreen( &rcBar );
+		DockControlBar( &m_wndMonitorBar, pDockBar->GetDlgCtrlID(), &rcBar );
+		RecalcLayout();
+	}
 
 	m_bMonitorAtEnd = TRUE;
 	m_wndMonitorBar.GetWindowRect( &m_rcMonitor );
@@ -3028,16 +3089,19 @@ BOOL CMainWnd::IsMonitorAtRowEnd()
 {
 	CControlBar* pMainBar = MainBar();
 	if ( ! pMainBar->GetSafeHwnd() || ! m_wndMonitorBar.GetSafeHwnd() ) return FALSE;
+	if ( pMainBar->IsFloating() ) return FALSE;
 	if ( ! pMainBar->IsVisible() || ! m_wndMonitorBar.IsVisible() ) return FALSE;
 
 	CWnd* pDockBar = m_wndMonitorBar.GetParent();
 	if ( ! pDockBar || pDockBar != pMainBar->GetParent() ) return FALSE;
 
+	// In the dock bar's client coordinates, whose right end is the row's end in either direction
 	CRect rcDock, rcMain, rcMonitor;
 	pDockBar->GetClientRect( &rcDock );
-	pDockBar->ClientToScreen( &rcDock );
 	pMainBar->GetWindowRect( &rcMain );
+	pDockBar->ScreenToClient( &rcMain );
 	m_wndMonitorBar.GetWindowRect( &rcMonitor );
+	pDockBar->ScreenToClient( &rcMonitor );
 
 	// On the main bar's row, with its right edge at the dock bar's or past it: MFC right-justifies
 	// the last bar of a row 2 pixels (cxBorder2) past the edge, and a row too narrow for both bars
@@ -3049,10 +3113,12 @@ BOOL CMainWnd::MonitorFitsBesideMainBar()
 {
 	CControlBar* pMainBar = MainBar();
 	if ( ! pMainBar->GetSafeHwnd() || ! pMainBar->IsVisible() ) return FALSE;
+	if ( pMainBar->IsFloating() ) return FALSE;
 
 	CWnd* pDockBar = pMainBar->GetParent();
 	if ( ! pDockBar ) return FALSE;
 
+	// In the dock bar's client coordinates, as IsMonitorAtRowEnd
 	CRect rcDock, rcMain;
 	pDockBar->GetClientRect( &rcDock );
 	pMainBar->GetWindowRect( &rcMain );
