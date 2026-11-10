@@ -15,7 +15,9 @@ The [Releases](https://github.com/Prev-I/Shareaza/releases) page is the only pla
 publishes installers. Do not trust an installer from anywhere else. The installers need Windows 10
 or later.
 
-Each release lists these checks. Run any of them on a download:
+Each release from previ.8 on lists these checks. For older releases only the `Get-FileHash`
+check applies, against their `SHA256SUMS.txt`, where the release has one. Run any of them on a
+download:
 
 - Built by this repository's release workflow:
   `gh attestation verify <file> --repo Prev-I/Shareaza --signer-workflow Prev-I/Shareaza/.github/workflows/release.yml`

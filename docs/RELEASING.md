@@ -70,8 +70,8 @@ the release that names the fixed release.
 `verify-release.yml` runs when a release is published, and by `workflow_dispatch` with the input
 `tag`. It downloads the installers and `SHA256SUMS.txt`, checks the files against the manifest and
 against each asset's `digest`, checks each installer's build attestation, and runs
-`gh release verify` and `gh release verify-asset`. It retries each `gh` check for about 5 minutes,
-because attestations and digests can appear shortly after publication.
+`gh release verify` and `gh release verify-asset`. The attestation and verify checks are retried for about 5 minutes,
+because the release attestation can appear shortly after publication.
 
 A failure is a signal, not a verdict. Look at which check failed:
 
@@ -84,7 +84,8 @@ tag. Run it against a published release only.
 
 ## Verifying a download
 
-Each release body lists these checks. Replace `<file>` with the installer and `<tag>` with the
+Each release body from previ.8 on lists these checks. For older releases only the
+`Get-FileHash` check applies, against their `SHA256SUMS.txt`, where the release has one. Replace `<file>` with the installer and `<tag>` with the
 release tag.
 
 - Built by this repository's release workflow:
