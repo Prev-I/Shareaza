@@ -132,21 +132,21 @@ void CDiscoveryServiceDlg::OnOK()
 {
 	UpdateData();
 
-	// Refuse an address another service already has. Checked before the modal box and the
-	// modification, and the network lock is released before the box is shown.
-	bool bDuplicate = false;
+	// A web cache address with a query or a fragment is never accepted: it would reach Add(),
+	// which refuses it and drops the listed cache.
+	if ( m_nType >= 1 && m_nType <= 3 && CDiscoveryServices::HasQueryOrFragment( m_sAddress ) )
+		return;
+
+	CSingleLock pLock( &Network.m_pSection, TRUE );
+
+	// Refuse an address another service already has. The lock is released before the modal box.
+	const CDiscoveryService* pOther = DiscoveryServices.GetByAddress( m_sAddress );
+	if ( pOther != NULL && pOther != m_pService )
 	{
-		CQuickLock pCheckLock( Network.m_pSection );
-		const CDiscoveryService* pOther = DiscoveryServices.GetByAddress( m_sAddress );
-		bDuplicate = ( pOther != NULL && pOther != m_pService );
-	}
-	if ( bDuplicate )
-	{
+		pLock.Unlock();
 		MsgBox( IDS_DISCOVERY_DUPLICATE, MB_ICONEXCLAMATION );
 		return;
 	}
-
-	CSingleLock pLock( &Network.m_pSection, TRUE );
 
 	if ( ! m_bNew && ! DiscoveryServices.Check( m_pService ) )
 		m_pService = new CDiscoveryService();

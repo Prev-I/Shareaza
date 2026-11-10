@@ -539,6 +539,8 @@ void CDiscoveryServices::MergeNewDefaults()
 					pService->m_nType = CDiscoveryService::dsWebCache;
 					pService->m_bGnutella2 = TRUE;
 					pService->m_bGnutella1 = FALSE;
+					pService->m_nFailures = 0;		// A lifted ban is a fresh start
+					pService->m_nAccessPeriod = Settings.Discovery.AccessPeriod;
 					break;
 				}
 			}
