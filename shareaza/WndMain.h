@@ -60,6 +60,9 @@ protected:
 	BOOL		IsMonitorAtRowEnd();			// the monitor bar is on the main bar's row, at or past its end
 	BOOL		MonitorFitsBesideMainBar();		// the main bar's row has room for the monitor bar after the main bar
 
+private:
+	CRect		MonitorRectInFrame();			// the monitor bar's rect in the frame's client coordinates
+
 public:
 
 	// Open main window from tray

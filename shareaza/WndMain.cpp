@@ -2806,8 +2806,9 @@ void CMainWnd::OnWindowMonitor()
 	Settings.Toolbars.ShowMonitor = ( bVisible != FALSE );
 
 	// Shown again where it was hidden: at the row end if it was there. A bar the user moved since
-	// the last resize has not been looked at yet, so look now, while it is still visible
-	if ( ! bVisible )
+	// the last resize has not been looked at yet, so look now, while it is still visible; one that
+	// has not moved keeps its mark, even when the dock bar has wrapped it onto a row of its own
+	if ( ! bVisible && MonitorRectInFrame() != m_rcMonitor )
 	{
 		m_bMonitorAtEnd = IsMonitorAtRowEnd();
 		if ( m_bMonitorAtEnd )
@@ -2829,7 +2830,7 @@ void CMainWnd::OnWindowMonitor()
 			// of its own, and OnSize would otherwise take that move for the user's and stop
 			// keeping it at the row end
 			RecalcLayout();
-			m_wndMonitorBar.GetWindowRect( &m_rcMonitor );
+			m_rcMonitor = MonitorRectInFrame();
 		}
 	}
 }
@@ -2989,8 +2990,7 @@ void CMainWnd::OnSize(UINT nType, int cx, int cy)
 	// changed, is kept at the row end only if that is where it now is
 	if ( nType != SIZE_MINIMIZED && m_wndMonitorBar.GetSafeHwnd() )
 	{
-		CRect rcMonitor;
-		m_wndMonitorBar.GetWindowRect( &rcMonitor );
+		CRect rcMonitor = MonitorRectInFrame();
 		// (a hidden bar keeps what OnWindowMonitor recorded when it hid it)
 		if ( rcMonitor != m_rcMonitor && m_wndMonitorBar.IsVisible() )
 		{
@@ -3010,7 +3010,7 @@ void CMainWnd::OnSize(UINT nType, int cx, int cy)
 		if ( m_bMonitorAtEnd && m_wndMonitorBar.IsVisible() && ! IsMonitorAtRowEnd() &&
 			MonitorFitsBesideMainBar() )
 			PlaceMonitorBesideMainBar();
-		m_wndMonitorBar.GetWindowRect( &m_rcMonitor );
+		m_rcMonitor = MonitorRectInFrame();
 	}
 }
 
@@ -3112,7 +3112,18 @@ void CMainWnd::PlaceMonitorBesideMainBar()
 
 	m_bMonitorAtEnd = TRUE;
 	m_pMonitorBeside = pMainBar;
-	m_wndMonitorBar.GetWindowRect( &m_rcMonitor );
+	m_rcMonitor = MonitorRectInFrame();
+}
+
+CRect CMainWnd::MonitorRectInFrame()
+{
+	// In the frame's client coordinates, which move with the frame: maximizing it, or moving its
+	// left or top edge, does not make an unmoved bar look moved. CWnd::ScreenToClient keeps the
+	// rect right under mirroring
+	CRect rc;
+	m_wndMonitorBar.GetWindowRect( &rc );
+	ScreenToClient( &rc );
+	return rc;
 }
 
 BOOL CMainWnd::IsMonitorAtRowEnd()
