@@ -890,6 +890,7 @@ Begin
   Result := Exec(ExpandConstant('{sys}\netsh.exe'),
     'advfirewall firewall delete rule name="Shareaza" dir=in program="' + Prog + '"',
     '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  Log('netsh delete rule: program="' + Prog + '", started: ' + IntToStr(Ord(Result)) + ', exit code: ' + IntToStr(ResultCode));
 End;
 
 Function AddFirewallRule(const Prog: string): Boolean;
@@ -899,7 +900,9 @@ Begin
   RemoveFirewallRule(Prog);
   Result := Exec(ExpandConstant('{sys}\netsh.exe'),
     'advfirewall firewall add rule name="Shareaza" dir=in action=allow program="' + Prog + '" enable=yes profile=private,domain edge=no',
-    '', SW_HIDE, ewWaitUntilTerminated, ResultCode) and (ResultCode = 0);
+    '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  Log('netsh add rule: program="' + Prog + '", started: ' + IntToStr(Ord(Result)) + ', exit code: ' + IntToStr(ResultCode));
+  Result := Result and (ResultCode = 0);
 End;
 
 Procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
