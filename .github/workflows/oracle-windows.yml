@@ -209,7 +209,7 @@ jobs:
                 Remove-Item gwc-requests.jsonl   # the readiness probe is not a client request
                 # A helper the run steps share: start Shareaza, wait for a query, watch, close it cleanly.
                 @'
-                param([string] $Name, [switch] $ExpectIPv6, [switch] $Resize)
+                param([string] $Name, [switch] $ExpectIPv6, [switch] $Resize, [switch] $ExpectRTL)
                 $ErrorActionPreference = 'Stop'
                 $before = if (Test-Path gwc-requests.jsonl) { @(Get-Content gwc-requests.jsonl).Count } else { 0 }
                 $app = (Get-ItemProperty 'HKCU:\Software\Shareaza\Shareaza').Path
@@ -253,20 +253,21 @@ jobs:
                 "window: handle=$($p.MainWindowHandle) title='$($p.MainWindowTitle)' session=$($p.SessionId)"
                 Add-Type -AssemblyName System.Windows.Forms, System.Drawing
                 $b = [Windows.Forms.SystemInformation]::VirtualScreen
-                # The monitor bar must follow the window: shrink the main window, then widen it, and
-                # take the screenshot after widening. Shareaza's hidden 'Shareaza Remote' window is
-                # what MainWindowHandle may report, so find the largest visible window of the process.
-                if ($Resize) {
+                # Shareaza's hidden 'Shareaza Remote' window is what MainWindowHandle may report, so find
+                # the largest visible window of the process. The monitor bar must follow the window:
+                # shrink it, then widen it, and take the screenshot after widening.
+                if ($Resize -or $ExpectRTL) {
                     Add-Type -TypeDefinition (@(
                         'using System;',
                         'using System.Runtime.InteropServices;',
                         'public static class OracleWin {',
                         '    delegate bool EnumProc(IntPtr h, IntPtr l);',
-                        '    [StructLayout(LayoutKind.Sequential)] struct RECT { public int Left, Top, Right, Bottom; }',
+                        '    [StructLayout(LayoutKind.Sequential)] public struct RECT { public int Left, Top, Right, Bottom; }',
                         '    [DllImport("user32.dll")] static extern bool EnumWindows(EnumProc p, IntPtr l);',
                         '    [DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(IntPtr h, out uint pid);',
                         '    [DllImport("user32.dll")] static extern bool IsWindowVisible(IntPtr h);',
-                        '    [DllImport("user32.dll")] static extern bool GetWindowRect(IntPtr h, out RECT r);',
+                        '    [DllImport("user32.dll")] public static extern int GetWindowLong(IntPtr h, int index);',
+                        '    [DllImport("user32.dll")] public static extern bool GetWindowRect(IntPtr h, out RECT r);',
                         '    [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr h, int cmd);',
                         '    [DllImport("user32.dll")] public static extern bool SetWindowPos(IntPtr h, IntPtr after, int x, int y, int cx, int cy, uint flags);',
                         '    public static IntPtr Largest(uint pid) {',
@@ -284,15 +285,29 @@ jobs:
                         '    }',
                         '}') -join "`n")
                     $h = [OracleWin]::Largest([uint32]$p.Id)
-                    if ($h -eq [IntPtr]::Zero) { throw 'no visible window of Shareaza to resize' }
+                    if ($h -eq [IntPtr]::Zero) { throw 'no visible window of Shareaza' }
+                    # WS_EX_LAYOUTRTL (0x00400000) on the main window: the setting must have taken effect,
+                    # or its absence in the other runs, or the screenshot shows nothing of the right-to-left layout.
+                    $rtl = ([OracleWin]::GetWindowLong($h, -20) -band 0x00400000) -ne 0
+                    "main window $h : right-to-left layout $rtl"
+                    if ($ExpectRTL -and -not $rtl) { throw 'LanguageRTL is set, but the main window has no right-to-left layout' }
+                    if (-not $ExpectRTL -and $rtl) { throw 'the main window has a right-to-left layout, but this run is left-to-right' }
+                }
+                if ($Resize) {
                     $wide = [Math]::Min(1280, $b.Width); $tall = [Math]::Min(800, $b.Height)
                     [void][OracleWin]::ShowWindow($h, 9)   # SW_RESTORE: a maximized window ignores the size
                     # SWP_NOZORDER | SWP_SHOWWINDOW
+                    function Get-Width($hw) { $r = New-Object OracleWin+RECT; [void][OracleWin]::GetWindowRect($hw, [ref]$r); "$($r.Right - $r.Left)x$($r.Bottom - $r.Top)" }
                     [void][OracleWin]::SetWindowPos($h, [IntPtr]::Zero, 0, 0, 640, 480, 0x44)
                     Start-Sleep 3
+                    $narrow = Get-Width $h
                     [void][OracleWin]::SetWindowPos($h, [IntPtr]::Zero, 0, 0, $wide, $tall, 0x44)
                     Start-Sleep 3
-                    "resized window $h to 640x480, then ${wide}x$tall"
+                    $widened = Get-Width $h
+                    "window after shrinking: $narrow (asked 640x480); after widening: $widened (asked ${wide}x$tall)"
+                    # The window may keep a minimum size: only the width has to have moved, then reached the target.
+                    if ([int]($narrow -split 'x')[0] -gt 640 + 40) { throw "the window did not narrow to 640: $narrow" }
+                    if ([int]($widened -split 'x')[0] -lt $wide - 40) { throw "the window did not widen to $wide : $widened" }
                 }
                 $bmp = New-Object Drawing.Bitmap $b.Width, $b.Height
                 [Drawing.Graphics]::FromImage($bmp).CopyFromScreen($b.Left, $b.Top, 0, 0, $bmp.Size)
@@ -371,6 +386,17 @@ jobs:
                         return [Text.Encoding]::Unicode.GetString($buffer, 0, $read - ($read % 2))
                     } finally { $fs.Dispose() }
                 }
+                # Without a firewall on the active profile, or with a default of Allow, no notice can come:
+                # say so here, so that a missing notice is not taken for a client regression.
+                Get-NetFirewallProfile | Select-Object Name, Enabled, DefaultInboundAction, AllowInboundRules | Format-Table | Out-String | Write-Host
+                $profiles = @(Get-NetConnectionProfile)
+                $profiles | ForEach-Object { "connection profile: $($_.Name), $($_.NetworkCategory), $($_.InterfaceAlias)" }
+                $active = @(Get-NetFirewallProfile -Name ($profiles | ForEach-Object { "$($_.NetworkCategory)" -replace '^DomainAuthenticated$', 'Domain' } | Sort-Object -Unique))
+                if (-not $active) { throw 'no active network profile to read the firewall settings of' }
+                foreach ($f in $active) {
+                    if ("$($f.Enabled)" -ne 'True') { throw "firewall off on the runner's active profile $($f.Name): the blocked case cannot be tested here" }
+                    if ("$($f.DefaultInboundAction)" -eq 'Allow') { throw "default inbound action is Allow on the runner's active profile $($f.Name): the blocked case cannot be tested here" }
+                }
                 try {
                     $rules | Disable-NetFirewallRule
                     Start-Process -FilePath explorer.exe -ArgumentList "`"$exe`""
@@ -414,13 +440,14 @@ jobs:
                 $ErrorActionPreference = 'Stop'
                 $k = 'HKCU:\Software\Shareaza\Shareaza'
                 Get-ChildItem "$k\Toolbars" -ErrorAction SilentlyContinue | Where-Object { $_.PSChildName -like 'CoolBar-*' } | Remove-Item -Recurse
-                New-Item -Path "$k\General" -Force | Out-Null
-                New-ItemProperty -Path "$k\General" -Name LanguageRTL -Value 1 -PropertyType DWord -Force | Out-Null
+                # The client reads LanguageRTL from its Settings section (Settings.cpp), and writes it back on exit.
+                New-Item -Path "$k\Settings" -Force | Out-Null
+                New-ItemProperty -Path "$k\Settings" -Name LanguageRTL -Value 1 -PropertyType DWord -Force | Out-Null
                 try {
                     # IPv6 is still on from run 3, on builds that have the setting.
-                    .\run-client.ps1 -Name rtl -ExpectIPv6
+                    .\run-client.ps1 -Name rtl -ExpectIPv6 -ExpectRTL
                 } finally {
-                    Remove-ItemProperty -Path "$k\General" -Name LanguageRTL -ErrorAction SilentlyContinue
+                    Remove-ItemProperty -Path "$k\Settings" -Name LanguageRTL -ErrorAction SilentlyContinue
                 }
 
         -   name: Run with the window resized
@@ -429,6 +456,7 @@ jobs:
                 $ErrorActionPreference = 'Stop'
                 $k = 'HKCU:\Software\Shareaza\Shareaza'
                 Get-ChildItem "$k\Toolbars" -ErrorAction SilentlyContinue | Where-Object { $_.PSChildName -like 'CoolBar-*' } | Remove-Item -Recurse
+                Remove-ItemProperty -Path "$k\Settings" -Name LanguageRTL -ErrorAction SilentlyContinue   # the client wrote it back on exit
                 .\run-client.ps1 -Name resize -ExpectIPv6 -Resize
 
         -   name: Prepare must refuse while a restore is unfinished
@@ -541,7 +569,7 @@ jobs:
                 # Under any name: a rule made by another installer or a prompt must go too. The kit's
                 # own rules are already gone, and are excluded in case one is left.
                 $left = @(Get-NetFirewallApplicationFilter |
-                    Where-Object { "$($_.Program)" -ieq "$app\Shareaza.exe" } |
+                    Where-Object { [Environment]::ExpandEnvironmentVariables("$($_.Program)") -ieq "$app\Shareaza.exe" } |
                     Get-NetFirewallRule |
                     Where-Object { "$($_.Direction)" -eq 'Inbound' -and $_.DisplayName -notlike 'Shareaza oracle*' })
                 $left | ForEach-Object { "rule '$($_.DisplayName)' still allows or blocks Shareaza.exe" }
@@ -553,12 +581,14 @@ jobs:
             if: always()
             run: |
                 New-Item -ItemType Directory -Force evidence | Out-Null
-                # Which profile Windows gave the runner's network: Public blocks what Private allows.
-                Get-NetConnectionProfile | Format-List * | Out-File -Encoding UTF8 evidence\network-profile.txt
-                Get-Content evidence\network-profile.txt
                 foreach ($p in "$env:WORK\evidence-*.zip", "$env:WORK\install-*.log", "$env:WORK\screen-*.png", "$env:WORK\blocked-notice.txt", 'gwc-requests.jsonl') {
                     Copy-Item $p evidence -ErrorAction SilentlyContinue
                 }
+                # Which profile Windows gave the runner's network: Public blocks what Private allows.
+                # After the copy, so that an error here cannot skip it.
+                Get-NetConnectionProfile -ErrorAction Continue | Format-List * | Out-File -Encoding UTF8 evidence\network-profile.txt
+                Get-Content evidence\network-profile.txt -ErrorAction Continue
+                Get-NetFirewallProfile -ErrorAction Continue | Select-Object Name, Enabled, DefaultInboundAction, AllowInboundRules | Format-Table | Out-File -Encoding UTF8 evidence\firewall-profiles.txt
 
         -   name: Upload the evidence
             if: always()

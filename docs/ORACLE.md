@@ -375,9 +375,15 @@ the kit's evidence zip:
   three minutes for its log to show the network starting. It then requires a line containing
   `Windows Firewall blocks incoming` in `Shareaza.log`. The rules come back in a `finally`, and the
   matching lines are kept in `blocked-notice.txt`. Only builds with the installer's rule run it.
-- **Monitor bar screenshots:** `screen-rtl.png` is a run with `General\LanguageRTL` = 1 and no saved
+- **Monitor bar screenshots:** `screen-rtl.png` is a run with `Settings\LanguageRTL` = 1 (the section the client reads it from;
+  the run checks that the main window has `WS_EX_LAYOUTRTL`) and no saved
   bar layout (the `Toolbars\CoolBar-*` keys removed first), so the default placement runs;
   `screen-resize.png` is taken after the main window is shrunk and then widened with
-  `SetWindowPos`. The other runs leave `screen-leaf.png`, `screen-hub.png` and `screen-ipv6.png`.
+  `SetWindowPos`, with the sizes read back and logged. The other runs leave `screen-leaf.png`, `screen-hub.png` and `screen-ipv6.png`.
 - **Rules under any name:** after uninstalling, the run fails on any inbound rule whose program is
   the installed `Shareaza.exe`, whatever its name, except names starting `Shareaza oracle`.
+  The blocked run is the only time Shareaza listens with no allow rule, so a Windows Firewall
+  prompt could create a rule under another name; the any-name check then fails, which is intended.
+  Before disabling the rules the step logs the firewall profiles and fails if the active profile has
+  the firewall off or a default inbound action of Allow, so a missing notice is not mistaken for a
+  client regression.
