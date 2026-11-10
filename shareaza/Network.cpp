@@ -1336,8 +1336,11 @@ void CNetwork::OnRun()
 				oLock.Unlock();
 
 				// Not under m_pSection: the check is a COM call
-				if ( Settings.Connection.EnableFirewallException && Settings.Connection.InPort != m_nFirewallCheckedPort )
-					CheckFirewall( Settings.Connection.InPort );
+				// InPort is a DWORD: compare the WORD the socket really uses, or a value above 65535
+				// would never match the stored port
+				const WORD nPort = static_cast< WORD >( Settings.Connection.InPort );
+				if ( Settings.Connection.EnableFirewallException && nPort != m_nFirewallCheckedPort )
+					CheckFirewall( nPort );
 			}
 			else if ( ! bListen )
 				continue;

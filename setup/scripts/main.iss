@@ -885,23 +885,24 @@ End;
 Function RemoveFirewallRule(const Prog: string): Boolean;
 var
   ResultCode: Integer;
+  Params: string;
 Begin
   { netsh exits with 1 when no rule matches: having nothing to remove is not a failure }
-  Result := Exec(ExpandConstant('{sys}\netsh.exe'),
-    'advfirewall firewall delete rule name="Shareaza" dir=in program="' + Prog + '"',
-    '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
-  Log('netsh delete rule: program="' + Prog + '", started: ' + IntToStr(Ord(Result)) + ', exit code: ' + IntToStr(ResultCode));
+  Params := 'advfirewall firewall delete rule name="Shareaza" dir=in program="' + Prog + '"';
+  Result := Exec(ExpandConstant('{sys}\netsh.exe'), Params, '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  { when Exec returns False, ResultCode is a Windows error code, not an exit code }
+  Log('netsh ' + Params + ' -> started: ' + IntToStr(Ord(Result)) + ', code: ' + IntToStr(ResultCode));
 End;
 
 Function AddFirewallRule(const Prog: string): Boolean;
 var
   ResultCode: Integer;
+  Params: string;
 Begin
   RemoveFirewallRule(Prog);
-  Result := Exec(ExpandConstant('{sys}\netsh.exe'),
-    'advfirewall firewall add rule name="Shareaza" dir=in action=allow program="' + Prog + '" enable=yes profile=private,domain edge=no',
-    '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
-  Log('netsh add rule: program="' + Prog + '", started: ' + IntToStr(Ord(Result)) + ', exit code: ' + IntToStr(ResultCode));
+  Params := 'advfirewall firewall add rule name="Shareaza" dir=in action=allow program="' + Prog + '" enable=yes profile=private,domain edge=no';
+  Result := Exec(ExpandConstant('{sys}\netsh.exe'), Params, '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  Log('netsh ' + Params + ' -> started: ' + IntToStr(Ord(Result)) + ', code: ' + IntToStr(ResultCode));
   Result := Result and (ResultCode = 0);
 End;
 

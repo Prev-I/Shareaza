@@ -92,7 +92,6 @@ protected:
 	DWORD			m_nUPnPTier;				// UPnP tier number (0..UPNP_MAX)
 	DWORD			m_tUPnPMap;					// Time of last UPnP port mapping
 	BOOL			m_bHomeNetworkNAT;				// Home network NAT> LAN NAT> Internet
-	WORD			m_nFirewallCheckedPort;		// Listening port the firewall was last checked for (0 = not yet)
 
 	typedef struct
 	{
@@ -189,6 +188,9 @@ protected:
 	bool		PreRun();
 	void		OnRun();
 	void		PostRun();
+
+private:
+	WORD		m_nFirewallCheckedPort;		// Listening port the firewall was last checked for (0 = not yet)
 	void		CheckFirewall(WORD nPort);	// Windows Firewall: does it allow the listening port? (network thread)
 
 // Operations

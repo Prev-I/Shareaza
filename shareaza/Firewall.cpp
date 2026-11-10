@@ -57,8 +57,8 @@ BOOL CFirewall::Init()
 
 BOOL CFirewall::IsFirewallOn() const
 {
-	// Ask for the profile in effect now rather than the one captured by Init(): the network can
-	// change profile while Shareaza runs
+	// Ask for the profile in effect now rather than the one captured by Init(). The check runs
+	// once per listening port, so the profile may differ from the one at construction.
 	if ( ! Policy )
 		return FALSE;
 
