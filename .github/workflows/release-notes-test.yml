@@ -23,6 +23,8 @@ jobs:
         steps:
         -   name: Checkout GIT sources
             uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+            with:
+                persist-credentials: false
 
         -   name: Build and run the release-notes test
-            run: g++ -std=c++17 -Wall -Wextra -I shareaza -o /tmp/rn tests/release-notes/test_release_notes.cpp && /tmp/rn
+            run: g++ -std=c++17 -Wall -Wextra -Werror -I shareaza -o /tmp/rn tests/release-notes/test_release_notes.cpp && /tmp/rn

@@ -1,5 +1,5 @@
 // Unit test for shareaza/ReleaseNotes.h, which has no MFC dependency.
-// Build and run: g++ -std=c++17 -I shareaza -o /tmp/rn tests/release-notes/test_release_notes.cpp && /tmp/rn
+// Build and run: g++ -std=c++17 -Wall -Wextra -Werror -I shareaza -o /tmp/rn tests/release-notes/test_release_notes.cpp && /tmp/rn
 // wchar_t is 32-bit on Linux; surrogate pairs are written out as two code units to test the cut.
 #include "ReleaseNotes.h"
 #include <cstdio>
@@ -67,6 +67,20 @@ int main()
 	ExpectTrue( UpgradePrompt( std::wstring( 60, L'9' ), L"2026-11-10", longPara ).size() <= 400, "prompt total within 400" );
 	Expect( UpgradePrompt( std::wstring( 390, L'9' ), L"", longPara ), L"Version " + std::wstring( 390, L'9' ) + L".", "summary omitted when its budget is tiny" );
 
+	Expect( Summary( L"- **\n\nReal text." ), L"Real text.", "a bullet with markup only is not text" );
+	Expect( Summary( L"```\ncode\n\nmore" ), L"", "unclosed fence runs to the end" );
+	Expect( Summary( L"<!-- open\n\nmore" ), L"", "unclosed comment runs to the end" );
+	Expect( Summary( L"Title\n---\n\nBody." ), L"Title", "setext heading" );
+	Expect( ToPlainText( L"<!-- x --> Visible" ), L"Visible", "comment followed by text" );
+	Expect( ToPlainText( L"end\\" ), L"end\\", "trailing backslash" );
+	Expect( Summary( L"```x``` is faster.\n\nNext." ), L"x is faster.", "backtick fence info string has no backtick" );
+	{
+		std::wstring p1 = UpgradePrompt( std::wstring( 500, L'9' ), L"2026-11-10", longPara );
+		std::wstring p2 = UpgradePrompt( std::wstring( 500, L'9' ), L"", longPara );
+		ExpectTrue( p1.size() <= 400, "500-char version with date within 400" );
+		ExpectTrue( p2.size() <= 400, "500-char version without date within 400" );
+		ExpectTrue( ! p2.empty() && p2.back() == L'.', "cut prompt keeps its final period" );
+	}
 	Expect( DatePart( L"2026-11-10T22:27:48Z" ), L"2026-11-10", "ISO date" );
 	Expect( DatePart( L"yesterday" ), L"yesterday", "malformed date kept" );
 	Expect( DatePart( L"" ), L"", "empty date" );

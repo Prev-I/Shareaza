@@ -98,6 +98,13 @@ namespace ReleaseNotes
 				wchar_t c = line.empty() ? L'\0' : line[ 0 ];
 				bool bFence = ( c == L'`' || c == L'~' ) && line.size() >= 3 &&
 					line[ 1 ] == c && line[ 2 ] == c;
+				// A backtick fence's info string holds no backtick: "```x``` is faster" is text
+				if ( bFence && c == L'`' )
+				{
+					size_t nRun = 0;
+					while ( nRun < line.size() && line[ nRun ] == c ) ++nRun;
+					if ( line.find( L'`', nRun ) != std::wstring::npos ) bFence = false;
+				}
 				if ( cFence )
 				{
 					if ( bFence && c == cFence ) cFence = 0;	// the closing fence
@@ -342,13 +349,23 @@ namespace ReleaseNotes
 	// The text of the upgrade prompt: "Version <version>, released <date>. <summary>", the date
 	// and the summary left out when empty, at most maxChars characters in all. The summary gets
 	// what the rest leaves, less the space and the ellipsis; when that is too little for a
-	// readable summary it is left out rather than letting the prompt run over.
+	// readable summary it is left out, and a prompt that is too long by itself is cut.
 	inline std::wstring UpgradePrompt(const std::wstring& version, const std::wstring& isoDate,
 		const std::wstring& markdown, size_t maxChars = 400)
 	{
 		std::wstring prompt = L"Version " + version;
 		if ( ! isoDate.empty() ) prompt += L", released " + DatePart( isoDate );
 		prompt += L".";
+
+		// Never over maxChars: cut a too long prompt, keeping its closing period
+		if ( prompt.size() > maxChars )
+		{
+			size_t cut = maxChars > 0 ? maxChars - 1 : 0;
+			if ( cut > 0 && Detail::IsHighSurrogate( prompt[ cut - 1 ] ) ) --cut;	// never split a surrogate pair
+			prompt = prompt.substr( 0, cut );
+			if ( maxChars > 0 ) prompt += L".";
+			return prompt;
+		}
 
 		const size_t kMinSummary = 8;
 		if ( prompt.size() + 2 + kMinSummary > maxChars ) return prompt;
