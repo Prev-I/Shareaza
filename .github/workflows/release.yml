@@ -110,6 +110,10 @@ jobs:
         runs-on: ubuntu-latest
         permissions:
             contents: write
+            # The two below are for the build provenance attestation, and only this job
+            # (tag pushes) gets them; the build job stays at contents: read.
+            id-token: write
+            attestations: write
         defaults:
             run:
                 # bash, not the default bash -e: adds pipefail.
@@ -155,7 +159,7 @@ jobs:
             fi
             : > body.md
             if [ -n "$ANALYSIS" ]; then
-              echo "🛡 VirusTotal analysis:" >> body.md
+              echo "VirusTotal analysis:" >> body.md
               # Entries are file=url. Split on the first '=' only: analysis ids are
               # base64 and can end in '='.
               echo "$ANALYSIS" | tr ',' '\n' | while read -r entry; do
@@ -163,9 +167,27 @@ jobs:
                 echo "* [\`$(basename "${entry%%=*}")\`](${entry#*=})" >> body.md
               done
             fi
+            # Appended to every release, with or without VirusTotal. The tag is the
+            # one the workflow was triggered for.
+            if [ -s body.md ]; then echo >> body.md; fi
+            {
+              echo "Verify:"
+              echo "* Built by this repository's release workflow: \`gh attestation verify <file> --repo Prev-I/Shareaza --signer-workflow Prev-I/Shareaza/.github/workflows/release.yml\`"
+              echo "* Unchanged since publication: \`gh release verify-asset ${GITHUB_REF_NAME} <file> --repo Prev-I/Shareaza\`"
+              echo "* Without gh: \`Get-FileHash <file> -Algorithm SHA256\`, compared with SHA256SUMS.txt or the sha256 shown beside each file"
+              echo "* \`gh\` 2.81.0 or later is needed."
+            } >> body.md
             cat body.md
+        - name: Attest build provenance
+          # Signs a provenance statement for each installer, so a download can be
+          # checked against this repository's workflow with gh attestation verify.
+          # The subjects are the files that are published, hashed after the manifest
+          # check above.
+          uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+          with:
+            subject-path: dist/*.exe
         - name: Release
-          uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
+          uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3.0.4
           with:
             draft: true
             make_latest: true
