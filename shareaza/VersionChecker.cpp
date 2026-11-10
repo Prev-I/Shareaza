@@ -332,13 +332,13 @@ void CVersionChecker::ProcessResponse()
 		}
 //		versionString = strValue;
 
-		// One paragraph, no line breaks: "Version 2.7.11.2-previ.7, released 2026-11-10. <summary>"
-		Settings.VersionCheck.UpgradePrompt = _T("Version ") + versionString;
-		if ( m_pResponse.Lookup( _T("published_at"), strValue ) && strValue.GetLength() )
-			Settings.VersionCheck.UpgradePrompt += CString( _T(", released ") ) + ReleaseNotes::DatePart( (LPCTSTR)strValue ).c_str();
-		Settings.VersionCheck.UpgradePrompt += _T(".");
-		if ( strSummary.GetLength() )
-			Settings.VersionCheck.UpgradePrompt += _T(" ") + strSummary;
+		// One paragraph, no line breaks, at most 400 characters:
+		// "Version 2.7.11.2-previ.7, released 2026-11-10. <summary>"
+		CString strPublished, strBody;
+		m_pResponse.Lookup( _T("published_at"), strPublished );
+		m_pResponse.Lookup( _T("body"), strBody );
+		Settings.VersionCheck.UpgradePrompt = ReleaseNotes::UpgradePrompt(
+			(LPCTSTR)versionString, (LPCTSTR)strPublished, (LPCTSTR)strBody ).c_str();
 
 		// The release's page, for the Home page's link: https only, as GitHub serves it
 		Settings.VersionCheck.UpgradeNotesURL.Empty();
