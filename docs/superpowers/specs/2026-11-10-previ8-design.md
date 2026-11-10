@@ -1,6 +1,6 @@
 # previ.8: verifiable releases, deferred minor fixes, and version 2.7.11.3: design
 
-Date: 2026-11-10. Status: awaiting the owner's approval. The scope and the decisions marked
+Date: 2026-11-10. Status: approved by the owner on 2026-11-10. The scope and the decisions marked
 *(owner)* were settled with the owner on 2026-11-09/10; items marked *(designer's call)* were
 settled while writing.
 
