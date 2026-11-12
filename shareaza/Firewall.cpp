@@ -57,11 +57,17 @@ BOOL CFirewall::Init()
 
 BOOL CFirewall::IsFirewallOn() const
 {
-	if ( ! Profile )
+	// Ask for the profile in effect now rather than the one captured by Init(). The check runs
+	// once per listening port, so the profile may differ from the one at construction.
+	if ( ! Policy )
+		return FALSE;
+
+	CComPtr< INetFwProfile > pProfile;
+	if ( FAILED( Policy->get_CurrentProfile( &pProfile ) ) || ! pProfile )
 		return FALSE;
 
 	VARIANT_BOOL vbEnabled = VARIANT_FALSE;
-	return SUCCEEDED( Profile->get_FirewallEnabled( &vbEnabled ) ) && vbEnabled != VARIANT_FALSE;
+	return SUCCEEDED( pProfile->get_FirewallEnabled( &vbEnabled ) ) && vbEnabled != VARIANT_FALSE;
 }
 
 // INetFwMgr::IsPortAllowed answers for the program, port and protocol without administrator

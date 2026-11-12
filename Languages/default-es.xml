@@ -4529,7 +4529,7 @@ puede comenzar a transferir en cualquier momento.</text>
 			<control caption="Una nueva versión de Shareaza esta disponible.  ¿Deseas actualizar?"/>
 			<control caption="Si seleccionas actualizar ahora, Shareaza va a agregar la actualizacion a tu cola de descarga y automaticamente lo va a descargar."/>
 			<control caption="Act_ualizar Ahora"/>
-			<control caption="No buscar nuevas versiones"/>
+			<control caption="Posponer comprobaciones 31 días"/>
 			<control caption="No deseo actualizar"/>
 		</dialog>
 		<dialog name="CDownloadReviewDlg" cookie="BuSyEd" caption="Descargar Reviews">

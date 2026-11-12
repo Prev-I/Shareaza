@@ -1014,7 +1014,7 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | DS_CENTER | WS_POPUP | WS_CAPTION
 CAPTION "Upgrade Alert"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
-    LTEXT           "A new version of Shareaza is now available.  Would you like to upgrade?",IDC_MESSAGE,20,10,252,60
+    LTEXT           "A new version of Shareaza is now available.  Would you like to upgrade?",IDC_MESSAGE,20,10,252,60,SS_NOPREFIX
     LTEXT           "If you select Upgrade Now, Shareaza will add the upgrade to your download queue and automatically begin downloading it.",IDC_STATIC,20,75,252,20
     DEFPUSHBUTTON   "&Upgrade Now",IDOK,7,117,70,16
     CONTROL         "Postpone checks for 31 days",IDC_DONT_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,20,99,252,12
@@ -4199,6 +4199,7 @@ BEGIN
     IDS_DISCOVERY_FAILED    "Discovery service ""%s"" failed, fail count %i."
     IDS_DISCOVERY_FAIL_REMOVE 
                             "Discovery service ""%s"" has failed %i times, removing."
+    IDS_DISCOVERY_DUPLICATE "Another discovery service already has this address."
     IDS_DISCOVERY_UPDATING  "Sending GWebCache update to service ""%s""..."
     IDS_DISCOVERY_SUBMIT    "Submitting GWebCache ""%s"" to a random GWebCache..."
 END

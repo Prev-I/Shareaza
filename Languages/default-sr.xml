@@ -4533,7 +4533,7 @@
 			<control caption="Dostupna je nova verzija Shareaze. Želite li je unaprediti(update)?"/>
 			<control caption="Ako odaberete Unapredi Sad, Shareaza će dodati novu verziju u za skinuti i automatski započeti skidanje."/>
 			<control caption="_Unapredi Sad"/>
-			<control caption="Ne proveravaj da li ima novih verzija."/>
+			<control caption="Odloži provere za 31 dan"/>
 			<control caption="Nemoj Unaprediti"/>
 		</dialog>
 		<dialog name="CDownloadReviewDlg" cookie="BuSyEd" caption="Skini Kritike">

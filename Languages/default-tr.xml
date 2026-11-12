@@ -4521,7 +4521,7 @@
 			<control caption="Shareaza'nın yeni bir versiyonu bulunmaktadır. Güncellemek ister misiniz?"/>
 			<control caption="Eğer şimdi güncelemeyi seçerseniz, Shareaza indirme sırasına güncelemeyi ekleyecektir ve indirme otomatik olarak başlayacaktır."/>
 			<control caption="_Şimdi Güncelle"/>
-			<control caption="Yeni versiyonları kontrol etme"/>
+			<control caption="Kontrolleri 31 gün ertele"/>
 			<control caption="Güncelleme"/>
 		</dialog>
 		<dialog name="CDownloadReviewDlg" cookie="BuSyEd" caption="İndirme Yorumları">

@@ -4486,7 +4486,7 @@ Shareaza 在搜尋時忽略標點符號與萬用字元，只使用您鍵入的�
 			<control caption="Shareaza 有新版本了，您要升級嗎？"/>
 			<control caption="如果您現在選取立刻升級，Shareaza 將新增更新檔至您的下載等待隊伍並自動開始下載。"/>
 			<control caption="立刻升級"/>
-			<control caption="不要檢查新版本"/>
+			<control caption="延後檢查 31 天"/>
 			<control caption="不升級"/>
 		</dialog>
 		<dialog name="CDownloadReviewDlg" cookie="BuSyEd" caption="下載評論">

@@ -4533,7 +4533,7 @@
 			<control caption="Nowa wersja Shareazy jest dostępna. Czy chciałbyś aktualizować?"/>
 			<control caption="Jeśli wybierzesz Aktualizuj teraz to Shareaza doda aktualizacje do Twojej kolejki pobierania i automatycznie zacznie ją pobierać."/>
 			<control caption="Aktualizuj teraz"/>
-			<control caption="Nie sprawdzaj czy są nowe wersje"/>
+			<control caption="Odłóż sprawdzanie o 31 dni"/>
 			<control caption="Nie aktualizuj"/>
 		</dialog>
 		<dialog name="CDownloadReviewDlg" cookie="BuSyEd" caption="Recenzje">

@@ -4528,7 +4528,7 @@
 			<control caption="Eine neue Version von Shareaza ist verfügbar. Möchten Sie aktualisieren?"/>
 			<control caption="Wenn Sie auf &quot;Jetzt aktualisieren&quot; klicken, wird das Update automatisch zu ihrer Downloadliste hinzugefügt und heruntergeladen."/>
 			<control caption="Jetzt _aktualisieren"/>
-			<control caption="Nicht nach Updates suchen"/>
+			<control caption="Prüfungen 31 Tage aufschieben"/>
 			<control caption="Nicht updaten"/>
 		</dialog>
 		<dialog name="CDownloadReviewDlg" cookie="BuSyEd" caption="Rezensionen herunterladen">

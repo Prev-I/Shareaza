@@ -4537,7 +4537,7 @@ pasta dos arquivos baixados a sua biblioteca agora?"/>
 			<control caption="Uma nova versão do Shareaza está disponível agora. Você gostaria de atualizar?"/>
 			<control caption="Se você selecionar Atualizar Agora, o Shareaza adicionará a atualização a sua fila de downloads e automaticamente começa a baixá-lo."/>
 			<control caption="_Atualizar Agora"/>
-			<control caption="Não procurar novas versões"/>
+			<control caption="Adiar verificações por 31 dias"/>
 			<control caption="Não Atualizar"/>
 		</dialog>
 		<dialog name="CDownloadReviewDlg" cookie="BuSyEd" caption="Análises dos Downloads">

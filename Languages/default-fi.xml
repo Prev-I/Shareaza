@@ -4533,7 +4533,7 @@
 			<control caption="A new version of Shareaza is now available. Would you like to upgrade?"/>
 			<control caption="If you select Upgrade Now, Shareaza will add the upgrade to your download queue and automatically begin downloading it."/>
 			<control caption="_Upgrade Now"/>
-			<control caption="Don't check for new versions"/>
+			<control caption="Lykkää tarkistuksia 31 päivällä"/>
 			<control caption="Don't Upgrade"/>
 		</dialog>
 		<dialog name="CDownloadReviewDlg" cookie="BuSyEd" caption="Download Reviews">

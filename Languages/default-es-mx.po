@@ -9711,8 +9711,8 @@ msgid "_Upgrade Now"
 msgstr "_Actualizar Ahora"
 
 #: cupgradedlg;control;4
-msgid "Don't check for new versions"
-msgstr "No checar si hay nuevas versiones"
+msgid "Postpone checks for 31 days"
+msgstr "Posponer las verificaciones 31 días"
 
 #: cupgradedlg;control;5
 msgid "Don't Upgrade"

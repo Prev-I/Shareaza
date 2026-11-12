@@ -4533,7 +4533,7 @@
 			<control caption="Una nueva versión de Shareaza esta disponible.  ¿Deseas actualizar?"/>
 			<control caption="Si seleccionas actualizar ahora, Shareaza va a agregar la actualizacion a tu cola de descarga y automaticamente lo va a descargar."/>
 			<control caption="_Actualizar Ahora"/>
-			<control caption="No checar si hay nuevas versiones"/>
+			<control caption="Posponer las verificaciones 31 días"/>
 			<control caption="No deseo actualizar"/>
 		</dialog>
 		<dialog name="CDownloadReviewDlg" cookie="BuSyEd" caption="Descargar Reviews">

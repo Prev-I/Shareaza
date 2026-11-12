@@ -118,7 +118,8 @@ void CDiscoveryServiceDlg::OnChangeAddress()
 	UpdateData();
 
 	m_wndOK.EnableWindow( m_nType ?
-		_tcsncmp( m_sAddress, _T("http://"), 7 ) == 0 :
+		( _tcsncmp( m_sAddress, _T("http://"), 7 ) == 0 &&
+		  ! ( m_nType <= 3 && CDiscoveryServices::HasQueryOrFragment( m_sAddress ) ) ) :
 		_tcschr( m_sAddress, '.' ) != NULL );
 }
 
@@ -131,7 +132,21 @@ void CDiscoveryServiceDlg::OnOK()
 {
 	UpdateData();
 
+	// A web cache address with a query or a fragment is never accepted: it would reach Add(),
+	// which refuses it and drops the listed cache.
+	if ( m_nType >= 1 && m_nType <= 3 && CDiscoveryServices::HasQueryOrFragment( m_sAddress ) )
+		return;
+
 	CSingleLock pLock( &Network.m_pSection, TRUE );
+
+	// Refuse an address another service already has. The lock is released before the modal box.
+	const CDiscoveryService* pOther = DiscoveryServices.GetByAddress( m_sAddress );
+	if ( pOther != NULL && pOther != m_pService )
+	{
+		pLock.Unlock();
+		MsgBox( IDS_DISCOVERY_DUPLICATE, MB_ICONEXCLAMATION );
+		return;
+	}
 
 	if ( ! m_bNew && ! DiscoveryServices.Check( m_pService ) )
 		m_pService = new CDiscoveryService();

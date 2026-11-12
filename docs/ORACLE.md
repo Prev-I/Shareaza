@@ -363,3 +363,34 @@ GET /gwc/?get=1&hostfile=1&net=gnutella2&ping=1&pv=4&client=RAZI2.7.11.2&getleav
 **The About box** of a fork build shows the commit it was built from, for example
 `Release 64-bit (commit 0dbc19d of 2026-10-25)` for `v2.7.10.6-previ.1`. That string was read
 from the built `Shareaza.exe`, not from a screenshot.
+
+## Evidence from the Windows run
+
+`.github/workflows/oracle-windows.yml` uploads these with each run, besides the cache requests and
+the kit's evidence zip:
+- **Network profile:** `network-profile.txt`, the output of `Get-NetConnectionProfile`, with
+  `firewall-profiles.txt`, the firewall profiles at the end of the job. A Public
+  network blocks what a Private one allows, so it tells which case the firewall checks ran in.
+- **Blocked-case notice:** the step *Run with incoming traffic blocked* turns off the kit's
+  `Shareaza oracle *` rules and the installer's `Shareaza` rule, starts the client, and waits up to
+  three minutes for its log to show the network starting. It then requires a line containing
+  `Windows Firewall blocks incoming` in `Shareaza.log`. The rules come back in a `finally`, and the
+  matching lines are kept in `blocked-notice.txt`. Only builds with the installer's rule run it.
+  The runner's firewall state does not fail the step: it records `Enabled`,
+  `DefaultInboundAction` and `NotifyOnListen` of the active profile, sets `Enabled` True,
+  `DefaultInboundAction` Block and `NotifyOnListen` False for the run, and puts the recorded
+  values back in the `finally` with the rules. Each restore is isolated, so one failing does not
+  skip the others; a failed restore fails the step only if the run itself passed. The profile
+  tables before, during and after are in `firewall-profiles-blocked.txt`.
+- **Monitor bar screenshots:** `screen-rtl.png` is a run with `Settings\LanguageRTL` = 1 (the
+  section the client reads it from; the run checks that the main window has `WS_EX_LAYOUTRTL`)
+  and no saved bar layout (the `Toolbars\CoolBar-*` keys removed first), so the default placement
+  runs; `screen-resize.png` is taken after the main window is shrunk and then widened with
+  `SetWindowPos`, with the sizes read back and logged; `screen-rtl-resize.png` is both at once,
+  the right-to-left layout on a fresh bar layout with the window shrunk and widened. The other
+  runs leave `screen-leaf.png`, `screen-hub.png` and `screen-ipv6.png`.
+- **Rules under any name:** after uninstalling, the run fails on any inbound rule whose program is
+  the installed `Shareaza.exe`, whatever its name, except names starting `Shareaza oracle`.
+  The blocked run is the only time Shareaza listens with no allow rule; with `NotifyOnListen`
+  False no Windows Security Alert comes up then to create a rule under another name, so a rule
+  the any-name check finds came from elsewhere, and failing on it is intended.

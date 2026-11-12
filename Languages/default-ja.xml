@@ -4534,7 +4534,7 @@
 			<control caption="新しいバージョンのShareazaが利用可能になりました。 アップグレードしますか?"/>
 			<control caption="「今すぐアップグレード」を選択した場合、Shareazaはダウンロードキューにアップグレードプログラムを追加し、自動的にダウンロードします。"/>
 			<control caption="今すぐアップグレード"/>
-			<control caption="新バージョンをチェックしない"/>
+			<control caption="確認を31日間延期する"/>
 			<control caption="アップグレードしない"/>
 		</dialog>
 		<dialog name="CDownloadReviewDlg" cookie="BuSyEd" caption="ダウンロードレビュー">

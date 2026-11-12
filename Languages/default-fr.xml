@@ -4531,7 +4531,7 @@
 			<control caption="Une nouvelle version de Shareaza est maintenant disponible. Voulez-vous mettre à jour ?"/>
 			<control caption="Si vous sélectionnez Mettre à jour, Shareaza va ajouter la mise à jour à votre liste de téléchargements et commencer à la télécharger."/>
 			<control caption="_Mettre à Jour"/>
-			<control caption="Ne pas vérifier les MàJ"/>
+			<control caption="Reporter les vérifications de 31 jours"/>
 			<control caption="Ne pas MàJ"/>
 		</dialog>
 		<dialog name="CDownloadReviewDlg" cookie="BuSyEd" caption="Télécharger les Revues">

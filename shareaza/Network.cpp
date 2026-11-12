@@ -115,7 +115,6 @@ CNetwork::CNetwork()
 	, QueryRoute			( new CRouteCache() )
 	, QueryKeys				( new CQueryKeys() )
 	, UPnPFinder			( NULL )
-	, Firewall				( new CFirewall() )
 	, m_pHost				()
 	, m_pHostIPv6			()
 	, m_bAutoConnect		( FALSE )
@@ -125,6 +124,7 @@ CNetwork::CNetwork()
 	, m_bUPnPPortsForwarded	( TRI_UNKNOWN )
 	, m_tUPnPMap			( 0 )
 	, m_bHomeNetworkNAT		( FALSE )
+	, m_nFirewallCheckedPort	( 0 )
 {
 	m_pHost.sin_family = AF_INET;
 	m_pHostIPv6.sin6_family = AF_INET6;
@@ -149,24 +149,35 @@ BOOL CNetwork::Init()
 		Cleanup();
 	}
 
-	// Check, without changing anything, that Windows Firewall lets Shareaza receive traffic. The
-	// client has no administrator rights: the installer's firewall option creates the rule.
-	if ( Settings.Connection.EnableFirewallException && Firewall->Init() && Firewall->IsFirewallOn() )
-	{
-		BOOL bTCP = TRUE, bUDP = TRUE;
-		const LONG nPort = static_cast< LONG >( Settings.Connection.InPort );
-		const BOOL bChecked =
-			Firewall->IsInboundAllowed( theApp.m_strBinaryPath, nPort, NET_FW_IP_PROTOCOL_TCP, &bTCP ) &&
-			Firewall->IsInboundAllowed( theApp.m_strBinaryPath, nPort, NET_FW_IP_PROTOCOL_UDP, &bUDP );
-
-		if ( ! bChecked )
-			theApp.Message( MSG_INFO, _T("Windows Firewall: could not check whether incoming connections are allowed.") );
-		else if ( ! bTCP || ! bUDP )
-			theApp.Message( MSG_NOTICE, _T("Windows Firewall blocks incoming %s for Shareaza on this network. If Windows treats this network as Public, set it to Private; otherwise run the installer again with the firewall option, or allow Shareaza.exe in Windows Firewall."),
-				! bTCP && ! bUDP ? _T("TCP and UDP") : ( ! bTCP ? _T("TCP") : _T("UDP") ) );
-	}
-
 	return TRUE;
+}
+
+// Check, without changing anything, that Windows Firewall lets Shareaza receive traffic on the
+// port it listens on. The client has no administrator rights: the installer's firewall option
+// creates the rule. Runs on the network thread, so it uses its own CFirewall: COM interfaces
+// belong to the apartment of the thread that created them.
+void CNetwork::CheckFirewall(WORD nPort)
+{
+	m_nFirewallCheckedPort = nPort;
+
+	CFirewall oFirewall;
+	if ( ! oFirewall.Init() || ! oFirewall.IsFirewallOn() )
+		return;
+
+	BOOL bTCP = TRUE, bUDP = TRUE;
+	const LONG nPortNumber = static_cast< LONG >( nPort );
+	const BOOL bHaveTCP = oFirewall.IsInboundAllowed( theApp.m_strBinaryPath, nPortNumber, NET_FW_IP_PROTOCOL_TCP, &bTCP );
+	const BOOL bHaveUDP = oFirewall.IsInboundAllowed( theApp.m_strBinaryPath, nPortNumber, NET_FW_IP_PROTOCOL_UDP, &bUDP );
+
+	// A blocked protocol is reported even when the other query failed
+	const BOOL bBlockedTCP = bHaveTCP && ! bTCP;
+	const BOOL bBlockedUDP = bHaveUDP && ! bUDP;
+
+	if ( ! bHaveTCP && ! bHaveUDP )
+		theApp.Message( MSG_INFO, _T("Windows Firewall: could not check whether incoming connections are allowed.") );
+	else if ( bBlockedTCP || bBlockedUDP )
+		theApp.Message( MSG_NOTICE, _T("Windows Firewall blocks incoming %s for Shareaza on this network. If Windows treats this network as Public, set it to Private; otherwise run the installer again with the firewall option, or allow Shareaza.exe in Windows Firewall."),
+			bBlockedTCP && bBlockedUDP ? _T("TCP and UDP") : ( bBlockedTCP ? _T("TCP") : _T("UDP") ) );
 }
 
 void CNetwork::Clear()
@@ -174,7 +185,6 @@ void CNetwork::Clear()
 	// Remove port mappings
 	DeletePorts();
 
-	Firewall.Free();
 	UPnPFinder.Free();
 	QueryKeys.Free();
 	QueryRoute.Free();
@@ -1324,6 +1334,13 @@ void CNetwork::OnRun()
 				CrawlSession.OnRun();
 
 				oLock.Unlock();
+
+				// Not under m_pSection: the check is a COM call
+				// InPort is a DWORD: compare the WORD the socket really uses, or a value above 65535
+				// would never match the stored port
+				const WORD nPort = static_cast< WORD >( Settings.Connection.InPort );
+				if ( Settings.Connection.EnableFirewallException && nPort != m_nFirewallCheckedPort )
+					CheckFirewall( nPort );
 			}
 			else if ( ! bListen )
 				continue;

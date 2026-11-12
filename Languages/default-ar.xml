@@ -4533,7 +4533,7 @@
 			<control caption="يتوفر نسخة جديدة من Shareaza الآن . تريد الترقّية ؟"/>
 			<control caption="عند اختيار الترقية الآن ، Shareaza سيضيف الترقية إلى قائمة إنتظار تحميلك و يبدأ بتحميله آليا"/>
 			<control caption="_رفع الملفات الان"/>
-			<control caption="عدم التدقيق بحثا عن النسخ الجديدة"/>
+			<control caption="تأجيل الفحص لمدة 31 يومًا"/>
 			<control caption="عدم الترقية"/>
 		</dialog>
 		<dialog name="CDownloadReviewDlg" cookie="BuSyEd" caption="معاينة التحميل">

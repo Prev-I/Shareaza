@@ -1,5 +1,5 @@
 // Unit test for shareaza/ReleaseNotes.h, which has no MFC dependency.
-// Build and run: g++ -std=c++17 -I shareaza -o /tmp/rn tests/release-notes/test_release_notes.cpp && /tmp/rn
+// Build and run: g++ -std=c++17 -Wall -Wextra -Werror -I shareaza -o /tmp/rn tests/release-notes/test_release_notes.cpp && /tmp/rn
 // wchar_t is 32-bit on Linux; surrogate pairs are written out as two code units to test the cut.
 #include "ReleaseNotes.h"
 #include <cstdio>
@@ -51,6 +51,36 @@ int main()
 	ExpectTrue( s.size() >= 2 && s[ s.size() - 2 ] != L'\xD83D', "cut never leaves a lone high surrogate" );
 	ExpectTrue( s.size() <= 401, "cut without spaces <= 401" );
 
+	Expect( ToPlainText( L"> quoted\n>> nested" ), L"quoted\nnested", "blockquotes" );
+	Expect( ToPlainText( L"*em* and _em_" ), L"em and em", "single emphasis" );
+	Expect( ToPlainText( L"snake_case, file_name.exe, 5 * 3" ), L"snake_case, file_name.exe, 5 * 3", "non-emphasis marks kept" );
+	Expect( ToPlainText( L"+ plus" ), L"\x2022 plus", "plus bullets" );
+	Expect( ToPlainText( L"\\*a\\* and C:\\path" ), L"*a* and C:\\path", "escapes" );
+	Expect( ToPlainText( L"a\n* * *\nb" ), L"a\n\nb", "thematic break" );
+	Expect( Summary( L"<!-- hidden\n\nstill hidden -->\nVisible." ), L"Visible.", "comment across a blank line" );
+	Expect( Summary( L"```python\nprint(1)\n\nx = 2\n```\n\nAfter code." ), L"After code.", "fenced block across a blank line" );
+	Expect( Summary( L"~~~\ncode\n~~~\nText." ), L"Text.", "tilde fence" );
+	Expect( Summary( L"***\n\nAfter rule." ), L"After rule.", "rule is not a summary" );
+	Expect( Summary( L"* **\n\nReal text." ), L"Real text.", "a bullet alone is not text" );
+	Expect( UpgradePrompt( L"2.7.11.3-previ.8", L"2026-11-10T10:00:00Z", L"Short." ), L"Version 2.7.11.3-previ.8, released 2026-11-10. Short.", "prompt" );
+	Expect( UpgradePrompt( L"2.7.11.3", L"", L"" ), L"Version 2.7.11.3.", "prompt without date or summary" );
+	ExpectTrue( UpgradePrompt( std::wstring( 60, L'9' ), L"2026-11-10", longPara ).size() <= 400, "prompt total within 400" );
+	Expect( UpgradePrompt( std::wstring( 390, L'9' ), L"", longPara ), L"Version " + std::wstring( 390, L'9' ) + L".", "summary omitted when its budget is tiny" );
+
+	Expect( Summary( L"- **\n\nReal text." ), L"Real text.", "a bullet with markup only is not text" );
+	Expect( Summary( L"```\ncode\n\nmore" ), L"", "unclosed fence runs to the end" );
+	Expect( Summary( L"<!-- open\n\nmore" ), L"", "unclosed comment runs to the end" );
+	Expect( Summary( L"Title\n---\n\nBody." ), L"Title", "setext heading" );
+	Expect( ToPlainText( L"<!-- x --> Visible" ), L"Visible", "comment followed by text" );
+	Expect( ToPlainText( L"end\\" ), L"end\\", "trailing backslash" );
+	Expect( Summary( L"```x``` is faster.\n\nNext." ), L"x is faster.", "backtick fence info string has no backtick" );
+	{
+		std::wstring p1 = UpgradePrompt( std::wstring( 500, L'9' ), L"2026-11-10", longPara );
+		std::wstring p2 = UpgradePrompt( std::wstring( 500, L'9' ), L"", longPara );
+		ExpectTrue( p1.size() <= 400, "500-char version with date within 400" );
+		ExpectTrue( p2.size() <= 400, "500-char version without date within 400" );
+		ExpectTrue( ! p2.empty() && p2.back() == L'.', "cut prompt keeps its final period" );
+	}
 	Expect( DatePart( L"2026-11-10T22:27:48Z" ), L"2026-11-10", "ISO date" );
 	Expect( DatePart( L"yesterday" ), L"yesterday", "malformed date kept" );
 	Expect( DatePart( L"" ), L"", "empty date" );

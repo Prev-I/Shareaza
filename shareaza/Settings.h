@@ -279,7 +279,7 @@ public:
 		bool		DetectConnectionReset;		// Detect regaining of internet connection
 		bool		ForceConnectedState;		// Force WinINet into a connected state on startup. (Put IE into online mode)
 		bool		SlowConnect;				// Connect to one network at a time. Don't download while connecting. (XPsp2)
-		bool		EnableFirewallException;	// Check at startup that Windows Firewall allows incoming traffic (the installer creates the rule)
+		bool		EnableFirewallException;	// Check once the network listens, per port, that Windows Firewall allows incoming traffic (the installer creates the rule)
 		bool		EnableUPnP;					// UPnP: Enable forwarded ports on startup
 		bool		DeleteUPnPPorts;			// UPnP: Delete forwarded ports on shutdown
 		DWORD		UPnPRefreshTime;			// UPnP: Refresh time of port mappings (millisecond)

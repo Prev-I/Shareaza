@@ -9709,8 +9709,8 @@ msgid "_Upgrade Now"
 msgstr "_Oppgrader nå"
 
 #: cupgradedlg;control;4
-msgid "Don't check for new versions"
-msgstr "Ikke søk etter nye versjoner"
+msgid "Postpone checks for 31 days"
+msgstr "Utsett kontroller i 31 dager"
 
 #: cupgradedlg;control;5
 msgid "Don't Upgrade"

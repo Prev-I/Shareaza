@@ -4533,7 +4533,7 @@
 			<control caption="En ny versjon av Shareaza er tilgjengelig. Ønsker du å oppgradere?"/>
 			<control caption="Hvis du velger å oppgradere nå, vil Shareaza legge til oppgraderingen i nedlastingene dine og automatisk starte nedlatningen."/>
 			<control caption="_Oppgrader nå"/>
-			<control caption="Ikke søk etter nye versjoner"/>
+			<control caption="Utsett kontroller i 31 dager"/>
 			<control caption="Ikke oppgrader"/>
 		</dialog>
 		<dialog name="CDownloadReviewDlg" cookie="BuSyEd" caption="Omtaler av nedlasting">

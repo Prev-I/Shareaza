@@ -122,7 +122,10 @@ void CHomeViewCtrl::Activate()
 // The skin's template has no element for it, so every language's Home page gets it the same way.
 void CHomeViewCtrl::UpdateReleaseNotesLink()
 {
-	const CString& strURL = Settings.VersionCheck.UpgradeNotesURL;
+	// The setting is persisted in the registry, which can be edited outside the client,
+	// so re-check here that the link is https, as VersionChecker does before storing it
+	CString strURL = Settings.VersionCheck.UpgradeNotesURL;
+	if ( _tcsnicmp( strURL, _T("https://"), 8 ) != 0 ) strURL.Empty();
 
 	if ( strURL.IsEmpty() )
 	{

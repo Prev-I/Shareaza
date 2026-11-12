@@ -4534,7 +4534,7 @@
 			<control caption="?קיימת גרסא חדשה לשרזה. האם ברצונך לשדרג"/>
 			<control caption="אם בחרת לשדרג כעת, שרזה יוסיף את השדרוג לרשימת ההורדות ויתחיל להוריד אותו באופן אוטומטי"/>
 			<control caption="_שדרג כעת"/>
-			<control caption="אל תבדוק אם קיימות גרסאות חדשות"/>
+			<control caption="דחה בדיקות ב-31 ימים"/>
 			<control caption="אל תשדרג"/>
 		</dialog>
 		<dialog name="CDownloadReviewDlg" cookie="BuSyEd" caption="הורד ביקורות">

@@ -28,7 +28,6 @@
 
 class CBuffer;
 class CConnection;
-class CFirewall;
 class CG2Packet;
 class CLocalSearch;
 class CNeighbour;
@@ -65,7 +64,6 @@ public:
 	CAutoPtr< CRouteCache >	QueryRoute;
 	CAutoPtr< CQueryKeys >	QueryKeys;
 	CAutoPtr< CUPnP >		UPnPFinder;			// UPnP
-	CAutoPtr< CFirewall >	Firewall;			// Windows Firewall
 
 	CMutexEx		m_pSection;
 	SOCKADDR_IN		m_pHost;					// Structure (Windows Sockets) which holds address of the local machine
@@ -191,9 +189,13 @@ protected:
 	void		OnRun();
 	void		PostRun();
 
+private:
+	WORD		m_nFirewallCheckedPort;		// Listening port the firewall was last checked for (0 = not yet)
+	void		CheckFirewall(WORD nPort);	// Windows Firewall: does it allow the listening port? (network thread)
+
 // Operations
 public:
-	// Initialize network: Windows Sockets, Windows Firewall, UPnP NAT.
+	// Initialize network: Windows Sockets.
 	BOOL		Init();
 	// Shutdown network
 	void		Clear();

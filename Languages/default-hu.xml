@@ -4533,7 +4533,7 @@
 			<control caption="Elérhetővé vált a Shareaza egy újabb verziója. Szeretne frissíteni?"/>
 			<control caption="Ha most szeretne frissíteni, a Shareaza berakja a letöltendő fájlt a letöltési sorba."/>
 			<control caption="_Frissítés most"/>
-			<control caption="Ne keressen új verzió után"/>
+			<control caption="Ellenőrzések halasztása 31 napra"/>
 			<control caption="Ne frissítsen"/>
 		</dialog>
 		<dialog name="CDownloadReviewDlg" cookie="BuSyEd" caption="Vélemények letöltése">
