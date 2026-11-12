@@ -466,8 +466,11 @@ jobs:
                 $k = 'HKCU:\Software\Shareaza\Shareaza'
                 Get-ChildItem "$k\Toolbars" -ErrorAction SilentlyContinue | Where-Object { $_.PSChildName -like 'CoolBar-*' } | Remove-Item -Recurse
                 # The client reads LanguageRTL from its Settings section (Settings.cpp), and writes it back on exit.
-                New-Item -Path "$k\Settings" -Force | Out-Null
+                # New-Item -Force would recreate the key empty, losing FirstRun=0 (and Upgrade=0, CloseMode=1) that Prepare-Oracle.ps1 and each clean exit leave:
+                # the client would then wait for its QuickStart Wizard and take LanguageRTL from DefaultLanguageRTL.
+                if (-not (Test-Path "$k\Settings")) { New-Item -Path "$k\Settings" | Out-Null }
                 New-ItemProperty -Path "$k\Settings" -Name LanguageRTL -Value 1 -PropertyType DWord -Force | Out-Null
+                if ((Get-ItemProperty "$k\Settings").FirstRun -ne 0) { throw 'Settings\FirstRun is not 0: the client would start its QuickStart Wizard' }
                 try {
                     # IPv6 is still on from run 3, on builds that have the setting.
                     .\run-client.ps1 -Name rtl -ExpectIPv6 -ExpectRTL
@@ -492,8 +495,11 @@ jobs:
                 $ErrorActionPreference = 'Stop'
                 $k = 'HKCU:\Software\Shareaza\Shareaza'
                 Get-ChildItem "$k\Toolbars" -ErrorAction SilentlyContinue | Where-Object { $_.PSChildName -like 'CoolBar-*' } | Remove-Item -Recurse
-                New-Item -Path "$k\Settings" -Force | Out-Null
+                # New-Item -Force would recreate the key empty, losing FirstRun=0 (and Upgrade=0, CloseMode=1) that Prepare-Oracle.ps1 and each clean exit leave:
+                # the client would then wait for its QuickStart Wizard and take LanguageRTL from DefaultLanguageRTL.
+                if (-not (Test-Path "$k\Settings")) { New-Item -Path "$k\Settings" | Out-Null }
                 New-ItemProperty -Path "$k\Settings" -Name LanguageRTL -Value 1 -PropertyType DWord -Force | Out-Null
+                if ((Get-ItemProperty "$k\Settings").FirstRun -ne 0) { throw 'Settings\FirstRun is not 0: the client would start its QuickStart Wizard' }
                 try {
                     .\run-client.ps1 -Name rtl-resize -ExpectIPv6 -ExpectRTL -Resize
                 } finally {
