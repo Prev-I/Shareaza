@@ -12,7 +12,7 @@ collects those fixes and ships them as 2.7.11.2:
 - **Release builds.** Every fork release so far has been an alpha build. It shows a warning at
   each start, and a "test period has ended" message a week after it was compiled.
 - **The update notice.**
-  - The client logs each line of the release notes as a printf format, so a `%` in them is
+  - The client does not log the lines of the release notes safely: some text in them causes
     undefined behaviour in every client that sees the release.
   - Characters outside the Windows code page become `?`.
   - Line breaks are lost on the Home page.
@@ -35,8 +35,8 @@ collects those fixes and ships them as 2.7.11.2:
 
 - The fork is public. Work goes through pull requests into `main`; tags use `-previ.N`.
 - Every release raises the version's fourth number. previ.7 is 2.7.11.2.
-- **Release notes must not contain `%`.** previ.6 and earlier clients still log them as a format
-  string.
+- **Release notes must pass the owner's release-notes checklist.** previ.6 and earlier clients
+  still do not log them safely.
 - **Release notes must start with a short plain paragraph.** Older clients show the notes raw,
   and their upgrade window shows only the first lines.
 - Installer asset names keep `_Release_<date>`. The update check finds the asset by looking for
@@ -317,7 +317,8 @@ As for previ.6:
 
 1. Tag `v2.7.11.2-previ.7`.
 2. Run the Windows oracle on the draft's build, including the new alpha-text check.
-3. Write release notes: plain first paragraph, no `%`. Have the reviewer check them.
+3. Write release notes: plain first paragraph, the owner's release-notes checklist. Have the
+   reviewer check them.
 4. Publish.
 5. Run both oracles against the release.
 6. Open the kits pull request.
