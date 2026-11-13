@@ -274,8 +274,9 @@ went to the provenance pass instead.
   box.
 - **Identifying the client:** they identify to caches as `RAZI` and their version: `RAZI2.7.10.6`
   up to `previ.4` (as ansani's own builds do), `RAZI2.7.11.0` in `previ.5`, `RAZI2.7.11.1` in
-  `v2.7.11.1-previ.6` and `RAZI2.7.11.2` from `v2.7.11.2-previ.7`, with user agents
-  `iShareaza 2.7.11.0`, `iShareaza 2.7.11.1` and `iShareaza 2.7.11.2`. The official
+  `v2.7.11.1-previ.6`, `RAZI2.7.11.2` in `v2.7.11.2-previ.7` and `RAZI2.7.11.3` in
+  `v2.7.11.3-previ.8`, with user agents `iShareaza 2.7.11.0`, `iShareaza 2.7.11.1`,
+  `iShareaza 2.7.11.2` and `iShareaza 2.7.11.3`. The official
   SourceForge 2.7.10.2 sends `RAZA2.7.10.2`.
 
 ## Addendum 2026-10-26: fixes for findings 3, 4 and 5
