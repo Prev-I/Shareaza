@@ -55,8 +55,8 @@ So previ.8 carries:
 
 - The fork is public. Work goes through pull requests into `main`; tags use `-previ.N`.
 - Every release raises the version's fourth number. previ.8 is **2.7.11.3**.
-- **Release notes:** first paragraph plain ASCII, no `%`, about 330 characters. previ.6 and older
-  clients log the notes as a printf format and show them raw.
+- **Release notes:** first paragraph plain ASCII, about 330 characters, checked against the owner's
+  release-notes checklist. previ.6 and older clients show the notes raw and do not log them safely.
 - Installer asset names keep `_Release_<date>`: the update check finds the asset by looking for
   `Release` and the platform in its URL.
 - The upgrade window keeps its five controls: translations identify it by its control list.
@@ -118,8 +118,8 @@ can still be moved or deleted.
 
 ### 1.2 Release body: how to verify
 
-The generated `body.md` gains a **Verify** section after the VirusTotal links, plain ASCII, no
-`%`:
+The generated `body.md` gains a **Verify** section after the VirusTotal links, plain ASCII, and
+passing the owner's release-notes checklist:
 
 - `gh attestation verify <file> --repo Prev-I/Shareaza` (built by this repository's workflow);
 - `gh release verify-asset v<tag> <file> --repo Prev-I/Shareaza` (unchanged since publication);
@@ -352,8 +352,8 @@ the owner's own act in the GitHub interface, after the oracle runs and the notes
 2. Tag `v2.7.11.3-previ.8` on `main`. `release.yml` builds, attests and creates the draft.
 3. Run the Windows and Wine oracles on the draft's build. **This is the last gate**: after
    publication nothing can be replaced.
-4. Write release notes: plain ASCII first paragraph, about 330 characters, no `%`. The reviewer
-   checks them, including for trigger disclosure.
+4. Write release notes: plain ASCII first paragraph, about 330 characters, checked against the
+   owner's release-notes checklist. The reviewer checks them, including for trigger disclosure.
 5. Publish. `verify-release.yml` runs; it must pass.
 6. Run both oracles against the release, then open the kits pull request.
 7. Before the announcement: switch on Issues and private vulnerability reporting.

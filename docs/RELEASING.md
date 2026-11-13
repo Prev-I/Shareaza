@@ -49,9 +49,9 @@ the owner switches the ruleset off in Settings first, then switches it on again.
 2. `release.yml` builds both installers, attests them and creates a draft release.
 3. Run the oracles on the draft's build. This is the last gate: after publication nothing can be
    replaced.
-4. Write the release notes. The first paragraph is plain ASCII, about 330 characters. Use no percent
-   sign anywhere: older clients log the notes as a printf format and show them raw. Review the notes
-   for any disclosure of the security audit's withheld detail.
+4. Write the release notes. The first paragraph is plain ASCII, about 330 characters. Older clients
+   show the notes raw and do not log them safely, so the reviewer checks them against the owner's
+   release-notes checklist, and for any disclosure of the security audit's withheld detail.
 5. The owner publishes the release.
 6. `verify-release.yml` must pass (see below).
 7. Run the oracles against the release, then open the kits pull request.
