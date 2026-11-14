@@ -567,8 +567,6 @@ BOOL CShareazaApp::InitInstance()
 
 int CShareazaApp::ExitInstance()
 {
-	Diagnostics::Stop();	// Safe unconditionally: a no-op unless Start succeeded
-
 	if ( m_bInteractive )
 	{
 		CWaitCursor pCursor;
@@ -617,9 +615,17 @@ int CShareazaApp::ExitInstance()
 		TrackerRequests.Clear();
 		Library.Clear();
 		CoolMenu.Clear();
+
+		// Late, so the crash filter and watchdog cover the whole shutdown. Nothing above tears down
+		// what they touch (m_oMessages, m_csMessage, Settings.General, the Network counters).
+		Diagnostics::Stop();	// Safe unconditionally: a no-op unless Start succeeded
 		Network.Clear();
 
 		SplashStep();
+	}
+	else
+	{
+		Diagnostics::Stop();
 	}
 
 	DDEServer.Close();
@@ -1431,20 +1437,35 @@ void CShareazaApp::PrintMessage(WORD nType, const CString& strLog)
 
 bool CShareazaApp::TryMessage(WORD nType, LPCTSTR pszLine)
 {
-	if ( ! TryEnterCriticalSection( &m_csMessage.m_sect ) )
-		return false;	// Busy: the line is already in Diagnostics.log
+	if ( IsLogDisabled( nType ) )
+		return false;
 
-	bool bResult = false;
-	const CString strLog( pszLine );
-	CLogMessage* pMsg = new CLogMessage( nType, strLog );
-	if ( pMsg )
+	// Called on the diagnostics watchdog thread: nothing may block or throw out of here.
+	try
 	{
-		AppendMessage( pMsg, strLog );
-		bResult = true;
-	}
+		const CString strLog( pszLine );
+		CAutoPtr< CLogMessage > pMsg( new CLogMessage( nType, strLog ) );
+		if ( ! pMsg )
+			return false;
 
-	LeaveCriticalSection( &m_csMessage.m_sect );
-	return bResult;
+		if ( ! TryEnterCriticalSection( &m_csMessage.m_sect ) )
+			return false;	// Busy: the line is already in Diagnostics.log
+
+		struct CLeave
+		{
+			CRITICAL_SECTION* m_pSect;
+			explicit CLeave( CRITICAL_SECTION* pSect ) : m_pSect( pSect ) {}
+			~CLeave() { LeaveCriticalSection( m_pSect ); }
+		} pLeave( &m_csMessage.m_sect );
+
+		AppendMessage( pMsg.Detach(), strLog );
+		return true;
+	}
+	catch ( CException* pException )
+	{
+		pException->Delete();	// e.g. the log file is full: drop the line
+		return false;
+	}
 }
 
 void CShareazaApp::AppendMessage(CLogMessage* pMsg, const CString& strLog)
