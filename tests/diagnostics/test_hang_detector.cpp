@@ -203,6 +203,12 @@ int main()
 		ExpectTrue( ! r.Allow( 60001, sup ), "rate limiter closes again" );
 	}
 	{
+		RateLimiter r; uint32_t sup = 0;
+		ExpectTrue( r.Allow( 1000, sup ), "rate limiter late: first" );
+		ExpectTrue( ! r.Allow( 999, sup ), "rate limiter late: older timestamp refused" );
+		ExpectTrue( r.Allow( 61000, sup ) && sup == 1, "rate limiter late: count carries" );
+	}
+	{
 		static RateLimiter s;   // static storage duration
 		uint32_t sup = 0;
 		ExpectTrue( s.Allow( 5000, sup ), "static rate limiter" );

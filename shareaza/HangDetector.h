@@ -201,7 +201,8 @@ public:
 		uint64_t prev = m_last.load( std::memory_order_relaxed );	// last allowed time + 1, 0: never
 		for (;;)
 		{
-			if ( prev != 0 && nowMs >= prev - 1 && nowMs - ( prev - 1 ) < 60000 )
+			// A time older than the last allowed one (callers sample the clock before calling) is inside the window too.
+			if ( prev != 0 && nowMs + 1 < prev + 60000 )
 			{
 				m_suppressed.fetch_add( 1, std::memory_order_relaxed );
 				return false;
