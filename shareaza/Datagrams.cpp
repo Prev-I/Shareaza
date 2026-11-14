@@ -38,6 +38,7 @@
 #include "DCPacket.h"
 #include "BENode.h"
 #include "Security.h"
+#include "ReceiveBudget.h"
 #include "Transfers.h"
 
 #ifdef _DEBUG
@@ -50,6 +51,9 @@ static char THIS_FILE[]=__FILE__;
 #define METER_LENGTH	24
 #define METER_PERIOD	2000
 #define METER_SECOND	1000
+
+#define RECEIVE_BUDGET_MS		50
+#define RECEIVE_BUDGET_COUNT	2048
 
 CDatagrams Datagrams;
 
@@ -687,13 +691,17 @@ void CDatagrams::OnRun()
 	TryWrite();
 	ManageOutput();
 
-	for ( int i = 0; i < _countof( m_hSocket ); ++i )
+	// One bound for the whole receive pass: the time budget and count limit are shared by both sockets
+	Diag::ReceiveBudget pBudget( GetTickCount64(), RECEIVE_BUDGET_MS, RECEIVE_BUDGET_COUNT );
+	bool bBudget = true;
+
+	for ( int i = 0; i < _countof( m_hSocket ) && bBudget; ++i )
 	{
 		do
 		{
 			ManagePartials();
 		}
-		while ( TryRead( i ) || TryReadIPv6() );
+		while ( ( bBudget = pBudget.Next( GetTickCount64() ) ) && ( TryRead( i ) || TryReadIPv6() ) );
 	}
 
 	Measure();
