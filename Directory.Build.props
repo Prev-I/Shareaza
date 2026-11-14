@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Release builds carry full debug information, so every release can publish
+  matching PDB symbols (see docs/RELEASING.md and docs/DIAGNOSTICS.md).
+
+  The Release configurations of the projects set neither GenerateDebugInformation
+  nor DebugInformationFormat, and a PDB is not to be left to toolset defaults, so the default
+  is set here for all of them. A project can still override it. /Zi and /DEBUG do
+  not change code generation; every shipped project sets OptimizeReferences and
+  EnableCOMDATFolding itself, so /DEBUG does not turn them off.
+-->
+<Project>
+	<ItemDefinitionGroup Condition="'$(Configuration)' == 'Release'">
+		<ClCompile>
+			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+		</ClCompile>
+		<Link>
+			<GenerateDebugInformation>DebugFull</GenerateDebugInformation>
+		</Link>
+	</ItemDefinitionGroup>
+</Project>

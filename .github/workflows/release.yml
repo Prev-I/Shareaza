@@ -87,11 +87,55 @@ jobs:
             # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
             run: msbuild ${{env.SOLUTION_FILE_PATH}} /nologo /v:m /t:Rebuild /p:Configuration=${{ matrix.type }} /p:Platform=${{ matrix.platform }} /p:DefineConstants=BUILDFROMMSBUILD /p:RevisionSHA=${{ steps.gitversion.outputs.shortSha }} /p:RevisionDate=${{ steps.gitversion.outputs.commitDate }} /fl /flp:Summary
 
+        -   name: Collect PDB symbols
+            # The PDBs of the binaries the installer ships, from the same build that fed
+            # ISCC, flat in one zip beside the installer. A dump from a release is read
+            # against these (docs/DIAGNOSTICS.md).
+            shell: pwsh
+            env:
+                PLATFORM: ${{ matrix.platform }}
+                CONFIGURATION: ${{ matrix.type }}
+            run: |
+                $installers = @(Get-ChildItem -Path setup/builds -Filter *.exe)
+                if ($installers.Count -ne 1) { throw "expected one installer in setup/builds, found $($installers.Count)" }
+                # The name must not contain "Release": the client's update check takes the first
+                # asset URL with the platform and "Release" in it, and must never pick this zip.
+                $base = $installers[0].BaseName
+                if (-not $base.Contains('_Release_')) { throw "installer name $base has no _Release_" }
+                $zipName = $base.Replace('_Release_', '_symbols_') + '.zip'
+                if ($zipName.Contains('Release')) { throw "symbols archive name $zipName contains Release" }
+                $zip = Join-Path $installers[0].DirectoryName $zipName
+                $stage = Join-Path $env:RUNNER_TEMP 'symbols'
+                Remove-Item -Recurse -Force $stage -ErrorAction SilentlyContinue
+                New-Item -ItemType Directory -Path $stage | Out-Null
+                # The binaries are the ones setup/scripts/main.iss installs from the build
+                # output. Most come from the leg's own platform; the two RazaWebHook DLLs have
+                # a literal Win32 or x64 directory, and the solution builds both in every leg.
+                $pattern = '^Source: "\{#Compiler\}\\(\{#PlatformName\}|Win32|x64)\\\{#ConfigurationName\}\\([^"\\]+\.(?:exe|dll))"'
+                $shipped = Select-String -Path setup/scripts/main.iss -Pattern $pattern |
+                    ForEach-Object { [pscustomobject]@{ Platform = $_.Matches[0].Groups[1].Value; Name = $_.Matches[0].Groups[2].Value } } |
+                    Sort-Object Platform, Name -Unique
+                if (-not $shipped) { throw 'no shipped binaries found in main.iss' }
+                # Prebuilt third-party binaries: no PDB exists. Anything else shipped is built
+                # here and must have one.
+                $prebuilt = @('7zxa.dll', '7zxa64.dll', 'unrar.dll', 'unrar64.dll', 'libgfl340.dll')
+                $missing = @()
+                foreach ($f in $shipped) {
+                    if ($prebuilt -contains $f.Name) { continue }
+                    $platform = if ($f.Platform -eq '{#PlatformName}') { $env:PLATFORM } else { $f.Platform }
+                    $pdb = Join-Path "vc143/$platform/$env:CONFIGURATION" ([IO.Path]::GetFileNameWithoutExtension($f.Name) + '.pdb')
+                    if (Test-Path $pdb) { Copy-Item $pdb $stage } else { $missing += "$($f.Name) ($pdb)" }
+                }
+                if ($missing) { throw "no PDB for shipped binaries: $($missing -join ', ')" }
+                Compress-Archive -Path (Join-Path $stage '*') -DestinationPath $zip
+                Get-ChildItem $stage | Select-Object Name, Length
+                Get-Item $zip | Select-Object Name, Length
+
         -   name: Compute SHA-256 manifest
             shell: bash
             working-directory: setup/builds
             run: |
-                sha256sum -- *.exe | tee SHA256SUMS.txt
+                sha256sum -- *.exe *.zip | tee SHA256SUMS.txt
 
         -   name: Archive Shareaza Release
             uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -99,6 +143,7 @@ jobs:
                 name: Shareaza Windows ${{ matrix.platform }} ${{ matrix.type }}
                 path: |
                     setup/builds/*.exe
+                    setup/builds/*.zip
                     setup/builds/SHA256SUMS.txt
                 if-no-files-found: error
 
@@ -130,16 +175,16 @@ jobs:
         - name: Display structure of downloaded files
           run: ls -R artifacts
         - name: Verify and merge SHA-256 manifests
-          # Each build job hashed its own installer; check those hashes survived the
-          # artifact round trip, then write one manifest for the release.
+          # Each build job hashed its own installer and symbols zip; check those hashes
+          # survived the artifact round trip, then write one manifest for the release.
           run: |
             for d in artifacts/*/; do (cd "$d" && sha256sum -c SHA256SUMS.txt); done
             mkdir dist
-            cp artifacts/*/*.exe dist/
-            # Two artifacts with the same installer name would overwrite each other.
-            src=(artifacts/*/*.exe) dst=(dist/*.exe)
-            [ "${#src[@]}" -eq "${#dst[@]}" ] || { echo "::error::duplicate installer names"; exit 1; }
-            (cd dist && sha256sum -- *.exe | tee SHA256SUMS.txt)
+            cp artifacts/*/*.exe artifacts/*/*.zip dist/
+            # Two artifacts with the same file name would overwrite each other.
+            src=(artifacts/*/*.exe artifacts/*/*.zip) dst=(dist/*.exe dist/*.zip)
+            [ "${#src[@]}" -eq "${#dst[@]}" ] || { echo "::error::duplicate file names"; exit 1; }
+            (cd dist && sha256sum -- *.exe *.zip | tee SHA256SUMS.txt)
         - name: VirusTotal Scan
           id: virustotal
           if: env.HAS_VT_KEY == 'true'
@@ -179,13 +224,15 @@ jobs:
             } >> body.md
             cat body.md
         - name: Attest build provenance
-          # Signs a provenance statement for each installer, so a download can be
+          # Signs a provenance statement for each installer and symbols zip, so a download can be
           # checked against this repository's workflow with gh attestation verify.
           # The subjects are the files that are published, hashed after the manifest
           # check above.
           uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
           with:
-            subject-path: dist/*.exe
+            subject-path: |
+              dist/*.exe
+              dist/*.zip
         - name: Release
           uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3.0.4
           with:
@@ -196,4 +243,5 @@ jobs:
             fail_on_unmatched_files: true
             files: |
               dist/*.exe
+              dist/*.zip
               dist/SHA256SUMS.txt

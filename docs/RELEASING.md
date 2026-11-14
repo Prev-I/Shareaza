@@ -8,7 +8,13 @@ future change that adds hash checking to the client's updater should read this f
 Each release has these assets:
 
 - One installer per platform, named `iShareaza_<version>_<Win32|x64>_Release_<YYYY-MM-DD>.exe`.
-- `SHA256SUMS.txt`, in `sha256sum` format: lowercase hex, two spaces, the file name.
+- One symbols archive per platform, named like the installer with `_symbols_` in place of `_Release_` and `.zip` in place of `.exe`:
+  `iShareaza_<version>_<Win32|x64>_symbols_<YYYY-MM-DD>.zip`. The name must never contain `Release`,
+  because the update check takes the first asset whose URL has the platform and `Release` in it. It holds the PDB files of the
+  binaries that build produced and the installer ships, flat, and nothing else.
+  [DIAGNOSTICS.md](DIAGNOSTICS.md) says how to open a dump against it.
+- `SHA256SUMS.txt`, in `sha256sum` format: lowercase hex, two spaces, the file name. It lists
+  every installer and every symbols archive.
 
 The update check finds the installer by the word `Release` and the platform in its URL. Names must
 keep that form.
@@ -46,7 +52,8 @@ the owner switches the ruleset off in Settings first, then switches it on again.
 ## Releasing
 
 1. Push the annotated tag `v<version>-previ.N` on `main`.
-2. `release.yml` builds both installers, attests them and creates a draft release.
+2. `release.yml` builds both installers and both symbols archives, attests them and creates a draft
+   release.
 3. Run the oracles on the draft's build. This is the last gate: after publication nothing can be
    replaced.
 4. Write the release notes. The first paragraph is plain ASCII, about 330 characters. Older clients
@@ -69,9 +76,10 @@ A defect found after publication means the next previ.N, never a replaced asset.
 the release that names the fixed release.
 
 `verify-release.yml` runs when a release is published, and by `workflow_dispatch` with the input
-`tag`. It downloads the installers and `SHA256SUMS.txt`, checks the files against the manifest and
-against each asset's `digest`, checks each installer's build attestation, and runs
-`gh release verify` and `gh release verify-asset`. The attestation and verify checks are retried
+`tag`. It downloads the installers, the symbols archives and `SHA256SUMS.txt`, and then, for every
+file listed in the manifest, checks the file against the manifest and against the asset's `digest`,
+checks its build attestation, and runs `gh release verify-asset`. It also runs
+`gh release verify`. The attestation and verify checks are retried
 for about 5 minutes, because the release attestation can appear shortly after publication.
 
 A failure is a signal, not a verdict. Look at which check failed:
@@ -88,7 +96,7 @@ tag. Run it against a published release only.
 
 Each release body from previ.8 on lists these checks. For older releases only the `Get-FileHash`
 check applies, against their `SHA256SUMS.txt`, where the release has one. Replace `<file>` with the
-installer and `<tag>` with the release tag.
+installer or the symbols archive and `<tag>` with the release tag.
 
 - Built by this repository's release workflow:
   `gh attestation verify <file> --repo Prev-I/Shareaza --signer-workflow Prev-I/Shareaza/.github/workflows/release.yml`
