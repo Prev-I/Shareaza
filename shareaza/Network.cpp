@@ -116,6 +116,7 @@ CNetwork::CNetwork()
 	, QueryKeys				( new CQueryKeys() )
 	, UPnPFinder			( NULL )
 	, m_nHeartbeat			( 0 )
+	, m_nRunningThreadId	( 0 )
 	, m_pHost				()
 	, m_pHostIPv6			()
 	, m_bAutoConnect		( FALSE )
@@ -1256,6 +1257,8 @@ void CNetwork::OnRun()
 
 	if ( PreRun() )
 	{
+		InterlockedExchange( &m_nRunningThreadId, (LONG)GetCurrentThreadId() );
+
 		while ( IsThreadEnabled() )
 		{
 			Doze( 100 );
@@ -1353,6 +1356,9 @@ void CNetwork::OnRun()
 
 			HostCache.PruneOldHosts();	// Every minute
 		}
+
+		// Cleared before PostRun(): PreRun/PostRun are outside the heartbeat stall (a hang there holding m_pSection is caught by the section stall)
+		InterlockedExchange( &m_nRunningThreadId, 0 );
 	}
 
 	PostRun();

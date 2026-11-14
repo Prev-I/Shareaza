@@ -67,6 +67,7 @@ public:
 
 	CMutexTracked	m_pSection;
 	volatile LONG	m_nHeartbeat;				// Incremented by every pass of the network loop (read by the watchdog)
+	volatile LONG	m_nRunningThreadId;			// Network thread ID while inside its loop, else 0
 	SOCKADDR_IN		m_pHost;					// Structure (Windows Sockets) which holds address of the local machine
 	SOCKADDR_IN6	m_pHostIPv6;				// Structure (Windows Sockets) which holds address of the local machine
 	
@@ -204,7 +205,7 @@ public:
 	BOOL		IsSelfIP(const IN6_ADDR& nAddress) const;
 	bool		IsAvailable() const;
 	bool		IsConnected() const;
-	DWORD		GetRunningThreadId() const { return GetThreadID(); }	// Network thread ID while it runs, else 0 (lock-free)
+	DWORD		GetRunningThreadId() const { return (DWORD)m_nRunningThreadId; }	// Network thread ID while inside its loop, else 0 (lock-free)
 	bool		IsListening() const;
 	bool		IsListeningIPv6() const;
 	bool		IsWellConnected() const;
