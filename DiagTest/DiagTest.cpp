@@ -80,6 +80,7 @@ namespace
 
 	CRITICAL_SECTION			g_csLog;
 	std::vector< std::wstring >	g_oLines;
+	DWORD						g_nSlowStartMs = 0;	// test hook: stall-start handler made this much slower
 
 	void RecordLog(bool bError, LPCWSTR pszLine)
 	{
@@ -88,6 +89,10 @@ namespace
 		LeaveCriticalSection( &g_csLog );
 		printf( "  log%s: %ls\n", bError ? " (error)" : "", pszLine );
 		fflush( stdout );
+		// The "started" line is logged inside the stall-start handler, just before the
+		// dump: sleeping here stands in for a dump that takes seconds.
+		if ( g_nSlowStartMs && wcsstr( pszLine, L"stall started" ) )
+			Sleep( g_nSlowStartMs );
 	}
 
 	size_t CountLines(LPCWSTR pszNeedle)
@@ -130,6 +135,22 @@ namespace
 		InterlockedExchange( &g_nNetworkThread, (LONG)GetCurrentThreadId() );
 		Take();
 		Sleep( 5000 );
+		Release();
+		for ( int i = 0 ; i < 30 ; ++i )
+		{
+			InterlockedIncrement( &g_nHeartbeat );
+			Sleep( 100 );
+		}
+		InterlockedExchange( &g_nNetworkThread, 0 );
+		return 0;
+	}
+
+	// Holds the section 10 s (5x the threshold) with the heartbeat flat, then runs normally for 3 s.
+	DWORD WINAPI LongHangThread(LPVOID)
+	{
+		InterlockedExchange( &g_nNetworkThread, (LONG)GetCurrentThreadId() );
+		Take();
+		Sleep( 10000 );
 		Release();
 		for ( int i = 0 ; i < 30 ; ++i )
 		{
@@ -354,6 +375,24 @@ namespace
 			CHECK( DumpHasThread( sFolder + L"\\" + oDumps[ 0 ], nHolder ) );
 	}
 
+	// A slow stall-start (3 s, above threshold / 2) must not end the episode early or dump twice.
+	void CaseSlowDump()
+	{
+		const std::wstring sFolder = NewFolder( L"slow-dump" );
+		g_nSlowStartMs = 3000;
+		CHECK( StartAndWatch( sFolder ) );
+		RunThread( LongHangThread );
+		Diagnostics::Stop();
+
+		CHECK( Dumps( sFolder, L"-hang-" ).size() == 1 );
+		CHECK( Dumps( sFolder, NULL ).size() == 1 );
+		CHECK( CountLines( L"stall started" ) == 1 );
+		CHECK( CountLines( L"stall ended" ) == 1 );
+		const std::string sLog = ReadFileBytes( sFolder + L"\\Diagnostics.log" );
+		CHECK( CountOccurrences( sLog, "stall started" ) == 1 );
+		CHECK( CountOccurrences( sLog, "stall ended" ) == 1 );
+	}
+
 	void CaseRetaken()
 	{
 		const std::wstring sFolder = NewFolder( L"re-taken" );
@@ -483,6 +522,7 @@ namespace
 	{
 		{ L"not-started",		CaseNotStarted },
 		{ L"hang",				CaseHang },
+		{ L"slow-dump",			CaseSlowDump },
 		{ L"re-taken",			CaseRetaken },
 		{ L"retention",			CaseRetention },
 		{ L"unwritable-folder",	CaseUnwritableFolder },

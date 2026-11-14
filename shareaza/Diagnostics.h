@@ -38,6 +38,10 @@ namespace Diagnostics
 
 	// Creates pszFolder, loads the system dbghelp.dll by full path and installs the
 	// unhandled-exception filter. pszVersion is opaque text, sanitised for file names.
+	// The filter writes its dump, then hands the exception to the filter it replaced.
+	// It never sees, so no dump is written for: abort(), CRT invalid-parameter and
+	// pure-call handlers that terminate, /GS security-cookie failures and other
+	// __fastfail calls, and anything that runs while a debugger is attached.
 	// Returns false (and logs once) if any of that fails; nothing is left installed.
 	bool Start(LPCWSTR pszFolder, LPCWSTR pszVersion, LogFn pfnLog);
 

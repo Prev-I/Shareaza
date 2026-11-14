@@ -64,7 +64,7 @@ namespace
 
 	WCHAR					g_szFolder[ PATH_CHARS ]		= {};
 	WCHAR					g_szVersion[ VERSION_CHARS + 1 ]	= {};
-	LogFn					g_pfnLog			= NULL;
+	LogFn volatile			g_pfnLog			= NULL;		// cleared if a watchdog outlives Stop
 	HMODULE					g_hDbgHelp			= NULL;
 	MiniDumpWriteDumpFn		g_pfnWriteDump		= NULL;
 	LPTOP_LEVEL_EXCEPTION_FILTER g_pfnPrevFilter = NULL;
@@ -85,8 +85,30 @@ namespace
 	const volatile LONG*	g_pHeartbeat		= NULL;
 	const volatile LONG*	g_pSectionOwner		= NULL;
 	const volatile LONG*	g_pSectionAcquisitions = NULL;
-	ThreadIdFn				g_pfnNetworkThread	= NULL;
+	ThreadIdFn volatile		g_pfnNetworkThread	= NULL;		// cleared if a watchdog outlives Stop
+	volatile LONG			g_nStopping			= 0;		// 1 from Stop on: no more callbacks into the caller
 	DWORD					g_nThresholdMs		= 0;
+
+	//////////////////////////////////////////////////////////////////////
+	// Callbacks into the caller: none once Stop has begun, so a watchdog that
+	// outlives Stop never calls into a client that may be shutting down.
+
+	LogFn CurrentLogFn()
+	{
+		if ( g_nStopping )
+			return NULL;
+		return reinterpret_cast< LogFn >( InterlockedCompareExchangePointer(
+			reinterpret_cast< PVOID volatile* >( &g_pfnLog ), NULL, NULL ) );
+	}
+
+	DWORD NetworkThreadId()
+	{
+		if ( g_nStopping )
+			return 0;
+		ThreadIdFn pfn = reinterpret_cast< ThreadIdFn >( InterlockedCompareExchangePointer(
+			reinterpret_cast< PVOID volatile* >( &g_pfnNetworkThread ), NULL, NULL ) );
+		return pfn ? pfn() : 0;
+	}
 
 	//////////////////////////////////////////////////////////////////////
 	// Log: <folder>\Diagnostics.log, UTF-8, one handle per line, no heap
@@ -135,8 +157,8 @@ namespace
 		va_end( pArgs );
 
 		AppendToFile( szLine );
-		if ( g_pfnLog )
-			g_pfnLog( bError, szLine );
+		if ( LogFn pfnLog = CurrentLogFn() )
+			pfnLog( bError, szLine );
 	}
 
 	//////////////////////////////////////////////////////////////////////
@@ -266,7 +288,10 @@ namespace
 			WaitForMultipleObjects( 2, hWait, FALSE, CRASH_WAIT_MS );
 			CloseHandle( hThread );
 		}
-		return EXCEPTION_CONTINUE_SEARCH;
+
+		// Then the process ends as it would have without us (e.g. the CRT's filter
+		// turns an uncaught C++ exception into terminate)
+		return g_pfnPrevFilter ? g_pfnPrevFilter( pExceptionPointers ) : EXCEPTION_CONTINUE_SEARCH;
 	}
 
 	//////////////////////////////////////////////////////////////////////
@@ -293,38 +318,41 @@ namespace
 		szOwner[ 0 ] = 0;
 		if ( nOwner == 0 )
 			return;
-		const DWORD nNetwork = g_pfnNetworkThread ? g_pfnNetworkThread() : 0;
+		const DWORD nNetwork = NetworkThreadId();
 		_snwprintf_s( szOwner, _countof( szOwner ), _TRUNCATE, L", network section held by thread %lu%ls",
 			nOwner, nOwner == nNetwork ? L" (network thread)" : L"" );
 	}
 
+	// Logs first (the line naming the owner is the primary evidence), then dumps.
+	// No heap until the dump is written: a stalled thread may hold the heap lock.
 	void OnStallStarted(const Diag::HangEvent& oEvent)
 	{
-		WCHAR szStamp[ 32 ];
+		WCHAR szStamp[ 32 ], szName[ 128 ];
 		Stamp( szStamp );
-		const std::wstring sName = Diag::DumpFileName( szStamp, L"hang", g_szVersion );
+		// Same form as Diag::DumpFileName, on the stack
+		_snwprintf_s( szName, _countof( szName ), _TRUNCATE, L"%ls-hang-%ls.dmp", szStamp, g_szVersion );
+
+		WCHAR szOwner[ 96 ];
+		OwnerText( oEvent.ownerThreadId, szOwner );
+		Log( true, L"Diagnostics: %ls stall started%ls for %llu s; dump %ls",
+			KindsText( oEvent.kinds ), szOwner, (unsigned long long)( oEvent.durationMs / 1000 ), szName );
 
 		DWORD nError = ERROR_BUSY;
 		bool bDumped = false;
 		if ( InterlockedCompareExchange( &g_nDumpBusy, 1, 0 ) == 0 )
 		{
-			bDumped = WriteDump( sName.c_str(), NULL, 0, nError );
-			if ( bDumped )
-				PruneDumps();
+			// In-process by design. MiniDumpWriteDump suspends every other thread
+			// while it writes; if it then needs a lock one of them holds (loader
+			// lock, process heap), it blocks, and the watchdog with it. That
+			// residual risk is accepted: the line above is already written, and
+			// Stop's bounded wait keeps shutdown from hanging on it.
+			bDumped = WriteDump( szName, NULL, 0, nError );
 			InterlockedExchange( &g_nDumpBusy, 0 );
 		}
-
-		WCHAR szOwner[ 96 ];
-		OwnerText( oEvent.ownerThreadId, szOwner );
 		if ( bDumped )
-			Log( true, L"Diagnostics: %ls stall started%ls for %llu s; dump %ls",
-				KindsText( oEvent.kinds ), szOwner, (unsigned long long)( oEvent.durationMs / 1000 ), sName.c_str() );
+			PruneDumps();
 		else
-		{
-			Log( true, L"Diagnostics: %ls stall started%ls for %llu s; no dump",
-				KindsText( oEvent.kinds ), szOwner, (unsigned long long)( oEvent.durationMs / 1000 ) );
-			LogDumpError( sName.c_str(), nError );
-		}
+			LogDumpError( szName, nError );
 	}
 
 	DWORD WINAPI WatchdogThread(LPVOID pParam)
@@ -340,11 +368,17 @@ namespace
 		Diag::HangDetector oDetector( g_nThresholdMs, REMINDER_MS );
 		unsigned nEpisodeKinds = 0;
 
+		// The detector's clock leaves out time spent in OnStallStarted (a dump can
+		// take seconds), which would otherwise look like a sampling gap and reset
+		// the observation: a false "ended", then a second dump for the same stall.
+		// Durations in the lines add that time back.
+		ULONGLONG nPausedMs = 0, nPausedAtStartMs = 0;
+
 		while ( WaitForSingleObject( hStop, nInterval ) == WAIT_TIMEOUT )
 		{
 			Diag::HangSample oSample;
-			oSample.nowMs				= GetTickCount64();
-			oSample.networkThreadId		= g_pfnNetworkThread ? (uint32_t)g_pfnNetworkThread() : 0;
+			oSample.nowMs				= GetTickCount64() - nPausedMs;
+			oSample.networkThreadId		= (uint32_t)NetworkThreadId();
 			oSample.heartbeat			= (uint32_t)*g_pHeartbeat;
 			oSample.sectionOwner		= (uint32_t)*g_pSectionOwner;
 			oSample.sectionAcquisitions	= (uint32_t)*g_pSectionAcquisitions;
@@ -354,21 +388,26 @@ namespace
 			switch ( oEvent.type )
 			{
 			case Diag::HangEvent::Started:
+			{
 				nEpisodeKinds = oEvent.kinds;
+				nPausedAtStartMs = nPausedMs;
+				const ULONGLONG nBefore = GetTickCount64();
 				OnStallStarted( oEvent );
+				nPausedMs += GetTickCount64() - nBefore;
 				break;
+			}
 
 			case Diag::HangEvent::KindAdded:
 			case Diag::HangEvent::Reminder:
 				nEpisodeKinds |= oEvent.kinds;
 				OwnerText( oEvent.ownerThreadId, szOwner );
 				Log( true, L"Diagnostics: %ls still stalled after %llu s%ls",
-					KindsText( oEvent.kinds ), (unsigned long long)( oEvent.durationMs / 1000 ), szOwner );
+					KindsText( oEvent.kinds ), (unsigned long long)( ( oEvent.durationMs + nPausedMs - nPausedAtStartMs ) / 1000 ), szOwner );
 				break;
 
 			case Diag::HangEvent::Ended:
 				Log( false, L"Diagnostics: %ls stall ended after %llu s",
-					KindsText( nEpisodeKinds ), (unsigned long long)( oEvent.durationMs / 1000 ) );
+					KindsText( nEpisodeKinds ), (unsigned long long)( ( oEvent.durationMs + nPausedMs - nPausedAtStartMs ) / 1000 ) );
 				nEpisodeKinds = 0;
 				break;
 
@@ -437,6 +476,7 @@ bool Start(LPCWSTR pszFolder, LPCWSTR pszVersion, LogFn pfnLog)
 	if ( g_bStarted || g_bStuck )
 		return false;
 
+	g_nStopping = 0;
 	g_pfnLog = pfnLog;
 	g_szFolder[ 0 ] = 0;
 	if ( ! pszFolder || ! *pszFolder || _snwprintf_s( g_szFolder, _countof( g_szFolder ), _TRUNCATE, L"%ls", pszFolder ) < 0 )
@@ -517,6 +557,7 @@ bool Watch(const volatile LONG* pHeartbeat, const volatile LONG* pSectionOwner,
 void Stop()
 {
 	bool bWatchdogGone = true;
+	InterlockedExchange( &g_nStopping, 1 );
 	if ( g_hWatchdog )
 	{
 		SetEvent( g_hStop );
@@ -526,6 +567,8 @@ void Stop()
 			// It exits on its own at its next wait.
 			bWatchdogGone = false;
 			g_bStuck = true;
+			InterlockedExchangePointer( reinterpret_cast< PVOID volatile* >( &g_pfnLog ), NULL );
+			InterlockedExchangePointer( reinterpret_cast< PVOID volatile* >( &g_pfnNetworkThread ), NULL );
 		}
 		CloseHandle( g_hWatchdog );
 		g_hWatchdog = NULL;
