@@ -177,7 +177,7 @@ Create the branch from `main`; commit the design and this plan first (`docs: des
 
 **Files:** Create `shareaza/ReceiveBudget.h`, `tests/diagnostics/test_receive_budget.cpp`; Modify `shareaza/Datagrams.cpp:688-697`
 
-**Interfaces:** Produces `class Diag::ReceiveBudget { public: ReceiveBudget(uint64_t startMs, uint64_t budgetMs, uint32_t maxCount); bool Next(uint64_t nowMs); };` — `Next` counts one datagram and returns false once `maxCount` datagrams were counted or `nowMs - startMs >= budgetMs`. `CDatagrams::OnRun` makes one budget per call with `budgetMs = 50`, `maxCount = 2048` *(designer's call within the spec's "time budget with a count backstop"; a healthy hub reads far fewer per 100 ms iteration)*, shared by both sockets, and stops reading when it is exhausted; `ManagePartials()` still runs once per loop pass.
+**Interfaces:** Produces `class Diag::ReceiveBudget { public: ReceiveBudget(uint64_t startMs, uint64_t budgetMs, uint32_t maxCount); bool Next(uint64_t nowMs); };` — `Next` counts one datagram and returns false once `maxCount` datagrams were counted or `nowMs - startMs >= budgetMs`. `CDatagrams::OnRun` makes one budget per call with `budgetMs = 50`, `maxCount = 2048` *(designer's call within the spec's "time budget with a count backstop")*, shared by both sockets, and stops reading when it is exhausted; `ManagePartials()` still runs once per loop pass.
 
 - [ ] **Write the failing tests:** `count limit` (`maxCount` 3 → true, true, true, false at constant time); `time limit` (true at 0 and 49, false at 50); `both` (whichever first).
 - [ ] **Run** the g++ line for `test_receive_budget.cpp`: FAIL. **Implement.** **Run:** PASS (and `diagnostics-test.yml` picks it up).

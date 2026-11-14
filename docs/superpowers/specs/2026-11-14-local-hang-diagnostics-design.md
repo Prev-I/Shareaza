@@ -228,15 +228,14 @@ holds that lock *(left to the builder how)*.
 
 ### Also in previ.9: a bounded datagram receive pass *(owner)*
 
-Separate from the diagnostics, and decided by the owner on 2026-11-14 before any dump confirms
-the hang's cause:
+Separate from the diagnostics, decided by the owner on 2026-11-14:
 
 - `CDatagrams::OnRun` (`Datagrams.cpp:690-697`) reads datagrams in a loop with no upper bound on
   time or count, while the network thread holds `Network.m_pSection`. Bound each pass, so that
   one call to `CDatagrams::OnRun` always returns and the network loop always reaches the rest of
   its iteration and releases the section.
 - The bound is a time budget per pass, with a count limit as a backstop *(designer's call; the
-  values are the builder's, chosen so a healthy hub never hits them in normal operation)*.
+  values are the builder's)*.
   Datagrams left unread wait in the socket buffer for the next iteration, 100 ms later.
 - It ships as its own commit and its own line in the release notes.
 - **Disclosure** *(repository rule)*: commit messages, the PR, release notes and docs describe
