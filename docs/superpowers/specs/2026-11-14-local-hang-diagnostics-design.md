@@ -185,7 +185,7 @@ holds that lock *(left to the builder how)*.
 - File name carries the kind (`crash` / `hang`), the client version and a timestamp.
 - Dump type "medium": all threads' stacks, thread information, handle data and the data
   segments, not the full process memory. A few MB, not hundreds *(designer's call)*. Even so it
-  may contain peer addresses and search terms; that is acceptable because it stays local.
+  may contain peer addresses, search terms, and the names and paths of files the client has open (downloads, shared files); that is acceptable because it stays local.
 - At most the **5** most recent dumps are kept, crash and hang dumps together; older ones are
   deleted when a new one is written *(designer's call)*.
 - The folder is user data like the rest of `Data\`: the builder checks what the uninstaller does

@@ -4,8 +4,12 @@ How to turn on the client's local crash and hang diagnostics, where the files go
 dump. Nothing is sent anywhere: every file stays on the computer until the user moves or deletes it.
 
 The diagnostics are off by default. With them on, the client writes a minidump when it crashes, and a
-watchdog writes one when the program stops making progress, for example one core pinned at 100%
+watchdog writes one when the network side stops making progress, for example one core pinned at 100%
 while the window still answers. The dump says where every thread was at that moment.
+
+The crash filter never sees `abort`, `/GS` failures and other fast-fail calls, the CRT invalid-parameter
+and pure-call handlers, or anything while a debugger is attached. For those, fall back to "Taking a
+dump by hand" below.
 
 ## Turning diagnostics on
 
@@ -18,14 +22,14 @@ Both settings are under Tools → Settings → Advanced:
 
 The settings are read once, when the client starts. A change takes effect at the next start.
 
-A crash before the settings are loaded, or during shutdown, is not covered.
+A crash before the settings are loaded, or in the last steps of shutdown, is not covered.
 
 ## Where files go
 
 Everything is in `<UserPath>\Data\Diagnostics\`. `<UserPath>` is `%APPDATA%\Shareaza` unless the
 installation was set up with another user path.
 
-- Dumps are named `<YYYYMMDD-HHMMSS>-<crash|hang>-<version>.dmp`, for example
+- Dumps are named `<YYYYMMDD-HHMMSS>-<crash|hang>-<version>.dmp`, with the time in UTC, for example
   `20261120-153012-hang-2.7.11.4.dmp`.
 - At most 5 dumps are kept, crash and hang dumps together. When a new one is written, the oldest are
   deleted.
@@ -33,12 +37,12 @@ installation was set up with another user path.
   new one is started.
 
 A dump holds the stacks of all threads and part of the program's memory. It can contain peer
-addresses and search terms. Look at a dump before sending it to anyone, and send it only to someone
+addresses, search terms, and the names and paths of files the client has open (downloads, shared files). Look at a dump before sending it to anyone, and send it only to someone
 you trust with that.
 
-The folder is user data like the rest of `Data\`. The uninstaller deletes `%APPDATA%\Shareaza\Data`,
-so with the default user path the dumps go with it. With another user path the uninstaller does not
-touch that folder, and the dumps stay until you delete them. To remove them earlier, delete the files
+The folder is user data like the rest of `Data\`. The uninstaller deletes `{app}\Data` and `%APPDATA%\Shareaza\Data`,
+so the dumps go with it when the user path is the default (`%APPDATA%\Shareaza`) or the install
+folder. With any other user path they stay until you delete them. To remove them earlier, delete the files
 in the folder.
 
 ## Taking a dump by hand
@@ -55,7 +59,7 @@ Take the dump while the problem is happening.
 
 ## Opening a dump
 
-Each release has a symbols archive for each platform, beside the installer:
+From previ.9 on, each release has a symbols archive for each platform, beside the installer:
 `iShareaza_<version>_<Win32|x64>_symbols_<YYYY-MM-DD>.zip`. It holds the PDB files of the
 `Shareaza.exe` and of the plugins and libraries the installer ships, built together with the
 installer, so only that release's PDBs match its dump. Take the archive for the same platform and
