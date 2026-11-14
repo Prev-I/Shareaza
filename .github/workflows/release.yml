@@ -93,7 +93,8 @@ jobs:
             # against these (docs/DIAGNOSTICS.md).
             shell: pwsh
             env:
-                OUT_DIR: vc143/${{ matrix.platform }}/${{ matrix.type }}
+                PLATFORM: ${{ matrix.platform }}
+                CONFIGURATION: ${{ matrix.type }}
             run: |
                 $installers = @(Get-ChildItem -Path setup/builds -Filter *.exe)
                 if ($installers.Count -ne 1) { throw "expected one installer in setup/builds, found $($installers.Count)" }
@@ -107,19 +108,25 @@ jobs:
                 $stage = Join-Path $env:RUNNER_TEMP 'symbols'
                 Remove-Item -Recurse -Force $stage -ErrorAction SilentlyContinue
                 New-Item -ItemType Directory -Path $stage | Out-Null
-                # The binaries are the ones setup/scripts/main.iss installs from the build output.
-                $pattern = '^Source: "\{#Compiler\}\\\{#PlatformName\}\\\{#ConfigurationName\}\\([^"\\]+\.(?:exe|dll))"'
+                # The binaries are the ones setup/scripts/main.iss installs from the build
+                # output. Most come from the leg's own platform; the two RazaWebHook DLLs have
+                # a literal Win32 or x64 directory, and the solution builds both in every leg.
+                $pattern = '^Source: "\{#Compiler\}\\(\{#PlatformName\}|Win32|x64)\\\{#ConfigurationName\}\\([^"\\]+\.(?:exe|dll))"'
                 $shipped = Select-String -Path setup/scripts/main.iss -Pattern $pattern |
-                    ForEach-Object { $_.Matches[0].Groups[1].Value } | Sort-Object -Unique
+                    ForEach-Object { [pscustomobject]@{ Platform = $_.Matches[0].Groups[1].Value; Name = $_.Matches[0].Groups[2].Value } } |
+                    Sort-Object Platform, Name -Unique
                 if (-not $shipped) { throw 'no shipped binaries found in main.iss' }
+                # Prebuilt third-party binaries: no PDB exists. Anything else shipped is built
+                # here and must have one.
+                $prebuilt = @('7zxa.dll', '7zxa64.dll', 'unrar.dll', 'unrar64.dll', 'libgfl340.dll')
                 $missing = @()
-                foreach ($name in $shipped) {
-                    $pdb = Join-Path $env:OUT_DIR ([IO.Path]::GetFileNameWithoutExtension($name) + '.pdb')
-                    if (Test-Path $pdb) { Copy-Item $pdb $stage } else { $missing += $name }
+                foreach ($f in $shipped) {
+                    if ($prebuilt -contains $f.Name) { continue }
+                    $platform = if ($f.Platform -eq '{#PlatformName}') { $env:PLATFORM } else { $f.Platform }
+                    $pdb = Join-Path "vc143/$platform/$env:CONFIGURATION" ([IO.Path]::GetFileNameWithoutExtension($f.Name) + '.pdb')
+                    if (Test-Path $pdb) { Copy-Item $pdb $stage } else { $missing += "$($f.Name) ($pdb)" }
                 }
-                # Prebuilt third-party binaries have no PDB here; the product's own must.
-                if ($missing) { Write-Output "::warning::no PDB for: $($missing -join ', ')" }
-                if (-not (Test-Path (Join-Path $stage 'Shareaza.pdb'))) { throw "Shareaza.pdb is not in $env:OUT_DIR" }
+                if ($missing) { throw "no PDB for shipped binaries: $($missing -join ', ')" }
                 Compress-Archive -Path (Join-Path $stage '*') -DestinationPath $zip
                 Get-ChildItem $stage | Select-Object Name, Length
                 Get-Item $zip | Select-Object Name, Length
