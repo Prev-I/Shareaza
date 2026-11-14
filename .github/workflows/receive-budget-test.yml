@@ -1,0 +1,31 @@
+name: Receive budget test
+
+on:
+    pull_request:
+      paths:
+        - shareaza/ReceiveBudget.h
+        - tests/receive-budget/**
+        - .github/workflows/receive-budget-test.yml
+    push:
+      branches:
+        - main
+        - 'prev-i/previ9-*'
+      paths:
+        - shareaza/ReceiveBudget.h
+        - tests/receive-budget/**
+        - .github/workflows/receive-budget-test.yml
+
+permissions:
+    contents: read
+
+jobs:
+    receive_budget:
+        runs-on: ubuntu-latest
+        steps:
+        -   name: Checkout GIT sources
+            uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+            with:
+                persist-credentials: false
+
+        -   name: Build and run the receive-budget test
+            run: g++ -std=c++14 -Wall -Wextra -Werror -I shareaza -o /tmp/rb tests/receive-budget/test_receive_budget.cpp && /tmp/rb
