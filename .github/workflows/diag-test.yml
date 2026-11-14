@@ -1,0 +1,61 @@
+name: Diagnostics module tests
+
+# Builds DiagTest, the console test program for shareaza/Diagnostics.cpp (crash
+# dumps and the network stall watchdog), and runs every case. Each case runs in
+# a child process of its own; the crash cases end their child with an
+# access violation and a stack overflow on purpose.
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - 'prev-i/previ9-*'
+    paths:
+      - 'shareaza/Diagnostics.*'
+      - 'shareaza/HangDetector.h'
+      - 'DiagTest/**'
+      - '.github/workflows/diag-test.yml'
+  pull_request:
+    paths:
+      - 'shareaza/Diagnostics.*'
+      - 'shareaza/HangDetector.h'
+      - 'DiagTest/**'
+      - '.github/workflows/diag-test.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  diag-test:
+    runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: x64
+            configuration: Release
+          - platform: Win32
+            configuration: Debug
+    env:
+      # OutDir is $(SolutionDir)DiagTest\$(Platform)\$(Configuration)\; the build
+      # sets SolutionDir to vc143/, as a build of vc143/Shareaza.sln does.
+      DIAGTEST_EXE: vc143/DiagTest/${{ matrix.platform }}/${{ matrix.configuration }}/DiagTest.exe
+    steps:
+    - name: Checkout GIT sources
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@30375c66a4eea26614e0d39710365f22f8b0af57 # v3.0.0
+
+    - name: Build
+      run: msbuild DiagTest/DiagTest_143.vcxproj /nologo /v:m /p:Configuration=${{ matrix.configuration }} /p:Platform=${{ matrix.platform }} /p:SolutionDir=${{ github.workspace }}/vc143/
+
+    - name: Run DiagTest
+      timeout-minutes: 15
+      shell: pwsh
+      run: |
+        & $env:DIAGTEST_EXE
+        exit $LASTEXITCODE
