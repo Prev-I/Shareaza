@@ -42,6 +42,7 @@
 #include "..\shareaza\Diagnostics.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string>
 #include <vector>
 
@@ -104,6 +105,21 @@ namespace
 				++nCount;
 		LeaveCriticalSection( &g_csLog );
 		return nCount;
+	}
+
+	// <n> from the first "stall ended after <n> s" line, or -1
+	long EndedSeconds()
+	{
+		long nSeconds = -1;
+		EnterCriticalSection( &g_csLog );
+		for ( size_t i = 0 ; i < g_oLines.size() && nSeconds < 0 ; ++i )
+		{
+			const size_t nPos = g_oLines[ i ].find( L"stall ended after " );
+			if ( nPos != std::wstring::npos )
+				nSeconds = wcstol( g_oLines[ i ].c_str() + nPos + 18, NULL, 10 );
+		}
+		LeaveCriticalSection( &g_csLog );
+		return nSeconds;
 	}
 
 	// The simulated network thread and section.
@@ -388,6 +404,7 @@ namespace
 		CHECK( Dumps( sFolder, NULL ).size() == 1 );
 		CHECK( CountLines( L"stall started" ) == 1 );
 		CHECK( CountLines( L"stall ended" ) == 1 );
+		CHECK( EndedSeconds() >= 9 );	// the 3 s spent starting is added back
 		const std::string sLog = ReadFileBytes( sFolder + L"\\Diagnostics.log" );
 		CHECK( CountOccurrences( sLog, "stall started" ) == 1 );
 		CHECK( CountOccurrences( sLog, "stall ended" ) == 1 );

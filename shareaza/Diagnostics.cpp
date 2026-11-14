@@ -68,7 +68,7 @@ namespace
 	HMODULE					g_hDbgHelp			= NULL;
 	MiniDumpWriteDumpFn		g_pfnWriteDump		= NULL;
 	LPTOP_LEVEL_EXCEPTION_FILTER g_pfnPrevFilter = NULL;
-	bool					g_bStarted			= false;
+	volatile bool			g_bStarted			= false;	// read by the crash filter
 	bool					g_bStuck			= false;	// a watchdog outlived Stop's wait: never restart
 
 	volatile LONG			g_nDumpBusy			= 0;		// 1 while a dump is being written
@@ -148,6 +148,24 @@ namespace
 		CloseHandle( hFile );
 	}
 
+	// Stack only: formats into szLine and appends it to the module's own log file
+	void LogToFile(WCHAR (&szLine)[ LINE_CHARS ], LPCWSTR pszFormat, ...)
+	{
+		va_list pArgs;
+		va_start( pArgs, pszFormat );
+		_vsnwprintf_s( szLine, _countof( szLine ), _TRUNCATE, pszFormat, pArgs );
+		va_end( pArgs );
+		AppendToFile( szLine );
+	}
+
+	// The caller's LogFn may allocate (Shareaza's formats a CString), so it is never
+	// called before a dump that a stalled thread's heap lock could otherwise prevent
+	void LogToCaller(bool bError, LPCWSTR pszLine)
+	{
+		if ( LogFn pfnLog = CurrentLogFn() )
+			pfnLog( bError, pszLine );
+	}
+
 	void Log(bool bError, LPCWSTR pszFormat, ...)
 	{
 		WCHAR szLine[ LINE_CHARS ];
@@ -157,8 +175,7 @@ namespace
 		va_end( pArgs );
 
 		AppendToFile( szLine );
-		if ( LogFn pfnLog = CurrentLogFn() )
-			pfnLog( bError, szLine );
+		LogToCaller( bError, szLine );
 	}
 
 	//////////////////////////////////////////////////////////////////////
@@ -273,9 +290,11 @@ namespace
 
 	LONG WINAPI CrashFilter(EXCEPTION_POINTERS* pExceptionPointers)
 	{
-		// One dump per process: a second exception (another thread, or the dump thread) goes straight on
-		if ( InterlockedExchange( &g_nCrashing, 1 ) != 0 )
-			return EXCEPTION_CONTINUE_SEARCH;
+		// Not started (a filter installed after ours may still chain to it after Stop,
+		// when dbghelp may be gone), or one dump per process already under way (another
+		// thread, or the dump thread): straight on to the previous filter
+		if ( ! g_bStarted || InterlockedExchange( &g_nCrashing, 1 ) != 0 )
+			return g_pfnPrevFilter ? g_pfnPrevFilter( pExceptionPointers ) : EXCEPTION_CONTINUE_SEARCH;
 
 		g_pCrashPointers = pExceptionPointers;
 		g_nCrashThreadId = GetCurrentThreadId();
@@ -323,8 +342,9 @@ namespace
 			nOwner, nOwner == nNetwork ? L" (network thread)" : L"" );
 	}
 
-	// Logs first (the line naming the owner is the primary evidence), then dumps.
-	// No heap until the dump is written: a stalled thread may hold the heap lock.
+	// Order: the module's own log line (the line naming the owner is the primary
+	// evidence), the dump, then the caller's LogFn. No heap until the dump is
+	// written: a stalled thread may hold the heap lock.
 	void OnStallStarted(const Diag::HangEvent& oEvent)
 	{
 		WCHAR szStamp[ 32 ], szName[ 128 ];
@@ -332,9 +352,9 @@ namespace
 		// Same form as Diag::DumpFileName, on the stack
 		_snwprintf_s( szName, _countof( szName ), _TRUNCATE, L"%ls-hang-%ls.dmp", szStamp, g_szVersion );
 
-		WCHAR szOwner[ 96 ];
+		WCHAR szOwner[ 96 ], szLine[ LINE_CHARS ];
 		OwnerText( oEvent.ownerThreadId, szOwner );
-		Log( true, L"Diagnostics: %ls stall started%ls for %llu s; dump %ls",
+		LogToFile( szLine, L"Diagnostics: %ls stall started%ls for %llu s; dump %ls",
 			KindsText( oEvent.kinds ), szOwner, (unsigned long long)( oEvent.durationMs / 1000 ), szName );
 
 		DWORD nError = ERROR_BUSY;
@@ -345,10 +365,13 @@ namespace
 			// while it writes; if it then needs a lock one of them holds (loader
 			// lock, process heap), it blocks, and the watchdog with it. That
 			// residual risk is accepted: the line above is already written, and
-			// Stop's bounded wait keeps shutdown from hanging on it.
+			// Stop's bounded wait keeps shutdown from hanging on it. CreateFileW may
+			// itself touch the process heap before the dump starts; also accepted.
 			bDumped = WriteDump( szName, NULL, 0, nError );
 			InterlockedExchange( &g_nDumpBusy, 0 );
 		}
+
+		LogToCaller( true, szLine );
 		if ( bDumped )
 			PruneDumps();
 		else
@@ -584,11 +607,11 @@ void Stop()
 	LPTOP_LEVEL_EXCEPTION_FILTER pfnCurrent = SetUnhandledExceptionFilter( g_pfnPrevFilter );
 	if ( pfnCurrent != CrashFilter )
 		SetUnhandledExceptionFilter( pfnCurrent );
-	g_pfnPrevFilter = NULL;
+	// g_pfnPrevFilter stays: a filter installed after ours may still chain to ours
 
+	g_bStarted = false;		// before dbghelp goes: the filter chains on at once from here
 	if ( bWatchdogGone && g_nCrashing == 0 )
 		Unload();
-	g_bStarted = false;
 }
 
 } // namespace Diagnostics
