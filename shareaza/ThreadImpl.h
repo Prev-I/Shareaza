@@ -124,6 +124,12 @@ public:
 		return ( WaitForSingleObject( m_pCancel, dwTimeout ) == WAIT_TIMEOUT );
 	}
 
+	// Thread ID, 0 if no thread was started (safe to read from any thread)
+	inline DWORD GetThreadID() const throw()
+	{
+		return m_nThreadID;
+	}
+
 	inline bool IsThreadAlive() const throw()
 	{
 		return CRazaThread::IsThreadAlive( m_nThreadID );

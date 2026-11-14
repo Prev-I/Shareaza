@@ -115,6 +115,7 @@ CNetwork::CNetwork()
 	, QueryRoute			( new CRouteCache() )
 	, QueryKeys				( new CQueryKeys() )
 	, UPnPFinder			( NULL )
+	, m_nHeartbeat			( 0 )
 	, m_pHost				()
 	, m_pHostIPv6			()
 	, m_bAutoConnect		( FALSE )
@@ -1258,6 +1259,7 @@ void CNetwork::OnRun()
 		while ( IsThreadEnabled() )
 		{
 			Doze( 100 );
+			InterlockedIncrement( &m_nHeartbeat );	// Watchdog heartbeat
 
 			if ( ! theApp.m_bLive )
 			{
