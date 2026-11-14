@@ -170,6 +170,10 @@ public:
 	void				Message(WORD nType, LPCTSTR pszFormat, ...);
 	// Log to file and to system window
 	void				PrintMessage(WORD nType, const CString& strLog);
+	// Same, but never waits: drops the line if the log lock is busy (diagnostics watchdog)
+	bool				TryMessage(WORD nType, LPCTSTR pszLine);
+
+	void				AppendMessage(CLogMessage* pMsg, const CString& strLog);	// Caller holds m_csMessage
 
 	void				SplashStep(LPCTSTR pszMessage = NULL, int nMax = 0, bool bClosing = false);
 	void				SplashAbort();
