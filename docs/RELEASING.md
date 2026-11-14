@@ -8,8 +8,9 @@ future change that adds hash checking to the client's updater should read this f
 Each release has these assets:
 
 - One installer per platform, named `iShareaza_<version>_<Win32|x64>_Release_<YYYY-MM-DD>.exe`.
-- One symbols archive per platform, named like the installer with `_symbols.zip` in place of `.exe`:
-  `iShareaza_<version>_<Win32|x64>_Release_<YYYY-MM-DD>_symbols.zip`. It holds the PDB files of the
+- One symbols archive per platform, named like the installer with `_symbols_` in place of `_Release_` and `.zip` in place of `.exe`:
+  `iShareaza_<version>_<Win32|x64>_symbols_<YYYY-MM-DD>.zip`. The name must never contain `Release`,
+  because the update check takes the first asset whose URL has the platform and `Release` in it. It holds the PDB files of the
   binaries that build produced and the installer ships, flat, and nothing else.
   [DIAGNOSTICS.md](DIAGNOSTICS.md) says how to open a dump against it.
 - `SHA256SUMS.txt`, in `sha256sum` format: lowercase hex, two spaces, the file name. It lists

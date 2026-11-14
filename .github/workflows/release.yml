@@ -97,7 +97,13 @@ jobs:
             run: |
                 $installers = @(Get-ChildItem -Path setup/builds -Filter *.exe)
                 if ($installers.Count -ne 1) { throw "expected one installer in setup/builds, found $($installers.Count)" }
-                $zip = Join-Path $installers[0].DirectoryName ($installers[0].BaseName + '_symbols.zip')
+                # The name must not contain "Release": the client's update check takes the first
+                # asset URL with the platform and "Release" in it, and must never pick this zip.
+                $base = $installers[0].BaseName
+                if (-not $base.Contains('_Release_')) { throw "installer name $base has no _Release_" }
+                $zipName = $base.Replace('_Release_', '_symbols_') + '.zip'
+                if ($zipName.Contains('Release')) { throw "symbols archive name $zipName contains Release" }
+                $zip = Join-Path $installers[0].DirectoryName $zipName
                 $stage = Join-Path $env:RUNNER_TEMP 'symbols'
                 Remove-Item -Recurse -Force $stage -ErrorAction SilentlyContinue
                 New-Item -ItemType Directory -Path $stage | Out-Null

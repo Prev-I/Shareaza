@@ -56,7 +56,7 @@ Take the dump while the problem is happening.
 ## Opening a dump
 
 Each release has a symbols archive for each platform, beside the installer:
-`iShareaza_<version>_<Win32|x64>_Release_<YYYY-MM-DD>_symbols.zip`. It holds the PDB files of the
+`iShareaza_<version>_<Win32|x64>_symbols_<YYYY-MM-DD>.zip`. It holds the PDB files of the
 `Shareaza.exe` and of the plugins and libraries the installer ships, built together with the
 installer, so only that release's PDBs match its dump. Take the archive for the same platform and
 version as the dump.
