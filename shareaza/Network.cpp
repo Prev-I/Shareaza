@@ -38,6 +38,7 @@
 #include "LocalSearch.h"
 #include "Neighbours.h"
 #include "Network.h"
+#include "HangDetector.h"
 #include "QueryHashMaster.h"
 #include "QueryHit.h"
 #include "QueryKeys.h"
@@ -1347,8 +1348,14 @@ void CNetwork::OnRun()
 				if ( Settings.Connection.EnableFirewallException && nPort != m_nFirewallCheckedPort )
 					CheckFirewall( nPort );
 			}
-			else if ( ! bListen )
-				continue;
+			else
+			{
+				static Diag::RateLimiter oLockLimiter;
+				LogLockTimeout( oLockLimiter, _T("CNetwork::OnRun") );
+
+				if ( ! bListen )
+					continue;
+			}
 
 			Neighbours.OnRun();
 
@@ -1535,7 +1542,12 @@ BOOL CNetwork::RoutePacket(CG2Packet* pPacket)
 BOOL CNetwork::SendPush(const Hashes::Guid& oGUID, DWORD nIndex)
 {
 	CSingleLock pLock( &m_pSection );
-	if ( ! pLock.Lock( 250 ) ) return TRUE;
+	if ( ! pLock.Lock( 250 ) )
+	{
+		static Diag::RateLimiter oLockLimiter;
+		LogLockTimeout( oLockLimiter, _T("CNetwork::SendPush") );
+		return TRUE;
+	}
 
 	if ( ! IsListening() ) return FALSE;
 
@@ -1715,6 +1727,16 @@ void CNetwork::OnQueryHits(CQueryHit* pHits)
 	m_oJobs.AddTail( CJob( CJob::Hit, pHits ) );
 }
 
+void CNetwork::LogLockTimeout(Diag::RateLimiter& oLimiter, LPCTSTR pszSite)
+{
+	if ( theApp.IsLogDisabled( MSG_DEBUG ) )
+		return;
+
+	uint32_t nSuppressed = 0;
+	if ( oLimiter.Allow( GetTickCount64(), nSuppressed ) )
+		theApp.Message( MSG_DEBUG, _T("Lock timeout: network section at %s (%u more suppressed)"), pszSite, nSuppressed );
+}
+
 void CNetwork::RunJobs()
 {
 	// Spend here no more than 250 ms at once
@@ -1745,6 +1767,11 @@ void CNetwork::RunJobs()
 				;
 			}
 			oNetworkLock.Unlock();
+		}
+		else
+		{
+			static Diag::RateLimiter oLockLimiter;
+			LogLockTimeout( oLockLimiter, _T("CNetwork::RunJobs") );
 		}
 
 		oJobLock.Lock();

@@ -33,6 +33,7 @@
 #include "Neighbour.h"
 #include "Neighbours.h"
 #include "Network.h"
+#include "HangDetector.h"
 #include "Packet.h"
 #include "Security.h"
 #include "VendorCache.h"
@@ -128,7 +129,11 @@ BOOL CDiscoveryServices::Add(LPCTSTR pszAddress, CDiscoveryService::Type nType, 
 {
 	CSingleLock pLock( &Network.m_pSection, FALSE );
 	if ( ! pLock.Lock( 250 ) )
+	{
+		static Diag::RateLimiter oLockLimiter;
+		CNetwork::LogLockTimeout( oLockLimiter, _T("CDiscoveryServices::Add") );
 		return FALSE;
+	}
 
 	CString strAddress( pszAddress );
 
@@ -320,7 +325,11 @@ BOOL CDiscoveryServices::CheckWebCacheValid(LPCTSTR pszAddress)
 
 	CSingleLock pLock( &Network.m_pSection, FALSE );
 	if ( ! pLock.Lock( 250 ) )
+	{
+		static Diag::RateLimiter oLockLimiter;
+		CNetwork::LogLockTimeout( oLockLimiter, _T("CDiscoveryServices::CheckWebCacheValid") );
 		return FALSE;
+	}
 
 	// Check it's not blocked
 	for ( POSITION pos = m_pList.GetHeadPosition() ; pos ; )
@@ -666,7 +675,11 @@ BOOL CDiscoveryServices::EnoughServices() const
 
 	CSingleLock pLock( &Network.m_pSection, FALSE );
 	if ( ! pLock.Lock( 250 ) )
+	{
+		static Diag::RateLimiter oLockLimiter;
+		CNetwork::LogLockTimeout( oLockLimiter, _T("CDiscoveryServices::EnoughServices") );
 		return TRUE;
+	}
 
 	for ( POSITION pos = m_pList.GetHeadPosition() ; pos ; )
 	{
@@ -983,7 +996,11 @@ BOOL CDiscoveryServices::Update()
 
 	CSingleLock pLock( &Network.m_pSection, FALSE );
 	if ( ! pLock.Lock( 250 ) )
+	{
+		static Diag::RateLimiter oLockLimiter;
+		CNetwork::LogLockTimeout( oLockLimiter, _T("CDiscoveryServices::Update") );
 		return FALSE;
+	}
 
 	if ( m_pRequest.IsPending() )
 		// Don't run concurrent request
@@ -1020,7 +1037,11 @@ BOOL CDiscoveryServices::Execute(PROTOCOLID nProtocol, USHORT nForceDiscovery)
 
 	CSingleLock pLock( &Network.m_pSection, FALSE );
 	if ( ! pLock.Lock( 250 ) )
+	{
+		static Diag::RateLimiter oLockLimiter;
+		CNetwork::LogLockTimeout( oLockLimiter, _T("CDiscoveryServices::Execute") );
 		return FALSE;
+	}
 
 	if ( m_pRequest.IsPending() )
 		return FALSE;
@@ -1135,7 +1156,11 @@ int CDiscoveryServices::ExecuteBootstraps(int nCount, BOOL bUDP, PROTOCOLID nPro
 
 	CSingleLock pLock( &Network.m_pSection, FALSE );
 	if ( ! pLock.Lock( 250 ) )
+	{
+		static Diag::RateLimiter oLockLimiter;
+		CNetwork::LogLockTimeout( oLockLimiter, _T("CDiscoveryServices::ExecuteBootstraps") );
 		return 0;
+	}
 
 	for ( POSITION pos = m_pList.GetHeadPosition() ; pos ; )
 	{
@@ -1328,7 +1353,11 @@ BOOL CDiscoveryServices::RequestWebCache(BOOL bForced, CDiscoveryService* pServi
 
 	CSingleLock pLock( &Network.m_pSection, FALSE );
 	if ( ! pLock.Lock( 250 ) )
+	{
+		static Diag::RateLimiter oLockLimiter;
+		CNetwork::LogLockTimeout( oLockLimiter, _T("CDiscoveryServices::RequestWebCache") );
 		return FALSE;
+	}
 
 	const DWORD tNow = static_cast< DWORD >( time( NULL ) );
 	DWORD nHosts = 0;
@@ -1438,6 +1467,11 @@ void CDiscoveryServices::OnRun()
 					bSuccess = RunWebCacheGet( TRUE );
 				}
 			}
+			else
+			{
+				static Diag::RateLimiter oLockLimiter;
+				CNetwork::LogLockTimeout( oLockLimiter, _T("CDiscoveryServices::OnRun#1") );
+			}
 		}
 		break;
 
@@ -1473,8 +1507,16 @@ void CDiscoveryServices::OnRun()
 		}
 
 		CSingleLock pLock( &Network.m_pSection );
-		if ( pLock.Lock( 250 ) && Check( m_pWebCache ) )
-			m_pWebCache->OnFailure();
+		if ( pLock.Lock( 250 ) )
+		{
+			if ( Check( m_pWebCache ) )
+				m_pWebCache->OnFailure();
+		}
+		else
+		{
+			static Diag::RateLimiter oLockLimiter;
+			CNetwork::LogLockTimeout( oLockLimiter, _T("CDiscoveryServices::OnRun#2") );
+		}
 	}
 
 	m_pRequest.Clear();
@@ -1487,7 +1529,11 @@ BOOL CDiscoveryServices::RunWebCacheGet(BOOL bCaches)
 {
 	CSingleLock pLock( &Network.m_pSection, FALSE );
 	if ( ! pLock.Lock( 250 ) )
+	{
+		static Diag::RateLimiter oLockLimiter;
+		CNetwork::LogLockTimeout( oLockLimiter, _T("CDiscoveryServices::RunWebCacheGet#1") );
 		return FALSE;
+	}
 
 	if ( ! Check( m_pWebCache ) )
 		return FALSE;
@@ -1531,7 +1577,11 @@ BOOL CDiscoveryServices::RunWebCacheGet(BOOL bCaches)
 	const DWORD tNow = static_cast< DWORD >( time( NULL ) );
 
 	if ( ! pLock.Lock( 250 ) )
+	{
+		static Diag::RateLimiter oLockLimiter;
+		CNetwork::LogLockTimeout( oLockLimiter, _T("CDiscoveryServices::RunWebCacheGet#2") );
 		return FALSE;
+	}
 
 	if ( ! Check( m_pWebCache ) )
 		return FALSE;
@@ -1896,7 +1946,11 @@ BOOL CDiscoveryServices::RunWebCacheUpdate()
 {
 	CSingleLock pLock( &Network.m_pSection, FALSE );
 	if ( ! pLock.Lock( 250 ) )
+	{
+		static Diag::RateLimiter oLockLimiter;
+		CNetwork::LogLockTimeout( oLockLimiter, _T("CDiscoveryServices::RunWebCacheUpdate#1") );
 		return FALSE;
+	}
 
 	if ( ! Check( m_pWebCache, CDiscoveryService::dsWebCache ) )
 		return FALSE;
@@ -1968,7 +2022,11 @@ BOOL CDiscoveryServices::RunWebCacheUpdate()
 	const DWORD tNow = static_cast< DWORD >( time( NULL ) );
 
 	if ( ! pLock.Lock( 250 ) )
+	{
+		static Diag::RateLimiter oLockLimiter;
+		CNetwork::LogLockTimeout( oLockLimiter, _T("CDiscoveryServices::RunWebCacheUpdate#2") );
 		return FALSE;
+	}
 
 	if ( ! Check( m_pWebCache, CDiscoveryService::dsWebCache ) )
 		return FALSE;
@@ -2053,7 +2111,11 @@ BOOL CDiscoveryServices::RunWebCacheFile()
 {
 	CSingleLock pLock( &Network.m_pSection, FALSE );
 	if ( ! pLock.Lock( 250 ) )
+	{
+		static Diag::RateLimiter oLockLimiter;
+		CNetwork::LogLockTimeout( oLockLimiter, _T("CDiscoveryServices::RunWebCacheFile#1") );
 		return FALSE;
+	}
 
 	CDiscoveryService::Type nType;
 	switch ( m_nWebCache )
@@ -2090,7 +2152,11 @@ BOOL CDiscoveryServices::RunWebCacheFile()
 	pFile.Seek( 0, CFile::begin );
 
 	if ( ! pLock.Lock( 250 ) )
+	{
+		static Diag::RateLimiter oLockLimiter;
+		CNetwork::LogLockTimeout( oLockLimiter, _T("CDiscoveryServices::RunWebCacheFile#2") );
 		return FALSE;
+	}
 
 	if ( ! Check( m_pWebCache, nType ) )
 		return FALSE;

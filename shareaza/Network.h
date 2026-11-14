@@ -23,6 +23,7 @@
 
 #include "ThreadImpl.h"
 #include "Settings.h"
+#include "HangDetector.h"
 
 #pragma comment(lib, "ws2_32.lib")
 
@@ -224,6 +225,8 @@ public:
 	BOOL		AcquireLocalAddress(LPCTSTR pszHeader, WORD nPort = 0, const IN_ADDR* pFromAddress = NULL, const IN6_ADDR* pFromIPv6Address = NULL);
 	BOOL		AcquireLocalAddress(const IN_ADDR& pAddress, WORD nPort = 0, const IN_ADDR* pFromAddress = NULL);
 	BOOL		AcquireLocalAddress(const IN6_ADDR& pAddress, WORD nPort = 0, const IN6_ADDR* pFromAddress = NULL);
+	// Debug-level, rate-limited note that a timed lock on m_pSection was given up (one limiter per site)
+	static void	LogLockTimeout(Diag::RateLimiter& oLimiter, LPCTSTR pszSite);
 	static BOOL	Resolve(LPCTSTR pszHost, int nPort, SOCKADDR_IN* pHost, BOOL bNames = TRUE);
 	BOOL		AsyncResolve(LPCTSTR pszAddress, WORD nPort, PROTOCOLID nProtocol, BYTE nCommand);
 	// Pending network name resolves queue size
