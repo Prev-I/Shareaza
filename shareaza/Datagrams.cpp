@@ -691,7 +691,7 @@ void CDatagrams::OnRun()
 	TryWrite();
 	ManageOutput();
 
-	// One bound for the whole receive pass: the time budget and count limit are shared by both sockets
+	// One bound for the whole receive pass: the time budget and count limit are shared by all sockets read in the pass
 	Diag::ReceiveBudget pBudget( GetTickCount64(), RECEIVE_BUDGET_MS, RECEIVE_BUDGET_COUNT );
 	bool bBudget = true;
 
