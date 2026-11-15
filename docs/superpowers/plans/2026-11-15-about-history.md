@@ -90,18 +90,19 @@ Actions (`windows-2022`), Python 3 for the check.
 **Interfaces:**
 - Consumes: `tests/encoding/check-cp1252.py` from Task 1.
 
-- [ ] **Step 1: Rewrite `IDD_ABOUT`** as `DIALOGEX 0, 0, 293, 173` with the same style, caption and
+- [ ] **Step 1: Rewrite `IDD_ABOUT`** as `DIALOGEX 0, 0, 293, 179` with the same style, caption and
   font, and these controls (x 7, width 279 unless stated):
   - `IDC_TITLE`, y 15, h 10, `SS_CENTERIMAGE` (unchanged)
   - four copyright `LTEXT`s, `IDC_STATIC`, h 10, at y 27, 37, 47, 57, text from Global
     Constraints
-  - GPL text, `IDC_STATIC`, y 71, h 24
-  - `Logo by Kid at pakkeimak.com`, y 99, h 10
-  - MaxMind line, y 112, h 18
-  - `IDC_WEB`, `https://github.com/Prev-I/Shareaza`, y 133, h 10
-  - `DEFPUSHBUTTON "OK",IDOK,226,150,60,16`
+  - GPL text, `IDC_STATIC`, y 71, h 28
+  - `Logo by Kid at pakkeimak.com`, y 103, h 10
+  - MaxMind line, y 116, h 20
+  - `IDC_WEB`, `https://github.com/Prev-I/Shareaza`, y 139, h 10
+  - `DEFPUSHBUTTON "OK",IDOK,226,156,60,16`
 
-  No control's y + h exceeds the next control's y, and the last ends at 166, inside 173.
+  No control's y + h exceeds the next control's y, and the last ends at 172, inside 179. The GPL and MaxMind
+  heights allow for the skin's 11 px font, not the template's 8 pt (final review).
 - [ ] **Step 2: Set `LegalCopyright`** to the one-line form, with `A9`. Leave every other
   version-info value as it is.
 - [ ] **Step 3: In `CAboutDlg::OnInitDialog`**, delete the `GetFileVersionInfoSize` …

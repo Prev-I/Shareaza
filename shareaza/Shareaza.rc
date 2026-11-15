@@ -616,7 +616,7 @@ BEGIN
     COMBOBOX        IDC_TRAY_MINIMISE,180,192,85,55,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
 END
 
-IDD_ABOUT DIALOGEX 0, 0, 293, 173
+IDD_ABOUT DIALOGEX 0, 0, 293, 179
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "About Shareaza"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
@@ -626,11 +626,11 @@ BEGIN
     LTEXT           "Copyright © ivan386, 2013-2019",IDC_STATIC,7,37,279,10
     LTEXT           "Copyright © Salvatore Ansani, 2022-2024",IDC_STATIC,7,47,279,10
     LTEXT           "Copyright © Claudio Previtali (Prev-I), 2026",IDC_STATIC,7,57,279,10
-    LTEXT           "Shareaza is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.",IDC_STATIC,7,71,279,24
-    LTEXT           "Logo by Kid at pakkeimak.com",IDC_STATIC,7,99,279,10
-    LTEXT           "This product includes GeoLite data created by MaxMind, available from http://maxmind.com/",IDC_STATIC,7,112,279,18
-    LTEXT           "https://github.com/Prev-I/Shareaza",IDC_WEB,7,133,279,10
-    DEFPUSHBUTTON   "OK",IDOK,226,150,60,16
+    LTEXT           "Shareaza is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.",IDC_STATIC,7,71,279,28
+    LTEXT           "Logo by Kid at pakkeimak.com",IDC_STATIC,7,103,279,10
+    LTEXT           "This product includes GeoLite data created by MaxMind, available from http://maxmind.com/",IDC_STATIC,7,116,279,20
+    LTEXT           "https://github.com/Prev-I/Shareaza",IDC_WEB,7,139,279,10
+    DEFPUSHBUTTON   "OK",IDOK,226,156,60,16
 END
 
 IDD_GRAPH_LIST DIALOGEX 0, 0, 247, 230

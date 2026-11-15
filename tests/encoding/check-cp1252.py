@@ -25,6 +25,17 @@ def faults(path):
         return
     if data.startswith(BOM):
         yield f"{path}:1: starts with a UTF-8 byte order mark"
+    if b"\x00" in data:
+        yield f"{path}:1: holds NUL bytes: the file was saved as UTF-16"
+    # A Windows-1252 file with a lone A9 or A0 is never valid UTF-8; one that
+    # decodes as UTF-8 was converted (A9 became C2 A9, shown as two characters).
+    if any(b >= 0x80 for b in data) and REPLACEMENT not in data:
+        try:
+            data.decode("utf-8")
+        except UnicodeDecodeError:
+            pass
+        else:
+            yield f"{path}:1: is valid UTF-8 with non-ASCII characters: the file was saved as UTF-8"
     for number, line in enumerate(data.split(b"\n"), start=1):
         if REPLACEMENT in line:
             yield f"{path}:{number}: holds U+FFFD (EF BF BD): the file was saved as UTF-8"
