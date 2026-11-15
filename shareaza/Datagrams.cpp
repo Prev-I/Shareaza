@@ -1559,14 +1559,20 @@ BOOL CDatagrams::OnAcknowledgeSGP(const SOCKADDR_IN* pHost, const SGP_HEADER* pH
 
 	CDatagramOut** pHash = m_pOutputHash + ( nHash & DATAGRAM_HASH_MASK );
 
-	for ( CDatagramOut* pDG = *pHash ; pDG ; pDG = pDG->m_pNextHash )
+	// Remove() moves a datagram to the free list and reuses its m_pNextHash for that list:
+	// take the next one first, or the walk would carry on through freed datagrams
+	for ( CDatagramOut* pDG = *pHash ; pDG ; )
 	{
+		CDatagramOut* pNext = pDG->m_pNextHash;
+
 		if (	pDG->m_pHost.sin_addr.S_un.S_addr == pHost->sin_addr.S_un.S_addr &&
 				pDG->m_pHost.sin_port == pHost->sin_port &&
 				pDG->m_nSequence == pHeader->nSequence )
 		{
 			if ( pDG->Acknowledge( pHeader->nPart ) ) Remove( pDG );
 		}
+
+		pDG = pNext;
 	}
 
 	return TRUE;
@@ -1600,14 +1606,20 @@ BOOL CDatagrams::OnAcknowledgeSGP(const SOCKADDR_IN6* pHost, const SGP_HEADER* p
 
 	CDatagramOut** pHash = m_pOutputHash + ( nHash & DATAGRAM_HASH_MASK );
 
-	for ( CDatagramOut* pDG = *pHash ; pDG ; pDG = pDG->m_pNextHash )
+	// Remove() moves a datagram to the free list and reuses its m_pNextHash for that list:
+	// take the next one first, or the walk would carry on through freed datagrams
+	for ( CDatagramOut* pDG = *pHash ; pDG ; )
 	{
+		CDatagramOut* pNext = pDG->m_pNextHash;
+
 		if (	IN6_ADDR_EQUAL( &pDG->m_pHostIPv6.sin6_addr, &pHost->sin6_addr ) &&
 				pDG->m_pHostIPv6.sin6_port == pHost->sin6_port &&
 				pDG->m_nSequence == pHeader->nSequence )
 		{
 			if ( pDG->Acknowledge( pHeader->nPart ) ) Remove( pDG );
 		}
+
+		pDG = pNext;
 	}
 
 	return TRUE;
