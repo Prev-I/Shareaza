@@ -164,7 +164,7 @@ SourceDir={#SourcePath}..\..
 VersionInfoVersion={#version}
 VersionInfoDescription={#Description}
 AppPublisher={#Publisher}
-AppCopyright=Copyright ï¿½ {#Publisher}. All rights reserved.
+AppCopyright=Copyright © Shareaza Development Team 2002-2017, ivan386 2013-2019, Salvatore Ansani 2022-2024, Claudio Previtali (Prev-I) 2026
 
 ; Links to website for software panel
 AppPublisherURL=http://shareaza.sourceforge.net/

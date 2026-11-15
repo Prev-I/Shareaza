@@ -71,22 +71,6 @@ BOOL CAboutDlg::OnInitDialog()
 	// Long version
 	m_wndTitle.SetWindowText( _T(CLIENT_NAME) _T(" ") + theApp.m_sVersionLong );
 
-	DWORD dwSize = GetFileVersionInfoSize( theApp.m_strBinaryPath, &dwSize );
-	BYTE* pBuffer = new BYTE[ dwSize ];
-	GetFileVersionInfo( theApp.m_strBinaryPath, NULL, dwSize, pBuffer );
-
-	BYTE* pValue = NULL;
-	CString strCopyRight;
-
-	if ( VerQueryValue( pBuffer, L"\\StringFileInfo\\000004b0\\LegalCopyright", 
-		 (void**)&pValue, (UINT*)&dwSize ) )
-		strCopyRight = (LPCTSTR)pValue;
-
-	delete [] pBuffer;
-
-	CWnd* pWnd = GetDlgItem( IDC_COPYRIGHT );
-	pWnd->SetWindowText( (LPCTSTR)strCopyRight );
-
 	return TRUE;
 }
 
