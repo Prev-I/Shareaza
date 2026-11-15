@@ -530,6 +530,49 @@ private:
 	CLocked& operator=(const CLocked&);
 };
 
+// Mutex which records its owner thread and counts acquisitions in all builds.
+// The counters are written only with Interlocked operations, so another
+// thread (the hang watchdog) may read them without taking the lock.
+class CMutexTracked : public CMutex
+{
+public:
+	CMutexTracked(BOOL bInitiallyOwn = FALSE, LPCTSTR lpszName = NULL, LPSECURITY_ATTRIBUTES lpsaAttribute = NULL)
+		: CMutex( bInitiallyOwn, lpszName, lpsaAttribute )
+		, m_nThreadId( 0 )
+		, m_nEnterCount( 0 )
+		, m_nAcquisitions( 0 )
+	{
+	}
+
+	virtual BOOL Lock(DWORD dwTimeout = INFINITE)
+	{
+		if ( CMutex::Lock( dwTimeout ) )
+		{
+			if ( InterlockedIncrement( &m_nEnterCount ) == 1 )
+				InterlockedIncrement( &m_nAcquisitions );	// Outermost acquisition only
+			InterlockedCompareExchange( &m_nThreadId, (LONG)GetCurrentThreadId(), 0 );
+			return TRUE;
+		}
+		else
+			return FALSE;
+	}
+
+	virtual BOOL Unlock()
+	{
+		if ( m_nThreadId && InterlockedDecrement( &m_nEnterCount ) == 0 )
+			InterlockedExchange( &m_nThreadId, 0 );
+		return CMutex::Unlock();
+	}
+
+	volatile LONG m_nThreadId;		// Owner thread
+	volatile LONG m_nEnterCount;	// Re-enter counter
+	volatile LONG m_nAcquisitions;	// Outermost acquisitions so far
+
+private:
+	CMutexTracked(const CMutexTracked&);
+	CMutexTracked& operator=(const CMutexTracked&);
+};
+
 #ifdef _DEBUG
 
 	// Assume we already entered to this lock
@@ -548,42 +591,8 @@ private:
 		strcat_s(BUF,1024,"\n\nThis code must be protected by " #lock "!"); \
 		if ( ::AfxAssertFailedLine(BUF, __LINE__) ) AfxDebugBreak(); }
 
-	class CMutexEx : public CMutex
-	{
-	public:
-		CMutexEx(BOOL bInitiallyOwn = FALSE, LPCTSTR lpszName = NULL, LPSECURITY_ATTRIBUTES lpsaAttribute = NULL)
-			: CMutex( bInitiallyOwn, lpszName, lpsaAttribute )
-			, m_nThreadId( 0 )
-			, m_nEnterCount( 0 )
-		{
-		}
-
-		virtual BOOL Lock(DWORD dwTimeout = INFINITE)
-		{
-			if ( CMutex::Lock( dwTimeout ) )
-			{
-				InterlockedIncrement( &m_nEnterCount );
-				InterlockedCompareExchange( &m_nThreadId, (LONG)GetCurrentThreadId(), 0 );
-				return TRUE;
-			}
-			else
-				return FALSE;
-		}
-
-		virtual BOOL Unlock()
-		{
-			if ( m_nThreadId && InterlockedDecrement( &m_nEnterCount ) == 0 )
-				InterlockedExchange( &m_nThreadId, 0 );
-			return CMutex::Unlock();
-		}
-
-		volatile LONG m_nThreadId;		// Owner thread
-		volatile LONG m_nEnterCount;	// Re-enter counter
-
-	private:
-		CMutexEx(const CMutexEx&);
-		CMutexEx& operator=(const CMutexEx&);
-	};
+	// Debug builds use the owner-tracking mutex for every CMutexEx section
+	typedef CMutexTracked CMutexEx;
 
 #else	// _DEBUG
 

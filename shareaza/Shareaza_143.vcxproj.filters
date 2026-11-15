@@ -141,6 +141,9 @@
     <ClCompile Include="DDEServer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Diagnostics.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="DiscoveryServices.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -1249,6 +1252,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DDEServer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Diagnostics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DiscoveryServices.h">

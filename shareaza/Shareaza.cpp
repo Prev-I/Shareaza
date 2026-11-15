@@ -30,6 +30,7 @@
 #include "DDEServer.h"
 #include "DiscoveryServices.h"
 #include "DlgDeleteFile.h"
+#include "Diagnostics.h"
 #include "DlgMessage.h"
 #include "Download.h"
 #include "DownloadGroups.h"
@@ -314,6 +315,17 @@ CShareazaApp::~CShareazaApp()
 /////////////////////////////////////////////////////////////////////////////
 // CShareazaApp initialization
 
+// Diagnostics callbacks (watchdog thread): neither may block
+static void DiagnosticsLog(bool bError, LPCWSTR pszLine)
+{
+	theApp.TryMessage( bError ? MSG_ERROR : MSG_INFO, pszLine );
+}
+
+static DWORD DiagnosticsNetworkThread()
+{
+	return Network.GetRunningThreadId();
+}
+
 BOOL CShareazaApp::InitInstance()
 {
 	CWinApp::InitInstance();
@@ -328,6 +340,15 @@ BOOL CShareazaApp::InitInstance()
 	AfxEnableControlContainer();
 	InitResources();			// Loads theApp settings.
 	Settings.Load();			// Loads settings. Depends on InitResources().
+
+	if ( Settings.General.Diagnostics )
+	{
+		// Opt-in: crash dump and network stall watchdog. A failed Start leaves the client running without them.
+		if ( Diagnostics::Start( Settings.General.UserPath + _T("\\Data\\Diagnostics"), m_sVersion, DiagnosticsLog ) )
+			Diagnostics::Watch( &Network.m_nHeartbeat, &Network.m_pSection.m_nThreadId,
+				&Network.m_pSection.m_nAcquisitions, DiagnosticsNetworkThread,
+				Settings.General.DiagnosticsHangSeconds * 1000 );
+	}
 
 	if ( m_pfnSetCurrentProcessExplicitAppUserModelID )
 		m_pfnSetCurrentProcessExplicitAppUserModelID( CLIENT_NAME_T );
@@ -594,9 +615,17 @@ int CShareazaApp::ExitInstance()
 		TrackerRequests.Clear();
 		Library.Clear();
 		CoolMenu.Clear();
+
+		// Late, so the crash filter and watchdog cover the whole shutdown. Nothing above tears down
+		// what they touch (m_oMessages, m_csMessage, Settings.General, the Network counters).
+		Diagnostics::Stop();	// Safe unconditionally: a no-op unless Start succeeded
 		Network.Clear();
 
 		SplashStep();
+	}
+	else
+	{
+		Diagnostics::Stop();
 	}
 
 	DDEServer.Close();
@@ -1403,11 +1432,49 @@ void CShareazaApp::PrintMessage(WORD nType, const CString& strLog)
 
 	CQuickLock pLock( m_csMessage );
 
+	AppendMessage( pMsg.Detach(), strLog );
+}
+
+bool CShareazaApp::TryMessage(WORD nType, LPCTSTR pszLine)
+{
+	if ( IsLogDisabled( nType ) )
+		return false;
+
+	// Called on the diagnostics watchdog thread: nothing may block or throw out of here.
+	try
+	{
+		const CString strLog( pszLine );
+		CAutoPtr< CLogMessage > pMsg( new CLogMessage( nType, strLog ) );
+		if ( ! pMsg )
+			return false;
+
+		if ( ! TryEnterCriticalSection( &m_csMessage.m_sect ) )
+			return false;	// Busy: the line is already in Diagnostics.log
+
+		struct CLeave
+		{
+			CRITICAL_SECTION* m_pSect;
+			explicit CLeave( CRITICAL_SECTION* pSect ) : m_pSect( pSect ) {}
+			~CLeave() { LeaveCriticalSection( m_pSect ); }
+		} pLeave( &m_csMessage.m_sect );
+
+		AppendMessage( pMsg.Detach(), strLog );
+		return true;
+	}
+	catch ( CException* pException )
+	{
+		pException->Delete();	// e.g. the log file is full: drop the line
+		return false;
+	}
+}
+
+void CShareazaApp::AppendMessage(CLogMessage* pMsg, const CString& strLog)
+{
 	// Max 1000 lines
 	if ( m_oMessages.GetCount() >= 1000 )
 		delete m_oMessages.RemoveHead();
 
-	m_oMessages.AddTail( pMsg.Detach() );
+	m_oMessages.AddTail( pMsg );
 
 	if ( ! Settings.General.DebugLog )
 		return;

@@ -87,6 +87,8 @@ void CSettings::Load()
 	// Add all settings
 	Add( _T(""), _T("DebugBTSources"), &General.DebugBTSources, false );
 	Add( _T(""), _T("DebugLog"), &General.DebugLog, false );
+	Add( _T(""), _T("Diagnostics"), &General.Diagnostics, false );
+	Add( _T(""), _T("DiagnosticsHangSeconds"), &General.DiagnosticsHangSeconds, 30, 1, 10, 600, _T(" s") );
 	Add( _T(""), _T("DiskSpaceStop"), &General.DiskSpaceStop, 25, 1, 0, 1000 , _T(" M") );
 	Add( _T(""), _T("DiskSpaceWarning"), &General.DiskSpaceWarning, 500, 1, 5, 2000 , _T(" M") );
 	Add( _T(""), _T("HashIntegrity"), &General.HashIntegrity, true );

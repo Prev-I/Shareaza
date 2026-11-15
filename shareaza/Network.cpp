@@ -38,6 +38,7 @@
 #include "LocalSearch.h"
 #include "Neighbours.h"
 #include "Network.h"
+#include "HangDetector.h"
 #include "QueryHashMaster.h"
 #include "QueryHit.h"
 #include "QueryKeys.h"
@@ -115,6 +116,8 @@ CNetwork::CNetwork()
 	, QueryRoute			( new CRouteCache() )
 	, QueryKeys				( new CQueryKeys() )
 	, UPnPFinder			( NULL )
+	, m_nHeartbeat			( 0 )
+	, m_nRunningThreadId	( 0 )
 	, m_pHost				()
 	, m_pHostIPv6			()
 	, m_bAutoConnect		( FALSE )
@@ -1255,9 +1258,12 @@ void CNetwork::OnRun()
 
 	if ( PreRun() )
 	{
+		InterlockedExchange( &m_nRunningThreadId, (LONG)GetCurrentThreadId() );
+
 		while ( IsThreadEnabled() )
 		{
 			Doze( 100 );
+			InterlockedIncrement( &m_nHeartbeat );	// Watchdog heartbeat
 
 			if ( ! theApp.m_bLive )
 			{
@@ -1342,8 +1348,14 @@ void CNetwork::OnRun()
 				if ( Settings.Connection.EnableFirewallException && nPort != m_nFirewallCheckedPort )
 					CheckFirewall( nPort );
 			}
-			else if ( ! bListen )
-				continue;
+			else
+			{
+				static Diag::RateLimiter oLockLimiter;
+				LogLockTimeout( oLockLimiter, _T("CNetwork::OnRun") );
+
+				if ( ! bListen )
+					continue;
+			}
 
 			Neighbours.OnRun();
 
@@ -1351,6 +1363,9 @@ void CNetwork::OnRun()
 
 			HostCache.PruneOldHosts();	// Every minute
 		}
+
+		// Cleared before PostRun(): PreRun/PostRun are outside the heartbeat stall (a hang there holding m_pSection is caught by the section stall)
+		InterlockedExchange( &m_nRunningThreadId, 0 );
 	}
 
 	PostRun();
@@ -1527,7 +1542,12 @@ BOOL CNetwork::RoutePacket(CG2Packet* pPacket)
 BOOL CNetwork::SendPush(const Hashes::Guid& oGUID, DWORD nIndex)
 {
 	CSingleLock pLock( &m_pSection );
-	if ( ! pLock.Lock( 250 ) ) return TRUE;
+	if ( ! pLock.Lock( 250 ) )
+	{
+		static Diag::RateLimiter oLockLimiter;
+		LogLockTimeout( oLockLimiter, _T("CNetwork::SendPush") );
+		return TRUE;
+	}
 
 	if ( ! IsListening() ) return FALSE;
 
@@ -1707,6 +1727,16 @@ void CNetwork::OnQueryHits(CQueryHit* pHits)
 	m_oJobs.AddTail( CJob( CJob::Hit, pHits ) );
 }
 
+void CNetwork::LogLockTimeout(Diag::RateLimiter& oLimiter, LPCTSTR pszSite)
+{
+	if ( theApp.IsLogDisabled( MSG_DEBUG ) )
+		return;
+
+	uint32_t nSuppressed = 0;
+	if ( oLimiter.Allow( GetTickCount64(), nSuppressed ) )
+		theApp.Message( MSG_DEBUG, _T("Lock timeout: network section at %s (%u more suppressed)"), pszSite, nSuppressed );
+}
+
 void CNetwork::RunJobs()
 {
 	// Spend here no more than 250 ms at once
@@ -1737,6 +1767,11 @@ void CNetwork::RunJobs()
 				;
 			}
 			oNetworkLock.Unlock();
+		}
+		else
+		{
+			static Diag::RateLimiter oLockLimiter;
+			LogLockTimeout( oLockLimiter, _T("CNetwork::RunJobs") );
 		}
 
 		oJobLock.Lock();

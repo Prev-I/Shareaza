@@ -48,6 +48,8 @@ public:
 		DWORD		LogLevel;					// Log severity (0 - MSG_ERROR .. 4 - MSG_DEBUG)
 		bool		SearchLog;					// Display search facility log information
 		bool		DebugLog;					// Create a log file
+		bool		Diagnostics;				// Write local crash and network stall dumps (takes effect at next start)
+		DWORD		DiagnosticsHangSeconds;		// Seconds without network progress before a stall dump
 		DWORD		MaxDebugLogSize;			// Max size of the log file
 		DWORD		DiskSpaceWarning;			// Value at which to warn the user about low disk space
 		DWORD		DiskSpaceStop;				// Value at which to pause all downloads due to low disk space

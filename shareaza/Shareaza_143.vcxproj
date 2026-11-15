@@ -367,6 +367,9 @@
     <ClCompile Include="DCNeighbour.cpp" />
     <ClCompile Include="DCPacket.cpp" />
     <ClCompile Include="DDEServer.cpp" />
+    <ClCompile Include="Diagnostics.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="DiscoveryServices.cpp" />
     <ClCompile Include="DlgHex.cpp" />
     <ClCompile Include="Download.cpp" />
@@ -777,6 +780,7 @@
     <ClInclude Include="DCNeighbour.h" />
     <ClInclude Include="DCPacket.h" />
     <ClInclude Include="DDEServer.h" />
+    <ClInclude Include="Diagnostics.h" />
     <ClInclude Include="DiscoveryServices.h" />
     <ClInclude Include="DlgHex.h" />
     <ClInclude Include="Download.h" />

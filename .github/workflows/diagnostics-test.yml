@@ -1,0 +1,34 @@
+name: Diagnostics test
+
+on:
+    pull_request:
+      paths:
+        - shareaza/HangDetector.h
+        - tests/diagnostics/**
+        - .github/workflows/diagnostics-test.yml
+    push:
+      branches:
+        - main
+        - prev-i/previ9-*
+      paths:
+        - shareaza/HangDetector.h
+        - tests/diagnostics/**
+        - .github/workflows/diagnostics-test.yml
+
+permissions:
+    contents: read
+
+jobs:
+    diagnostics:
+        runs-on: ubuntu-latest
+        steps:
+        -   name: Checkout GIT sources
+            uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+            with:
+                persist-credentials: false
+
+        -   name: Build and run the diagnostics tests
+            run: |
+                for t in tests/diagnostics/test_*.cpp; do
+                  g++ -std=c++14 -Wall -Wextra -Werror -I shareaza -o /tmp/diag-test "$t" && /tmp/diag-test || exit 1
+                done

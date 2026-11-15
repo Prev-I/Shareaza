@@ -23,6 +23,7 @@
 
 #include "ThreadImpl.h"
 #include "Settings.h"
+#include "HangDetector.h"
 
 #pragma comment(lib, "ws2_32.lib")
 
@@ -65,7 +66,9 @@ public:
 	CAutoPtr< CQueryKeys >	QueryKeys;
 	CAutoPtr< CUPnP >		UPnPFinder;			// UPnP
 
-	CMutexEx		m_pSection;
+	CMutexTracked	m_pSection;
+	volatile LONG	m_nHeartbeat;				// Incremented by every pass of the network loop (read by the watchdog)
+	volatile LONG	m_nRunningThreadId;			// Network thread ID while inside its loop, else 0
 	SOCKADDR_IN		m_pHost;					// Structure (Windows Sockets) which holds address of the local machine
 	SOCKADDR_IN6	m_pHostIPv6;				// Structure (Windows Sockets) which holds address of the local machine
 	
@@ -203,6 +206,7 @@ public:
 	BOOL		IsSelfIP(const IN6_ADDR& nAddress) const;
 	bool		IsAvailable() const;
 	bool		IsConnected() const;
+	DWORD		GetRunningThreadId() const { return (DWORD)m_nRunningThreadId; }	// Network thread ID while inside its loop, else 0 (lock-free)
 	bool		IsListening() const;
 	bool		IsListeningIPv6() const;
 	bool		IsWellConnected() const;
@@ -221,6 +225,8 @@ public:
 	BOOL		AcquireLocalAddress(LPCTSTR pszHeader, WORD nPort = 0, const IN_ADDR* pFromAddress = NULL, const IN6_ADDR* pFromIPv6Address = NULL);
 	BOOL		AcquireLocalAddress(const IN_ADDR& pAddress, WORD nPort = 0, const IN_ADDR* pFromAddress = NULL);
 	BOOL		AcquireLocalAddress(const IN6_ADDR& pAddress, WORD nPort = 0, const IN6_ADDR* pFromAddress = NULL);
+	// Debug-level, rate-limited note that a timed lock on m_pSection was given up (one limiter per site)
+	static void	LogLockTimeout(Diag::RateLimiter& oLimiter, LPCTSTR pszSite);
 	static BOOL	Resolve(LPCTSTR pszHost, int nPort, SOCKADDR_IN* pHost, BOOL bNames = TRUE);
 	BOOL		AsyncResolve(LPCTSTR pszAddress, WORD nPort, PROTOCOLID nProtocol, BYTE nCommand);
 	// Pending network name resolves queue size
