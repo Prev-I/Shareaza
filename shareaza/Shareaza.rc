@@ -1,4 +1,6 @@
 // Microsoft Visual C++ generated resource script.
+// Encoding: Windows-1252, no BOM (#pragma code_page(1252)). Save it in that encoding; an editor
+// that converts it to UTF-8 destroys the non-ASCII characters (CI checks).
 //
 #include "resource.h"
 
@@ -3596,7 +3598,7 @@ BEGIN
     IDS_SEARCH_PAD_TYPE     "What type of file is it?"
     IDS_SEARCH_PAD_CLEAR_HISTORY "(Clear Search History)"
     IDS_SEARCH_PANEL_INPUT_4 "File size must be"
-    IDS_SEARCH_PANEL_INPUT_5 "ï¿½to"
+    IDS_SEARCH_PANEL_INPUT_5 " to"
 END
 
 STRINGTABLE 
@@ -4238,7 +4240,7 @@ BEGIN
     IDS_MEDIA_PARTIAL_RENDER 
                             "Part of this file could not be played, you may need to download additional codecs."
     IDS_MEDIA_EMPTY         "There is no file playing. Double-click a media file in your library to play it."
-    IDS_MEDIA_TITLE         "S ï¿½ ï¿½ H ï¿½ ï¿½ A ï¿½ ï¿½ R ï¿½ ï¿½ E ï¿½ ï¿½ A ï¿½ ï¿½ Z ï¿½ ï¿½ A ï¿½ ï¿½ ï¿½ ï¿½ ï¿½ M ï¿½ ï¿½ E ï¿½ ï¿½ D ï¿½ ï¿½ I ï¿½ ï¿½ A ï¿½ ï¿½ ï¿½ ï¿½ ï¿½ S ï¿½ ï¿½ Y ï¿½ ï¿½ S ï¿½ ï¿½ T ï¿½ ï¿½ E ï¿½ ï¿½ M"
+    IDS_MEDIA_TITLE         "S     H     A     R     E     A     Z     A           M     E     D     I     A           S     Y     S     T     E     M"
     IDS_MEDIA_PLAYLIST      "P L A Y L I S T"
 END
 
