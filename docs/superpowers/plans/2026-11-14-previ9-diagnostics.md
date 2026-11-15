@@ -2,13 +2,15 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Make the next hub hang or crash leave a local dump and log lines that name the stuck thread, publish matching PDBs with every release, and bound the datagram receive pass.
+**Goal:** Make the next hang or crash leave a local dump and log lines that name the stuck thread, publish matching PDBs with every release, and bound the datagram receive pass.
 
 **Architecture:** Three pull requests into `main`. A (`prev-i/previ9-symbols`, which also carries the design and this plan) changes only the release workflows and docs, so it can be dry-run with `workflow_dispatch` before anything is published. B (`prev-i/previ9-diagnostics`) adds a pure, header-only hang detector tested with g++, a Win32 diagnostics module tested by a Windows console program on CI, and the wiring into the client. C (`prev-i/previ9-datagram-bound`) bounds `CDatagrams::OnRun`. The previ.9 release itself, and the other previ.9 backlog items, are outside this plan.
 
 **Tech Stack:** C++/MFC (v143, `_WIN32_WINNT 0x0601`), Win32 `dbghelp` (`MiniDumpWriteDump`), GitHub Actions, g++ for the header-only unit tests.
 
 **Spec:** `docs/superpowers/specs/2026-11-14-local-hang-diagnostics-design.md`
+
+**Status:** shipped in `v2.7.11.4-previ.9` (#41, #42, #43).
 
 ## Global Constraints
 
@@ -169,7 +171,7 @@ Create the branch from `main`; commit the design and this plan first (`docs: des
 ### Task B-end: Review, pull request B, owner checks
 
 - [ ] Whole-diff `reviewer` pass on `main..prev-i/previ9-diagnostics`, trigger disclosure named. Fix, re-run all checks and `diagnostics-test`/`diag-test`.
-- [ ] After the owner's go: push, open PR B with the owner's manual checks: with the setting off, no `Data\Diagnostics` after a session; with it on and a restart, the folder exists, `Diagnostics.log` is empty or absent after hours of hub mode (no false stall); Task Manager shows no CPU from the watchdog; a Task Manager dump of that build (installer and symbols from `gh workflow run release.yml --ref prev-i/previ9-diagnostics`) opens in WinDbg per `docs/DIAGNOSTICS.md` and `~*k` shows `CNetwork::OnRun` by name on the network thread. CI green. Hand over.
+- [ ] After the owner's go: push, open PR B with the owner's manual checks: with the setting off, no `Data\Diagnostics` after a session; with it on and a restart, the folder exists, `Diagnostics.log` is empty or absent after a long connected run (no false stall); Task Manager shows no CPU from the watchdog; a Task Manager dump of that build (installer and symbols from `gh workflow run release.yml --ref prev-i/previ9-diagnostics`) opens in WinDbg per `docs/DIAGNOSTICS.md` and `~*k` shows `CNetwork::OnRun` by name on the network thread. CI green. Hand over.
 
 ## Pull request C: `prev-i/previ9-datagram-bound` (from `main`; independent of B)
 

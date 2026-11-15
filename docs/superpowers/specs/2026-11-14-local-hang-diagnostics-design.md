@@ -1,15 +1,15 @@
 # Local hang and crash diagnostics: design
 
-Date: 2026-11-14. Status: approved by the owner on 2026-11-14. Decisions marked *(owner)* were
-settled with the owner on 2026-11-14; items marked *(designer's call)* were settled while writing
-and are open to correction.
+Date: 2026-11-14. Status: approved by the owner on 2026-11-14; shipped in `v2.7.11.4-previ.9`
+(#41, #42, #43). Decisions marked *(owner)* were settled with the owner on 2026-11-14; items marked
+*(designer's call)* were settled while writing and are open to correction.
 
 ## Intent
 
-The owner's hub (v2.7.11.3-previ.8, G2 hub mode, Windows) stopped working after some uptime:
-one core pinned at 100%, the UI responsive, the Discovery window's query/advertise/browse
-commands greyed out, new searches returning nothing, and the system log ending in a run of peer
-disconnections followed by nothing. Nothing else was recorded.
+The owner's client (v2.7.11.3-previ.8, Windows) stopped working: one core pinned at 100%, the UI
+responsive, the Discovery window's query/advertise/browse commands greyed out, new searches
+returning nothing, and the system log ending in a run of peer disconnections followed by nothing.
+Nothing else was recorded.
 
 Since previ.5 removed the BugSplat reporter (`fe0e88439`), the client has **no** way to record a
 failure like this:
@@ -89,11 +89,11 @@ Three were considered with the owner *(owner chose 3)*:
 
 1. **No code change.** The owner takes a dump by hand (Task Manager, *Create dump file*, or
    ProcDump) when they notice a hang, and releases publish PDBs. Cheapest, but only works if
-   the owner is watching, and the hub stays down meanwhile. **Kept as the stopgap until previ.9
+   the owner is watching, and the client stays stuck meanwhile. **Kept as the stopgap until previ.9
    ships** *(owner)*.
 2. **External ProcDump monitoring.** No change to Shareaza, but its triggers miss this failure:
    the hung-window trigger does not fire because the UI stays responsive, and a CPU threshold
-   cannot tell a hang from a busy hub. It only catches real crashes well.
+   cannot tell a hang from a busy client. It only catches real crashes well.
 3. **In-process local diagnostics behind a setting** *(chosen)*: an exception filter that
    writes a minidump, a watchdog thread that notices the network thread or `Network.m_pSection`
    stalling and records a dump plus log lines, rate-limited lock-timeout log lines, and PDBs
@@ -246,7 +246,7 @@ Separate from the diagnostics, decided by the owner on 2026-11-14:
 
 - With the setting **off**: no watchdog thread, no exception filter, no `dbghelp` loaded, no
   diagnostics folder created.
-- On a healthy client with the setting on, a long run (hub mode, hours) produces no dump and no
+- On a healthy client with the setting on, a long connected run produces no dump and no
   stall line: the false-positive check for the anti-goal.
 - A debug-only or test-only hook that holds `Network.m_pSection` for longer than the threshold
   produces exactly one dump and the log lines above, and the "ended" line after release. The
