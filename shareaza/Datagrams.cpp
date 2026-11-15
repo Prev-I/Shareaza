@@ -38,6 +38,7 @@
 #include "DCPacket.h"
 #include "BENode.h"
 #include "Security.h"
+#include "ReceiveBudget.h"
 #include "Transfers.h"
 
 #ifdef _DEBUG
@@ -50,6 +51,9 @@ static char THIS_FILE[]=__FILE__;
 #define METER_LENGTH	24
 #define METER_PERIOD	2000
 #define METER_SECOND	1000
+
+#define RECEIVE_BUDGET_MS		50
+#define RECEIVE_BUDGET_COUNT	2048
 
 CDatagrams Datagrams;
 
@@ -687,13 +691,17 @@ void CDatagrams::OnRun()
 	TryWrite();
 	ManageOutput();
 
-	for ( int i = 0; i < _countof( m_hSocket ); ++i )
+	// One bound for the whole receive pass: the time budget and count limit are shared by all sockets read in the pass
+	Diag::ReceiveBudget pBudget( GetTickCount64(), RECEIVE_BUDGET_MS, RECEIVE_BUDGET_COUNT );
+	bool bBudget = true;
+
+	for ( int i = 0; i < _countof( m_hSocket ) && bBudget; ++i )
 	{
 		do
 		{
 			ManagePartials();
 		}
-		while ( TryRead( i ) || TryReadIPv6() );
+		while ( ( bBudget = pBudget.Next( GetTickCount64() ) ) && ( TryRead( i ) || TryReadIPv6() ) );
 	}
 
 	Measure();
@@ -1551,14 +1559,20 @@ BOOL CDatagrams::OnAcknowledgeSGP(const SOCKADDR_IN* pHost, const SGP_HEADER* pH
 
 	CDatagramOut** pHash = m_pOutputHash + ( nHash & DATAGRAM_HASH_MASK );
 
-	for ( CDatagramOut* pDG = *pHash ; pDG ; pDG = pDG->m_pNextHash )
+	// Remove() moves a datagram to the free list and reuses its m_pNextHash for that list:
+	// take the next one first, or the walk would carry on through freed datagrams
+	for ( CDatagramOut* pDG = *pHash ; pDG ; )
 	{
+		CDatagramOut* pNext = pDG->m_pNextHash;
+
 		if (	pDG->m_pHost.sin_addr.S_un.S_addr == pHost->sin_addr.S_un.S_addr &&
 				pDG->m_pHost.sin_port == pHost->sin_port &&
 				pDG->m_nSequence == pHeader->nSequence )
 		{
 			if ( pDG->Acknowledge( pHeader->nPart ) ) Remove( pDG );
 		}
+
+		pDG = pNext;
 	}
 
 	return TRUE;
@@ -1592,14 +1606,20 @@ BOOL CDatagrams::OnAcknowledgeSGP(const SOCKADDR_IN6* pHost, const SGP_HEADER* p
 
 	CDatagramOut** pHash = m_pOutputHash + ( nHash & DATAGRAM_HASH_MASK );
 
-	for ( CDatagramOut* pDG = *pHash ; pDG ; pDG = pDG->m_pNextHash )
+	// Remove() moves a datagram to the free list and reuses its m_pNextHash for that list:
+	// take the next one first, or the walk would carry on through freed datagrams
+	for ( CDatagramOut* pDG = *pHash ; pDG ; )
 	{
+		CDatagramOut* pNext = pDG->m_pNextHash;
+
 		if (	IN6_ADDR_EQUAL( &pDG->m_pHostIPv6.sin6_addr, &pHost->sin6_addr ) &&
 				pDG->m_pHostIPv6.sin6_port == pHost->sin6_port &&
 				pDG->m_nSequence == pHeader->nSequence )
 		{
 			if ( pDG->Acknowledge( pHeader->nPart ) ) Remove( pDG );
 		}
+
+		pDG = pNext;
 	}
 
 	return TRUE;
