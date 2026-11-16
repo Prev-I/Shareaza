@@ -97,6 +97,8 @@ public:
 
 	bool			Complain(const IN_ADDR* pAddress, int nBanLength = ban5Mins, int nExpire = 10, int nCount = 3);
 	void			Clear();
+	void			ClearMissCache();
+	void			RemoveShippedRules();	// Remove the deny rules older versions shipped (ShippedRules.h)
 	BOOL			IsIgnoredCountry(const CString& strCountry);
 	BOOL			IsDenied(const IN_ADDR* pAddress);
 	BOOL			IsDenied(const IN6_ADDR* pAddress);

@@ -489,7 +489,14 @@ BOOL CShareazaApp::InitInstance()
 	SplashStep( L"Profile" );
 		MyProfile.Load();
 	SplashStep( L"Security Services" );
-		Security.Load();
+		if ( Security.Load() && Settings.Security.DefaultsVersion < 1 )
+		{
+			// Older versions shipped deny rules; remove them once. Only after a
+			// good load, so Save() never overwrites a file that failed to load.
+			Security.RemoveShippedRules();
+			Security.Save();
+			Settings.Security.DefaultsVersion = 1;
+		}
 		LoadTlsTrust();
 		AdultFilter.Load();
 		MessageFilter.Load();
