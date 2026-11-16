@@ -2634,7 +2634,7 @@
 		<tip id="ID_SECURITY_POLICY_DENY" message="Set the default security policy to deny all hosts."/>
 		<tip id="ID_SECURITY_REMOVE" message="Remove the selected rules or IP lists."/>
 		<tip id="ID_SECURITY_RESET" message="Reset the hit counts on the selected rules."/>
-		<tip id="ID_SECURITY_UPDATE_LISTS" message="Download the selected IP lists now, or all of them when none is selected."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="Download the selected IP lists now, or every enabled list when none is selected."/>
 		<tip id="ID_SYSTEM_CLEAR" message="Clear the status log."/>
 		<tip id="ID_SYSTEM_COPY" message="Copy selected line(s) of status log."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="Record a timestamp for each line."/>
@@ -3537,6 +3537,7 @@
 		<string id="20307" value="Nothing was added: the lists you chose are already in your IP lists."/>
 		<string id="20308" value="Tick a list, or enter the address of your own list."/>
 		<string id="20309" value="Already in your IP lists, so not added again: %s"/>
+		<string id="20310" value="The download was cut off before its end."/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->

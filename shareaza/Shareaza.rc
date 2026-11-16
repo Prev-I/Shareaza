@@ -3535,6 +3535,7 @@ BEGIN
     IDS_IPLIST_ALREADY_ADDED "Nothing was added: the lists you chose are already in your IP lists."
     IDS_IPLIST_NOTHING_CHOSEN "Tick a list, or enter the address of your own list."
     IDS_IPLIST_SKIPPED      "Already in your IP lists, so not added again: %s"
+    IDS_IPLIST_ERR_TRUNCATED "The download was cut off before its end."
 END
 
 STRINGTABLE 
@@ -5151,7 +5152,7 @@ STRINGTABLE
 BEGIN
     ID_SCHEDULER_REMOVE_ALL "Removes all scheduled tasks."
     ID_SECURITY_ADD_LIST    "Add IP block lists from the catalogue, or your own list from an https:// address..."
-    ID_SECURITY_UPDATE_LISTS "Download the selected IP lists now, or all of them when none is selected."
+    ID_SECURITY_UPDATE_LISTS "Download the selected IP lists now, or every enabled list when none is selected."
     ID_SECURITY_LIST_REMOVE "Remove the selected IP lists."
     ID_SECURITY_LIST_ENABLE "Turn the selected IP lists on or off."
 END

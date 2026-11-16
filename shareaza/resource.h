@@ -1644,6 +1644,7 @@
 #define IDS_IPLIST_ALREADY_ADDED        20307
 #define IDS_IPLIST_NOTHING_CHOSEN       20308
 #define IDS_IPLIST_SKIPPED              20309
+#define IDS_IPLIST_ERR_TRUNCATED        20310
 #define ID_HELP_ABOUT                   32772
 #define ID_HELP_VERSION_CHECK           32773
 #define ID_CHECKMARK                    32774

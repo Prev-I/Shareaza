@@ -1205,7 +1205,8 @@ void CSecurityWnd::OnSecurityAddList()
 
 void CSecurityWnd::OnUpdateSecurityUpdateLists(CCmdUI* pCmdUI)
 {
-	// Something to download: a selected list with URLs, or with no selection any list
+	// Something to download: a selected list with URLs, or with no selection any
+	// list (UpdateNow then takes the enabled ones with URLs)
 	if ( m_wndLists.GetSelectedCount() > 0 )
 		pCmdUI->Enable( ! GetSelectedLists( true ).empty() );
 	else
@@ -1214,8 +1215,8 @@ void CSecurityWnd::OnUpdateSecurityUpdateLists(CCmdUI* pCmdUI)
 
 void CSecurityWnd::OnSecurityUpdateLists()
 {
-	// The selected lists, or every list when none is selected. Imported lists
-	// have nothing to download.
+	// The selected lists, or every enabled list when none is selected. Imported
+	// lists have nothing to download.
 	const std::vector< GUID > pUpdate = GetSelectedLists( true );
 	if ( m_wndLists.GetSelectedCount() > 0 && pUpdate.empty() )
 		return;

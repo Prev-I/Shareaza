@@ -50,6 +50,7 @@ public:
 	CString		GetResponseString(UINT nCodePage = CP_UTF8) const;
 	CBuffer*	GetResponseBuffer() const;
 	BOOL		InflateResponse();
+	bool		GetReadError() const;	// reading the body failed: what was read is not the whole of it
 	bool		Execute(bool bBackground);
 	BOOL		IsPending() const;
 	BOOL		IsFinished() const;
@@ -72,6 +73,7 @@ protected:
 	UINT		m_nNotifyMsg;
 	WPARAM		m_nNotifyParam;
 	bool		m_bUseCookie;
+	bool		m_bReadError;
 
 	void		OnRun();
 

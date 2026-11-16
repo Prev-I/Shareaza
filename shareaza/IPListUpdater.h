@@ -58,8 +58,8 @@ public:
 	// and starts the thread if it is idle. No I/O. Main thread.
 	void	OnTimer60();
 
-	// Queues the given lists regardless of due time; empty = every list with
-	// URLs. Main thread.
+	// Queues the given lists regardless of due time, even if disabled; empty =
+	// every enabled list with URLs. Main thread.
 	void	UpdateNow(const std::vector< GUID >& oLists);
 
 	// Reads one downloaded or imported file into oOut, adding to oStats: gzip
@@ -78,7 +78,7 @@ protected:
 	struct QueueItem
 	{
 		GUID	oGUID;
-		bool	bForced;		// UpdateNow: fetched even if disabled meanwhile
+		bool	bForced;		// UpdateNow with a selection: fetched even if disabled
 	};
 
 	CCriticalSection	m_pSection;		// guards the members below

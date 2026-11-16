@@ -68,6 +68,25 @@ bool IsHttps(const CString& sURL)
 	return _tcsnicmp( sURL, _T("https://"), 8 ) == 0;
 }
 
+// A Content-Length value: decimal digits only, at most 19 of them (no overflow).
+// False for anything else, so a value that does not parse is not compared.
+bool ParseContentLength(const CString& sValue, QWORD& nOut)
+{
+	const int nLength = sValue.GetLength();
+	if ( nLength < 1 || nLength > 19 )
+		return false;
+	QWORD nValue = 0;
+	for ( int i = 0 ; i < nLength ; ++i )
+	{
+		const TCHAR c = sValue.GetAt( i );
+		if ( c < _T('0') || c > _T('9') )
+			return false;
+		nValue = nValue * 10 + static_cast< QWORD >( c - _T('0') );
+	}
+	nOut = nValue;
+	return true;
+}
+
 // A copy of the list with that GUID; false if there is none.
 bool FindList(const GUID& oGUID, CIPList& oOut)
 {
@@ -498,13 +517,15 @@ void CIPListUpdater::UpdateNow(const std::vector< GUID >& oLists)
 	std::vector< CIPList > pLists;
 	IPLists.Snapshot( pLists );
 
+	// No selection: every enabled list with URLs. A disabled list is fetched
+	// only when it is chosen explicitly.
 	std::vector< GUID > pAll;
 	for ( size_t i = 0 ; i < pLists.size() ; ++i )
 	{
-		if ( pLists[ i ].m_pURLs.GetSize() > 0 )
+		if ( pLists[ i ].m_bEnabled && pLists[ i ].m_pURLs.GetSize() > 0 )
 			pAll.push_back( pLists[ i ].m_oGUID );
 	}
-	Enqueue( pAll, true );
+	Enqueue( pAll, false );		// not forced: skipped if disabled meanwhile
 }
 
 void CIPListUpdater::Enqueue(const std::vector< GUID >& oLists, bool bForced)
@@ -712,6 +733,19 @@ bool CIPListUpdater::Fetch(const CString& sURL, IPList::RangeSet& oRanges, IPLis
 	if ( nStatus < 200 || nStatus > 299 )
 	{
 		sError.Format( LoadString( IDS_IPLIST_ERR_HTTP_STATUS ), nStatus );
+		return false;
+	}
+
+	// A body cut off early must not pass for the whole list: its last line
+	// could be a shorter, wider range. The body is compared as received;
+	// CHttpRequest does not decode Content-Encoding unless InflateResponse is
+	// called, and it is not, so Content-Length counts the same bytes.
+	QWORD nDeclared = 0;
+	if ( m_pRequest.GetReadError() ||
+		( ParseContentLength( m_pRequest.GetHeader( _T("Content-Length") ), nDeclared ) &&
+		  nDeclared != static_cast< QWORD >( pResponse->m_nLength ) ) )
+	{
+		sError = LoadString( IDS_IPLIST_ERR_TRUNCATED );
 		return false;
 	}
 

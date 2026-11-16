@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Check shareaza/ShippedRules.h against the rules Shareaza used to ship.
 
-Decodes Data/DefaultSecurity.dat as of commit ec36d5849 (the 2011 file,
+Decodes Data/DefaultSecurity.dat as of commit ec36d58490f81c1448020e74327e02f39c9f7c97 (the 2011 file,
 whose 60 GUIDs are the ones every install received), checks that the
 client's kGuids table holds exactly those GUIDs, and checks that the
 current Data/DefaultSecurity.dat is an empty rule set.
@@ -15,7 +15,7 @@ import subprocess
 import sys
 import uuid
 
-OLD_COMMIT = "ec36d5849"
+OLD_COMMIT = "ec36d58490f81c1448020e74327e02f39c9f7c97"
 DAT_PATH = "Data/DefaultSecurity.dat"
 HEADER_PATH = "shareaza/ShippedRules.h"
 EXPECTED_RULES = 60

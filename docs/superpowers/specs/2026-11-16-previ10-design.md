@@ -163,8 +163,11 @@ per line and accepts:
 - **Spamhaus DROP JSON lines** (`drop_v4.json`, `drop_v6.json`): one JSON object per line; the
   `cidr` field is taken, metadata lines are ignored.
 - Comment lines (`#`, `;`, `//`) and blank lines are skipped and not counted as rejected.
-- **Containers:** gzip (`CBuffer::Ungzip`) and zip (minizip, already compiled into `zlibwapi` but
-  unused by the client): every member whose content parses is taken *(designer's call)*.
+- **Containers:** gzip by a streaming inflate (`inflateInit2` with the gzip header), its output
+  capped at the 256 MB limit as it is produced — `CBuffer::Ungzip` cannot enforce the cap — and zip
+  through minizip's 32-bit in-memory API (`unzOpen2` over the downloaded buffer; minizip is already
+  compiled into `zlibwapi` but unused by the client): every member whose content parses is taken
+  *(designer's call)*.
 
 The result reports ranges taken and lines rejected, by reason, for the import message and the log.
 
@@ -194,11 +197,14 @@ The result reports ranges taken and lines rejected, by reason, for the import me
 - **HTTPS only:** the dialog refuses a URL that is not `https://`; after the request the final URL
   (`INTERNET_OPTION_URL`) must still be `https://`, otherwise the update fails. Whether WinINet
   follows an https-to-http redirect is unverified; the check makes it irrelevant.
+- **Truncated downloads:** a body shorter or longer than its `Content-Length`, or one whose read
+  failed, is refused and the previous copy kept: a cut-off last line could be a wider range.
 - **Schedule:** checked from `CMainWnd::OnTimer`'s 60-second block. A list is due 24 hours after
   its last successful update; after a failure it is retried 6 hours later. The first check after
   start waits 2 minutes. One download at a time, on a worker thread *(designer's call)*. Fetching
   does not depend on being connected to G2/eD2k; a failed fetch simply follows the retry rule.
-- **"Update now"** fetches the selected lists (all if none is selected) regardless of due time.
+- **"Update now"** fetches the selected lists (every enabled list if none is selected) regardless of
+  due time.
 - No list is ever fetched unless the user added it.
 
 ### 1.6 The catalogue *(owner: the five lists; designer's call: wording)*

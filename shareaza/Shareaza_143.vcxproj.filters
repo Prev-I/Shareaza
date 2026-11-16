@@ -1434,6 +1434,18 @@
     <ClInclude Include="IPListUpdater.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="IPListParser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IPRangeSet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ReservedAddresses.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ShippedRules.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="Kademlia.h">
       <Filter>Header Files</Filter>
     </ClInclude>

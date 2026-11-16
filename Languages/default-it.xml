@@ -2615,7 +2615,7 @@
 		<tip id="ID_SECURITY_POLICY_DENY" message="Imposta come predefinito la regola di sicurezza di rifiutare ogni host."/>
 		<tip id="ID_SECURITY_REMOVE" message="Rimuovi le regole o le liste IP selezionate."/>
 		<tip id="ID_SECURITY_RESET" message="Azzera il conteggio delle richieste nelle regole selezionate."/>
-		<tip id="ID_SECURITY_UPDATE_LISTS" message="Scarica ora le liste IP selezionate, o tutte se nessuna è selezionata."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="Scarica ora le liste IP selezionate, o tutte quelle attive se nessuna è selezionata."/>
 		<tip id="ID_SYSTEM_CLEAR" message="Azzera il log di stato."/>
 		<tip id="ID_SYSTEM_COPY" message="Copy selected line(s) of status log."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="Registra un orario per ciascuna linea."/>

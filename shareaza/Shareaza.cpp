@@ -495,9 +495,10 @@ BOOL CShareazaApp::InitInstance()
 		{
 			// Older versions shipped deny rules; remove them once. Only after a
 			// good load, so Save() never overwrites a file that failed to load.
+			// Marked done only once saved, so a failed save is retried next start.
 			Security.RemoveShippedRules();
-			Security.Save();
-			Settings.Security.DefaultsVersion = 1;
+			if ( Security.Save() )
+				Settings.Security.DefaultsVersion = 1;
 		}
 		IPLists.Load();
 		IPListUpdater.Start();
