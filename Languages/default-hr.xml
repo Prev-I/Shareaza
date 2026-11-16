@@ -379,10 +379,13 @@
 			<button id="ID_SECURITY_EDIT" text="Edit Rule"/>
 			<separator/>
 			<button id="ID_SECURITY_ADD" text="Add Rule"/>
-			<button id="ID_SECURITY_REMOVE" text="Remove Rule"/>
+			<button id="ID_SECURITY_REMOVE" text="Makni"/>
 			<separator/>
 			<button id="ID_SECURITY_MOVE_UP" text="Move Up"/>
 			<button id="ID_SECURITY_MOVE_DOWN" text="Move Down"/>
+			<separator/>
+			<button id="ID_SECURITY_ADD_LIST" text="Dodaj popis..."/>
+			<button id="ID_SECURITY_UPDATE_LISTS" text="Ažuriraj sada"/>
 			<rightAlign/>
 			<button id="ID_SECURITY_RESET" text="Reset List"/>
 			<button id="ID_SECURITY_IMPORT" text="Import List"/>
@@ -1561,6 +1564,14 @@
 			<separator/>
 			<item id="ID_SECURITY_EDIT" text="Napredno Uredi..."/>
 		</menu>
+		<menu name="CSecurityWnd.Lists">
+			<item id="ID_SECURITY_ADD_LIST" text="Dodaj _popis..."/>
+			<separator/>
+			<item id="ID_SECURITY_UPDATE_LISTS" text="_Ažuriraj sada"/>
+			<item id="ID_SECURITY_LIST_ENABLE" text="_Omogućeno"/>
+			<separator/>
+			<item id="ID_SECURITY_LIST_REMOVE" text="Makni"/>
+		</menu>
 		<!-- SCHEDULER WINDOW -->
 		<menu name="CSchedulerWnd">
 			<item id="ID_SCHEDULER_ADD" text="_Add Scheduled Task"/>
@@ -2592,16 +2603,20 @@
 		<tip id="ID_SEARCHMONITOR_CLEAR" message="Clear the search monitor buffer."/>
 		<tip id="ID_SEARCHMONITOR_PAUSE" message="Pause search monitoring."/>
 		<tip id="ID_SECURITY_ADD" message="Add a new rule to the security chain..."/>
+		<tip id="ID_SECURITY_ADD_LIST" message="Dodaj popise za blokiranje IP adresa iz kataloga ili vlastiti popis s https:// adrese..."/>
 		<tip id="ID_SECURITY_BAN" message="Ban the selected host for the duration of this session."/>
 		<tip id="ID_SECURITY_EDIT" message="Edit the selected security rule..."/>
 		<tip id="ID_SECURITY_EXPORT" message="Export the selected security rules to a file..."/>
 		<tip id="ID_SECURITY_IMPORT" message="Import security rules from a file..."/>
+		<tip id="ID_SECURITY_LIST_ENABLE" message="Uključi ili isključi odabrane IP popise."/>
+		<tip id="ID_SECURITY_LIST_REMOVE" message="Makni odabrane IP popise."/>
 		<tip id="ID_SECURITY_MOVE_DOWN" message="Move the selected security rules down the precedence list."/>
 		<tip id="ID_SECURITY_MOVE_UP" message="Move the selected security rules up the precedence list."/>
 		<tip id="ID_SECURITY_POLICY_ACCEPT" message="Set the default security policy to allow all hosts."/>
 		<tip id="ID_SECURITY_POLICY_DENY" message="Set the default security policy to deny all hosts."/>
-		<tip id="ID_SECURITY_REMOVE" message="Remove the selected security rules."/>
+		<tip id="ID_SECURITY_REMOVE" message="Makni odabrana pravila ili IP popise."/>
 		<tip id="ID_SECURITY_RESET" message="Reset the hit counts on the selected rules."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="Preuzmi odabrane IP popise sada, ili sve ako nijedan nije odabran."/>
 		<tip id="ID_SYSTEM_CLEAR" message="Clear the status log."/>
 		<tip id="ID_SYSTEM_COPY" message="Copy selected line(s) of status log."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="Record a timestamp for each line."/>
@@ -3445,6 +3460,44 @@
 		<string id="20269" value="Nezavršene Datoteke Spremi Ovdje"/>
 		<string id="20270" value="Ovdje Spremi Torrente"/>
 		<string id="20271" value="Ovdje Spremaj Kolekcije"/>
+		<string id="20272" value="Spremljena kopija nije čitljiva; bit će ponovno preuzeta."/>
+		<string id="20273" value="Spremljena kopija nije čitljiva; ponovno uvezite datoteku."/>
+		<string id="20274" value="Otete i kriminalne mreže; malo lažnih pozitiva. Podaci (c) The Spamhaus Project."/>
+		<string id="20275" value="Poznata kompromitirana računala."/>
+		<string id="20276" value="Anti-P2P tvrtke; vrlo velik (oko petine svih IPv4 adresa); blokira cijele pružatelje usluga i CDN raspone (sadrži Cloudflareov blok 1.1.1.0)."/>
+		<string id="20277" value="Skup nekoliko popisa za privatnost i zlouporabe."/>
+		<string id="20278" value="Nedodijeljeni prostor; mora ostati ažuran ili će blokirati nove mreže."/>
+		<string id="20279" value="Adresa ne počinje s https://."/>
+		<string id="20280" value="Preuzimanje nije završilo na https:// adresi."/>
+		<string id="20281" value="Poslužitelj nije dostupan."/>
+		<string id="20282" value="Poslužitelj je odgovorio HTTP statusom %d."/>
+		<string id="20283" value="Preuzimanje je veće od 64 MB."/>
+		<string id="20284" value="Sadržaj je nakon raspakiranja veći od 256 MB."/>
+		<string id="20285" value="Komprimirana datoteka nije čitljiva."/>
+		<string id="20286" value="Popis ne sadrži nijedan raspon adresa."/>
+		<string id="20287" value="Popis sadrži više od 2.000.000 raspona."/>
+		<string id="20288" value="Popis sadrži IPv4 raspon od pola adresnog prostora ili više."/>
+		<string id="20289" value="IPv4 rasponi popisa pokrivaju više od pola adresnog prostora."/>
+		<string id="20290" value="Popis sadrži IPv6 raspon koji pokriva cijeli 2000::/3."/>
+		<string id="20291" value="Popis nije moguće spremiti."/>
+		<string id="20292" value="IP popis %s ažuriran: %lu redaka prihvaćeno, %lu odbijeno, %lu raspona nakon spajanja."/>
+		<string id="20293" value="IP popis %s nije ažuriran: %s"/>
+		<string id="20294" value="%s: %Iu raspona uvezeno, %Iu redaka odbijeno."/>
+		<string id="20295" value="%s nije moguće uvesti."/>
+		<string id="20296" value="%s nije moguće zapisati."/>
+		<string id="20297" value="%s nije moguće uvesti: %s"/>
+		<string id="20298" value="Datoteka je veća od 64 MB."/>
+		<string id="20299" value="IP popisi preuzimaju se samo putem HTTPS-a: URL mora počinjati s https://."/>
+		<string id="20300" value="Maknuti odabrane IP popise? Izbrisat će se i njihove preuzete kopije."/>
+		<string id="20301" value="Uvezeno"/>
+		<string id="20302" value="Neuspjelo: %s"/>
+		<string id="20303" value="Još nije preuzeto"/>
+		<string id="20304" value="IP popisi"/>
+		<string id="20305" value="Moja pravila"/>
+		<string id="20306" value="Unesite https:// adresu vlastitog popisa ili obrišite njegov naziv."/>
+		<string id="20307" value="Ništa nije dodano: odabrani popisi već su među vašim IP popisima."/>
+		<string id="20308" value="Označite popis ili unesite adresu vlastitog popisa."/>
+		<string id="20309" value="Već među vašim IP popisima, pa nisu ponovno dodani: %s"/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->
@@ -4285,6 +4338,27 @@
 			<control caption="OK"/>
 			<control caption="Odustani"/>
 		</dialog>
+		<dialog name="CIPListAddDlg" cookie="StBuStBuStBuStBuStBuStBuStEdStEdStBuBu" caption="Dodaj IP popis">
+			<control caption="Označite popise za dodavanje. Svaki se preuzima putem HTTPS-a i ažurira jednom dnevno; ništa se ne dodaje ako ga ne označite."/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control caption="Vlastiti popis"/>
+			<control caption="Ime:"/>
+			<control/>
+			<control caption="_URL:"/>
+			<control/>
+			<control caption="Prihvaćeni formati: PeerGuardian (.p2p), eMule (ipfilter.dat), Gnucleus (.net), CIDR, obične adrese i Spamhaus DROP JSON, kao tekst, gzip ili zip. URL mora počinjati s https://."/>
+			<control caption="Dod_aj"/>
+			<control caption="Odustani"/>
+		</dialog>
 		<dialog name="CShareManagerDlg" cookie="StSyBuBuBuBu" caption="Pomoćnik oko Djeljenih Mapa">
 			<control caption="Ovdje je lista mapa u vašoj kolekciji.Možete maknuti ili dodati mape koristeći butune na lijevoj strani.When you add a new folder it is initially shared with other users, however you can unshare it from the Shareaza library if you wish."/>
 			<control/>
@@ -4633,6 +4707,12 @@
 			<column from="Precedence" to="Precedence"/>
 			<column from="Hits" to="Pogodaka"/>
 			<column from="Comment" to="Komentar"/>
+		</list>
+		<list name="CSecurityWnd.Lists">
+			<column from="List" to="Popis"/>
+			<column from="Ranges" to="Rasponi"/>
+			<column from="Updated" to="Ažurirano"/>
+			<column from="Hits" to="Pogodaka"/>
 		</list>
 		<list name="CHostCacheWnd">
 			<column from="Address" to="Adresa"/>

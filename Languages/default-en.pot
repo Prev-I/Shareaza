@@ -372,8 +372,8 @@ msgstr ""
 msgid "Add Rule"
 msgstr ""
 
-#: button;id_security_remove
-msgid "Remove Rule"
+#: button;id_security_remove button;id_hostcache_remove string;17021 cfavouritesprofilepage;control;8
+msgid "Remove"
 msgstr ""
 
 #: button;id_security_move_up
@@ -382,6 +382,14 @@ msgstr ""
 
 #: button;id_security_move_down
 msgid "Move Down"
+msgstr ""
+
+#: button;id_security_add_list
+msgid "Add List..."
+msgstr ""
+
+#: button;id_security_update_lists
+msgid "Update Now"
 msgstr ""
 
 #: button;id_security_reset
@@ -422,10 +430,6 @@ msgstr ""
 
 #: button;id_hitmonitor_search
 msgid "Requery"
-msgstr ""
-
-#: button;id_hostcache_remove string;17021 cfavouritesprofilepage;control;8
-msgid "Remove"
 msgstr ""
 
 #: button;id_hostcache_g2_horizon
@@ -1160,7 +1164,7 @@ msgstr ""
 msgid "_Explore"
 msgstr ""
 
-#: clibrarytree.physical.basic;item;id_library_remove clibrarytree.physical;item;id_library_remove cmedialist;item;id_media_remove csecuritywnd;item;id_security_remove cschedulerwnd;item;id_scheduler_remove cdiscoverywnd;item;id_discovery_remove clibrarysettingspage;control;19 clibrarysettingspage;control;23 cmediasettingspage;control;8 cwebsettingspage;control;13 cwizardsharepage;control;6 cavatarprofilepage;control;6 cfilesourcespage;control;6 cgraphlistdlg;control;4 cgraphitemdlg;control;12 csharemanagerdlg;control;4 cdownloadgroupdlg;control;8
+#: clibrarytree.physical.basic;item;id_library_remove clibrarytree.physical;item;id_library_remove cmedialist;item;id_media_remove csecuritywnd;item;id_security_remove csecuritywnd.lists;item;id_security_list_remove cschedulerwnd;item;id_scheduler_remove cdiscoverywnd;item;id_discovery_remove clibrarysettingspage;control;19 clibrarysettingspage;control;23 cmediasettingspage;control;8 cwebsettingspage;control;13 cwizardsharepage;control;6 cavatarprofilepage;control;6 cfilesourcespage;control;6 cgraphlistdlg;control;4 cgraphitemdlg;control;12 csharemanagerdlg;control;4 cdownloadgroupdlg;control;8
 msgid "_Remove"
 msgstr ""
 
@@ -1494,6 +1498,18 @@ msgstr ""
 
 #: csecuritywnd;61;item;id_security_policy_deny
 msgid "_Deny"
+msgstr ""
+
+#: csecuritywnd.lists;item;id_security_add_list
+msgid "_Add List..."
+msgstr ""
+
+#: csecuritywnd.lists;item;id_security_update_lists
+msgid "_Update Now"
+msgstr ""
+
+#: csecuritywnd.lists;item;id_security_list_enable
+msgid "_Enabled"
 msgstr ""
 
 #: cschedulerwnd;item;id_scheduler_add
@@ -3520,6 +3536,10 @@ msgstr ""
 msgid "Add a new rule to the security chain..."
 msgstr ""
 
+#: message;id_security_add_list
+msgid "Add IP block lists from the catalogue, or your own list from an https:// address..."
+msgstr ""
+
 #: message;id_security_ban
 msgid "Ban the selected host for the duration of this session."
 msgstr ""
@@ -3534,6 +3554,14 @@ msgstr ""
 
 #: message;id_security_import
 msgid "Import security rules from a file..."
+msgstr ""
+
+#: message;id_security_list_enable
+msgid "Turn the selected IP lists on or off."
+msgstr ""
+
+#: message;id_security_list_remove
+msgid "Remove the selected IP lists."
 msgstr ""
 
 #: message;id_security_move_down
@@ -3553,11 +3581,15 @@ msgid "Set the default security policy to deny all hosts."
 msgstr ""
 
 #: message;id_security_remove
-msgid "Remove the selected security rules."
+msgid "Remove the selected rules or IP lists."
 msgstr ""
 
 #: message;id_security_reset
 msgid "Reset the hit counts on the selected rules."
+msgstr ""
+
+#: message;id_security_update_lists
+msgid "Download the selected IP lists now, or all of them when none is selected."
 msgstr ""
 
 #: message;id_system_clear
@@ -6632,7 +6664,7 @@ msgstr ""
 msgid "OK"
 msgstr ""
 
-#: string;20238 csettingsheet;control;3 cqueuepropertiesdlg;control;38 cprofilemanagerdlg;control;3 cconnecttodlg;control;8 cdownloaddlg;control;5 cnewsearchdlg;control;4 cfiltersearchdlg;control;30 csavefilterasdlg;control;3 cdiscoveryservicedlg;control;6 cfilecopydlg;control;5 cfolderpropertiesdlg;control;8 cgraphlistdlg;control;17 cgraphitemdlg;control;2 cschemacolumnsdlg;control;4 csecureruledlg;control;34 csharemanagerdlg;control;6 curlcopydlg;control;6 curlexportdlg;control;10 curlactiondlg;control;11 cfilepreviewdlg;control;6 cexistingfiledlg;control;2 cclosemodedlg;control;6 cdonkeyserversdlg;control;5 cdeletefiledlg;control;5 ctorrentseeddlg;control;4 cdownloadgroupdlg;control;2 cmediavisdlg;control;6 cdecodemetadatadlg;control;9 circinputdlg;control;3
+#: string;20238 csettingsheet;control;3 cqueuepropertiesdlg;control;38 cprofilemanagerdlg;control;3 cconnecttodlg;control;8 cdownloaddlg;control;5 cnewsearchdlg;control;4 cfiltersearchdlg;control;30 csavefilterasdlg;control;3 cdiscoveryservicedlg;control;6 cfilecopydlg;control;5 cfolderpropertiesdlg;control;8 cgraphlistdlg;control;17 cgraphitemdlg;control;2 cschemacolumnsdlg;control;4 csecureruledlg;control;34 ciplistadddlg;control;19 csharemanagerdlg;control;6 curlcopydlg;control;6 curlexportdlg;control;10 curlactiondlg;control;11 cfilepreviewdlg;control;6 cexistingfiledlg;control;2 cclosemodedlg;control;6 cdonkeyserversdlg;control;5 cdeletefiledlg;control;5 ctorrentseeddlg;control;4 cdownloadgroupdlg;control;2 cmediavisdlg;control;6 cdecodemetadatadlg;control;9 circinputdlg;control;3
 msgid "Cancel"
 msgstr ""
 
@@ -6758,6 +6790,158 @@ msgstr ""
 
 #: string;20271 clibrarysettingspage;control;24
 msgid "Store Collections Here"
+msgstr ""
+
+#: string;20272
+msgid "Cached copy unreadable; it will be downloaded again."
+msgstr ""
+
+#: string;20273
+msgid "Cached copy unreadable; import the file again."
+msgstr ""
+
+#: string;20274
+msgid "Hijacked and criminal networks; few false positives. Data (c) The Spamhaus Project."
+msgstr ""
+
+#: string;20275
+msgid "Known compromised hosts."
+msgstr ""
+
+#: string;20276
+msgid "Anti-P2P companies; very large (about a fifth of all IPv4 addresses); blocks whole providers and CDN ranges (it lists Cloudflare's 1.1.1.0 block)."
+msgstr ""
+
+#: string;20277
+msgid "Aggregate of several privacy and abuse lists."
+msgstr ""
+
+#: string;20278
+msgid "Unallocated space; must stay updated or it blocks new networks."
+msgstr ""
+
+#: string;20279
+msgid "The address does not start with https://."
+msgstr ""
+
+#: string;20280
+msgid "The download did not end at an https:// address."
+msgstr ""
+
+#: string;20281
+msgid "The server could not be reached."
+msgstr ""
+
+#: string;20282
+msgid "The server answered with HTTP status %d."
+msgstr ""
+
+#: string;20283
+msgid "The download is larger than 64 MB."
+msgstr ""
+
+#: string;20284
+msgid "The content is larger than 256 MB once decompressed."
+msgstr ""
+
+#: string;20285
+msgid "The compressed file could not be read."
+msgstr ""
+
+#: string;20286
+msgid "The list holds no address range."
+msgstr ""
+
+#: string;20287
+msgid "The list holds more than 2,000,000 ranges."
+msgstr ""
+
+#: string;20288
+msgid "The list holds an IPv4 range of half the address space or more."
+msgstr ""
+
+#: string;20289
+msgid "The list's IPv4 ranges cover more than half the address space."
+msgstr ""
+
+#: string;20290
+msgid "The list holds an IPv6 range that covers all of 2000::/3."
+msgstr ""
+
+#: string;20291
+msgid "The list could not be saved."
+msgstr ""
+
+#: string;20292
+msgid "IP list %s updated: %lu lines taken, %lu rejected, %lu ranges after merging."
+msgstr ""
+
+#: string;20293
+msgid "IP list %s not updated: %s"
+msgstr ""
+
+#: string;20294
+msgid "%s: %Iu ranges imported, %Iu lines rejected."
+msgstr ""
+
+#: string;20295
+msgid "%s could not be imported."
+msgstr ""
+
+#: string;20296
+msgid "%s could not be written."
+msgstr ""
+
+#: string;20297
+msgid "%s could not be imported: %s"
+msgstr ""
+
+#: string;20298
+msgid "The file is larger than 64 MB."
+msgstr ""
+
+#: string;20299
+msgid "IP lists are downloaded over HTTPS only: the URL must start with https://."
+msgstr ""
+
+#: string;20300
+msgid "Remove the selected IP lists? Their downloaded copies are deleted too."
+msgstr ""
+
+#: string;20301
+msgid "Imported"
+msgstr ""
+
+#: string;20302
+msgid "Failed: %s"
+msgstr ""
+
+#: string;20303
+msgid "Not downloaded yet"
+msgstr ""
+
+#: string;20304
+msgid "IP lists"
+msgstr ""
+
+#: string;20305
+msgid "My rules"
+msgstr ""
+
+#: string;20306
+msgid "Enter the https:// address of your own list, or clear its name."
+msgstr ""
+
+#: string;20307
+msgid "Nothing was added: the lists you chose are already in your IP lists."
+msgstr ""
+
+#: string;20308
+msgid "Tick a list, or enter the address of your own list."
+msgstr ""
+
+#: string;20309
+msgid "Already in your IP lists, so not added again: %s"
 msgstr ""
 
 #: csettingsheet;control;4 cprofilemanagerdlg;control;4
@@ -6900,7 +7084,7 @@ msgstr ""
 msgid "_Safe to Open:"
 msgstr ""
 
-#: clibrarysettingspage;control;18 clibrarysettingspage;control;22 cmediasettingspage;control;7 cwebsettingspage;control;12 cfilesourcespage;control;5 cdownloadgroupdlg;control;7
+#: clibrarysettingspage;control;18 clibrarysettingspage;control;22 cmediasettingspage;control;7 cwebsettingspage;control;12 cfilesourcespage;control;5 ciplistadddlg;control;18 cdownloadgroupdlg;control;7
 msgid "_Add"
 msgstr ""
 
@@ -7588,7 +7772,7 @@ msgstr ""
 msgid "Upload Queue Properties"
 msgstr ""
 
-#: cqueuepropertiesdlg;control;1 cgraphlistdlg;control;14 cdownloadgroupdlg;control;12
+#: cqueuepropertiesdlg;control;1 cgraphlistdlg;control;14 ciplistadddlg;control;13 cdownloadgroupdlg;control;12
 msgid "_Name:"
 msgstr ""
 
@@ -8484,6 +8668,26 @@ msgstr ""
 msgid "m"
 msgstr ""
 
+#: dialog;ciplistadddlg
+msgid "Add IP List"
+msgstr ""
+
+#: ciplistadddlg;control;1
+msgid "Tick the lists to add. Each one is downloaded over HTTPS and updated once a day; none is added unless you tick it."
+msgstr ""
+
+#: ciplistadddlg;control;12
+msgid "Your own list"
+msgstr ""
+
+#: ciplistadddlg;control;15
+msgid "_URL:"
+msgstr ""
+
+#: ciplistadddlg;control;17
+msgid "Accepted formats: PeerGuardian (.p2p), eMule (ipfilter.dat), Gnucleus (.net), CIDR, plain addresses and Spamhaus DROP JSON, as text, gzip or zip. The URL must start with https://."
+msgstr ""
+
 #: dialog;csharemanagerdlg
 msgid "Shared Folder Manager"
 msgstr ""
@@ -9102,6 +9306,18 @@ msgstr ""
 
 #: column;comment
 msgid "Comment"
+msgstr ""
+
+#: column;list
+msgid "List"
+msgstr ""
+
+#: column;ranges
+msgid "Ranges"
+msgstr ""
+
+#: column;updated
+msgid "Updated"
 msgstr ""
 
 #: column;lastseen

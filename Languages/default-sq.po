@@ -387,9 +387,10 @@ msgstr "Edito Rregullin"
 msgid "Add Rule"
 msgstr "Shto Rregull"
 
-#: button;id_security_remove
-msgid "Remove Rule"
-msgstr "Hiqe Rregullin"
+#: button;id_security_remove button;id_hostcache_remove string;17021
+#: cfavouritesprofilepage;control;8
+msgid "Remove"
+msgstr "Fshije"
 
 #: button;id_security_move_up
 msgid "Move Up"
@@ -398,6 +399,14 @@ msgstr "Lëvize Sipër"
 #: button;id_security_move_down
 msgid "Move Down"
 msgstr "Lëvize Poshtë"
+
+#: button;id_security_add_list
+msgid "Add List..."
+msgstr "Shto Listë..."
+
+#: button;id_security_update_lists
+msgid "Update Now"
+msgstr "Përditëso Tani"
 
 #: button;id_security_reset
 msgid "Reset List"
@@ -438,10 +447,6 @@ msgstr ""
 #: button;id_hitmonitor_search
 msgid "Requery"
 msgstr "Ripyete"
-
-#: button;id_hostcache_remove string;17021 cfavouritesprofilepage;control;8
-msgid "Remove"
-msgstr "Fshije"
 
 #: button;id_hostcache_g2_horizon
 msgid "G2 Cluster"
@@ -1476,6 +1481,7 @@ msgstr "_Eksploro"
 #: clibrarytree.physical.basic;item;id_library_remove
 #: clibrarytree.physical;item;id_library_remove
 #: cmedialist;item;id_media_remove csecuritywnd;item;id_security_remove
+#: csecuritywnd.lists;item;id_security_list_remove
 #: cschedulerwnd;item;id_scheduler_remove
 #: cdiscoverywnd;item;id_discovery_remove clibrarysettingspage;control;19
 #: clibrarysettingspage;control;23 cmediasettingspage;control;8
@@ -1890,6 +1896,18 @@ msgstr "_Prano"
 #: csecuritywnd;61;item;id_security_policy_deny
 msgid "_Deny"
 msgstr "_Moho"
+
+#: csecuritywnd.lists;item;id_security_add_list
+msgid "_Add List..."
+msgstr "_Shto listë..."
+
+#: csecuritywnd.lists;item;id_security_update_lists
+msgid "_Update Now"
+msgstr "_Përditëso tani"
+
+#: csecuritywnd.lists;item;id_security_list_enable
+msgid "_Enabled"
+msgstr "_Aktive"
 
 #: cschedulerwnd;item;id_scheduler_add
 msgid "_Add Scheduled Task"
@@ -4242,6 +4260,10 @@ msgstr "Pushon monitorimin e kërkimit."
 msgid "Add a new rule to the security chain..."
 msgstr "Shton një rregull të ri tek zinxhiri i sigurisë..."
 
+#: message;id_security_add_list
+msgid "Add IP block lists from the catalogue, or your own list from an https:// address..."
+msgstr "Shto lista bllokimi IP nga katalogu, ose listën tënde nga një adresë https://..."
+
 #: message;id_security_ban
 msgid "Ban the selected host for the duration of this session."
 msgstr "Dëbon hostin e zgjedhur për zgjatje të sesionit."
@@ -4257,6 +4279,14 @@ msgstr "Eksporton në skedë rregullin e zgjedhur të sigurisë..."
 #: message;id_security_import
 msgid "Import security rules from a file..."
 msgstr "Importon nga një skedë rregullat e sigurisë..."
+
+#: message;id_security_list_enable
+msgid "Turn the selected IP lists on or off."
+msgstr "Aktivizo ose çaktivizo listat IP të zgjedhura."
+
+#: message;id_security_list_remove
+msgid "Remove the selected IP lists."
+msgstr "Hiq listat IP të zgjedhura."
 
 #: message;id_security_move_down
 msgid "Move the selected security rules down the precedence list."
@@ -4275,12 +4305,16 @@ msgid "Set the default security policy to deny all hosts."
 msgstr "Vendos dëftesën e sigurisë tipike për të mohuar tërë hostet."
 
 #: message;id_security_remove
-msgid "Remove the selected security rules."
-msgstr "Fshin rregullin e zgjedhur të sigurisë."
+msgid "Remove the selected rules or IP lists."
+msgstr "Hiq rregullat ose listat IP të zgjedhura."
 
 #: message;id_security_reset
 msgid "Reset the hit counts on the selected rules."
 msgstr "Rivendos numërimin e hiteve në rregullin e zgjedhur."
+
+#: message;id_security_update_lists
+msgid "Download the selected IP lists now, or all of them when none is selected."
+msgstr "Shkarko tani listat IP të zgjedhura, ose të gjitha kur nuk është zgjedhur asnjë."
 
 #: message;id_system_clear
 msgid "Clear the status log."
@@ -7393,8 +7427,8 @@ msgstr "OK"
 #: cfilecopydlg;control;5 cfolderpropertiesdlg;control;8
 #: cgraphlistdlg;control;17 cgraphitemdlg;control;2
 #: cschemacolumnsdlg;control;4 csecureruledlg;control;34
-#: csharemanagerdlg;control;6 curlcopydlg;control;6 curlexportdlg;control;10
-#: curlactiondlg;control;11 cfilepreviewdlg;control;6
+#: ciplistadddlg;control;19 csharemanagerdlg;control;6 curlcopydlg;control;6
+#: curlexportdlg;control;10 curlactiondlg;control;11 cfilepreviewdlg;control;6
 #: cexistingfiledlg;control;2 cclosemodedlg;control;6
 #: cdonkeyserversdlg;control;5 cdeletefiledlg;control;5
 #: ctorrentseeddlg;control;4 cdownloadgroupdlg;control;2
@@ -7528,6 +7562,158 @@ msgstr "Depozito Këtu Torrentet"
 #: string;20271 clibrarysettingspage;control;24
 msgid "Store Collections Here"
 msgstr "Depozito Këtu Koleksionet"
+
+#: string;20272
+msgid "Cached copy unreadable; it will be downloaded again."
+msgstr "Kopja në memorien e përkohshme është e palexueshme; do të shkarkohet përsëri."
+
+#: string;20273
+msgid "Cached copy unreadable; import the file again."
+msgstr "Kopja në memorien e përkohshme është e palexueshme; importoje skedarin përsëri."
+
+#: string;20274
+msgid "Hijacked and criminal networks; few false positives. Data (c) The Spamhaus Project."
+msgstr "Rrjete të rrëmbyera dhe kriminale; pak pozitive të rreme. Të dhënat (c) The Spamhaus Project."
+
+#: string;20275
+msgid "Known compromised hosts."
+msgstr "Hoste të njohur si të komprometuar."
+
+#: string;20276
+msgid "Anti-P2P companies; very large (about a fifth of all IPv4 addresses); blocks whole providers and CDN ranges (it lists Cloudflare's 1.1.1.0 block)."
+msgstr "Kompani anti-P2P; shumë e madhe (rreth një e pesta e adresave IPv4); bllokon ofrues të tërë dhe vargje CDN (përfshin bllokun 1.1.1.0 të Cloudflare)."
+
+#: string;20277
+msgid "Aggregate of several privacy and abuse lists."
+msgstr "Përmbledhje e disa listave për privatësinë dhe abuzimet."
+
+#: string;20278
+msgid "Unallocated space; must stay updated or it blocks new networks."
+msgstr "Hapësirë e pashpërndarë; duhet mbajtur e përditësuar, përndryshe bllokon rrjete të reja."
+
+#: string;20279
+msgid "The address does not start with https://."
+msgstr "Adresa nuk fillon me https://."
+
+#: string;20280
+msgid "The download did not end at an https:// address."
+msgstr "Shkarkimi nuk përfundoi në një adresë https://."
+
+#: string;20281
+msgid "The server could not be reached."
+msgstr "Serveri nuk u arrit."
+
+#: string;20282
+msgid "The server answered with HTTP status %d."
+msgstr "Serveri u përgjigj me gjendjen HTTP %d."
+
+#: string;20283
+msgid "The download is larger than 64 MB."
+msgstr "Shkarkimi është më i madh se 64 MB."
+
+#: string;20284
+msgid "The content is larger than 256 MB once decompressed."
+msgstr "Përmbajtja është më e madhe se 256 MB pasi çngjishet."
+
+#: string;20285
+msgid "The compressed file could not be read."
+msgstr "Skedari i ngjeshur nuk u lexua dot."
+
+#: string;20286
+msgid "The list holds no address range."
+msgstr "Lista nuk përmban asnjë varg adresash."
+
+#: string;20287
+msgid "The list holds more than 2,000,000 ranges."
+msgstr "Lista përmban më shumë se 2.000.000 vargje."
+
+#: string;20288
+msgid "The list holds an IPv4 range of half the address space or more."
+msgstr "Lista përmban një varg IPv4 sa gjysma e hapësirës së adresave ose më shumë."
+
+#: string;20289
+msgid "The list's IPv4 ranges cover more than half the address space."
+msgstr "Vargjet IPv4 të listës mbulojnë më shumë se gjysmën e hapësirës së adresave."
+
+#: string;20290
+msgid "The list holds an IPv6 range that covers all of 2000::/3."
+msgstr "Lista përmban një varg IPv6 që mbulon gjithë 2000::/3."
+
+#: string;20291
+msgid "The list could not be saved."
+msgstr "Lista nuk u ruajt dot."
+
+#: string;20292
+msgid "IP list %s updated: %lu lines taken, %lu rejected, %lu ranges after merging."
+msgstr "Lista IP %s u përditësua: %lu rreshta të pranuar, %lu të refuzuar, %lu vargje pas bashkimit."
+
+#: string;20293
+msgid "IP list %s not updated: %s"
+msgstr "Lista IP %s nuk u përditësua: %s"
+
+#: string;20294
+msgid "%s: %Iu ranges imported, %Iu lines rejected."
+msgstr "%s: %Iu vargje të importuara, %Iu rreshta të refuzuar."
+
+#: string;20295
+msgid "%s could not be imported."
+msgstr "%s nuk u importua dot."
+
+#: string;20296
+msgid "%s could not be written."
+msgstr "%s nuk u shkrua dot."
+
+#: string;20297
+msgid "%s could not be imported: %s"
+msgstr "%s nuk u importua dot: %s"
+
+#: string;20298
+msgid "The file is larger than 64 MB."
+msgstr "Skedari është më i madh se 64 MB."
+
+#: string;20299
+msgid "IP lists are downloaded over HTTPS only: the URL must start with https://."
+msgstr "Listat IP shkarkohen vetëm përmes HTTPS: URL-ja duhet të fillojë me https://."
+
+#: string;20300
+msgid "Remove the selected IP lists? Their downloaded copies are deleted too."
+msgstr "Të hiqen listat IP të zgjedhura? Do të fshihen edhe kopjet e tyre të shkarkuara."
+
+#: string;20301
+msgid "Imported"
+msgstr "E importuar"
+
+#: string;20302
+msgid "Failed: %s"
+msgstr "Dështoi: %s"
+
+#: string;20303
+msgid "Not downloaded yet"
+msgstr "Ende e pashkarkuar"
+
+#: string;20304
+msgid "IP lists"
+msgstr "Listat IP"
+
+#: string;20305
+msgid "My rules"
+msgstr "Rregullat e mia"
+
+#: string;20306
+msgid "Enter the https:// address of your own list, or clear its name."
+msgstr "Jep adresën https:// të listës tënde, ose pastro emrin e saj."
+
+#: string;20307
+msgid "Nothing was added: the lists you chose are already in your IP lists."
+msgstr "S'u shtua asgjë: listat që zgjodhe janë tashmë te listat e tua IP."
+
+#: string;20308
+msgid "Tick a list, or enter the address of your own list."
+msgstr "Zgjidh një listë, ose jep adresën e listës tënde."
+
+#: string;20309
+msgid "Already in your IP lists, so not added again: %s"
+msgstr "Tashmë te listat e tua IP, prandaj nuk u shtuan sërish: %s"
 
 #: csettingsheet;control;4 cprofilemanagerdlg;control;4
 msgid "Apply"
@@ -7672,7 +7858,8 @@ msgstr "_Hap pa Rrezik:"
 
 #: clibrarysettingspage;control;18 clibrarysettingspage;control;22
 #: cmediasettingspage;control;7 cwebsettingspage;control;12
-#: cfilesourcespage;control;5 cdownloadgroupdlg;control;7
+#: cfilesourcespage;control;5 ciplistadddlg;control;18
+#: cdownloadgroupdlg;control;7
 msgid "_Add"
 msgstr "_Shto"
 
@@ -8371,7 +8558,7 @@ msgid "Upload Queue Properties"
 msgstr "Vetitë e Ngarkesës në Radhë"
 
 #: cqueuepropertiesdlg;control;1 cgraphlistdlg;control;14
-#: cdownloadgroupdlg;control;12
+#: ciplistadddlg;control;13 cdownloadgroupdlg;control;12
 msgid "_Name:"
 msgstr "_Emri:"
 
@@ -9268,6 +9455,26 @@ msgstr "o"
 msgid "m"
 msgstr "m"
 
+#: dialog;ciplistadddlg
+msgid "Add IP List"
+msgstr "Shto Listë IP"
+
+#: ciplistadddlg;control;1
+msgid "Tick the lists to add. Each one is downloaded over HTTPS and updated once a day; none is added unless you tick it."
+msgstr "Zgjidh listat për t'u shtuar. Secila shkarkohet përmes HTTPS dhe përditësohet një herë në ditë; asnjë nuk shtohet nëse nuk e zgjedh."
+
+#: ciplistadddlg;control;12
+msgid "Your own list"
+msgstr "Lista jote"
+
+#: ciplistadddlg;control;15
+msgid "_URL:"
+msgstr "_URL:"
+
+#: ciplistadddlg;control;17
+msgid "Accepted formats: PeerGuardian (.p2p), eMule (ipfilter.dat), Gnucleus (.net), CIDR, plain addresses and Spamhaus DROP JSON, as text, gzip or zip. The URL must start with https://."
+msgstr "Formatet e pranuara: PeerGuardian (.p2p), eMule (ipfilter.dat), Gnucleus (.net), CIDR, adresa të thjeshta dhe Spamhaus DROP JSON, si tekst, gzip ose zip. URL-ja duhet të fillojë me https://."
+
 #: dialog;csharemanagerdlg
 msgid "Shared Folder Manager"
 msgstr "Menaxheri i Dosjeve të Shpërndara"
@@ -9889,6 +10096,18 @@ msgstr "Paraprirje"
 msgid "Comment"
 msgstr "Komenti"
 
+#: column;list
+msgid "List"
+msgstr "Lista"
+
+#: column;ranges
+msgid "Ranges"
+msgstr "Vargje"
+
+#: column;updated
+msgid "Updated"
+msgstr "Përditësuar"
+
 #: column;lastseen
 msgid "LastSeen"
 msgstr "Parë së Fundmi"
@@ -10180,3 +10399,9 @@ msgstr "Tjetër"
 
 #~ msgid "Saturday"
 #~ msgstr "e Shtunë"
+
+#~ msgid "Remove Rule"
+#~ msgstr "Hiqe Rregullin"
+
+#~ msgid "Remove the selected security rules."
+#~ msgstr "Fshin rregullin e zgjedhur të sigurisë."

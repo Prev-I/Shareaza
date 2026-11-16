@@ -379,10 +379,13 @@
 			<button id="ID_SECURITY_EDIT" text="Edit Rule"/>
 			<separator/>
 			<button id="ID_SECURITY_ADD" text="Add Rule"/>
-			<button id="ID_SECURITY_REMOVE" text="Remove Rule"/>
+			<button id="ID_SECURITY_REMOVE" text="Odstranit"/>
 			<separator/>
 			<button id="ID_SECURITY_MOVE_UP" text="Move Up"/>
 			<button id="ID_SECURITY_MOVE_DOWN" text="Move Down"/>
+			<separator/>
+			<button id="ID_SECURITY_ADD_LIST" text="Přidat seznam..."/>
+			<button id="ID_SECURITY_UPDATE_LISTS" text="Aktualizovat nyní"/>
 			<rightAlign/>
 			<button id="ID_SECURITY_RESET" text="Reset List"/>
 			<button id="ID_SECURITY_IMPORT" text="Import List"/>
@@ -1561,6 +1564,14 @@
 			<separator/>
 			<item id="ID_SECURITY_EDIT" text="Pokročilé _úpravy..."/>
 		</menu>
+		<menu name="CSecurityWnd.Lists">
+			<item id="ID_SECURITY_ADD_LIST" text="Přidat _seznam..."/>
+			<separator/>
+			<item id="ID_SECURITY_UPDATE_LISTS" text="_Aktualizovat nyní"/>
+			<item id="ID_SECURITY_LIST_ENABLE" text="_Povoleno"/>
+			<separator/>
+			<item id="ID_SECURITY_LIST_REMOVE" text="Odst_ranit"/>
+		</menu>
 		<!-- SCHEDULER WINDOW -->
 		<menu name="CSchedulerWnd">
 			<item id="ID_SCHEDULER_ADD" text="_Add Scheduled Task"/>
@@ -2594,16 +2605,20 @@
 		<tip id="ID_SEARCHMONITOR_CLEAR" message="Vymazat zásobník monitoru hledání."/>
 		<tip id="ID_SEARCHMONITOR_PAUSE" message="Pozastavit výpis při hledání."/>
 		<tip id="ID_SECURITY_ADD" message="Přidat nové pravidlo k zabezpečení..."/>
+		<tip id="ID_SECURITY_ADD_LIST" message="Přidat seznamy blokovaných IP z katalogu nebo vlastní seznam z adresy https://..."/>
 		<tip id="ID_SECURITY_BAN" message="Zakázat označeného hosta po dobu tohoto sezení."/>
 		<tip id="ID_SECURITY_EDIT" message="Upravit označené pravidlo zabezpečení..."/>
 		<tip id="ID_SECURITY_EXPORT" message="Export vybraných pravidel zabezpečení u souboru..."/>
 		<tip id="ID_SECURITY_IMPORT" message="Importovat pravidla zabezpečení ze souboru..."/>
+		<tip id="ID_SECURITY_LIST_ENABLE" message="Zapnout nebo vypnout vybrané seznamy IP."/>
+		<tip id="ID_SECURITY_LIST_REMOVE" message="Odstranit vybrané seznamy IP."/>
 		<tip id="ID_SECURITY_MOVE_DOWN" message="Přesunout vybraná pravidla zabezpečení dolů na prioritního seznamu."/>
 		<tip id="ID_SECURITY_MOVE_UP" message="Přesunout vybraná pravidla zabezpečení nahoru na prioritního seznamu."/>
 		<tip id="ID_SECURITY_POLICY_ACCEPT" message="Nastavit standardní bezpečnostní povolení pro všechny hosty."/>
 		<tip id="ID_SECURITY_POLICY_DENY" message="Nastavit standardní zabezpečení odepření pro všechny hosty."/>
-		<tip id="ID_SECURITY_REMOVE" message="Odstranit označené pravidlo zabezpečení."/>
+		<tip id="ID_SECURITY_REMOVE" message="Odstranit vybraná pravidla nebo seznamy IP."/>
 		<tip id="ID_SECURITY_RESET" message="Ihned resetovat a počítat s pravidly výběru."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="Stáhnout nyní vybrané seznamy IP, nebo všechny, pokud není vybrán žádný."/>
 		<tip id="ID_SYSTEM_CLEAR" message="Vymazat stav záznamu."/>
 		<tip id="ID_SYSTEM_COPY" message="Copy selected line(s) of status log."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="Zaznamenat časovou značku pro každou linku."/>
@@ -3447,6 +3462,44 @@
 		<string id="20269" value="Ukládat neúplné soubory do"/>
 		<string id="20270" value="Torrenty skladovat zde"/>
 		<string id="20271" value="Sbírky ukládat do adresáře"/>
+		<string id="20272" value="Kopie v mezipaměti je nečitelná; bude stažena znovu."/>
+		<string id="20273" value="Kopie v mezipaměti je nečitelná; importujte soubor znovu."/>
+		<string id="20274" value="Unesené a kriminální sítě; málo falešných poplachů. Data (c) The Spamhaus Project."/>
+		<string id="20275" value="Známé napadené počítače."/>
+		<string id="20276" value="Anti-P2P firmy; velmi velký (asi pětina všech adres IPv4); blokuje celé poskytovatele a rozsahy CDN (obsahuje blok 1.1.1.0 společnosti Cloudflare)."/>
+		<string id="20277" value="Souhrn několika seznamů pro soukromí a proti zneužívání."/>
+		<string id="20278" value="Nepřidělený adresní prostor; musí zůstat aktuální, jinak blokuje nové sítě."/>
+		<string id="20279" value="Adresa nezačíná na https://."/>
+		<string id="20280" value="Stahování neskončilo na adrese https://."/>
+		<string id="20281" value="Server není dostupný."/>
+		<string id="20282" value="Server odpověděl stavem HTTP %d."/>
+		<string id="20283" value="Stahovaný soubor je větší než 64 MB."/>
+		<string id="20284" value="Obsah je po rozbalení větší než 256 MB."/>
+		<string id="20285" value="Komprimovaný soubor nelze přečíst."/>
+		<string id="20286" value="Seznam neobsahuje žádný rozsah adres."/>
+		<string id="20287" value="Seznam obsahuje více než 2 000 000 rozsahů."/>
+		<string id="20288" value="Seznam obsahuje rozsah IPv4 o velikosti poloviny adresního prostoru nebo více."/>
+		<string id="20289" value="Rozsahy IPv4 seznamu pokrývají více než polovinu adresního prostoru."/>
+		<string id="20290" value="Seznam obsahuje rozsah IPv6, který pokrývá celé 2000::/3."/>
+		<string id="20291" value="Seznam nelze uložit."/>
+		<string id="20292" value="Seznam IP %s aktualizován: %lu řádků přijato, %lu odmítnuto, %lu rozsahů po sloučení."/>
+		<string id="20293" value="Seznam IP %s nebyl aktualizován: %s"/>
+		<string id="20294" value="%s: %Iu rozsahů importováno, %Iu řádků odmítnuto."/>
+		<string id="20295" value="%s nelze importovat."/>
+		<string id="20296" value="%s nelze zapsat."/>
+		<string id="20297" value="%s nelze importovat: %s"/>
+		<string id="20298" value="Soubor je větší než 64 MB."/>
+		<string id="20299" value="Seznamy IP se stahují pouze přes HTTPS: URL musí začínat na https://."/>
+		<string id="20300" value="Odstranit vybrané seznamy IP? Smažou se i jejich stažené kopie."/>
+		<string id="20301" value="Importováno"/>
+		<string id="20302" value="Chyba: %s"/>
+		<string id="20303" value="Zatím nestaženo"/>
+		<string id="20304" value="Seznamy IP"/>
+		<string id="20305" value="Moje pravidla"/>
+		<string id="20306" value="Zadejte adresu https:// vlastního seznamu, nebo vymažte jeho název."/>
+		<string id="20307" value="Nic nebylo přidáno: vybrané seznamy už mezi vašimi seznamy IP jsou."/>
+		<string id="20308" value="Zaškrtněte seznam, nebo zadejte adresu vlastního seznamu."/>
+		<string id="20309" value="Už mezi vašimi seznamy IP, proto znovu nepřidáno: %s"/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->
@@ -4287,6 +4340,27 @@
 			<control caption="OK"/>
 			<control caption="Zrušit"/>
 		</dialog>
+		<dialog name="CIPListAddDlg" cookie="StBuStBuStBuStBuStBuStBuStEdStEdStBuBu" caption="Přidat seznam IP">
+			<control caption="Zaškrtněte seznamy k přidání. Každý se stahuje přes HTTPS a aktualizuje jednou denně; nic se nepřidá, pokud to nezaškrtnete."/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control caption="Vlastní seznam"/>
+			<control caption="_Název:"/>
+			<control/>
+			<control caption="_URL:"/>
+			<control/>
+			<control caption="Podporované formáty: PeerGuardian (.p2p), eMule (ipfilter.dat), Gnucleus (.net), CIDR, prosté adresy a Spamhaus DROP JSON, jako text, gzip nebo zip. URL musí začínat na https://."/>
+			<control caption="Přid_at"/>
+			<control caption="Zrušit"/>
+		</dialog>
 		<dialog name="CShareManagerDlg" cookie="StSyBuBuBuBu" caption="Správce sdílených složek">
 			<control caption="Toto je seznam složek ve vaší knihovně. Můžete přidat a odstranit složky pomocí tlačítek dole. Pokud přidáte novou složku ta je ihned sdílena dalšími uživateli, ovšem můžete naopak tuto složku také nesdílet v knihovně Shareazy."/>
 			<control/>
@@ -4635,6 +4709,12 @@
 			<column from="Precedence" to="Přednost"/>
 			<column from="Hits" to="Výsledky"/>
 			<column from="Comment" to="Poznámka"/>
+		</list>
+		<list name="CSecurityWnd.Lists">
+			<column from="List" to="Seznam"/>
+			<column from="Ranges" to="Rozsahy"/>
+			<column from="Updated" to="Aktualizováno"/>
+			<column from="Hits" to="Výsledky"/>
 		</list>
 		<list name="CHostCacheWnd">
 			<column from="Address" to="Adresa"/>

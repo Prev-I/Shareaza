@@ -387,9 +387,10 @@ msgstr ""
 msgid "Add Rule"
 msgstr ""
 
-#: button;id_security_remove
-msgid "Remove Rule"
-msgstr ""
+#: button;id_security_remove button;id_hostcache_remove string;17021
+#: cfavouritesprofilepage;control;8
+msgid "Remove"
+msgstr "Eemalda"
 
 #: button;id_security_move_up
 msgid "Move Up"
@@ -398,6 +399,14 @@ msgstr ""
 #: button;id_security_move_down
 msgid "Move Down"
 msgstr ""
+
+#: button;id_security_add_list
+msgid "Add List..."
+msgstr "Lisa loend..."
+
+#: button;id_security_update_lists
+msgid "Update Now"
+msgstr "Uuenda kohe"
 
 #: button;id_security_reset
 msgid "Reset List"
@@ -438,10 +447,6 @@ msgstr ""
 #: button;id_hitmonitor_search
 msgid "Requery"
 msgstr "Nõutud"
-
-#: button;id_hostcache_remove string;17021 cfavouritesprofilepage;control;8
-msgid "Remove"
-msgstr "Eemalda"
 
 #: button;id_hostcache_g2_horizon
 msgid "G2 Cluster"
@@ -1476,6 +1481,7 @@ msgstr "_Vaata Faile"
 #: clibrarytree.physical.basic;item;id_library_remove
 #: clibrarytree.physical;item;id_library_remove
 #: cmedialist;item;id_media_remove csecuritywnd;item;id_security_remove
+#: csecuritywnd.lists;item;id_security_list_remove
 #: cschedulerwnd;item;id_scheduler_remove
 #: cdiscoverywnd;item;id_discovery_remove clibrarysettingspage;control;19
 #: clibrarysettingspage;control;23 cmediasettingspage;control;8
@@ -1890,6 +1896,18 @@ msgstr ""
 #: csecuritywnd;61;item;id_security_policy_deny
 msgid "_Deny"
 msgstr ""
+
+#: csecuritywnd.lists;item;id_security_add_list
+msgid "_Add List..."
+msgstr "Lisa _loend..."
+
+#: csecuritywnd.lists;item;id_security_update_lists
+msgid "_Update Now"
+msgstr "_Uuenda kohe"
+
+#: csecuritywnd.lists;item;id_security_list_enable
+msgid "_Enabled"
+msgstr "Lu_batud"
 
 #: cschedulerwnd;item;id_scheduler_add
 msgid "_Add Scheduled Task"
@@ -4225,6 +4243,10 @@ msgstr "Peata osingu jälgimine."
 msgid "Add a new rule to the security chain..."
 msgstr "Lisa turvalisuse ahelasse uus reegel..."
 
+#: message;id_security_add_list
+msgid "Add IP block lists from the catalogue, or your own list from an https:// address..."
+msgstr "Lisa kataloogist IP-blokeerimisloendeid või oma loend https://-aadressilt..."
+
 #: message;id_security_ban
 msgid "Ban the selected host for the duration of this session."
 msgstr "Keela valitud server antud sessiooniks."
@@ -4240,6 +4262,14 @@ msgstr "Ekspordi valitud failist uued turvareeglid..."
 #: message;id_security_import
 msgid "Import security rules from a file..."
 msgstr "Impordi turvareeglid valitud failist..."
+
+#: message;id_security_list_enable
+msgid "Turn the selected IP lists on or off."
+msgstr "Lülita valitud IP-loendid sisse või välja."
+
+#: message;id_security_list_remove
+msgid "Remove the selected IP lists."
+msgstr "Eemalda valitud IP-loendid."
 
 #: message;id_security_move_down
 msgid "Move the selected security rules down the precedence list."
@@ -4258,12 +4288,16 @@ msgid "Set the default security policy to deny all hosts."
 msgstr "Keela vaikimisi reeglina kõik serverid."
 
 #: message;id_security_remove
-msgid "Remove the selected security rules."
-msgstr "Eemalda valitud turvareegel."
+msgid "Remove the selected rules or IP lists."
+msgstr "Eemalda valitud reeglid või IP-loendid."
 
 #: message;id_security_reset
 msgid "Reset the hit counts on the selected rules."
 msgstr "Nulli löögilugeja valitud reeglil."
+
+#: message;id_security_update_lists
+msgid "Download the selected IP lists now, or all of them when none is selected."
+msgstr "Laadi valitud IP-loendid kohe alla või kõik, kui ühtki pole valitud."
 
 #: message;id_system_clear
 msgid "Clear the status log."
@@ -7375,8 +7409,8 @@ msgstr "OK"
 #: cfilecopydlg;control;5 cfolderpropertiesdlg;control;8
 #: cgraphlistdlg;control;17 cgraphitemdlg;control;2
 #: cschemacolumnsdlg;control;4 csecureruledlg;control;34
-#: csharemanagerdlg;control;6 curlcopydlg;control;6 curlexportdlg;control;10
-#: curlactiondlg;control;11 cfilepreviewdlg;control;6
+#: ciplistadddlg;control;19 csharemanagerdlg;control;6 curlcopydlg;control;6
+#: curlexportdlg;control;10 curlactiondlg;control;11 cfilepreviewdlg;control;6
 #: cexistingfiledlg;control;2 cclosemodedlg;control;6
 #: cdonkeyserversdlg;control;5 cdeletefiledlg;control;5
 #: ctorrentseeddlg;control;4 cdownloadgroupdlg;control;2
@@ -7510,6 +7544,158 @@ msgstr "Salvesta Torrentid Siia"
 #: string;20271 clibrarysettingspage;control;24
 msgid "Store Collections Here"
 msgstr "Siia Salvesta Kollektsioonid"
+
+#: string;20272
+msgid "Cached copy unreadable; it will be downloaded again."
+msgstr "Puhverdatud koopia on loetamatu; see laaditakse uuesti alla."
+
+#: string;20273
+msgid "Cached copy unreadable; import the file again."
+msgstr "Puhverdatud koopia on loetamatu; impordi fail uuesti."
+
+#: string;20274
+msgid "Hijacked and criminal networks; few false positives. Data (c) The Spamhaus Project."
+msgstr "Kaaperdatud ja kuritegelikud võrgud; vähe valepositiivseid. Andmed (c) The Spamhaus Project."
+
+#: string;20275
+msgid "Known compromised hosts."
+msgstr "Teadaolevalt ohustatud hostid."
+
+#: string;20276
+msgid "Anti-P2P companies; very large (about a fifth of all IPv4 addresses); blocks whole providers and CDN ranges (it lists Cloudflare's 1.1.1.0 block)."
+msgstr "P2P-vastased firmad; väga suur (umbes viiendik kõigist IPv4-aadressidest); blokeerib terveid teenusepakkujaid ja CDN-vahemikke (sisaldab Cloudflare'i plokki 1.1.1.0)."
+
+#: string;20277
+msgid "Aggregate of several privacy and abuse lists."
+msgstr "Mitme privaatsus- ja kuritarvitusloendi koond."
+
+#: string;20278
+msgid "Unallocated space; must stay updated or it blocks new networks."
+msgstr "Jaotamata aadressiruum; peab olema ajakohane, muidu blokeerib uusi võrke."
+
+#: string;20279
+msgid "The address does not start with https://."
+msgstr "Aadress ei alga https://-ga."
+
+#: string;20280
+msgid "The download did not end at an https:// address."
+msgstr "Allalaadimine ei lõppenud https://-aadressil."
+
+#: string;20281
+msgid "The server could not be reached."
+msgstr "Serveriga ei saadud ühendust."
+
+#: string;20282
+msgid "The server answered with HTTP status %d."
+msgstr "Server vastas HTTP olekuga %d."
+
+#: string;20283
+msgid "The download is larger than 64 MB."
+msgstr "Allalaaditav on suurem kui 64 MB."
+
+#: string;20284
+msgid "The content is larger than 256 MB once decompressed."
+msgstr "Sisu on lahtipakituna suurem kui 256 MB."
+
+#: string;20285
+msgid "The compressed file could not be read."
+msgstr "Pakitud faili ei saanud lugeda."
+
+#: string;20286
+msgid "The list holds no address range."
+msgstr "Loend ei sisalda ühtki aadressivahemikku."
+
+#: string;20287
+msgid "The list holds more than 2,000,000 ranges."
+msgstr "Loend sisaldab üle 2 000 000 vahemiku."
+
+#: string;20288
+msgid "The list holds an IPv4 range of half the address space or more."
+msgstr "Loend sisaldab IPv4-vahemikku, mis on vähemalt pool aadressiruumist."
+
+#: string;20289
+msgid "The list's IPv4 ranges cover more than half the address space."
+msgstr "Loendi IPv4-vahemikud katavad üle poole aadressiruumist."
+
+#: string;20290
+msgid "The list holds an IPv6 range that covers all of 2000::/3."
+msgstr "Loend sisaldab IPv6-vahemikku, mis katab kogu 2000::/3."
+
+#: string;20291
+msgid "The list could not be saved."
+msgstr "Loendit ei saanud salvestada."
+
+#: string;20292
+msgid "IP list %s updated: %lu lines taken, %lu rejected, %lu ranges after merging."
+msgstr "IP-loend %s uuendatud: %lu rida vastu võetud, %lu tagasi lükatud, %lu vahemikku pärast ühendamist."
+
+#: string;20293
+msgid "IP list %s not updated: %s"
+msgstr "IP-loendit %s ei uuendatud: %s"
+
+#: string;20294
+msgid "%s: %Iu ranges imported, %Iu lines rejected."
+msgstr "%s: %Iu vahemikku imporditud, %Iu rida tagasi lükatud."
+
+#: string;20295
+msgid "%s could not be imported."
+msgstr "%s importimine ebaõnnestus."
+
+#: string;20296
+msgid "%s could not be written."
+msgstr "%s kirjutamine ebaõnnestus."
+
+#: string;20297
+msgid "%s could not be imported: %s"
+msgstr "%s importimine ebaõnnestus: %s"
+
+#: string;20298
+msgid "The file is larger than 64 MB."
+msgstr "Fail on suurem kui 64 MB."
+
+#: string;20299
+msgid "IP lists are downloaded over HTTPS only: the URL must start with https://."
+msgstr "IP-loendeid laaditakse alla ainult HTTPS-i kaudu: URL peab algama https://-ga."
+
+#: string;20300
+msgid "Remove the selected IP lists? Their downloaded copies are deleted too."
+msgstr "Kas eemaldada valitud IP-loendid? Ka nende allalaaditud koopiad kustutatakse."
+
+#: string;20301
+msgid "Imported"
+msgstr "Imporditud"
+
+#: string;20302
+msgid "Failed: %s"
+msgstr "Nurjus: %s"
+
+#: string;20303
+msgid "Not downloaded yet"
+msgstr "Pole veel alla laaditud"
+
+#: string;20304
+msgid "IP lists"
+msgstr "IP-loendid"
+
+#: string;20305
+msgid "My rules"
+msgstr "Minu reeglid"
+
+#: string;20306
+msgid "Enter the https:// address of your own list, or clear its name."
+msgstr "Sisesta oma loendi https://-aadress või tühjenda selle nimi."
+
+#: string;20307
+msgid "Nothing was added: the lists you chose are already in your IP lists."
+msgstr "Midagi ei lisatud: valitud loendid on juba sinu IP-loendites."
+
+#: string;20308
+msgid "Tick a list, or enter the address of your own list."
+msgstr "Märgi loend või sisesta oma loendi aadress."
+
+#: string;20309
+msgid "Already in your IP lists, so not added again: %s"
+msgstr "Juba sinu IP-loendites, seega uuesti ei lisatud: %s"
 
 #: csettingsheet;control;4 cprofilemanagerdlg;control;4
 msgid "Apply"
@@ -7654,7 +7840,8 @@ msgstr "_Ohutu Avada:"
 
 #: clibrarysettingspage;control;18 clibrarysettingspage;control;22
 #: cmediasettingspage;control;7 cwebsettingspage;control;12
-#: cfilesourcespage;control;5 cdownloadgroupdlg;control;7
+#: cfilesourcespage;control;5 ciplistadddlg;control;18
+#: cdownloadgroupdlg;control;7
 msgid "_Add"
 msgstr "_Lisa"
 
@@ -8353,7 +8540,7 @@ msgid "Upload Queue Properties"
 msgstr "Üleslaadimisjärjekorra Omadused"
 
 #: cqueuepropertiesdlg;control;1 cgraphlistdlg;control;14
-#: cdownloadgroupdlg;control;12
+#: ciplistadddlg;control;13 cdownloadgroupdlg;control;12
 msgid "_Name:"
 msgstr "_Nimi:"
 
@@ -9250,6 +9437,26 @@ msgstr ""
 msgid "m"
 msgstr "OK"
 
+#: dialog;ciplistadddlg
+msgid "Add IP List"
+msgstr "Lisa IP-loend"
+
+#: ciplistadddlg;control;1
+msgid "Tick the lists to add. Each one is downloaded over HTTPS and updated once a day; none is added unless you tick it."
+msgstr "Märgi lisatavad loendid. Igaüks laaditakse alla HTTPS-i kaudu ja uuendatakse kord päevas; ühtki ei lisata, kui sa seda ei märgi."
+
+#: ciplistadddlg;control;12
+msgid "Your own list"
+msgstr "Sinu oma loend"
+
+#: ciplistadddlg;control;15
+msgid "_URL:"
+msgstr "_URL:"
+
+#: ciplistadddlg;control;17
+msgid "Accepted formats: PeerGuardian (.p2p), eMule (ipfilter.dat), Gnucleus (.net), CIDR, plain addresses and Spamhaus DROP JSON, as text, gzip or zip. The URL must start with https://."
+msgstr "Toetatud vormingud: PeerGuardian (.p2p), eMule (ipfilter.dat), Gnucleus (.net), CIDR, lihtaadressid ja Spamhaus DROP JSON, tekstina, gzip- või zip-failina. URL peab algama https://-ga."
+
 #: dialog;csharemanagerdlg
 msgid "Shared Folder Manager"
 msgstr "Jagatud Kausta Haldur"
@@ -9871,6 +10078,18 @@ msgstr "Precedence"
 msgid "Comment"
 msgstr "Kommentaar"
 
+#: column;list
+msgid "List"
+msgstr "Loend"
+
+#: column;ranges
+msgid "Ranges"
+msgstr "Vahemikud"
+
+#: column;updated
+msgid "Updated"
+msgstr "Uuendatud"
+
 #: column;lastseen
 msgid "LastSeen"
 msgstr "Viimati Nähtud"
@@ -10132,3 +10351,6 @@ msgstr "Järgmine"
 
 #~ msgid "Saturday"
 #~ msgstr "Laupäev"
+
+#~ msgid "Remove the selected security rules."
+#~ msgstr "Eemalda valitud turvareegel."

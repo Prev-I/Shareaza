@@ -379,10 +379,13 @@
 			<button id="ID_SECURITY_EDIT" text="Wijzig Regel"/>
 			<separator/>
 			<button id="ID_SECURITY_ADD" text="Regel Toevoegen"/>
-			<button id="ID_SECURITY_REMOVE" text="Regel Verwijderen"/>
+			<button id="ID_SECURITY_REMOVE" text="Verwijderen"/>
 			<separator/>
 			<button id="ID_SECURITY_MOVE_UP" text="Verplaats Omhoog"/>
 			<button id="ID_SECURITY_MOVE_DOWN" text="Verplaats Omlaag"/>
+			<separator/>
+			<button id="ID_SECURITY_ADD_LIST" text="Lijst Toevoegen..."/>
+			<button id="ID_SECURITY_UPDATE_LISTS" text="Nu Bijwerken"/>
 			<rightAlign/>
 			<button id="ID_SECURITY_RESET" text="Lijst opnieuw initialiseren"/>
 			<button id="ID_SECURITY_IMPORT" text="Lijst Importeren"/>
@@ -1561,6 +1564,14 @@
 			<separator/>
 			<item id="ID_SECURITY_EDIT" text="_Geavanceerde Eigenschappen"/>
 		</menu>
+		<menu name="CSecurityWnd.Lists">
+			<item id="ID_SECURITY_ADD_LIST" text="_Lijst toevoegen..."/>
+			<separator/>
+			<item id="ID_SECURITY_UPDATE_LISTS" text="Nu _bijwerken"/>
+			<item id="ID_SECURITY_LIST_ENABLE" text="_Ingeschakeld"/>
+			<separator/>
+			<item id="ID_SECURITY_LIST_REMOVE" text="Ver_wijderen"/>
+		</menu>
 		<!-- SCHEDULER WINDOW -->
 		<menu name="CSchedulerWnd">
 			<item id="ID_SCHEDULER_ADD" text="_Voeg Geplande Taak toe"/>
@@ -2587,16 +2598,20 @@
 		<tip id="ID_SEARCHMONITOR_CLEAR" message="De buffer van de zoekmonitor wissen."/>
 		<tip id="ID_SEARCHMONITOR_PAUSE" message="Pauzeer het meekijken met zoekopdrachten."/>
 		<tip id="ID_SECURITY_ADD" message="Voeg een nieuwe beveiligingsregel toe..."/>
+		<tip id="ID_SECURITY_ADD_LIST" message="IP-blokkeerlijsten toevoegen uit de catalogus, of een eigen lijst van een https://-adres..."/>
 		<tip id="ID_SECURITY_BAN" message="De geselecteerde gastheer verbannen voor de duur van deze sessie."/>
 		<tip id="ID_SECURITY_EDIT" message="Wijzig de geselecteerde beveiligingsregel..."/>
 		<tip id="ID_SECURITY_EXPORT" message="Exporteer de geselecteerde beveiligingsregels naar een bestand..."/>
 		<tip id="ID_SECURITY_IMPORT" message="Importeer beveiligingsregels vanuit een bestand..."/>
+		<tip id="ID_SECURITY_LIST_ENABLE" message="De geselecteerde IP-lijsten in- of uitschakelen."/>
+		<tip id="ID_SECURITY_LIST_REMOVE" message="De geselecteerde IP-lijsten verwijderen."/>
 		<tip id="ID_SECURITY_MOVE_DOWN" message="Verplaats de geselecteerde beveiligingsregels naar beneden in de prioriteitenlijst."/>
 		<tip id="ID_SECURITY_MOVE_UP" message="Verplaats de geselecteerde beveiligingsregels naar boven in de prioriteitenlijst."/>
 		<tip id="ID_SECURITY_POLICY_ACCEPT" message="De beveiliging instellen zodat standaard alle bronnen geaccepteerd worden."/>
 		<tip id="ID_SECURITY_POLICY_DENY" message="De beveiliging instellen zodat standaard alle bronnen worden geweigerd."/>
-		<tip id="ID_SECURITY_REMOVE" message="Verwijder de geselecteerde beveiligingsregels."/>
+		<tip id="ID_SECURITY_REMOVE" message="De geselecteerde regels of IP-lijsten verwijderen."/>
 		<tip id="ID_SECURITY_RESET" message="De tellers terugzetten voor de geselecteerde regels."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="De geselecteerde IP-lijsten nu downloaden, of allemaal als er geen geselecteerd is."/>
 		<tip id="ID_SYSTEM_CLEAR" message="De statuslog wissen."/>
 		<tip id="ID_SYSTEM_COPY" message="Kopieer de geselecteerde regel(s) van de statuslog."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="Geef elke regel een tijdstempel."/>
@@ -3440,6 +3455,44 @@
 		<string id="20269" value="Tijdelijke incomplete bestanden hier opslaan"/>
 		<string id="20270" value="Bewaar torrents hier"/>
 		<string id="20271" value="Verzamelingen hier opslaan"/>
+		<string id="20272" value="Kopie in de cache onleesbaar; deze wordt opnieuw gedownload."/>
+		<string id="20273" value="Kopie in de cache onleesbaar; importeer het bestand opnieuw."/>
+		<string id="20274" value="Gekaapte en criminele netwerken; weinig valse positieven. Gegevens (c) The Spamhaus Project."/>
+		<string id="20275" value="Bekende gecompromitteerde hosts."/>
+		<string id="20276" value="Anti-P2P-bedrijven; zeer groot (ongeveer een vijfde van alle IPv4-adressen); blokkeert hele providers en CDN-bereiken (bevat het 1.1.1.0-blok van Cloudflare)."/>
+		<string id="20277" value="Verzameling van meerdere privacy- en misbruiklijsten."/>
+		<string id="20278" value="Niet-toegewezen adresruimte; moet bijgewerkt blijven, anders blokkeert ze nieuwe netwerken."/>
+		<string id="20279" value="Het adres begint niet met https://."/>
+		<string id="20280" value="De download eindigde niet op een https://-adres."/>
+		<string id="20281" value="De server kon niet worden bereikt."/>
+		<string id="20282" value="De server antwoordde met HTTP-status %d."/>
+		<string id="20283" value="De download is groter dan 64 MB."/>
+		<string id="20284" value="De inhoud is uitgepakt groter dan 256 MB."/>
+		<string id="20285" value="Het gecomprimeerde bestand kon niet worden gelezen."/>
+		<string id="20286" value="De lijst bevat geen adresbereik."/>
+		<string id="20287" value="De lijst bevat meer dan 2.000.000 bereiken."/>
+		<string id="20288" value="De lijst bevat een IPv4-bereik van de helft van de adresruimte of meer."/>
+		<string id="20289" value="De IPv4-bereiken van de lijst beslaan meer dan de helft van de adresruimte."/>
+		<string id="20290" value="De lijst bevat een IPv6-bereik dat heel 2000::/3 beslaat."/>
+		<string id="20291" value="De lijst kon niet worden opgeslagen."/>
+		<string id="20292" value="IP-lijst %s bijgewerkt: %lu regels overgenomen, %lu geweigerd, %lu bereiken na samenvoegen."/>
+		<string id="20293" value="IP-lijst %s niet bijgewerkt: %s"/>
+		<string id="20294" value="%s: %Iu bereiken geïmporteerd, %Iu regels geweigerd."/>
+		<string id="20295" value="%s kon niet worden geïmporteerd."/>
+		<string id="20296" value="%s kon niet worden geschreven."/>
+		<string id="20297" value="%s kon niet worden geïmporteerd: %s"/>
+		<string id="20298" value="Het bestand is groter dan 64 MB."/>
+		<string id="20299" value="IP-lijsten worden alleen via HTTPS gedownload: de URL moet met https:// beginnen."/>
+		<string id="20300" value="De geselecteerde IP-lijsten verwijderen? Hun gedownloade kopieën worden ook gewist."/>
+		<string id="20301" value="Geïmporteerd"/>
+		<string id="20302" value="Mislukt: %s"/>
+		<string id="20303" value="Nog niet gedownload"/>
+		<string id="20304" value="IP-lijsten"/>
+		<string id="20305" value="Mijn regels"/>
+		<string id="20306" value="Voer het https://-adres van je eigen lijst in, of wis de naam ervan."/>
+		<string id="20307" value="Niets toegevoegd: de gekozen lijsten staan al bij je IP-lijsten."/>
+		<string id="20308" value="Vink een lijst aan, of voer het adres van je eigen lijst in."/>
+		<string id="20309" value="Staat al bij je IP-lijsten, dus niet opnieuw toegevoegd: %s"/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->
@@ -4280,6 +4333,27 @@
 			<control caption="OK"/>
 			<control caption="Annuleren"/>
 		</dialog>
+		<dialog name="CIPListAddDlg" cookie="StBuStBuStBuStBuStBuStBuStEdStEdStBuBu" caption="IP-lijst toevoegen">
+			<control caption="Vink de lijsten aan die je wilt toevoegen. Elke lijst wordt via HTTPS gedownload en dagelijks bijgewerkt; niets wordt toegevoegd tenzij je het aanvinkt."/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control caption="Eigen lijst"/>
+			<control caption="_Naam:"/>
+			<control/>
+			<control caption="_URL:"/>
+			<control/>
+			<control caption="Geaccepteerde formaten: PeerGuardian (.p2p), eMule (ipfilter.dat), Gnucleus (.net), CIDR, losse adressen en Spamhaus DROP JSON, als tekst, gzip of zip. De URL moet met https:// beginnen."/>
+			<control caption="_Toevoegen"/>
+			<control caption="Annuleren"/>
+		</dialog>
 		<dialog name="CShareManagerDlg" cookie="StSyBuBuBuBu" caption="Vrijgegeven mappen beheerder">
 			<control caption="Dit is een lijst met mappen uit je bibliotheek. Je kunt mappen toevoegen en verwijderen met de knoppen linksonder. Een nieuw toegevoegde map wordt automatisch gedeeld met andere gebruikers. In de bibliotheek kun je de vrijgave echter altijd uitschakelen."/>
 			<control/>
@@ -4628,6 +4702,12 @@
 			<column from="Precedence" to="Prioriteit"/>
 			<column from="Hits" to="Hits"/>
 			<column from="Comment" to="Commentaar"/>
+		</list>
+		<list name="CSecurityWnd.Lists">
+			<column from="List" to="Lijst"/>
+			<column from="Ranges" to="Bereiken"/>
+			<column from="Updated" to="Bijgewerkt"/>
+			<column from="Hits" to="Hits"/>
 		</list>
 		<list name="CHostCacheWnd">
 			<column from="Address" to="Adres"/>

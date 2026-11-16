@@ -379,10 +379,13 @@
 			<button id="ID_SECURITY_EDIT" text="Edit Rule"/>
 			<separator/>
 			<button id="ID_SECURITY_ADD" text="Add Rule"/>
-			<button id="ID_SECURITY_REMOVE" text="Remove Rule"/>
+			<button id="ID_SECURITY_REMOVE" text="Eemalda"/>
 			<separator/>
 			<button id="ID_SECURITY_MOVE_UP" text="Move Up"/>
 			<button id="ID_SECURITY_MOVE_DOWN" text="Move Down"/>
+			<separator/>
+			<button id="ID_SECURITY_ADD_LIST" text="Lisa loend..."/>
+			<button id="ID_SECURITY_UPDATE_LISTS" text="Uuenda kohe"/>
 			<rightAlign/>
 			<button id="ID_SECURITY_RESET" text="Reset List"/>
 			<button id="ID_SECURITY_IMPORT" text="Import List"/>
@@ -1561,6 +1564,14 @@
 			<separator/>
 			<item id="ID_SECURITY_EDIT" text="_Muuda Omadusi..."/>
 		</menu>
+		<menu name="CSecurityWnd.Lists">
+			<item id="ID_SECURITY_ADD_LIST" text="Lisa _loend..."/>
+			<separator/>
+			<item id="ID_SECURITY_UPDATE_LISTS" text="_Uuenda kohe"/>
+			<item id="ID_SECURITY_LIST_ENABLE" text="Lu_batud"/>
+			<separator/>
+			<item id="ID_SECURITY_LIST_REMOVE" text="_Eemalda"/>
+		</menu>
 		<!-- SCHEDULER WINDOW -->
 		<menu name="CSchedulerWnd">
 			<item id="ID_SCHEDULER_ADD" text="_Add Scheduled Task"/>
@@ -2592,16 +2603,20 @@
 		<tip id="ID_SEARCHMONITOR_CLEAR" message="Puhasta otsingu jälgimise vahemälu."/>
 		<tip id="ID_SEARCHMONITOR_PAUSE" message="Peata osingu jälgimine."/>
 		<tip id="ID_SECURITY_ADD" message="Lisa turvalisuse ahelasse uus reegel..."/>
+		<tip id="ID_SECURITY_ADD_LIST" message="Lisa kataloogist IP-blokeerimisloendeid või oma loend https://-aadressilt..."/>
 		<tip id="ID_SECURITY_BAN" message="Keela valitud server antud sessiooniks."/>
 		<tip id="ID_SECURITY_EDIT" message="Muuda valitud turvareeglit..."/>
 		<tip id="ID_SECURITY_EXPORT" message="Ekspordi valitud failist uued turvareeglid..."/>
 		<tip id="ID_SECURITY_IMPORT" message="Impordi turvareeglid valitud failist..."/>
+		<tip id="ID_SECURITY_LIST_ENABLE" message="Lülita valitud IP-loendid sisse või välja."/>
+		<tip id="ID_SECURITY_LIST_REMOVE" message="Eemalda valitud IP-loendid."/>
 		<tip id="ID_SECURITY_MOVE_DOWN" message="Liiguta valitud turvareegel käesolevas nimekirjas alla."/>
 		<tip id="ID_SECURITY_MOVE_UP" message="Liiguta valitud turvareegel käesolevas nimekirjas üles."/>
 		<tip id="ID_SECURITY_POLICY_ACCEPT" message="Luba vaikimisi reeglina kõiki servereid."/>
 		<tip id="ID_SECURITY_POLICY_DENY" message="Keela vaikimisi reeglina kõik serverid."/>
-		<tip id="ID_SECURITY_REMOVE" message="Eemalda valitud turvareegel."/>
+		<tip id="ID_SECURITY_REMOVE" message="Eemalda valitud reeglid või IP-loendid."/>
 		<tip id="ID_SECURITY_RESET" message="Nulli löögilugeja valitud reeglil."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="Laadi valitud IP-loendid kohe alla või kõik, kui ühtki pole valitud."/>
 		<tip id="ID_SYSTEM_CLEAR" message="Puhasta oleku logi."/>
 		<tip id="ID_SYSTEM_COPY" message="Copy selected line(s) of status log."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="Salvesta iga rea jaoks ajamärk."/>
@@ -3445,6 +3460,44 @@
 		<string id="20269" value="Salvesta Ajutised Poolikud Failid Siia"/>
 		<string id="20270" value="Salvesta Torrentid Siia"/>
 		<string id="20271" value="Siia Salvesta Kollektsioonid"/>
+		<string id="20272" value="Puhverdatud koopia on loetamatu; see laaditakse uuesti alla."/>
+		<string id="20273" value="Puhverdatud koopia on loetamatu; impordi fail uuesti."/>
+		<string id="20274" value="Kaaperdatud ja kuritegelikud võrgud; vähe valepositiivseid. Andmed (c) The Spamhaus Project."/>
+		<string id="20275" value="Teadaolevalt ohustatud hostid."/>
+		<string id="20276" value="P2P-vastased firmad; väga suur (umbes viiendik kõigist IPv4-aadressidest); blokeerib terveid teenusepakkujaid ja CDN-vahemikke (sisaldab Cloudflare'i plokki 1.1.1.0)."/>
+		<string id="20277" value="Mitme privaatsus- ja kuritarvitusloendi koond."/>
+		<string id="20278" value="Jaotamata aadressiruum; peab olema ajakohane, muidu blokeerib uusi võrke."/>
+		<string id="20279" value="Aadress ei alga https://-ga."/>
+		<string id="20280" value="Allalaadimine ei lõppenud https://-aadressil."/>
+		<string id="20281" value="Serveriga ei saadud ühendust."/>
+		<string id="20282" value="Server vastas HTTP olekuga %d."/>
+		<string id="20283" value="Allalaaditav on suurem kui 64 MB."/>
+		<string id="20284" value="Sisu on lahtipakituna suurem kui 256 MB."/>
+		<string id="20285" value="Pakitud faili ei saanud lugeda."/>
+		<string id="20286" value="Loend ei sisalda ühtki aadressivahemikku."/>
+		<string id="20287" value="Loend sisaldab üle 2 000 000 vahemiku."/>
+		<string id="20288" value="Loend sisaldab IPv4-vahemikku, mis on vähemalt pool aadressiruumist."/>
+		<string id="20289" value="Loendi IPv4-vahemikud katavad üle poole aadressiruumist."/>
+		<string id="20290" value="Loend sisaldab IPv6-vahemikku, mis katab kogu 2000::/3."/>
+		<string id="20291" value="Loendit ei saanud salvestada."/>
+		<string id="20292" value="IP-loend %s uuendatud: %lu rida vastu võetud, %lu tagasi lükatud, %lu vahemikku pärast ühendamist."/>
+		<string id="20293" value="IP-loendit %s ei uuendatud: %s"/>
+		<string id="20294" value="%s: %Iu vahemikku imporditud, %Iu rida tagasi lükatud."/>
+		<string id="20295" value="%s importimine ebaõnnestus."/>
+		<string id="20296" value="%s kirjutamine ebaõnnestus."/>
+		<string id="20297" value="%s importimine ebaõnnestus: %s"/>
+		<string id="20298" value="Fail on suurem kui 64 MB."/>
+		<string id="20299" value="IP-loendeid laaditakse alla ainult HTTPS-i kaudu: URL peab algama https://-ga."/>
+		<string id="20300" value="Kas eemaldada valitud IP-loendid? Ka nende allalaaditud koopiad kustutatakse."/>
+		<string id="20301" value="Imporditud"/>
+		<string id="20302" value="Nurjus: %s"/>
+		<string id="20303" value="Pole veel alla laaditud"/>
+		<string id="20304" value="IP-loendid"/>
+		<string id="20305" value="Minu reeglid"/>
+		<string id="20306" value="Sisesta oma loendi https://-aadress või tühjenda selle nimi."/>
+		<string id="20307" value="Midagi ei lisatud: valitud loendid on juba sinu IP-loendites."/>
+		<string id="20308" value="Märgi loend või sisesta oma loendi aadress."/>
+		<string id="20309" value="Juba sinu IP-loendites, seega uuesti ei lisatud: %s"/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->
@@ -4285,6 +4338,27 @@
 			<control caption="OK"/>
 			<control caption="Tühista"/>
 		</dialog>
+		<dialog name="CIPListAddDlg" cookie="StBuStBuStBuStBuStBuStBuStEdStEdStBuBu" caption="Lisa IP-loend">
+			<control caption="Märgi lisatavad loendid. Igaüks laaditakse alla HTTPS-i kaudu ja uuendatakse kord päevas; ühtki ei lisata, kui sa seda ei märgi."/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control caption="Sinu oma loend"/>
+			<control caption="_Nimi:"/>
+			<control/>
+			<control caption="_URL:"/>
+			<control/>
+			<control caption="Toetatud vormingud: PeerGuardian (.p2p), eMule (ipfilter.dat), Gnucleus (.net), CIDR, lihtaadressid ja Spamhaus DROP JSON, tekstina, gzip- või zip-failina. URL peab algama https://-ga."/>
+			<control caption="_Lisa"/>
+			<control caption="Tühista"/>
+		</dialog>
 		<dialog name="CShareManagerDlg" cookie="StSyBuBuBuBu" caption="Jagatud Kausta Haldur">
 			<control caption="See on nimekiri sinu Raamautukogus olevatest kaustadest.  Sa võid vasakul asuvatest nuppudest lisada või kustutada kaustu .  Kui lisad uue kausta siis seda jagatakse automaatselt teistega, aga sa saad selle soovi korral ka keelata, Shareaza Raamatukogust."/>
 			<control/>
@@ -4633,6 +4707,12 @@
 			<column from="Precedence" to="Precedence"/>
 			<column from="Hits" to="Vaatamisi"/>
 			<column from="Comment" to="Kommentaar"/>
+		</list>
+		<list name="CSecurityWnd.Lists">
+			<column from="List" to="Loend"/>
+			<column from="Ranges" to="Vahemikud"/>
+			<column from="Updated" to="Uuendatud"/>
+			<column from="Hits" to="Vaatamisi"/>
 		</list>
 		<list name="CHostCacheWnd">
 			<column from="Address" to="Aadress"/>

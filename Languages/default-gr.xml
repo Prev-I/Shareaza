@@ -379,10 +379,13 @@
 			<button id="ID_SECURITY_EDIT" text="Edit Rule"/>
 			<separator/>
 			<button id="ID_SECURITY_ADD" text="Add Rule"/>
-			<button id="ID_SECURITY_REMOVE" text="Remove Rule"/>
+			<button id="ID_SECURITY_REMOVE" text="Αφαίρεση"/>
 			<separator/>
 			<button id="ID_SECURITY_MOVE_UP" text="Move Up"/>
 			<button id="ID_SECURITY_MOVE_DOWN" text="Move Down"/>
+			<separator/>
+			<button id="ID_SECURITY_ADD_LIST" text="Προσθήκη λίστας..."/>
+			<button id="ID_SECURITY_UPDATE_LISTS" text="Ενημέρωση τώρα"/>
 			<rightAlign/>
 			<button id="ID_SECURITY_RESET" text="Reset List"/>
 			<button id="ID_SECURITY_IMPORT" text="Import List"/>
@@ -1561,6 +1564,14 @@
 			<separator/>
 			<item id="ID_SECURITY_EDIT" text="_Ιδιότητες"/>
 		</menu>
+		<menu name="CSecurityWnd.Lists">
+			<item id="ID_SECURITY_ADD_LIST" text="Προσθήκη _λίστας..."/>
+			<separator/>
+			<item id="ID_SECURITY_UPDATE_LISTS" text="Ε_νημέρωση τώρα"/>
+			<item id="ID_SECURITY_LIST_ENABLE" text="Ενερ_γή"/>
+			<separator/>
+			<item id="ID_SECURITY_LIST_REMOVE" text="Α_φαίρεση"/>
+		</menu>
 		<!-- SCHEDULER WINDOW -->
 		<menu name="CSchedulerWnd">
 			<item id="ID_SCHEDULER_ADD" text="_Add Scheduled Task"/>
@@ -2591,16 +2602,20 @@
 		<tip id="ID_SEARCHMONITOR_CLEAR" message="Καθαρισμός buffer εποπτείας αναζητήσεων."/>
 		<tip id="ID_SEARCHMONITOR_PAUSE" message="Παύση εποπτείας αναζητήσεων."/>
 		<tip id="ID_SECURITY_ADD" message="Προσθήκη νέου κανόνα στην αλυσίδα ασφαλείας..."/>
+		<tip id="ID_SECURITY_ADD_LIST" message="Προσθήκη λιστών αποκλεισμού IP από τον κατάλογο, ή δικής σας λίστας από διεύθυνση https://..."/>
 		<tip id="ID_SECURITY_BAN" message="Αποκλεισμός επιλεγμένου χρήστη για τη διάρκεια αυτής της συνεδρίας."/>
 		<tip id="ID_SECURITY_EDIT" message="Επεξεργασία επιλεγμένου κανόνα ασφαλείας..."/>
 		<tip id="ID_SECURITY_EXPORT" message="Εξαγωγή επιλεγμένων κανόνων ασφαλείας σε αρχείο..."/>
 		<tip id="ID_SECURITY_IMPORT" message="Εισαγωγή κανόνων ασφαλείας από αρχείο..."/>
+		<tip id="ID_SECURITY_LIST_ENABLE" message="Ενεργοποίηση ή απενεργοποίηση των επιλεγμένων λιστών IP."/>
+		<tip id="ID_SECURITY_LIST_REMOVE" message="Αφαίρεση των επιλεγμένων λιστών IP."/>
 		<tip id="ID_SECURITY_MOVE_DOWN" message="Μετακίνηση επιλεγμένων κανόνων ασφαλείας προς τα κάτω στη λίστα προτεραιότητας."/>
 		<tip id="ID_SECURITY_MOVE_UP" message="Μετακίνηση επιλεγμένων κανόνων ασφαλείας προς τα πάνω στη λίστα προτεραιότητας."/>
 		<tip id="ID_SECURITY_POLICY_ACCEPT" message="Ρύθμιση προεπιλεγμένης πολιτικής ασφαλείας σε αποδοχή όλων των hosts."/>
 		<tip id="ID_SECURITY_POLICY_DENY" message="Ρύθμιση προεπιλεγμένης πολιτικής ασφαλείας σε άρνηση όλων των hosts."/>
-		<tip id="ID_SECURITY_REMOVE" message="Αφαίρεση επιλεγμένων κανόνων ασφαλείας."/>
+		<tip id="ID_SECURITY_REMOVE" message="Αφαίρεση των επιλεγμένων κανόνων ή λιστών IP."/>
 		<tip id="ID_SECURITY_RESET" message="Μηδενισμός των μετρητών εφαρμογής των επιλεγμένων κανόνων."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="Λήψη των επιλεγμένων λιστών IP τώρα, ή όλων αν δεν έχει επιλεγεί καμία."/>
 		<tip id="ID_SYSTEM_CLEAR" message="Καθαρισμός του ιστορικού κατάστασης."/>
 		<tip id="ID_SYSTEM_COPY" message="Copy selected line(s) of status log."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="Καταγραφή χρονικής επισήμανσης σε κάθε γραμμή."/>
@@ -3444,6 +3459,44 @@
 		<string id="20269" value="Αποθήκευση Προσωρινών Ημιτελών Αρχείων Σε"/>
 		<string id="20270" value="Αποθήκευση Torrents Σε"/>
 		<string id="20271" value="Αποθήκευση Συλλογών Σε"/>
+		<string id="20272" value="Το αντίγραφο της προσωρινής μνήμης δεν διαβάζεται· θα ληφθεί ξανά."/>
+		<string id="20273" value="Το αντίγραφο της προσωρινής μνήμης δεν διαβάζεται· εισαγάγετε ξανά το αρχείο."/>
+		<string id="20274" value="Υφαρπαγμένα και εγκληματικά δίκτυα· λίγα ψευδώς θετικά. Δεδομένα (c) The Spamhaus Project."/>
+		<string id="20275" value="Γνωστοί παραβιασμένοι υπολογιστές."/>
+		<string id="20276" value="Εταιρείες κατά του P2P· πολύ μεγάλη (περίπου το 1/5 των διευθύνσεων IPv4)· αποκλείει ολόκληρους παρόχους και περιοχές CDN (περιέχει το μπλοκ 1.1.1.0 της Cloudflare)."/>
+		<string id="20277" value="Συγκέντρωση πολλών λιστών απορρήτου και κατάχρησης."/>
+		<string id="20278" value="Μη εκχωρημένος χώρος· πρέπει να ενημερώνεται, αλλιώς αποκλείει νέα δίκτυα."/>
+		<string id="20279" value="Η διεύθυνση δεν ξεκινά με https://."/>
+		<string id="20280" value="Η λήψη δεν κατέληξε σε διεύθυνση https://."/>
+		<string id="20281" value="Δεν ήταν δυνατή η σύνδεση με τον διακομιστή."/>
+		<string id="20282" value="Ο διακομιστής απάντησε με κατάσταση HTTP %d."/>
+		<string id="20283" value="Η λήψη ξεπερνά τα 64 MB."/>
+		<string id="20284" value="Το περιεχόμενο ξεπερνά τα 256 MB μετά την αποσυμπίεση."/>
+		<string id="20285" value="Δεν ήταν δυνατή η ανάγνωση του συμπιεσμένου αρχείου."/>
+		<string id="20286" value="Η λίστα δεν περιέχει καμία περιοχή διευθύνσεων."/>
+		<string id="20287" value="Η λίστα περιέχει περισσότερες από 2.000.000 περιοχές."/>
+		<string id="20288" value="Η λίστα περιέχει περιοχή IPv4 ίση με το μισό του χώρου διευθύνσεων ή μεγαλύτερη."/>
+		<string id="20289" value="Οι περιοχές IPv4 της λίστας καλύπτουν πάνω από το μισό του χώρου διευθύνσεων."/>
+		<string id="20290" value="Η λίστα περιέχει περιοχή IPv6 που καλύπτει όλο το 2000::/3."/>
+		<string id="20291" value="Δεν ήταν δυνατή η αποθήκευση της λίστας."/>
+		<string id="20292" value="Η λίστα IP %s ενημερώθηκε: %lu γραμμές δεκτές, %lu απορρίφθηκαν, %lu περιοχές μετά τη συγχώνευση."/>
+		<string id="20293" value="Η λίστα IP %s δεν ενημερώθηκε: %s"/>
+		<string id="20294" value="%s: εισήχθησαν %Iu περιοχές, απορρίφθηκαν %Iu γραμμές."/>
+		<string id="20295" value="Δεν ήταν δυνατή η εισαγωγή του %s."/>
+		<string id="20296" value="Δεν ήταν δυνατή η εγγραφή του %s."/>
+		<string id="20297" value="Δεν ήταν δυνατή η εισαγωγή του %s: %s"/>
+		<string id="20298" value="Το αρχείο ξεπερνά τα 64 MB."/>
+		<string id="20299" value="Οι λίστες IP λαμβάνονται μόνο μέσω HTTPS: η διεύθυνση URL πρέπει να ξεκινά με https://."/>
+		<string id="20300" value="Αφαίρεση των επιλεγμένων λιστών IP; Θα διαγραφούν και τα ληφθέντα αντίγραφά τους."/>
+		<string id="20301" value="Εισαγμένη"/>
+		<string id="20302" value="Απέτυχε: %s"/>
+		<string id="20303" value="Δεν έχει ληφθεί ακόμα"/>
+		<string id="20304" value="Λίστες IP"/>
+		<string id="20305" value="Οι κανόνες μου"/>
+		<string id="20306" value="Εισαγάγετε τη διεύθυνση https:// της δικής σας λίστας, ή διαγράψτε το όνομά της."/>
+		<string id="20307" value="Δεν προστέθηκε τίποτα: οι λίστες που επιλέξατε υπάρχουν ήδη στις λίστες IP σας."/>
+		<string id="20308" value="Επιλέξτε μια λίστα, ή εισαγάγετε τη διεύθυνση της δικής σας λίστας."/>
+		<string id="20309" value="Υπάρχουν ήδη στις λίστες IP σας, οπότε δεν προστέθηκαν ξανά: %s"/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->
@@ -4284,6 +4337,27 @@
 			<control caption="OK"/>
 			<control caption="Άκυρο"/>
 		</dialog>
+		<dialog name="CIPListAddDlg" cookie="StBuStBuStBuStBuStBuStBuStEdStEdStBuBu" caption="Προσθήκη λίστας IP">
+			<control caption="Επιλέξτε τις λίστες προς προσθήκη. Κάθε μία λαμβάνεται μέσω HTTPS και ενημερώνεται μία φορά την ημέρα· καμία δεν προστίθεται αν δεν την επιλέξετε."/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control caption="Η δική σας λίστα"/>
+			<control caption="_Όνομα:"/>
+			<control/>
+			<control caption="_URL:"/>
+			<control/>
+			<control caption="Αποδεκτές μορφές: PeerGuardian (.p2p), eMule (ipfilter.dat), Gnucleus (.net), CIDR, απλές διευθύνσεις και Spamhaus DROP JSON, ως κείμενο, gzip ή zip. Η διεύθυνση URL πρέπει να ξεκινά με https://."/>
+			<control caption="_Προσθήκη"/>
+			<control caption="Άκυρο"/>
+		</dialog>
 		<dialog name="CShareManagerDlg" cookie="StSyBuBuBuBu" caption="Διαχειριστής Κοινοποίησης Φακέλων">
 			<control caption="Αυτή η λίστα περιέχει τους φακέλους της Βιβλιοθήκης. Μπορείτε να προσθαφαιρέσετε φακέλους χρησιμοποιώντας τα κουμπιά. Κάθε νέος φάκελος αρχικά κοινοποιείται, όμως μπορείτε αν θέλετε να τον αποκοινοποιήσετε στις επιλογές της Βιβλιοθήκης."/>
 			<control/>
@@ -4632,6 +4706,12 @@
 			<column from="Precedence" to="Προτεραιότητα"/>
 			<column from="Hits" to="Ευρέσεις"/>
 			<column from="Comment" to="Σχόλια"/>
+		</list>
+		<list name="CSecurityWnd.Lists">
+			<column from="List" to="Λίστα"/>
+			<column from="Ranges" to="Περιοχές"/>
+			<column from="Updated" to="Ενημέρωση"/>
+			<column from="Hits" to="Ευρέσεις"/>
 		</list>
 		<list name="CHostCacheWnd">
 			<column from="Address" to="Διεύθυνση"/>

@@ -379,10 +379,13 @@
 			<button id="ID_SECURITY_EDIT" text="Редактировать правило"/>
 			<separator/>
 			<button id="ID_SECURITY_ADD" text="Добавить правило"/>
-			<button id="ID_SECURITY_REMOVE" text="Удалить правило"/>
+			<button id="ID_SECURITY_REMOVE" text="Удалить"/>
 			<separator/>
 			<button id="ID_SECURITY_MOVE_UP" text="Вверх"/>
 			<button id="ID_SECURITY_MOVE_DOWN" text="Вниз"/>
+			<separator/>
+			<button id="ID_SECURITY_ADD_LIST" text="Добавить список..."/>
+			<button id="ID_SECURITY_UPDATE_LISTS" text="Обновить сейчас"/>
 			<rightAlign/>
 			<button id="ID_SECURITY_RESET" text="Сброс"/>
 			<button id="ID_SECURITY_IMPORT" text="Импорт"/>
@@ -1561,6 +1564,14 @@
 			<separator/>
 			<item id="ID_SECURITY_EDIT" text="_Свойства"/>
 		</menu>
+		<menu name="CSecurityWnd.Lists">
+			<item id="ID_SECURITY_ADD_LIST" text="Добавить _список..."/>
+			<separator/>
+			<item id="ID_SECURITY_UPDATE_LISTS" text="_Обновить сейчас"/>
+			<item id="ID_SECURITY_LIST_ENABLE" text="_Включён"/>
+			<separator/>
+			<item id="ID_SECURITY_LIST_REMOVE" text="_Удалить"/>
+		</menu>
 		<!-- SCHEDULER WINDOW -->
 		<menu name="CSchedulerWnd">
 			<item id="ID_SCHEDULER_ADD" text="Доб_авить задачу"/>
@@ -2588,16 +2599,20 @@
 		<tip id="ID_SEARCHMONITOR_CLEAR" message="Очистить буфер монитора поиска."/>
 		<tip id="ID_SEARCHMONITOR_PAUSE" message="Приостановить вывод в монитор поиска."/>
 		<tip id="ID_SECURITY_ADD" message="Добавить новое правило в цепочку безопасности..."/>
+		<tip id="ID_SECURITY_ADD_LIST" message="Добавить списки блокировки IP из каталога или свой список с адреса https://..."/>
 		<tip id="ID_SECURITY_BAN" message="Запретить доступ помеченного хоста на протяжении этой сессии."/>
 		<tip id="ID_SECURITY_EDIT" message="Править помеченное правило безопасности..."/>
 		<tip id="ID_SECURITY_EXPORT" message="Экспорт помеченных правил безопасности в файл..."/>
 		<tip id="ID_SECURITY_IMPORT" message="Импорт правил безопасности из файла..."/>
+		<tip id="ID_SECURITY_LIST_ENABLE" message="Включить или выключить выбранные списки IP."/>
+		<tip id="ID_SECURITY_LIST_REMOVE" message="Удалить выбранные списки IP."/>
 		<tip id="ID_SECURITY_MOVE_DOWN" message="Переместить помеченные правила безопасности вниз по списку старшенства."/>
 		<tip id="ID_SECURITY_MOVE_UP" message="Переместить помеченные правила безопасности вверх по списку старшенства."/>
 		<tip id="ID_SECURITY_POLICY_ACCEPT" message="Установить политику безопасности по умочанию на разрешенный допуск всем хостам."/>
 		<tip id="ID_SECURITY_POLICY_DENY" message="Установить политику безопасности по умочанию на отказ допуска всем хостам."/>
-		<tip id="ID_SECURITY_REMOVE" message="Удалить помеченное правило(а) безопасности."/>
+		<tip id="ID_SECURITY_REMOVE" message="Удалить выбранные правила или списки IP."/>
 		<tip id="ID_SECURITY_RESET" message="Сбросить счетчики хитов для помеченных правил."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="Загрузить выбранные списки IP сейчас или все, если ни один не выбран."/>
 		<tip id="ID_SYSTEM_CLEAR" message="Очистить журнал статуса."/>
 		<tip id="ID_SYSTEM_COPY" message="Копировать выделенные строки."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="Добавлять штамп времени в каждую строчку."/>
@@ -3441,6 +3456,44 @@
 		<string id="20269" value="Незаконченные файлы лежат здесь"/>
 		<string id="20270" value="Держать торренты в папке"/>
 		<string id="20271" value="Держать коллекции в папке"/>
+		<string id="20272" value="Кэшированная копия не читается; она будет загружена заново."/>
+		<string id="20273" value="Кэшированная копия не читается; импортируйте файл заново."/>
+		<string id="20274" value="Захваченные и криминальные сети; мало ложных срабатываний. Данные (c) The Spamhaus Project."/>
+		<string id="20275" value="Известные скомпрометированные узлы."/>
+		<string id="20276" value="Анти-P2P компании; очень большой (около пятой части всех адресов IPv4); блокирует целых провайдеров и диапазоны CDN (включает блок 1.1.1.0 Cloudflare)."/>
+		<string id="20277" value="Сводка нескольких списков приватности и злоупотреблений."/>
+		<string id="20278" value="Нераспределённое пространство; должен обновляться, иначе блокирует новые сети."/>
+		<string id="20279" value="Адрес не начинается с https://."/>
+		<string id="20280" value="Загрузка завершилась не на адресе https://."/>
+		<string id="20281" value="Не удалось связаться с сервером."/>
+		<string id="20282" value="Сервер ответил с кодом HTTP %d."/>
+		<string id="20283" value="Загрузка больше 64 МБ."/>
+		<string id="20284" value="После распаковки содержимое больше 256 МБ."/>
+		<string id="20285" value="Не удалось прочитать сжатый файл."/>
+		<string id="20286" value="В списке нет ни одного диапазона адресов."/>
+		<string id="20287" value="В списке более 2 000 000 диапазонов."/>
+		<string id="20288" value="В списке есть диапазон IPv4 размером в половину адресного пространства или больше."/>
+		<string id="20289" value="Диапазоны IPv4 в списке покрывают больше половины адресного пространства."/>
+		<string id="20290" value="В списке есть диапазон IPv6, покрывающий весь 2000::/3."/>
+		<string id="20291" value="Не удалось сохранить список."/>
+		<string id="20292" value="Список IP %s обновлён: принято строк %lu, отклонено %lu, диапазонов после слияния %lu."/>
+		<string id="20293" value="Список IP %s не обновлён: %s"/>
+		<string id="20294" value="%s: импортировано диапазонов %Iu, отклонено строк %Iu."/>
+		<string id="20295" value="Не удалось импортировать %s."/>
+		<string id="20296" value="Не удалось записать %s."/>
+		<string id="20297" value="Не удалось импортировать %s: %s"/>
+		<string id="20298" value="Файл больше 64 МБ."/>
+		<string id="20299" value="Списки IP загружаются только по HTTPS: ссылка должна начинаться с https://."/>
+		<string id="20300" value="Удалить выбранные списки IP? Их загруженные копии тоже будут удалены."/>
+		<string id="20301" value="Импортирован"/>
+		<string id="20302" value="Ошибка: %s"/>
+		<string id="20303" value="Ещё не загружен"/>
+		<string id="20304" value="Списки IP"/>
+		<string id="20305" value="Мои правила"/>
+		<string id="20306" value="Введите адрес https:// своего списка или очистите его название."/>
+		<string id="20307" value="Ничего не добавлено: выбранные списки уже есть в ваших списках IP."/>
+		<string id="20308" value="Отметьте список или введите адрес своего списка."/>
+		<string id="20309" value="Уже есть в ваших списках IP, поэтому не добавлены повторно: %s"/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->
@@ -4285,6 +4338,27 @@
 			<control caption="OK"/>
 			<control caption="Отмена"/>
 		</dialog>
+		<dialog name="CIPListAddDlg" cookie="StBuStBuStBuStBuStBuStBuStEdStEdStBuBu" caption="Добавить список IP">
+			<control caption="Отметьте списки для добавления. Каждый загружается по HTTPS и обновляется раз в день; без отметки ни один список не добавляется."/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control caption="Свой список"/>
+			<control caption="_Название:"/>
+			<control/>
+			<control caption="_Ссылка:"/>
+			<control/>
+			<control caption="Поддерживаемые форматы: PeerGuardian (.p2p), eMule (ipfilter.dat), Gnucleus (.net), CIDR, простые адреса и Spamhaus DROP JSON, в виде текста, gzip или zip. Ссылка должна начинаться с https://."/>
+			<control caption="_Внести"/>
+			<control caption="Отмена"/>
+		</dialog>
 		<dialog name="CShareManagerDlg" cookie="StSyBuBuBuBu" caption="Общий доступ">
 			<control caption="Это список папок Вашего хранилища.  Можно добавлять или удалять папки кнопками слева.  Когда Вы добавляете новую папку, она становиться доступной для всех, но Вы можете изменить это позже из самого хранилища."/>
 			<control/>
@@ -4633,6 +4707,12 @@
 			<column from="Precedence" to="Старшинство"/>
 			<column from="Hits" to="Обращений"/>
 			<column from="Comment" to="Заметка"/>
+		</list>
+		<list name="CSecurityWnd.Lists">
+			<column from="List" to="Список"/>
+			<column from="Ranges" to="Диапазоны"/>
+			<column from="Updated" to="Обновлён"/>
+			<column from="Hits" to="Обращений"/>
 		</list>
 		<list name="CHostCacheWnd">
 			<column from="Address" to="Адрес"/>

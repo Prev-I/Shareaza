@@ -379,10 +379,13 @@
 			<button id="ID_SECURITY_EDIT" text="Edit Rule"/>
 			<separator/>
 			<button id="ID_SECURITY_ADD" text="Add Rule"/>
-			<button id="ID_SECURITY_REMOVE" text="Remove Rule"/>
+			<button id="ID_SECURITY_REMOVE" text="إزالة"/>
 			<separator/>
 			<button id="ID_SECURITY_MOVE_UP" text="Move Up"/>
 			<button id="ID_SECURITY_MOVE_DOWN" text="Move Down"/>
+			<separator/>
+			<button id="ID_SECURITY_ADD_LIST" text="إضافة قائمة..."/>
+			<button id="ID_SECURITY_UPDATE_LISTS" text="تحديث الآن"/>
 			<rightAlign/>
 			<button id="ID_SECURITY_RESET" text="Reset List"/>
 			<button id="ID_SECURITY_IMPORT" text="Import List"/>
@@ -1561,6 +1564,14 @@
 			<separator/>
 			<item id="ID_SECURITY_EDIT" text="تحرير _متقدم..."/>
 		</menu>
+		<menu name="CSecurityWnd.Lists">
+			<item id="ID_SECURITY_ADD_LIST" text="إضافة _قائمة..."/>
+			<separator/>
+			<item id="ID_SECURITY_UPDATE_LISTS" text="_تحديث الآن"/>
+			<item id="ID_SECURITY_LIST_ENABLE" text="_مفعّلة"/>
+			<separator/>
+			<item id="ID_SECURITY_LIST_REMOVE" text="_إزالة"/>
+		</menu>
 		<!-- SCHEDULER WINDOW -->
 		<menu name="CSchedulerWnd">
 			<item id="ID_SCHEDULER_ADD" text="_Add Scheduled Task"/>
@@ -2591,16 +2602,20 @@
 		<tip id="ID_SEARCHMONITOR_CLEAR" message="مسح المخزون المؤقت لمراقب البحث"/>
 		<tip id="ID_SEARCHMONITOR_PAUSE" message="إيقاف مراقب البحث مؤقتا"/>
 		<tip id="ID_SECURITY_ADD" message="إضافة قاعدة جديدة إلى سلسلة الأمان..."/>
+		<tip id="ID_SECURITY_ADD_LIST" message="إضافة قوائم حظر IP من الدليل، أو قائمتك الخاصة من عنوان https://..."/>
 		<tip id="ID_SECURITY_BAN" message="حظر المضيف المحدد لمدة هذه الجلسة"/>
 		<tip id="ID_SECURITY_EDIT" message="تحرير قاعدة الأمان المحددة..."/>
 		<tip id="ID_SECURITY_EXPORT" message="تصدير قواعد الأمان المحددة إلى ملف..."/>
 		<tip id="ID_SECURITY_IMPORT" message="إستيراد قواعد الأمان المحددة من ملف..."/>
+		<tip id="ID_SECURITY_LIST_ENABLE" message="تشغيل قوائم IP المحددة أو إيقافها."/>
+		<tip id="ID_SECURITY_LIST_REMOVE" message="إزالة قوائم IP المحددة."/>
 		<tip id="ID_SECURITY_MOVE_DOWN" message="نقل قواعد الأمان المحددة أسفل قائمة الأسبقية"/>
 		<tip id="ID_SECURITY_MOVE_UP" message="نقل قواعد الأمان المحددة أعلى قائمة الأسبقية"/>
 		<tip id="ID_SECURITY_POLICY_ACCEPT" message="وضع نهج الأمان الإفتراضي للسماح لكافة المضيفين"/>
 		<tip id="ID_SECURITY_POLICY_DENY" message="وضع نهج الأمان الإفتراضي لحظر كافة المضيفين"/>
-		<tip id="ID_SECURITY_REMOVE" message="إزالة قواعد الأمان المحددة"/>
+		<tip id="ID_SECURITY_REMOVE" message="إزالة القواعد أو قوائم IP المحددة."/>
 		<tip id="ID_SECURITY_RESET" message="إستعادة عدد الضربات مع القواعد المحددة"/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="تنزيل قوائم IP المحددة الآن، أو جميعها إذا لم يُحدَّد أي منها."/>
 		<tip id="ID_SYSTEM_CLEAR" message="مسح سجل الحالة"/>
 		<tip id="ID_SYSTEM_COPY" message="Copy selected line(s) of status log."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="تسجيل طابع الوقت لكل سطر"/>
@@ -3444,6 +3459,44 @@
 		<string id="20269" value="تخزين الملفات الغير مكتملة المؤقتة هنا"/>
 		<string id="20270" value="هنا Torrent تخزين ملفات"/>
 		<string id="20271" value="تخزين التجميعات هنا"/>
+		<string id="20272" value="النسخة المخزنة مؤقتًا غير مقروءة؛ سيُعاد تنزيلها."/>
+		<string id="20273" value="النسخة المخزنة مؤقتًا غير مقروءة؛ استورد الملف مرة أخرى."/>
+		<string id="20274" value="شبكات مختطفة وإجرامية؛ نتائج إيجابية خاطئة قليلة. البيانات (c) The Spamhaus Project."/>
+		<string id="20275" value="مضيفون معروفون بأنهم مخترقون."/>
+		<string id="20276" value="شركات مناهضة لـ P2P؛ كبيرة جدًا (نحو خُمس جميع عناوين IPv4)؛ تحظر مزودين بأكملهم ونطاقات CDN (تتضمن كتلة Cloudflare 1.1.1.0)."/>
+		<string id="20277" value="تجميع لعدة قوائم للخصوصية ومكافحة الإساءة."/>
+		<string id="20278" value="مساحة غير مخصصة؛ يجب أن تبقى محدّثة وإلا حظرت شبكات جديدة."/>
+		<string id="20279" value="العنوان لا يبدأ بـ https://."/>
+		<string id="20280" value="لم ينتهِ التنزيل عند عنوان https://."/>
+		<string id="20281" value="تعذّر الوصول إلى الخادم."/>
+		<string id="20282" value="ردّ الخادم برمز حالة HTTP %d."/>
+		<string id="20283" value="حجم التنزيل أكبر من 64 ميغابايت."/>
+		<string id="20284" value="حجم المحتوى بعد فك الضغط أكبر من 256 ميغابايت."/>
+		<string id="20285" value="تعذّرت قراءة الملف المضغوط."/>
+		<string id="20286" value="لا تحتوي القائمة على أي نطاق عناوين."/>
+		<string id="20287" value="تحتوي القائمة على أكثر من 2,000,000 نطاق."/>
+		<string id="20288" value="تحتوي القائمة على نطاق IPv4 بحجم نصف مساحة العناوين أو أكثر."/>
+		<string id="20289" value="تغطي نطاقات IPv4 في القائمة أكثر من نصف مساحة العناوين."/>
+		<string id="20290" value="تحتوي القائمة على نطاق IPv6 يغطي 2000::/3 بالكامل."/>
+		<string id="20291" value="تعذّر حفظ القائمة."/>
+		<string id="20292" value="تم تحديث قائمة IP %s: قُبل %lu سطرًا، ورُفض %lu، و%lu نطاقًا بعد الدمج."/>
+		<string id="20293" value="لم يتم تحديث قائمة IP %s: %s"/>
+		<string id="20294" value="%s: استُورد %Iu نطاقًا، ورُفض %Iu سطرًا."/>
+		<string id="20295" value="تعذّر استيراد %s."/>
+		<string id="20296" value="تعذّرت كتابة %s."/>
+		<string id="20297" value="تعذّر استيراد %s: %s"/>
+		<string id="20298" value="حجم الملف أكبر من 64 ميغابايت."/>
+		<string id="20299" value="تُنزَّل قوائم IP عبر HTTPS فقط: يجب أن يبدأ الرابط بـ https://."/>
+		<string id="20300" value="هل تريد إزالة قوائم IP المحددة؟ ستُحذف نسخها المنزّلة أيضًا."/>
+		<string id="20301" value="مستوردة"/>
+		<string id="20302" value="فشل: %s"/>
+		<string id="20303" value="لم تُنزَّل بعد"/>
+		<string id="20304" value="قوائم IP"/>
+		<string id="20305" value="قواعدي"/>
+		<string id="20306" value="أدخل عنوان https:// لقائمتك الخاصة، أو امسح اسمها."/>
+		<string id="20307" value="لم تُضَف أي قائمة: القوائم التي اخترتها موجودة بالفعل في قوائم IP لديك."/>
+		<string id="20308" value="حدّد قائمة، أو أدخل عنوان قائمتك الخاصة."/>
+		<string id="20309" value="موجودة بالفعل في قوائم IP لديك، فلم تُضَف مرة أخرى: %s"/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->
@@ -4284,6 +4337,27 @@
 			<control caption="حسنا"/>
 			<control caption="إلغاء الأمر"/>
 		</dialog>
+		<dialog name="CIPListAddDlg" cookie="StBuStBuStBuStBuStBuStBuStEdStEdStBuBu" caption="إضافة قائمة IP">
+			<control caption="حدّد القوائم المراد إضافتها. تُنزَّل كل منها عبر HTTPS وتُحدَّث مرة يوميًا؛ لا تُضاف أي قائمة ما لم تحددها."/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control caption="قائمتك الخاصة"/>
+			<control caption=":_الاسم"/>
+			<control/>
+			<control caption=":_الرابط"/>
+			<control/>
+			<control caption="الصيغ المقبولة: PeerGuardian (.p2p)، eMule (ipfilter.dat)، Gnucleus (.net)، CIDR، عناوين بسيطة وSpamhaus DROP JSON، كنص أو gzip أو zip. يجب أن يبدأ الرابط بـ https://."/>
+			<control caption="إ_ضافة"/>
+			<control caption="إلغاء الأمر"/>
+		</dialog>
 		<dialog name="CShareManagerDlg" cookie="StSyBuBuBuBu" caption="إدارة مجلد المشاركة">
 			<control caption="هذه هي قائمة المجلدات في مكتبتك . يمكنك أن تضيف و أن تزيل المجلدات باستخدام الأزرار التي على اليسار . عندما تضيف أي مجلد جديد هو أصلا للمشاركة مع المستخدمين الآخرين ، يمكنك أن تزيله من مكتبة شير-أزا متى ما تريد"/>
 			<control/>
@@ -4632,6 +4706,12 @@
 			<column from="Precedence" to="الأسبقية"/>
 			<column from="Hits" to="ضربة"/>
 			<column from="Comment" to="التعليق"/>
+		</list>
+		<list name="CSecurityWnd.Lists">
+			<column from="List" to="القائمة"/>
+			<column from="Ranges" to="النطاقات"/>
+			<column from="Updated" to="آخر تحديث"/>
+			<column from="Hits" to="ضربة"/>
 		</list>
 		<list name="CHostCacheWnd">
 			<column from="Address" to="العنوان"/>

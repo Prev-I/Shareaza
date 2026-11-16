@@ -379,10 +379,13 @@
 			<button id="ID_SECURITY_EDIT" text="Edit Rule"/>
 			<separator/>
 			<button id="ID_SECURITY_ADD" text="Add Rule"/>
-			<button id="ID_SECURITY_REMOVE" text="Remove Rule"/>
+			<button id="ID_SECURITY_REMOVE" text="Esborra"/>
 			<separator/>
 			<button id="ID_SECURITY_MOVE_UP" text="Move Up"/>
 			<button id="ID_SECURITY_MOVE_DOWN" text="Move Down"/>
+			<separator/>
+			<button id="ID_SECURITY_ADD_LIST" text="Afegeix llista..."/>
+			<button id="ID_SECURITY_UPDATE_LISTS" text="Actualitza ara"/>
 			<rightAlign/>
 			<button id="ID_SECURITY_RESET" text="Reset List"/>
 			<button id="ID_SECURITY_IMPORT" text="Import List"/>
@@ -1561,6 +1564,14 @@
 			<separator/>
 			<item id="ID_SECURITY_EDIT" text="Edició avançada"/>
 		</menu>
+		<menu name="CSecurityWnd.Lists">
+			<item id="ID_SECURITY_ADD_LIST" text="Afegeix _llista..."/>
+			<separator/>
+			<item id="ID_SECURITY_UPDATE_LISTS" text="Act_ualitza ara"/>
+			<item id="ID_SECURITY_LIST_ENABLE" text="_Activada"/>
+			<separator/>
+			<item id="ID_SECURITY_LIST_REMOVE" text="_Esborra"/>
+		</menu>
 		<!-- SCHEDULER WINDOW -->
 		<menu name="CSchedulerWnd">
 			<item id="ID_SCHEDULER_ADD" text="_Add Scheduled Task"/>
@@ -2591,16 +2602,20 @@
 		<tip id="ID_SEARCHMONITOR_CLEAR" message="Esborra el buffer del monitor de cerques."/>
 		<tip id="ID_SEARCHMONITOR_PAUSE" message="Posa en pausa al monitor de cerques."/>
 		<tip id="ID_SECURITY_ADD" message="Afegeix una nova regla de seguretat."/>
+		<tip id="ID_SECURITY_ADD_LIST" message="Afegeix llistes de bloqueig d'IP del catàleg, o la vostra pròpia llista des d'una adreça https://..."/>
 		<tip id="ID_SECURITY_BAN" message="Bloqueja aquesta adreça IP per aquesta sessió."/>
 		<tip id="ID_SECURITY_EDIT" message="Edita la norma de seguretat."/>
 		<tip id="ID_SECURITY_EXPORT" message="Exporta les normes de seguretat a un arxiu XML."/>
 		<tip id="ID_SECURITY_IMPORT" message="Importa les normes de seguretat d'un arxiu XML."/>
+		<tip id="ID_SECURITY_LIST_ENABLE" message="Activa o desactiva les llistes d'IP seleccionades."/>
+		<tip id="ID_SECURITY_LIST_REMOVE" message="Esborra les llistes d'IP seleccionades."/>
 		<tip id="ID_SECURITY_MOVE_DOWN" message="Mou aquesta regla cap avall en la llista de precedència."/>
 		<tip id="ID_SECURITY_MOVE_UP" message="Mou aquesta regla cap a dalt en la llista de precedència."/>
 		<tip id="ID_SECURITY_POLICY_ACCEPT" message="Canvia la política de seguretat per defecte a acceptar totes les connexions."/>
 		<tip id="ID_SECURITY_POLICY_DENY" message="Canvia la política de seguretat per defecte a denegar totes les connexions."/>
-		<tip id="ID_SECURITY_REMOVE" message="Esborra aquesta norma de seguretat."/>
+		<tip id="ID_SECURITY_REMOVE" message="Esborra les normes o les llistes d'IP seleccionades."/>
 		<tip id="ID_SECURITY_RESET" message="Reinicia els compadors de les regles de seguretat seleccionades."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="Baixa ara les llistes d'IP seleccionades, o totes si no n'hi ha cap de seleccionada."/>
 		<tip id="ID_SYSTEM_CLEAR" message="Esborra la història d'estat."/>
 		<tip id="ID_SYSTEM_COPY" message="Copy selected line(s) of status log."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="Enregistra el temps a cada línia."/>
@@ -3444,6 +3459,44 @@
 		<string id="20269" value="Carpeta d'arxius incomplets"/>
 		<string id="20270" value="Desa els torrents aquí"/>
 		<string id="20271" value="Desa les col·leccions aquí"/>
+		<string id="20272" value="Còpia de la memòria cau il·legible; es tornarà a baixar."/>
+		<string id="20273" value="Còpia de la memòria cau il·legible; torneu a importar el fitxer."/>
+		<string id="20274" value="Xarxes segrestades i criminals; pocs falsos positius. Dades (c) The Spamhaus Project."/>
+		<string id="20275" value="Amfitrions compromesos coneguts."/>
+		<string id="20276" value="Empreses anti-P2P; molt gran (prop d'una cinquena part de les adreces IPv4); bloqueja proveïdors sencers i rangs de CDN (inclou el bloc 1.1.1.0 de Cloudflare)."/>
+		<string id="20277" value="Agregat de diverses llistes de privadesa i d'abusos."/>
+		<string id="20278" value="Espai no assignat; s'ha de mantenir actualitzada o bloquejarà xarxes noves."/>
+		<string id="20279" value="L'adreça no comença per https://."/>
+		<string id="20280" value="La baixada no ha acabat en una adreça https://."/>
+		<string id="20281" value="No s'ha pogut contactar amb el servidor."/>
+		<string id="20282" value="El servidor ha respost amb l'estat HTTP %d."/>
+		<string id="20283" value="La baixada supera els 64 MB."/>
+		<string id="20284" value="El contingut supera els 256 MB un cop descomprimit."/>
+		<string id="20285" value="No s'ha pogut llegir el fitxer comprimit."/>
+		<string id="20286" value="La llista no conté cap rang d'adreces."/>
+		<string id="20287" value="La llista conté més de 2.000.000 de rangs."/>
+		<string id="20288" value="La llista conté un rang IPv4 de la meitat de l'espai d'adreces o més."/>
+		<string id="20289" value="Els rangs IPv4 de la llista cobreixen més de la meitat de l'espai d'adreces."/>
+		<string id="20290" value="La llista conté un rang IPv6 que cobreix tot 2000::/3."/>
+		<string id="20291" value="No s'ha pogut desar la llista."/>
+		<string id="20292" value="Llista d'IP %s actualitzada: %lu línies acceptades, %lu rebutjades, %lu rangs després de fusionar."/>
+		<string id="20293" value="Llista d'IP %s no actualitzada: %s"/>
+		<string id="20294" value="%s: %Iu rangs importats, %Iu línies rebutjades."/>
+		<string id="20295" value="No s'ha pogut importar %s."/>
+		<string id="20296" value="No s'ha pogut escriure %s."/>
+		<string id="20297" value="No s'ha pogut importar %s: %s"/>
+		<string id="20298" value="El fitxer supera els 64 MB."/>
+		<string id="20299" value="Les llistes d'IP només es baixen per HTTPS: l'URL ha de començar per https://."/>
+		<string id="20300" value="Voleu esborrar les llistes d'IP seleccionades? També se n'eliminaran les còpies baixades."/>
+		<string id="20301" value="Importada"/>
+		<string id="20302" value="Error: %s"/>
+		<string id="20303" value="Encara no baixada"/>
+		<string id="20304" value="Llistes d'IP"/>
+		<string id="20305" value="Les meves normes"/>
+		<string id="20306" value="Introduïu l'adreça https:// de la vostra llista, o esborreu-ne el nom."/>
+		<string id="20307" value="No s'ha afegit res: les llistes triades ja són a les vostres llistes d'IP."/>
+		<string id="20308" value="Marqueu una llista, o introduïu l'adreça de la vostra pròpia llista."/>
+		<string id="20309" value="Ja són a les vostres llistes d'IP, no s'han tornat a afegir: %s"/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->
@@ -4284,6 +4337,27 @@
 			<control caption="Accepta"/>
 			<control caption="Cancel·la"/>
 		</dialog>
+		<dialog name="CIPListAddDlg" cookie="StBuStBuStBuStBuStBuStBuStEdStEdStBuBu" caption="Afegeix una llista d'IP">
+			<control caption="Marqueu les llistes que voleu afegir. Cadascuna es baixa per HTTPS i s'actualitza un cop al dia; no se n'afegeix cap si no la marqueu."/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control caption="La vostra llista"/>
+			<control caption="_Nom:"/>
+			<control/>
+			<control caption="_URL:"/>
+			<control/>
+			<control caption="Formats acceptats: PeerGuardian (.p2p), eMule (ipfilter.dat), Gnucleus (.net), CIDR, adreces simples i Spamhaus DROP JSON, com a text, gzip o zip. L'URL ha de començar per https://."/>
+			<control caption="_Afegeix"/>
+			<control caption="Cancel·la"/>
+		</dialog>
 		<dialog name="CShareManagerDlg" cookie="StSyBuBuBuBu" caption="Controlador de carpetes de la col·lecció">
 			<control caption="Aquesta és la llista de carpetes en la col·lecció. Pots afegir o treure carpetes amb els botons de baix a l'esquerra. Quan afegeixes una nova carpeta inicialment es comparteix amb altres usuaris; no obstant, pots deixar de compartir-la des de la llista de carpetes de la col·lecció."/>
 			<control/>
@@ -4632,6 +4706,12 @@
 			<column from="Precedence" to="Procedència"/>
 			<column from="Hits" to="Encerts"/>
 			<column from="Comment" to="Comentari"/>
+		</list>
+		<list name="CSecurityWnd.Lists">
+			<column from="List" to="Llista"/>
+			<column from="Ranges" to="Rangs"/>
+			<column from="Updated" to="Actualitzada"/>
+			<column from="Hits" to="Encerts"/>
 		</list>
 		<list name="CHostCacheWnd">
 			<column from="Address" to="Adreça"/>

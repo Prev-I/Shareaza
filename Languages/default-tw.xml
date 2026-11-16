@@ -379,10 +379,13 @@
 			<button id="ID_SECURITY_EDIT" text="編輯規則"/>
 			<separator/>
 			<button id="ID_SECURITY_ADD" text="新增規則"/>
-			<button id="ID_SECURITY_REMOVE" text="移除規則"/>
+			<button id="ID_SECURITY_REMOVE" text="移除"/>
 			<separator/>
 			<button id="ID_SECURITY_MOVE_UP" text="上移"/>
 			<button id="ID_SECURITY_MOVE_DOWN" text="下移"/>
+			<separator/>
+			<button id="ID_SECURITY_ADD_LIST" text="新增清單…"/>
+			<button id="ID_SECURITY_UPDATE_LISTS" text="立即更新"/>
 			<rightAlign/>
 			<button id="ID_SECURITY_RESET" text="重置清單"/>
 			<button id="ID_SECURITY_IMPORT" text="匯入清單"/>
@@ -1561,6 +1564,14 @@
 			<separator/>
 			<item id="ID_SECURITY_EDIT" text="進階編輯…"/>
 		</menu>
+		<menu name="CSecurityWnd.Lists">
+			<item id="ID_SECURITY_ADD_LIST" text="新增清單…"/>
+			<separator/>
+			<item id="ID_SECURITY_UPDATE_LISTS" text="立即更新"/>
+			<item id="ID_SECURITY_LIST_ENABLE" text="啟用"/>
+			<separator/>
+			<item id="ID_SECURITY_LIST_REMOVE" text="移除"/>
+		</menu>
 		<!-- SCHEDULER WINDOW -->
 		<menu name="CSchedulerWnd">
 			<item id="ID_SCHEDULER_ADD" text="新增預定任務"/>
@@ -2544,16 +2555,20 @@ Shareaza 在搜尋時忽略標點符號與萬用字元，只使用您鍵入的�
 		<tip id="ID_SEARCHMONITOR_CLEAR" message="清除搜尋監視器緩衝。"/>
 		<tip id="ID_SEARCHMONITOR_PAUSE" message="暫停搜尋要求監控。"/>
 		<tip id="ID_SECURITY_ADD" message="在安全鍊中新增一個規則…"/>
+		<tip id="ID_SECURITY_ADD_LIST" message="從目錄新增 IP 封鎖清單，或從 https:// 位址新增您自己的清單…"/>
 		<tip id="ID_SECURITY_BAN" message="封鎖選取的主機直到會期結束。"/>
 		<tip id="ID_SECURITY_EDIT" message="編輯選取的安全性規則…"/>
 		<tip id="ID_SECURITY_EXPORT" message="匯出選取的安全性規則至檔案…"/>
 		<tip id="ID_SECURITY_IMPORT" message="從檔案匯入安全性規則…"/>
+		<tip id="ID_SECURITY_LIST_ENABLE" message="啟用或停用選取的 IP 清單。"/>
+		<tip id="ID_SECURITY_LIST_REMOVE" message="移除選取的 IP 清單。"/>
 		<tip id="ID_SECURITY_MOVE_DOWN" message="降低選取的安全性規則的優先權。"/>
 		<tip id="ID_SECURITY_MOVE_UP" message="提升選取的安全性規則的優先權。"/>
 		<tip id="ID_SECURITY_POLICY_ACCEPT" message="將預設的安全性方針設定成接受所有的主機。"/>
 		<tip id="ID_SECURITY_POLICY_DENY" message="將預設的安全性方針設定成拒絕所有的主機。"/>
-		<tip id="ID_SECURITY_REMOVE" message="移除選取的安全性規則。"/>
+		<tip id="ID_SECURITY_REMOVE" message="移除選取的規則或 IP 清單。"/>
 		<tip id="ID_SECURITY_RESET" message="重置選取規則的計數。"/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="立即下載選取的 IP 清單；若未選取任何清單則下載全部。"/>
 		<tip id="ID_SYSTEM_CLEAR" message="清除狀態記錄。"/>
 		<tip id="ID_SYSTEM_COPY" message="複製這項狀態日誌。"/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="為每一列附上時間郵戳。"/>
@@ -3397,6 +3412,44 @@ Shareaza 在搜尋時忽略標點符號與萬用字元，只使用您鍵入的�
 		<string id="20269" value="請將暫存的未完成檔案放在這裡"/>
 		<string id="20270" value="存放種子於此"/>
 		<string id="20271" value="將組檔存放在這個位置"/>
+		<string id="20272" value="快取副本無法讀取；將重新下載。"/>
+		<string id="20273" value="快取副本無法讀取；請重新匯入檔案。"/>
+		<string id="20274" value="遭劫持及犯罪網路；誤判很少。資料 (c) The Spamhaus Project。"/>
+		<string id="20275" value="已知遭入侵的主機。"/>
+		<string id="20276" value="反 P2P 公司；非常龐大（約占所有 IPv4 位址的五分之一）；會封鎖整個供應商及 CDN 範圍（包含 Cloudflare 的 1.1.1.0 區塊）。"/>
+		<string id="20277" value="多份隱私與濫用清單的彙整。"/>
+		<string id="20278" value="未分配的位址空間；必須保持更新，否則會封鎖新網路。"/>
+		<string id="20279" value="位址不是以 https:// 開頭。"/>
+		<string id="20280" value="下載最後的位址不是 https:// 位址。"/>
+		<string id="20281" value="無法連線到伺服器。"/>
+		<string id="20282" value="伺服器回應 HTTP 狀態 %d。"/>
+		<string id="20283" value="下載內容超過 64 MB。"/>
+		<string id="20284" value="解壓縮後的內容超過 256 MB。"/>
+		<string id="20285" value="無法讀取壓縮檔。"/>
+		<string id="20286" value="清單中沒有任何位址範圍。"/>
+		<string id="20287" value="清單中的範圍超過 2,000,000 個。"/>
+		<string id="20288" value="清單中有一個 IPv4 範圍達到位址空間的一半或以上。"/>
+		<string id="20289" value="清單的 IPv4 範圍涵蓋超過一半的位址空間。"/>
+		<string id="20290" value="清單中有一個 IPv6 範圍涵蓋整個 2000::/3。"/>
+		<string id="20291" value="無法儲存清單。"/>
+		<string id="20292" value="IP 清單 %s 已更新：接受 %lu 行，拒絕 %lu 行，合併後共 %lu 個範圍。"/>
+		<string id="20293" value="IP 清單 %s 未更新：%s"/>
+		<string id="20294" value="%s：已匯入 %Iu 個範圍，拒絕 %Iu 行。"/>
+		<string id="20295" value="無法匯入 %s。"/>
+		<string id="20296" value="無法寫入 %s。"/>
+		<string id="20297" value="無法匯入 %s：%s"/>
+		<string id="20298" value="檔案超過 64 MB。"/>
+		<string id="20299" value="IP 清單只能透過 HTTPS 下載：URL 必須以 https:// 開頭。"/>
+		<string id="20300" value="要移除選取的 IP 清單嗎？已下載的副本也會一併刪除。"/>
+		<string id="20301" value="已匯入"/>
+		<string id="20302" value="失敗：%s"/>
+		<string id="20303" value="尚未下載"/>
+		<string id="20304" value="IP 清單"/>
+		<string id="20305" value="我的規則"/>
+		<string id="20306" value="請輸入您自己清單的 https:// 位址，或清除其名稱。"/>
+		<string id="20307" value="未新增任何清單：所選清單已在您的 IP 清單中。"/>
+		<string id="20308" value="請勾選一份清單，或輸入您自己清單的位址。"/>
+		<string id="20309" value="已在您的 IP 清單中，因此未重複新增：%s"/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->
@@ -4237,6 +4290,27 @@ Shareaza 在搜尋時忽略標點符號與萬用字元，只使用您鍵入的�
 			<control caption="確定"/>
 			<control caption="取消"/>
 		</dialog>
+		<dialog name="CIPListAddDlg" cookie="StBuStBuStBuStBuStBuStBuStEdStEdStBuBu" caption="新增 IP 清單">
+			<control caption="勾選要新增的清單。每份清單都透過 HTTPS 下載並每天更新一次；未勾選的清單不會被新增。"/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control caption="您自己的清單"/>
+			<control caption="名稱："/>
+			<control/>
+			<control caption="URL："/>
+			<control/>
+			<control caption="接受的格式：PeerGuardian (.p2p)、eMule (ipfilter.dat)、Gnucleus (.net)、CIDR、純位址及 Spamhaus DROP JSON，可為文字、gzip 或 zip。URL 必須以 https:// 開頭。"/>
+			<control caption="新增"/>
+			<control caption="取消"/>
+		</dialog>
 		<dialog name="CShareManagerDlg" cookie="StSyBuBuBuBu" caption="分享的資料夾管理員">
 			<control caption="這是您的收藏的資料夾清單。 您可以使用左方按鈕新增或移除資料夾 。  任何一個新增的資料夾將預設為開放給其他使用者分享， 不過您可以在 Shareaza 收藏停止分享。"/>
 			<control/>
@@ -4585,6 +4659,12 @@ Shareaza 在搜尋時忽略標點符號與萬用字元，只使用您鍵入的�
 			<column from="Precedence" to="優先順序"/>
 			<column from="Hits" to="Hits"/>
 			<column from="Comment" to="備註"/>
+		</list>
+		<list name="CSecurityWnd.Lists">
+			<column from="List" to="清單"/>
+			<column from="Ranges" to="範圍"/>
+			<column from="Updated" to="更新時間"/>
+			<column from="Hits" to="Hits"/>
 		</list>
 		<list name="CHostCacheWnd">
 			<column from="Address" to="位址"/>

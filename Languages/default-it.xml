@@ -379,10 +379,13 @@
 			<button id="ID_SECURITY_EDIT" text="Modifica Regola"/>
 			<separator/>
 			<button id="ID_SECURITY_ADD" text="Aggiungi Regola"/>
-			<button id="ID_SECURITY_REMOVE" text="Rimuovi Regola"/>
+			<button id="ID_SECURITY_REMOVE" text="Rimuovi"/>
 			<separator/>
 			<button id="ID_SECURITY_MOVE_UP" text="Muovi Sopra"/>
 			<button id="ID_SECURITY_MOVE_DOWN" text="Muovi Sotto"/>
+			<separator/>
+			<button id="ID_SECURITY_ADD_LIST" text="Aggiungi Lista..."/>
+			<button id="ID_SECURITY_UPDATE_LISTS" text="Aggiorna Ora"/>
 			<rightAlign/>
 			<button id="ID_SECURITY_RESET" text="Resetta Lista"/>
 			<button id="ID_SECURITY_IMPORT" text="Importa Lista"/>
@@ -1561,6 +1564,14 @@
 			<separator/>
 			<item id="ID_SECURITY_EDIT" text="_Proprietà"/>
 		</menu>
+		<menu name="CSecurityWnd.Lists">
+			<item id="ID_SECURITY_ADD_LIST" text="_Aggiungi lista..."/>
+			<separator/>
+			<item id="ID_SECURITY_UPDATE_LISTS" text="Aggiorna _ora"/>
+			<item id="ID_SECURITY_LIST_ENABLE" text="A_ttiva"/>
+			<separator/>
+			<item id="ID_SECURITY_LIST_REMOVE" text="_Rimuovi"/>
+		</menu>
 		<!-- SCHEDULER WINDOW -->
 		<menu name="CSchedulerWnd">
 			<item id="ID_SCHEDULER_ADD" text="_Add Scheduled Task"/>
@@ -2591,16 +2602,20 @@
 		<tip id="ID_SEARCHMONITOR_CLEAR" message="Svuota la memoria buffer del monitor di ricerca."/>
 		<tip id="ID_SEARCHMONITOR_PAUSE" message="Sospendi il monitor di ricerca."/>
 		<tip id="ID_SECURITY_ADD" message="Aggiungi una nuova regola nelle chiavi di sicurezza..."/>
+		<tip id="ID_SECURITY_ADD_LIST" message="Aggiungi liste di blocco IP dal catalogo, o una tua lista da un indirizzo https://..."/>
 		<tip id="ID_SECURITY_BAN" message="Blocca gli host selezionati per la durata di questa sessione."/>
 		<tip id="ID_SECURITY_EDIT" message="Modifica le regole di sicurezza selezionate..."/>
 		<tip id="ID_SECURITY_EXPORT" message="Esporta in un file le regole di sicurezza selezionate..."/>
 		<tip id="ID_SECURITY_IMPORT" message="Importa da un file le regole di sicurezza..."/>
+		<tip id="ID_SECURITY_LIST_ENABLE" message="Attiva o disattiva le liste IP selezionate."/>
+		<tip id="ID_SECURITY_LIST_REMOVE" message="Rimuovi le liste IP selezionate."/>
 		<tip id="ID_SECURITY_MOVE_DOWN" message="Sposta in basso nella lista della precedenza le regole di sicurezza selezionate."/>
 		<tip id="ID_SECURITY_MOVE_UP" message="Sposta in alto nella lista della precedenza le regole di sicurezza selezionate."/>
 		<tip id="ID_SECURITY_POLICY_ACCEPT" message="Imposta come predefinito la regola di sicurezza di accettare ogni host."/>
 		<tip id="ID_SECURITY_POLICY_DENY" message="Imposta come predefinito la regola di sicurezza di rifiutare ogni host."/>
-		<tip id="ID_SECURITY_REMOVE" message="Rimuovi le regole di sicurezza selezionate."/>
+		<tip id="ID_SECURITY_REMOVE" message="Rimuovi le regole o le liste IP selezionate."/>
 		<tip id="ID_SECURITY_RESET" message="Azzera il conteggio delle richieste nelle regole selezionate."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="Scarica ora le liste IP selezionate, o tutte se nessuna è selezionata."/>
 		<tip id="ID_SYSTEM_CLEAR" message="Azzera il log di stato."/>
 		<tip id="ID_SYSTEM_COPY" message="Copy selected line(s) of status log."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="Registra un orario per ciascuna linea."/>
@@ -3444,6 +3459,44 @@
 		<string id="20269" value="Cartella dei file incompleti temporanei"/>
 		<string id="20270" value="Salva torrent qui"/>
 		<string id="20271" value="Salva collezioni qui"/>
+		<string id="20272" value="Copia in cache illeggibile; verrà scaricata di nuovo."/>
+		<string id="20273" value="Copia in cache illeggibile; importa di nuovo il file."/>
+		<string id="20274" value="Reti dirottate e criminali; pochi falsi positivi. Dati (c) The Spamhaus Project."/>
+		<string id="20275" value="Host noti come compromessi."/>
+		<string id="20276" value="Aziende anti-P2P; molto grande (circa un quinto di tutti gli indirizzi IPv4); blocca interi provider e reti CDN (include il blocco 1.1.1.0 di Cloudflare)."/>
+		<string id="20277" value="Raccolta di diverse liste su privacy e abusi."/>
+		<string id="20278" value="Spazio non assegnato; va tenuta aggiornata, altrimenti blocca le reti nuove."/>
+		<string id="20279" value="L'indirizzo non inizia con https://."/>
+		<string id="20280" value="Il download non si è concluso su un indirizzo https://."/>
+		<string id="20281" value="Impossibile raggiungere il server."/>
+		<string id="20282" value="Il server ha risposto con lo stato HTTP %d."/>
+		<string id="20283" value="Il download supera i 64 MB."/>
+		<string id="20284" value="Il contenuto supera i 256 MB una volta decompresso."/>
+		<string id="20285" value="Impossibile leggere il file compresso."/>
+		<string id="20286" value="La lista non contiene alcun intervallo di indirizzi."/>
+		<string id="20287" value="La lista contiene più di 2.000.000 di intervalli."/>
+		<string id="20288" value="La lista contiene un intervallo IPv4 pari ad almeno metà dello spazio degli indirizzi."/>
+		<string id="20289" value="Gli intervalli IPv4 della lista coprono più di metà dello spazio degli indirizzi."/>
+		<string id="20290" value="La lista contiene un intervallo IPv6 che copre tutto 2000::/3."/>
+		<string id="20291" value="Impossibile salvare la lista."/>
+		<string id="20292" value="Lista IP %s aggiornata: %lu righe accettate, %lu scartate, %lu intervalli dopo l'unione."/>
+		<string id="20293" value="Lista IP %s non aggiornata: %s"/>
+		<string id="20294" value="%s: %Iu intervalli importati, %Iu righe scartate."/>
+		<string id="20295" value="Impossibile importare %s."/>
+		<string id="20296" value="Impossibile scrivere %s."/>
+		<string id="20297" value="Impossibile importare %s: %s"/>
+		<string id="20298" value="Il file supera i 64 MB."/>
+		<string id="20299" value="Le liste IP si scaricano solo tramite HTTPS: l'URL deve iniziare con https://."/>
+		<string id="20300" value="Rimuovere le liste IP selezionate? Verranno eliminate anche le copie scaricate."/>
+		<string id="20301" value="Importata"/>
+		<string id="20302" value="Errore: %s"/>
+		<string id="20303" value="Non ancora scaricata"/>
+		<string id="20304" value="Liste IP"/>
+		<string id="20305" value="Le mie regole"/>
+		<string id="20306" value="Inserisci l'indirizzo https:// della tua lista, oppure cancellane il nome."/>
+		<string id="20307" value="Non è stato aggiunto nulla: le liste scelte sono già tra le tue liste IP."/>
+		<string id="20308" value="Spunta una lista, o inserisci l'indirizzo di una tua lista."/>
+		<string id="20309" value="Già presenti tra le tue liste IP, quindi non aggiunte di nuovo: %s"/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->
@@ -4284,6 +4337,27 @@
 			<control caption="OK"/>
 			<control caption="Annulla"/>
 		</dialog>
+		<dialog name="CIPListAddDlg" cookie="StBuStBuStBuStBuStBuStBuStEdStEdStBuBu" caption="Aggiungi lista IP">
+			<control caption="Spunta le liste da aggiungere. Ognuna viene scaricata tramite HTTPS e aggiornata una volta al giorno; nessuna viene aggiunta se non la spunti."/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control caption="La tua lista"/>
+			<control caption="_Nome:"/>
+			<control/>
+			<control caption="_URL:"/>
+			<control/>
+			<control caption="Formati accettati: PeerGuardian (.p2p), eMule (ipfilter.dat), Gnucleus (.net), CIDR, indirizzi semplici e Spamhaus DROP JSON, come testo, gzip o zip. L'URL deve iniziare con https://."/>
+			<control caption="_Aggiungi"/>
+			<control caption="Annulla"/>
+		</dialog>
 		<dialog name="CShareManagerDlg" cookie="StSyBuBuBuBu" caption="Gestore cartelle condivise">
 			<control caption="Questa è la lista delle cartelle nella tua libreria. Puoi aggiungere e rimuovere cartelle utilizzando i pulsanti sulla sinistra. Quando aggiungi una cartella, questa è inizialmente condivisa con altri utenti, tuttavia puoi rimuoverla dalla condivisione su Shareaza."/>
 			<control/>
@@ -4632,6 +4706,12 @@
 			<column from="Precedence" to="Precedenza"/>
 			<column from="Hits" to="Hits"/>
 			<column from="Comment" to="Commento"/>
+		</list>
+		<list name="CSecurityWnd.Lists">
+			<column from="List" to="Lista"/>
+			<column from="Ranges" to="Intervalli"/>
+			<column from="Updated" to="Aggiornata"/>
+			<column from="Hits" to="Hits"/>
 		</list>
 		<list name="CHostCacheWnd">
 			<column from="Address" to="Indirizzo"/>

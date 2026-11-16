@@ -379,10 +379,13 @@
 			<button id="ID_SECURITY_EDIT" text="Edit Rule"/>
 			<separator/>
 			<button id="ID_SECURITY_ADD" text="Add Rule"/>
-			<button id="ID_SECURITY_REMOVE" text="Remove Rule"/>
+			<button id="ID_SECURITY_REMOVE" text="削除"/>
 			<separator/>
 			<button id="ID_SECURITY_MOVE_UP" text="Move Up"/>
 			<button id="ID_SECURITY_MOVE_DOWN" text="Move Down"/>
+			<separator/>
+			<button id="ID_SECURITY_ADD_LIST" text="リストを追加..."/>
+			<button id="ID_SECURITY_UPDATE_LISTS" text="今すぐ更新"/>
 			<rightAlign/>
 			<button id="ID_SECURITY_RESET" text="Reset List"/>
 			<button id="ID_SECURITY_IMPORT" text="Import List"/>
@@ -1561,6 +1564,14 @@
 			<separator/>
 			<item id="ID_SECURITY_EDIT" text="高度な編集(_E)..."/>
 		</menu>
+		<menu name="CSecurityWnd.Lists">
+			<item id="ID_SECURITY_ADD_LIST" text="リストを追加(_A)..."/>
+			<separator/>
+			<item id="ID_SECURITY_UPDATE_LISTS" text="今すぐ更新(_U)"/>
+			<item id="ID_SECURITY_LIST_ENABLE" text="有効(_E)"/>
+			<separator/>
+			<item id="ID_SECURITY_LIST_REMOVE" text="削除(_R)"/>
+		</menu>
 		<!-- SCHEDULER WINDOW -->
 		<menu name="CSchedulerWnd">
 			<item id="ID_SCHEDULER_ADD" text="_Add Scheduled Task"/>
@@ -2592,16 +2603,20 @@
 		<tip id="ID_SEARCHMONITOR_CLEAR" message="検索モニタバッファをクリアします"/>
 		<tip id="ID_SEARCHMONITOR_PAUSE" message="検索モニタリングを一時停止します"/>
 		<tip id="ID_SECURITY_ADD" message="セキュリィティチェインに新しい規則を追加します..."/>
+		<tip id="ID_SECURITY_ADD_LIST" message="カタログから IP ブロックリストを、または https:// アドレスから独自のリストを追加します..."/>
 		<tip id="ID_SECURITY_BAN" message="このセッションの間、選択したホストをBAN(禁止)します"/>
 		<tip id="ID_SECURITY_EDIT" message="選択したセキュリィティ規則を編集します..."/>
 		<tip id="ID_SECURITY_EXPORT" message="選択したセキュリティ規則をファイルへエクスポートします..."/>
 		<tip id="ID_SECURITY_IMPORT" message="ファイルからセキュリティ規則をインポートします..."/>
+		<tip id="ID_SECURITY_LIST_ENABLE" message="選択した IP リストを有効または無効にします。"/>
+		<tip id="ID_SECURITY_LIST_REMOVE" message="選択した IP リストを削除します。"/>
 		<tip id="ID_SECURITY_MOVE_DOWN" message="優先順位リスト内で選択されたセキュリティ規則を下に移動します"/>
 		<tip id="ID_SECURITY_MOVE_UP" message="優先順位リスト内で選択されたセキュリティ規則を上に移動します"/>
 		<tip id="ID_SECURITY_POLICY_ACCEPT" message="デフォルトのセキュリティ方針を全てのホストに許可するように設定します"/>
 		<tip id="ID_SECURITY_POLICY_DENY" message="デフォルトセキュリティ方針を全てのホストで許可しないように設定します"/>
-		<tip id="ID_SECURITY_REMOVE" message="選択したセキュリティ規則を削除します"/>
+		<tip id="ID_SECURITY_REMOVE" message="選択した規則または IP リストを削除します。"/>
 		<tip id="ID_SECURITY_RESET" message="選択した規則のヒット数をリセットします"/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="選択した IP リストを今すぐダウンロードします。何も選択していない場合はすべてをダウンロードします。"/>
 		<tip id="ID_SYSTEM_CLEAR" message="ステータスログをクリアします"/>
 		<tip id="ID_SYSTEM_COPY" message="Copy selected line(s) of status log."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="各行のタイムスタンプを記録します"/>
@@ -3445,6 +3460,44 @@
 		<string id="20269" value="未完了ファイルの保存先"/>
 		<string id="20270" value="Torrentの保存先"/>
 		<string id="20271" value="コレクションの格納先"/>
+		<string id="20272" value="キャッシュのコピーを読み込めません。再ダウンロードします。"/>
+		<string id="20273" value="キャッシュのコピーを読み込めません。ファイルを再度インポートしてください。"/>
+		<string id="20274" value="乗っ取られたネットワークや犯罪ネットワーク。誤検出は少なめです。データ (c) The Spamhaus Project。"/>
+		<string id="20275" value="侵害が確認されているホスト。"/>
+		<string id="20276" value="反 P2P 企業。非常に大きい (全 IPv4 アドレスの約 5 分の 1)。プロバイダや CDN の範囲全体をブロックします (Cloudflare の 1.1.1.0 ブロックを含みます)。"/>
+		<string id="20277" value="複数のプライバシー・不正利用リストを集約したもの。"/>
+		<string id="20278" value="未割り当てのアドレス空間。更新し続けないと新しいネットワークをブロックします。"/>
+		<string id="20279" value="アドレスが https:// で始まっていません。"/>
+		<string id="20280" value="ダウンロードの最終アドレスが https:// ではありませんでした。"/>
+		<string id="20281" value="サーバーに接続できませんでした。"/>
+		<string id="20282" value="サーバーが HTTP ステータス %d を返しました。"/>
+		<string id="20283" value="ダウンロードが 64 MB を超えています。"/>
+		<string id="20284" value="展開後の内容が 256 MB を超えています。"/>
+		<string id="20285" value="圧縮ファイルを読み込めませんでした。"/>
+		<string id="20286" value="リストにアドレス範囲がありません。"/>
+		<string id="20287" value="リストの範囲が 2,000,000 を超えています。"/>
+		<string id="20288" value="リストにアドレス空間の半分以上を占める IPv4 範囲があります。"/>
+		<string id="20289" value="リストの IPv4 範囲がアドレス空間の半分を超えています。"/>
+		<string id="20290" value="リストに 2000::/3 全体を含む IPv6 範囲があります。"/>
+		<string id="20291" value="リストを保存できませんでした。"/>
+		<string id="20292" value="IP リスト %s を更新しました: %lu 行を採用、%lu 行を拒否、統合後 %lu 範囲。"/>
+		<string id="20293" value="IP リスト %s は更新されませんでした: %s"/>
+		<string id="20294" value="%s: %Iu 範囲をインポート、%Iu 行を拒否しました。"/>
+		<string id="20295" value="%s をインポートできませんでした。"/>
+		<string id="20296" value="%s に書き込めませんでした。"/>
+		<string id="20297" value="%s をインポートできませんでした: %s"/>
+		<string id="20298" value="ファイルが 64 MB を超えています。"/>
+		<string id="20299" value="IP リストは HTTPS でのみダウンロードされます。URL は https:// で始まる必要があります。"/>
+		<string id="20300" value="選択した IP リストを削除しますか? ダウンロード済みのコピーも削除されます。"/>
+		<string id="20301" value="インポート済み"/>
+		<string id="20302" value="失敗: %s"/>
+		<string id="20303" value="未ダウンロード"/>
+		<string id="20304" value="IP リスト"/>
+		<string id="20305" value="自分の規則"/>
+		<string id="20306" value="独自リストの https:// アドレスを入力するか、名前を消去してください。"/>
+		<string id="20307" value="何も追加されませんでした: 選択したリストはすでに IP リストにあります。"/>
+		<string id="20308" value="リストにチェックを入れるか、独自リストのアドレスを入力してください。"/>
+		<string id="20309" value="すでに IP リストにあるため、再追加しませんでした: %s"/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->
@@ -4285,6 +4338,27 @@
 			<control caption="OK"/>
 			<control caption="キャンセル"/>
 		</dialog>
+		<dialog name="CIPListAddDlg" cookie="StBuStBuStBuStBuStBuStBuStEdStEdStBuBu" caption="IP リストの追加">
+			<control caption="追加するリストにチェックを入れてください。各リストは HTTPS でダウンロードされ、1 日 1 回更新されます。チェックしないリストは追加されません。"/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control caption="独自のリスト"/>
+			<control caption="名前(_N):"/>
+			<control/>
+			<control caption="URL(_U):"/>
+			<control/>
+			<control caption="対応形式: PeerGuardian (.p2p)、eMule (ipfilter.dat)、Gnucleus (.net)、CIDR、単純なアドレス、Spamhaus DROP JSON (テキスト、gzip、zip)。URL は https:// で始まる必要があります。"/>
+			<control caption="追加(_A)"/>
+			<control caption="キャンセル"/>
+		</dialog>
 		<dialog name="CShareManagerDlg" cookie="StSyBuBuBuBu" caption="共有フォルダ管理">
 			<control caption="これはライブラリ内のフォルダリストです。 左側のボタンを使用することでフォルダの追加・削除ができます。 新規フォルダ追加時にはデフォルトで共有する設定になりますが、必要であればShareazaライブラリでそれを非共有にすることも出来ます。"/>
 			<control/>
@@ -4633,6 +4707,12 @@
 			<column from="Precedence" to="優先順位"/>
 			<column from="Hits" to="ヒット"/>
 			<column from="Comment" to="コメント"/>
+		</list>
+		<list name="CSecurityWnd.Lists">
+			<column from="List" to="リスト"/>
+			<column from="Ranges" to="範囲"/>
+			<column from="Updated" to="更新日時"/>
+			<column from="Hits" to="ヒット"/>
 		</list>
 		<list name="CHostCacheWnd">
 			<column from="Address" to="アドレス"/>

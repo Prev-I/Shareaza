@@ -379,10 +379,13 @@
 			<button id="ID_SECURITY_EDIT" text="Editar Regra"/>
 			<separator/>
 			<button id="ID_SECURITY_ADD" text="Adicionar Regra"/>
-			<button id="ID_SECURITY_REMOVE" text="Remover Regra"/>
+			<button id="ID_SECURITY_REMOVE" text="Remover"/>
 			<separator/>
 			<button id="ID_SECURITY_MOVE_UP" text="Mover pra Cima"/>
 			<button id="ID_SECURITY_MOVE_DOWN" text="Mover pra Baixo"/>
+			<separator/>
+			<button id="ID_SECURITY_ADD_LIST" text="Adicionar Lista..."/>
+			<button id="ID_SECURITY_UPDATE_LISTS" text="Atualizar Agora"/>
 			<rightAlign/>
 			<button id="ID_SECURITY_RESET" text="Resetar a Lista"/>
 			<button id="ID_SECURITY_IMPORT" text="Importar a Lista"/>
@@ -1561,6 +1564,14 @@
 			<separator/>
 			<item id="ID_SECURITY_EDIT" text="_Propriedades"/>
 		</menu>
+		<menu name="CSecurityWnd.Lists">
+			<item id="ID_SECURITY_ADD_LIST" text="Adicionar _Lista..."/>
+			<separator/>
+			<item id="ID_SECURITY_UPDATE_LISTS" text="A_tualizar Agora"/>
+			<item id="ID_SECURITY_LIST_ENABLE" text="Ati_vada"/>
+			<separator/>
+			<item id="ID_SECURITY_LIST_REMOVE" text="_Remover"/>
+		</menu>
 		<!-- SCHEDULER WINDOW -->
 		<menu name="CSchedulerWnd">
 			<item id="ID_SCHEDULER_ADD" text="_Adicionar Tarefa Agendada"/>
@@ -2591,16 +2602,20 @@ t		Alternativamente, você pode manualmente iniciar este download com o comando 
 		<tip id="ID_SEARCHMONITOR_CLEAR" message="Limpar o buffer do monitor de busca."/>
 		<tip id="ID_SEARCHMONITOR_PAUSE" message="Pausar a monitoração de busca."/>
 		<tip id="ID_SECURITY_ADD" message="Adicionar uma nova regra para a cadeia de segurança..."/>
+		<tip id="ID_SECURITY_ADD_LIST" message="Adicionar listas de bloqueio de IP do catálogo, ou sua própria lista de um endereço https://..."/>
 		<tip id="ID_SECURITY_BAN" message="Banir o host selecionado pela duração desta sessão."/>
 		<tip id="ID_SECURITY_EDIT" message="Editar a regra de segurança selecionada..."/>
 		<tip id="ID_SECURITY_EXPORT" message="Exportar a regra de segurança selecionada para um arquivo..."/>
 		<tip id="ID_SECURITY_IMPORT" message="Importar regras de segurança de um arquivo..."/>
+		<tip id="ID_SECURITY_LIST_ENABLE" message="Ativar ou desativar as listas de IP selecionadas."/>
+		<tip id="ID_SECURITY_LIST_REMOVE" message="Remover as listas de IP selecionadas."/>
 		<tip id="ID_SECURITY_MOVE_DOWN" message="Mover as regras de segurança selecionadas pra baixo na lista de prioridade."/>
 		<tip id="ID_SECURITY_MOVE_UP" message="Mover as regras de segurança selecionadas pra cima na lista de prioridade."/>
 		<tip id="ID_SECURITY_POLICY_ACCEPT" message="Definir política padrão pra permitir todos os hosts."/>
 		<tip id="ID_SECURITY_POLICY_DENY" message="Definir política padrão pra negar todos os hosts."/>
-		<tip id="ID_SECURITY_REMOVE" message="Remover a regras de segurança selecionadas."/>
+		<tip id="ID_SECURITY_REMOVE" message="Remover as regras ou listas de IP selecionadas."/>
 		<tip id="ID_SECURITY_RESET" message="Reiniciar as contagens de acerto das regras de segurança selecionadas."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="Baixar agora as listas de IP selecionadas, ou todas quando nenhuma estiver selecionada."/>
 		<tip id="ID_SYSTEM_CLEAR" message="Limpar o log do status."/>
 		<tip id="ID_SYSTEM_COPY" message="Copiar a(s) linha(s) selecionada(s) do log do status."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="Registra um horário para cada linha."/>
@@ -3448,6 +3463,44 @@ pasta dos arquivos baixados a sua biblioteca agora?"/>
 		<string id="20269" value="Armazenar Arquivos Incompletos Temporários Aqui"/>
 		<string id="20270" value="Armazenar Torrents Aqui"/>
 		<string id="20271" value="Armazenar as Coleções Aqui"/>
+		<string id="20272" value="Cópia em cache ilegível; ela será baixada novamente."/>
+		<string id="20273" value="Cópia em cache ilegível; importe o arquivo novamente."/>
+		<string id="20274" value="Redes sequestradas e criminosas; poucos falsos positivos. Dados (c) The Spamhaus Project."/>
+		<string id="20275" value="Hosts comprometidos conhecidos."/>
+		<string id="20276" value="Empresas anti-P2P; muito grande (cerca de um quinto de todos os endereços IPv4); bloqueia provedores inteiros e faixas de CDN (inclui o bloco 1.1.1.0 da Cloudflare)."/>
+		<string id="20277" value="Agregado de várias listas de privacidade e abuso."/>
+		<string id="20278" value="Espaço não alocado; deve ser mantida atualizada ou bloqueará redes novas."/>
+		<string id="20279" value="O endereço não começa com https://."/>
+		<string id="20280" value="O download não terminou em um endereço https://."/>
+		<string id="20281" value="Não foi possível contatar o servidor."/>
+		<string id="20282" value="O servidor respondeu com o status HTTP %d."/>
+		<string id="20283" value="O download é maior que 64 MB."/>
+		<string id="20284" value="O conteúdo é maior que 256 MB depois de descompactado."/>
+		<string id="20285" value="Não foi possível ler o arquivo compactado."/>
+		<string id="20286" value="A lista não contém nenhuma faixa de endereços."/>
+		<string id="20287" value="A lista contém mais de 2.000.000 de faixas."/>
+		<string id="20288" value="A lista contém uma faixa IPv4 de metade do espaço de endereços ou mais."/>
+		<string id="20289" value="As faixas IPv4 da lista cobrem mais da metade do espaço de endereços."/>
+		<string id="20290" value="A lista contém uma faixa IPv6 que cobre todo o 2000::/3."/>
+		<string id="20291" value="Não foi possível salvar a lista."/>
+		<string id="20292" value="Lista de IP %s atualizada: %lu linhas aceitas, %lu rejeitadas, %lu faixas após a mesclagem."/>
+		<string id="20293" value="Lista de IP %s não atualizada: %s"/>
+		<string id="20294" value="%s: %Iu faixas importadas, %Iu linhas rejeitadas."/>
+		<string id="20295" value="Não foi possível importar %s."/>
+		<string id="20296" value="Não foi possível gravar %s."/>
+		<string id="20297" value="Não foi possível importar %s: %s"/>
+		<string id="20298" value="O arquivo é maior que 64 MB."/>
+		<string id="20299" value="As listas de IP são baixadas somente por HTTPS: a URL deve começar com https://."/>
+		<string id="20300" value="Remover as listas de IP selecionadas? As cópias baixadas também serão excluídas."/>
+		<string id="20301" value="Importada"/>
+		<string id="20302" value="Falhou: %s"/>
+		<string id="20303" value="Ainda não baixada"/>
+		<string id="20304" value="Listas de IP"/>
+		<string id="20305" value="Minhas regras"/>
+		<string id="20306" value="Digite o endereço https:// da sua própria lista, ou apague o nome dela."/>
+		<string id="20307" value="Nada foi adicionado: as listas escolhidas já estão nas suas listas de IP."/>
+		<string id="20308" value="Marque uma lista, ou digite o endereço da sua própria lista."/>
+		<string id="20309" value="Já estão nas suas listas de IP, por isso não foram adicionadas de novo: %s"/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->
@@ -4288,6 +4341,27 @@ pasta dos arquivos baixados a sua biblioteca agora?"/>
 			<control caption="OK"/>
 			<control caption="Cancelar"/>
 		</dialog>
+		<dialog name="CIPListAddDlg" cookie="StBuStBuStBuStBuStBuStBuStEdStEdStBuBu" caption="Adicionar Lista de IP">
+			<control caption="Marque as listas a adicionar. Cada uma é baixada por HTTPS e atualizada uma vez por dia; nenhuma é adicionada se você não marcar."/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control caption="Sua própria lista"/>
+			<control caption="_ Nome:"/>
+			<control/>
+			<control caption="_URL:"/>
+			<control/>
+			<control caption="Formatos aceitos: PeerGuardian (.p2p), eMule (ipfilter.dat), Gnucleus (.net), CIDR, endereços simples e Spamhaus DROP JSON, como texto, gzip ou zip. A URL deve começar com https://."/>
+			<control caption="_Adicionar"/>
+			<control caption="Cancelar"/>
+		</dialog>
 		<dialog name="CShareManagerDlg" cookie="StSyBuBuBuBu" caption="Gerenciador de Pasta Compartilhada">
 			<control caption="Esta é uma lista de pastas na sua biblioteca. Você pode adicionar e remover pastas usando os botões a esquerda. Qdo você adiciona uma nova pasta ela é compartilhada com outros usuários, mas você pode descompartilhá-la se você desejar."/>
 			<control/>
@@ -4636,6 +4710,12 @@ pasta dos arquivos baixados a sua biblioteca agora?"/>
 			<column from="Precedence" to="Prioridade"/>
 			<column from="Hits" to="Acertos"/>
 			<column from="Comment" to="Comentário"/>
+		</list>
+		<list name="CSecurityWnd.Lists">
+			<column from="List" to="Lista"/>
+			<column from="Ranges" to="Faixas"/>
+			<column from="Updated" to="Atualizada"/>
+			<column from="Hits" to="Acertos"/>
 		</list>
 		<list name="CHostCacheWnd">
 			<column from="Address" to="Endereço"/>

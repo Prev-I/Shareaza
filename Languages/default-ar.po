@@ -387,9 +387,10 @@ msgstr ""
 msgid "Add Rule"
 msgstr ""
 
-#: button;id_security_remove
-msgid "Remove Rule"
-msgstr ""
+#: button;id_security_remove button;id_hostcache_remove string;17021
+#: cfavouritesprofilepage;control;8
+msgid "Remove"
+msgstr "إزالة"
 
 #: button;id_security_move_up
 msgid "Move Up"
@@ -398,6 +399,14 @@ msgstr ""
 #: button;id_security_move_down
 msgid "Move Down"
 msgstr ""
+
+#: button;id_security_add_list
+msgid "Add List..."
+msgstr "إضافة قائمة..."
+
+#: button;id_security_update_lists
+msgid "Update Now"
+msgstr "تحديث الآن"
 
 #: button;id_security_reset
 msgid "Reset List"
@@ -438,10 +447,6 @@ msgstr ""
 #: button;id_hitmonitor_search
 msgid "Requery"
 msgstr "إعادة إستفسار"
-
-#: button;id_hostcache_remove string;17021 cfavouritesprofilepage;control;8
-msgid "Remove"
-msgstr "إزالة"
 
 #: button;id_hostcache_g2_horizon
 msgid "G2 Cluster"
@@ -1476,6 +1481,7 @@ msgstr "_تصفح"
 #: clibrarytree.physical.basic;item;id_library_remove
 #: clibrarytree.physical;item;id_library_remove
 #: cmedialist;item;id_media_remove csecuritywnd;item;id_security_remove
+#: csecuritywnd.lists;item;id_security_list_remove
 #: cschedulerwnd;item;id_scheduler_remove
 #: cdiscoverywnd;item;id_discovery_remove clibrarysettingspage;control;19
 #: clibrarysettingspage;control;23 cmediasettingspage;control;8
@@ -1890,6 +1896,18 @@ msgstr "_قبول"
 #: csecuritywnd;61;item;id_security_policy_deny
 msgid "_Deny"
 msgstr "_رفض"
+
+#: csecuritywnd.lists;item;id_security_add_list
+msgid "_Add List..."
+msgstr "إضافة _قائمة..."
+
+#: csecuritywnd.lists;item;id_security_update_lists
+msgid "_Update Now"
+msgstr "_تحديث الآن"
+
+#: csecuritywnd.lists;item;id_security_list_enable
+msgid "_Enabled"
+msgstr "_مفعّلة"
 
 #: cschedulerwnd;item;id_scheduler_add
 msgid "_Add Scheduled Task"
@@ -4237,6 +4255,10 @@ msgstr "إيقاف مراقب البحث مؤقتا"
 msgid "Add a new rule to the security chain..."
 msgstr "إضافة قاعدة جديدة إلى سلسلة الأمان..."
 
+#: message;id_security_add_list
+msgid "Add IP block lists from the catalogue, or your own list from an https:// address..."
+msgstr "إضافة قوائم حظر IP من الدليل، أو قائمتك الخاصة من عنوان https://..."
+
 #: message;id_security_ban
 msgid "Ban the selected host for the duration of this session."
 msgstr "حظر المضيف المحدد لمدة هذه الجلسة"
@@ -4252,6 +4274,14 @@ msgstr "تصدير قواعد الأمان المحددة إلى ملف..."
 #: message;id_security_import
 msgid "Import security rules from a file..."
 msgstr "إستيراد قواعد الأمان المحددة من ملف..."
+
+#: message;id_security_list_enable
+msgid "Turn the selected IP lists on or off."
+msgstr "تشغيل قوائم IP المحددة أو إيقافها."
+
+#: message;id_security_list_remove
+msgid "Remove the selected IP lists."
+msgstr "إزالة قوائم IP المحددة."
 
 #: message;id_security_move_down
 msgid "Move the selected security rules down the precedence list."
@@ -4270,12 +4300,16 @@ msgid "Set the default security policy to deny all hosts."
 msgstr "وضع نهج الأمان الإفتراضي لحظر كافة المضيفين"
 
 #: message;id_security_remove
-msgid "Remove the selected security rules."
-msgstr "إزالة قواعد الأمان المحددة"
+msgid "Remove the selected rules or IP lists."
+msgstr "إزالة القواعد أو قوائم IP المحددة."
 
 #: message;id_security_reset
 msgid "Reset the hit counts on the selected rules."
 msgstr "إستعادة عدد الضربات مع القواعد المحددة"
+
+#: message;id_security_update_lists
+msgid "Download the selected IP lists now, or all of them when none is selected."
+msgstr "تنزيل قوائم IP المحددة الآن، أو جميعها إذا لم يُحدَّد أي منها."
 
 #: message;id_system_clear
 msgid "Clear the status log."
@@ -7388,8 +7422,8 @@ msgstr "حسنا"
 #: cfilecopydlg;control;5 cfolderpropertiesdlg;control;8
 #: cgraphlistdlg;control;17 cgraphitemdlg;control;2
 #: cschemacolumnsdlg;control;4 csecureruledlg;control;34
-#: csharemanagerdlg;control;6 curlcopydlg;control;6 curlexportdlg;control;10
-#: curlactiondlg;control;11 cfilepreviewdlg;control;6
+#: ciplistadddlg;control;19 csharemanagerdlg;control;6 curlcopydlg;control;6
+#: curlexportdlg;control;10 curlactiondlg;control;11 cfilepreviewdlg;control;6
 #: cexistingfiledlg;control;2 cclosemodedlg;control;6
 #: cdonkeyserversdlg;control;5 cdeletefiledlg;control;5
 #: ctorrentseeddlg;control;4 cdownloadgroupdlg;control;2
@@ -7523,6 +7557,158 @@ msgstr "هنا Torrent تخزين ملفات"
 #: string;20271 clibrarysettingspage;control;24
 msgid "Store Collections Here"
 msgstr "تخزين التجميعات هنا"
+
+#: string;20272
+msgid "Cached copy unreadable; it will be downloaded again."
+msgstr "النسخة المخزنة مؤقتًا غير مقروءة؛ سيُعاد تنزيلها."
+
+#: string;20273
+msgid "Cached copy unreadable; import the file again."
+msgstr "النسخة المخزنة مؤقتًا غير مقروءة؛ استورد الملف مرة أخرى."
+
+#: string;20274
+msgid "Hijacked and criminal networks; few false positives. Data (c) The Spamhaus Project."
+msgstr "شبكات مختطفة وإجرامية؛ نتائج إيجابية خاطئة قليلة. البيانات (c) The Spamhaus Project."
+
+#: string;20275
+msgid "Known compromised hosts."
+msgstr "مضيفون معروفون بأنهم مخترقون."
+
+#: string;20276
+msgid "Anti-P2P companies; very large (about a fifth of all IPv4 addresses); blocks whole providers and CDN ranges (it lists Cloudflare's 1.1.1.0 block)."
+msgstr "شركات مناهضة لـ P2P؛ كبيرة جدًا (نحو خُمس جميع عناوين IPv4)؛ تحظر مزودين بأكملهم ونطاقات CDN (تتضمن كتلة Cloudflare 1.1.1.0)."
+
+#: string;20277
+msgid "Aggregate of several privacy and abuse lists."
+msgstr "تجميع لعدة قوائم للخصوصية ومكافحة الإساءة."
+
+#: string;20278
+msgid "Unallocated space; must stay updated or it blocks new networks."
+msgstr "مساحة غير مخصصة؛ يجب أن تبقى محدّثة وإلا حظرت شبكات جديدة."
+
+#: string;20279
+msgid "The address does not start with https://."
+msgstr "العنوان لا يبدأ بـ https://."
+
+#: string;20280
+msgid "The download did not end at an https:// address."
+msgstr "لم ينتهِ التنزيل عند عنوان https://."
+
+#: string;20281
+msgid "The server could not be reached."
+msgstr "تعذّر الوصول إلى الخادم."
+
+#: string;20282
+msgid "The server answered with HTTP status %d."
+msgstr "ردّ الخادم برمز حالة HTTP %d."
+
+#: string;20283
+msgid "The download is larger than 64 MB."
+msgstr "حجم التنزيل أكبر من 64 ميغابايت."
+
+#: string;20284
+msgid "The content is larger than 256 MB once decompressed."
+msgstr "حجم المحتوى بعد فك الضغط أكبر من 256 ميغابايت."
+
+#: string;20285
+msgid "The compressed file could not be read."
+msgstr "تعذّرت قراءة الملف المضغوط."
+
+#: string;20286
+msgid "The list holds no address range."
+msgstr "لا تحتوي القائمة على أي نطاق عناوين."
+
+#: string;20287
+msgid "The list holds more than 2,000,000 ranges."
+msgstr "تحتوي القائمة على أكثر من 2,000,000 نطاق."
+
+#: string;20288
+msgid "The list holds an IPv4 range of half the address space or more."
+msgstr "تحتوي القائمة على نطاق IPv4 بحجم نصف مساحة العناوين أو أكثر."
+
+#: string;20289
+msgid "The list's IPv4 ranges cover more than half the address space."
+msgstr "تغطي نطاقات IPv4 في القائمة أكثر من نصف مساحة العناوين."
+
+#: string;20290
+msgid "The list holds an IPv6 range that covers all of 2000::/3."
+msgstr "تحتوي القائمة على نطاق IPv6 يغطي 2000::/3 بالكامل."
+
+#: string;20291
+msgid "The list could not be saved."
+msgstr "تعذّر حفظ القائمة."
+
+#: string;20292
+msgid "IP list %s updated: %lu lines taken, %lu rejected, %lu ranges after merging."
+msgstr "تم تحديث قائمة IP %s: قُبل %lu سطرًا، ورُفض %lu، و%lu نطاقًا بعد الدمج."
+
+#: string;20293
+msgid "IP list %s not updated: %s"
+msgstr "لم يتم تحديث قائمة IP %s: %s"
+
+#: string;20294
+msgid "%s: %Iu ranges imported, %Iu lines rejected."
+msgstr "%s: استُورد %Iu نطاقًا، ورُفض %Iu سطرًا."
+
+#: string;20295
+msgid "%s could not be imported."
+msgstr "تعذّر استيراد %s."
+
+#: string;20296
+msgid "%s could not be written."
+msgstr "تعذّرت كتابة %s."
+
+#: string;20297
+msgid "%s could not be imported: %s"
+msgstr "تعذّر استيراد %s: %s"
+
+#: string;20298
+msgid "The file is larger than 64 MB."
+msgstr "حجم الملف أكبر من 64 ميغابايت."
+
+#: string;20299
+msgid "IP lists are downloaded over HTTPS only: the URL must start with https://."
+msgstr "تُنزَّل قوائم IP عبر HTTPS فقط: يجب أن يبدأ الرابط بـ https://."
+
+#: string;20300
+msgid "Remove the selected IP lists? Their downloaded copies are deleted too."
+msgstr "هل تريد إزالة قوائم IP المحددة؟ ستُحذف نسخها المنزّلة أيضًا."
+
+#: string;20301
+msgid "Imported"
+msgstr "مستوردة"
+
+#: string;20302
+msgid "Failed: %s"
+msgstr "فشل: %s"
+
+#: string;20303
+msgid "Not downloaded yet"
+msgstr "لم تُنزَّل بعد"
+
+#: string;20304
+msgid "IP lists"
+msgstr "قوائم IP"
+
+#: string;20305
+msgid "My rules"
+msgstr "قواعدي"
+
+#: string;20306
+msgid "Enter the https:// address of your own list, or clear its name."
+msgstr "أدخل عنوان https:// لقائمتك الخاصة، أو امسح اسمها."
+
+#: string;20307
+msgid "Nothing was added: the lists you chose are already in your IP lists."
+msgstr "لم تُضَف أي قائمة: القوائم التي اخترتها موجودة بالفعل في قوائم IP لديك."
+
+#: string;20308
+msgid "Tick a list, or enter the address of your own list."
+msgstr "حدّد قائمة، أو أدخل عنوان قائمتك الخاصة."
+
+#: string;20309
+msgid "Already in your IP lists, so not added again: %s"
+msgstr "موجودة بالفعل في قوائم IP لديك، فلم تُضَف مرة أخرى: %s"
 
 #: csettingsheet;control;4 cprofilemanagerdlg;control;4
 msgid "Apply"
@@ -7667,7 +7853,8 @@ msgstr "_: أمان في فتح"
 
 #: clibrarysettingspage;control;18 clibrarysettingspage;control;22
 #: cmediasettingspage;control;7 cwebsettingspage;control;12
-#: cfilesourcespage;control;5 cdownloadgroupdlg;control;7
+#: cfilesourcespage;control;5 ciplistadddlg;control;18
+#: cdownloadgroupdlg;control;7
 msgid "_Add"
 msgstr "إ_ضافة"
 
@@ -8366,7 +8553,7 @@ msgid "Upload Queue Properties"
 msgstr "خصائص قائمة إنتظار الإرسال"
 
 #: cqueuepropertiesdlg;control;1 cgraphlistdlg;control;14
-#: cdownloadgroupdlg;control;12
+#: ciplistadddlg;control;13 cdownloadgroupdlg;control;12
 msgid "_Name:"
 msgstr ":_الاسم"
 
@@ -9263,6 +9450,26 @@ msgstr "س"
 msgid "m"
 msgstr "د"
 
+#: dialog;ciplistadddlg
+msgid "Add IP List"
+msgstr "إضافة قائمة IP"
+
+#: ciplistadddlg;control;1
+msgid "Tick the lists to add. Each one is downloaded over HTTPS and updated once a day; none is added unless you tick it."
+msgstr "حدّد القوائم المراد إضافتها. تُنزَّل كل منها عبر HTTPS وتُحدَّث مرة يوميًا؛ لا تُضاف أي قائمة ما لم تحددها."
+
+#: ciplistadddlg;control;12
+msgid "Your own list"
+msgstr "قائمتك الخاصة"
+
+#: ciplistadddlg;control;15
+msgid "_URL:"
+msgstr ":_الرابط"
+
+#: ciplistadddlg;control;17
+msgid "Accepted formats: PeerGuardian (.p2p), eMule (ipfilter.dat), Gnucleus (.net), CIDR, plain addresses and Spamhaus DROP JSON, as text, gzip or zip. The URL must start with https://."
+msgstr "الصيغ المقبولة: PeerGuardian (.p2p)، eMule (ipfilter.dat)، Gnucleus (.net)، CIDR، عناوين بسيطة وSpamhaus DROP JSON، كنص أو gzip أو zip. يجب أن يبدأ الرابط بـ https://."
+
 #: dialog;csharemanagerdlg
 msgid "Shared Folder Manager"
 msgstr "إدارة مجلد المشاركة"
@@ -9884,6 +10091,18 @@ msgstr "الأسبقية"
 msgid "Comment"
 msgstr "التعليق"
 
+#: column;list
+msgid "List"
+msgstr "القائمة"
+
+#: column;ranges
+msgid "Ranges"
+msgstr "النطاقات"
+
+#: column;updated
+msgid "Updated"
+msgstr "آخر تحديث"
+
 #: column;lastseen
 msgid "LastSeen"
 msgstr "آخر مشاهدة"
@@ -10175,3 +10394,6 @@ msgstr "التالي"
 
 #~ msgid "Saturday"
 #~ msgstr "Saturday"
+
+#~ msgid "Remove the selected security rules."
+#~ msgstr "إزالة قواعد الأمان المحددة"

@@ -379,10 +379,13 @@
 			<button id="ID_SECURITY_EDIT" text="Edit Rule"/>
 			<separator/>
 			<button id="ID_SECURITY_ADD" text="Add Rule"/>
-			<button id="ID_SECURITY_REMOVE" text="Remove Rule"/>
+			<button id="ID_SECURITY_REMOVE" text="Уклони"/>
 			<separator/>
 			<button id="ID_SECURITY_MOVE_UP" text="Move Up"/>
 			<button id="ID_SECURITY_MOVE_DOWN" text="Move Down"/>
+			<separator/>
+			<button id="ID_SECURITY_ADD_LIST" text="Додај листу..."/>
+			<button id="ID_SECURITY_UPDATE_LISTS" text="Ажурирај сада"/>
 			<rightAlign/>
 			<button id="ID_SECURITY_RESET" text="Reset List"/>
 			<button id="ID_SECURITY_IMPORT" text="Import List"/>
@@ -1561,6 +1564,14 @@
 			<separator/>
 			<item id="ID_SECURITY_EDIT" text="Napredno Uredi..."/>
 		</menu>
+		<menu name="CSecurityWnd.Lists">
+			<item id="ID_SECURITY_ADD_LIST" text="Додај _листу..."/>
+			<separator/>
+			<item id="ID_SECURITY_UPDATE_LISTS" text="_Ажурирај сада"/>
+			<item id="ID_SECURITY_LIST_ENABLE" text="_Омогућено"/>
+			<separator/>
+			<item id="ID_SECURITY_LIST_REMOVE" text="Ukloni"/>
+		</menu>
 		<!-- SCHEDULER WINDOW -->
 		<menu name="CSchedulerWnd">
 			<item id="ID_SCHEDULER_ADD" text="_Add Scheduled Task"/>
@@ -2591,16 +2602,20 @@
 		<tip id="ID_SEARCHMONITOR_CLEAR" message="Clear the search monitor buffer."/>
 		<tip id="ID_SEARCHMONITOR_PAUSE" message="Pause search monitoring."/>
 		<tip id="ID_SECURITY_ADD" message="Dodaj novo pravilo u sigurnosni lanac..."/>
+		<tip id="ID_SECURITY_ADD_LIST" message="Додај листе за блокирање IP адреса из каталога или сопствену листу са https:// адресе..."/>
 		<tip id="ID_SECURITY_BAN" message="Blokiraj selektovani host do kraja ove sesije."/>
 		<tip id="ID_SECURITY_EDIT" message="Uredi selektovano sigurnosno pravilo..."/>
 		<tip id="ID_SECURITY_EXPORT" message="Izvezi selektovana sigurosna pravila u datoteku..."/>
 		<tip id="ID_SECURITY_IMPORT" message="Uvezi sigurosna pravila iz datoteke..."/>
+		<tip id="ID_SECURITY_LIST_ENABLE" message="Укључи или искључи изабране IP листе."/>
+		<tip id="ID_SECURITY_LIST_REMOVE" message="Уклони изабране IP листе."/>
 		<tip id="ID_SECURITY_MOVE_DOWN" message="Move the selected security rules down the precedence list."/>
 		<tip id="ID_SECURITY_MOVE_UP" message="Move the selected security rules up the precedence list."/>
 		<tip id="ID_SECURITY_POLICY_ACCEPT" message="Set the default security policy to allow all hosts."/>
 		<tip id="ID_SECURITY_POLICY_DENY" message="Set the default security policy to deny all hosts."/>
-		<tip id="ID_SECURITY_REMOVE" message="Obriši selektovana sigurnosna pravila."/>
+		<tip id="ID_SECURITY_REMOVE" message="Уклони изабрана правила или IP листе."/>
 		<tip id="ID_SECURITY_RESET" message="Reset the hit counts on the selected rules."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="Преузми изабране IP листе сада, или све ако ниједна није изабрана."/>
 		<tip id="ID_SYSTEM_CLEAR" message="Clear the status log."/>
 		<tip id="ID_SYSTEM_COPY" message="Copy selected line(s) of status log."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="Record a timestamp for each line."/>
@@ -3444,6 +3459,44 @@
 		<string id="20269" value="Nezavršene Datoteke Sačuvj Ovde"/>
 		<string id="20270" value="Ovde Sačuvaj Torrente"/>
 		<string id="20271" value="Ovde Sačuvaj Kolekcije"/>
+		<string id="20272" value="Кеширана копија није читљива; биће поново преузета."/>
+		<string id="20273" value="Кеширана копија није читљива; поново увезите датотеку."/>
+		<string id="20274" value="Отете и криминалне мреже; мало лажних позитивних резултата. Подаци (c) The Spamhaus Project."/>
+		<string id="20275" value="Познати компромитовани рачунари."/>
+		<string id="20276" value="Анти-P2P компаније; веома велика (око петине свих IPv4 адреса); блокира целе провајдере и CDN опсеге (садржи блок 1.1.1.0 компаније Cloudflare)."/>
+		<string id="20277" value="Збир неколико листа за приватност и злоупотребе."/>
+		<string id="20278" value="Недодељени простор; мора остати ажурна, иначе блокира нове мреже."/>
+		<string id="20279" value="Адреса не почиње са https://."/>
+		<string id="20280" value="Преузимање се није завршило на https:// адреси."/>
+		<string id="20281" value="Сервер није доступан."/>
+		<string id="20282" value="Сервер је одговорио HTTP статусом %d."/>
+		<string id="20283" value="Преузимање је веће од 64 MB."/>
+		<string id="20284" value="Садржај је после распакивања већи од 256 MB."/>
+		<string id="20285" value="Компримована датотека не може да се прочита."/>
+		<string id="20286" value="Листа не садржи ниједан опсег адреса."/>
+		<string id="20287" value="Листа садржи више од 2.000.000 опсега."/>
+		<string id="20288" value="Листа садржи IPv4 опсег од пола адресног простора или више."/>
+		<string id="20289" value="IPv4 опсези листе покривају више од пола адресног простора."/>
+		<string id="20290" value="Листа садржи IPv6 опсег који покрива цео 2000::/3."/>
+		<string id="20291" value="Листа не може да се сачува."/>
+		<string id="20292" value="IP листа %s ажурирана: %lu редова прихваћено, %lu одбијено, %lu опсега после спајања."/>
+		<string id="20293" value="IP листа %s није ажурирана: %s"/>
+		<string id="20294" value="%s: %Iu опсега увезено, %Iu редова одбијено."/>
+		<string id="20295" value="%s не може да се увезе."/>
+		<string id="20296" value="%s не може да се упише."/>
+		<string id="20297" value="%s не може да се увезе: %s"/>
+		<string id="20298" value="Датотека је већа од 64 MB."/>
+		<string id="20299" value="IP листе се преузимају само преко HTTPS-а: URL мора почињати са https://."/>
+		<string id="20300" value="Уклонити изабране IP листе? Биће обрисане и њихове преузете копије."/>
+		<string id="20301" value="Увезена"/>
+		<string id="20302" value="Неуспешно: %s"/>
+		<string id="20303" value="Још није преузета"/>
+		<string id="20304" value="IP листе"/>
+		<string id="20305" value="Моја правила"/>
+		<string id="20306" value="Унесите https:// адресу сопствене листе или обришите њен назив."/>
+		<string id="20307" value="Ништа није додато: изабране листе су већ међу вашим IP листама."/>
+		<string id="20308" value="Означите листу или унесите адресу сопствене листе."/>
+		<string id="20309" value="Већ су међу вашим IP листама, па нису поново додате: %s"/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->
@@ -4284,6 +4337,27 @@
 			<control caption="OK"/>
 			<control caption="Odustani"/>
 		</dialog>
+		<dialog name="CIPListAddDlg" cookie="StBuStBuStBuStBuStBuStBuStEdStEdStBuBu" caption="Додај IP листу">
+			<control caption="Означите листе за додавање. Свака се преузима преко HTTPS-а и ажурира једном дневно; ниједна се не додаје ако је не означите."/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control caption="Сопствена листа"/>
+			<control caption="Ime:"/>
+			<control/>
+			<control caption="_URL:"/>
+			<control/>
+			<control caption="Прихваћени формати: PeerGuardian (.p2p), eMule (ipfilter.dat), Gnucleus (.net), CIDR, обичне адресе и Spamhaus DROP JSON, као текст, gzip или zip. URL мора почињати са https://."/>
+			<control caption="Dod_aj"/>
+			<control caption="Odustani"/>
+		</dialog>
 		<dialog name="CShareManagerDlg" cookie="StSyBuBuBuBu" caption="Pomoćnik oko Deljenih Fascikala">
 			<control caption="Ovde je lista fascikala u vašoj kolekciji.Možete ukloniti ili dodati fascikle koristeći dugmad na levoj strani.Kada dodate novu fasciklu ona je inicijalno deljena sa ostalim korisnicima, ipak Vi kasnije možete da je isključite iz deljenja ukoliko to želite(iz kolekcije-library)."/>
 			<control/>
@@ -4632,6 +4706,12 @@
 			<column from="Precedence" to="Precedence"/>
 			<column from="Hits" to="Pogodaka"/>
 			<column from="Comment" to="Komentar"/>
+		</list>
+		<list name="CSecurityWnd.Lists">
+			<column from="List" to="Листа"/>
+			<column from="Ranges" to="Опсези"/>
+			<column from="Updated" to="Ажурирано"/>
+			<column from="Hits" to="Pogodaka"/>
 		</list>
 		<list name="CHostCacheWnd">
 			<column from="Address" to="Adresa"/>

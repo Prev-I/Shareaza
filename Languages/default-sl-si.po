@@ -387,9 +387,10 @@ msgstr ""
 msgid "Add Rule"
 msgstr ""
 
-#: button;id_security_remove
-msgid "Remove Rule"
-msgstr ""
+#: button;id_security_remove button;id_hostcache_remove string;17021
+#: cfavouritesprofilepage;control;8
+msgid "Remove"
+msgstr "Odstrani"
 
 #: button;id_security_move_up
 msgid "Move Up"
@@ -398,6 +399,14 @@ msgstr ""
 #: button;id_security_move_down
 msgid "Move Down"
 msgstr ""
+
+#: button;id_security_add_list
+msgid "Add List..."
+msgstr "Dodaj seznam..."
+
+#: button;id_security_update_lists
+msgid "Update Now"
+msgstr "Posodobi zdaj"
 
 #: button;id_security_reset
 msgid "Reset List"
@@ -438,10 +447,6 @@ msgstr ""
 #: button;id_hitmonitor_search
 msgid "Requery"
 msgstr "Ponovna poizvedba"
-
-#: button;id_hostcache_remove string;17021 cfavouritesprofilepage;control;8
-msgid "Remove"
-msgstr "Odstrani"
 
 #: button;id_hostcache_g2_horizon
 msgid "G2 Cluster"
@@ -1476,6 +1481,7 @@ msgstr "_Razišči"
 #: clibrarytree.physical.basic;item;id_library_remove
 #: clibrarytree.physical;item;id_library_remove
 #: cmedialist;item;id_media_remove csecuritywnd;item;id_security_remove
+#: csecuritywnd.lists;item;id_security_list_remove
 #: cschedulerwnd;item;id_scheduler_remove
 #: cdiscoverywnd;item;id_discovery_remove clibrarysettingspage;control;19
 #: clibrarysettingspage;control;23 cmediasettingspage;control;8
@@ -1890,6 +1896,18 @@ msgstr ""
 #: csecuritywnd;61;item;id_security_policy_deny
 msgid "_Deny"
 msgstr ""
+
+#: csecuritywnd.lists;item;id_security_add_list
+msgid "_Add List..."
+msgstr "Dodaj _seznam..."
+
+#: csecuritywnd.lists;item;id_security_update_lists
+msgid "_Update Now"
+msgstr "_Posodobi zdaj"
+
+#: csecuritywnd.lists;item;id_security_list_enable
+msgid "_Enabled"
+msgstr "Omo_gočeno"
 
 #: cschedulerwnd;item;id_scheduler_add
 msgid "_Add Scheduled Task"
@@ -4229,6 +4247,10 @@ msgstr "Trenutno zaustavi nadziranje iskanja."
 msgid "Add a new rule to the security chain..."
 msgstr "Dodaj novo pravilo v varnostno verigo..."
 
+#: message;id_security_add_list
+msgid "Add IP block lists from the catalogue, or your own list from an https:// address..."
+msgstr "Dodaj sezname za blokiranje IP iz kataloga ali lasten seznam z naslova https://..."
+
 #: message;id_security_ban
 msgid "Ban the selected host for the duration of this session."
 msgstr "Izobči (ban) izbranega gostitelja za čas trenutne seje."
@@ -4244,6 +4266,14 @@ msgstr "Izvozi izbrana varnostna pravila v datoteko..."
 #: message;id_security_import
 msgid "Import security rules from a file..."
 msgstr "Uvozi varnostna pravila iz datoteke..."
+
+#: message;id_security_list_enable
+msgid "Turn the selected IP lists on or off."
+msgstr "Vklopi ali izklopi izbrane sezname IP."
+
+#: message;id_security_list_remove
+msgid "Remove the selected IP lists."
+msgstr "Odstrani izbrane sezname IP."
 
 #: message;id_security_move_down
 msgid "Move the selected security rules down the precedence list."
@@ -4262,12 +4292,16 @@ msgid "Set the default security policy to deny all hosts."
 msgstr "Nastavi privzeto varnostno politiko tako, da zavrne vse gostitelje."
 
 #: message;id_security_remove
-msgid "Remove the selected security rules."
-msgstr "Odstrani izbrana varnostna pravila."
+msgid "Remove the selected rules or IP lists."
+msgstr "Odstrani izbrana pravila ali sezname IP."
 
 #: message;id_security_reset
 msgid "Reset the hit counts on the selected rules."
 msgstr "Ponastavi števce zadetkov na izbrana pravila."
+
+#: message;id_security_update_lists
+msgid "Download the selected IP lists now, or all of them when none is selected."
+msgstr "Prenesi izbrane sezname IP zdaj ali vse, če ni izbran noben."
 
 #: message;id_system_clear
 msgid "Clear the status log."
@@ -7379,8 +7413,8 @@ msgstr "V redu"
 #: cfilecopydlg;control;5 cfolderpropertiesdlg;control;8
 #: cgraphlistdlg;control;17 cgraphitemdlg;control;2
 #: cschemacolumnsdlg;control;4 csecureruledlg;control;34
-#: csharemanagerdlg;control;6 curlcopydlg;control;6 curlexportdlg;control;10
-#: curlactiondlg;control;11 cfilepreviewdlg;control;6
+#: ciplistadddlg;control;19 csharemanagerdlg;control;6 curlcopydlg;control;6
+#: curlexportdlg;control;10 curlactiondlg;control;11 cfilepreviewdlg;control;6
 #: cexistingfiledlg;control;2 cclosemodedlg;control;6
 #: cdonkeyserversdlg;control;5 cdeletefiledlg;control;5
 #: ctorrentseeddlg;control;4 cdownloadgroupdlg;control;2
@@ -7514,6 +7548,158 @@ msgstr "Shrani Torrente na tem mestu"
 #: string;20271 clibrarysettingspage;control;24
 msgid "Store Collections Here"
 msgstr "Shrani zbirke na tem mestu"
+
+#: string;20272
+msgid "Cached copy unreadable; it will be downloaded again."
+msgstr "Predpomnjena kopija ni berljiva; znova bo prenesena."
+
+#: string;20273
+msgid "Cached copy unreadable; import the file again."
+msgstr "Predpomnjena kopija ni berljiva; znova uvozite datoteko."
+
+#: string;20274
+msgid "Hijacked and criminal networks; few false positives. Data (c) The Spamhaus Project."
+msgstr "Ugrabljena in kriminalna omrežja; malo lažnih zadetkov. Podatki (c) The Spamhaus Project."
+
+#: string;20275
+msgid "Known compromised hosts."
+msgstr "Znani ogroženi gostitelji."
+
+#: string;20276
+msgid "Anti-P2P companies; very large (about a fifth of all IPv4 addresses); blocks whole providers and CDN ranges (it lists Cloudflare's 1.1.1.0 block)."
+msgstr "Podjetja proti P2P; zelo velik (približno petina vseh naslovov IPv4); blokira cele ponudnike in obsege CDN (vsebuje Cloudflarov blok 1.1.1.0)."
+
+#: string;20277
+msgid "Aggregate of several privacy and abuse lists."
+msgstr "Zbirka več seznamov za zasebnost in zlorabe."
+
+#: string;20278
+msgid "Unallocated space; must stay updated or it blocks new networks."
+msgstr "Nedodeljen prostor; mora ostati posodobljen, sicer blokira nova omrežja."
+
+#: string;20279
+msgid "The address does not start with https://."
+msgstr "Naslov se ne začne s https://."
+
+#: string;20280
+msgid "The download did not end at an https:// address."
+msgstr "Prenos se ni končal na naslovu https://."
+
+#: string;20281
+msgid "The server could not be reached."
+msgstr "Strežnika ni bilo mogoče doseči."
+
+#: string;20282
+msgid "The server answered with HTTP status %d."
+msgstr "Strežnik je odgovoril s stanjem HTTP %d."
+
+#: string;20283
+msgid "The download is larger than 64 MB."
+msgstr "Prenos je večji od 64 MB."
+
+#: string;20284
+msgid "The content is larger than 256 MB once decompressed."
+msgstr "Vsebina je po razširitvi večja od 256 MB."
+
+#: string;20285
+msgid "The compressed file could not be read."
+msgstr "Stisnjene datoteke ni bilo mogoče prebrati."
+
+#: string;20286
+msgid "The list holds no address range."
+msgstr "Seznam ne vsebuje nobenega obsega naslovov."
+
+#: string;20287
+msgid "The list holds more than 2,000,000 ranges."
+msgstr "Seznam vsebuje več kot 2.000.000 obsegov."
+
+#: string;20288
+msgid "The list holds an IPv4 range of half the address space or more."
+msgstr "Seznam vsebuje obseg IPv4 polovice naslovnega prostora ali več."
+
+#: string;20289
+msgid "The list's IPv4 ranges cover more than half the address space."
+msgstr "Obsegi IPv4 seznama pokrivajo več kot polovico naslovnega prostora."
+
+#: string;20290
+msgid "The list holds an IPv6 range that covers all of 2000::/3."
+msgstr "Seznam vsebuje obseg IPv6, ki pokriva ves 2000::/3."
+
+#: string;20291
+msgid "The list could not be saved."
+msgstr "Seznama ni bilo mogoče shraniti."
+
+#: string;20292
+msgid "IP list %s updated: %lu lines taken, %lu rejected, %lu ranges after merging."
+msgstr "Seznam IP %s posodobljen: %lu vrstic sprejetih, %lu zavrnjenih, %lu obsegov po združitvi."
+
+#: string;20293
+msgid "IP list %s not updated: %s"
+msgstr "Seznam IP %s ni posodobljen: %s"
+
+#: string;20294
+msgid "%s: %Iu ranges imported, %Iu lines rejected."
+msgstr "%s: %Iu obsegov uvoženih, %Iu vrstic zavrnjenih."
+
+#: string;20295
+msgid "%s could not be imported."
+msgstr "%s ni bilo mogoče uvoziti."
+
+#: string;20296
+msgid "%s could not be written."
+msgstr "%s ni bilo mogoče zapisati."
+
+#: string;20297
+msgid "%s could not be imported: %s"
+msgstr "%s ni bilo mogoče uvoziti: %s"
+
+#: string;20298
+msgid "The file is larger than 64 MB."
+msgstr "Datoteka je večja od 64 MB."
+
+#: string;20299
+msgid "IP lists are downloaded over HTTPS only: the URL must start with https://."
+msgstr "Seznami IP se prenašajo samo prek HTTPS: URL se mora začeti s https://."
+
+#: string;20300
+msgid "Remove the selected IP lists? Their downloaded copies are deleted too."
+msgstr "Odstranim izbrane sezname IP? Izbrisane bodo tudi njihove prenesene kopije."
+
+#: string;20301
+msgid "Imported"
+msgstr "Uvoženo"
+
+#: string;20302
+msgid "Failed: %s"
+msgstr "Ni uspelo: %s"
+
+#: string;20303
+msgid "Not downloaded yet"
+msgstr "Še ni preneseno"
+
+#: string;20304
+msgid "IP lists"
+msgstr "Seznami IP"
+
+#: string;20305
+msgid "My rules"
+msgstr "Moja pravila"
+
+#: string;20306
+msgid "Enter the https:// address of your own list, or clear its name."
+msgstr "Vnesite naslov https:// lastnega seznama ali izbrišite njegovo ime."
+
+#: string;20307
+msgid "Nothing was added: the lists you chose are already in your IP lists."
+msgstr "Nič ni bilo dodano: izbrani seznami so že med vašimi seznami IP."
+
+#: string;20308
+msgid "Tick a list, or enter the address of your own list."
+msgstr "Označite seznam ali vnesite naslov lastnega seznama."
+
+#: string;20309
+msgid "Already in your IP lists, so not added again: %s"
+msgstr "Že med vašimi seznami IP, zato niso bili znova dodani: %s"
 
 #: csettingsheet;control;4 cprofilemanagerdlg;control;4
 msgid "Apply"
@@ -7658,7 +7844,8 @@ msgstr "_Varno za odpiranje:"
 
 #: clibrarysettingspage;control;18 clibrarysettingspage;control;22
 #: cmediasettingspage;control;7 cwebsettingspage;control;12
-#: cfilesourcespage;control;5 cdownloadgroupdlg;control;7
+#: cfilesourcespage;control;5 ciplistadddlg;control;18
+#: cdownloadgroupdlg;control;7
 msgid "_Add"
 msgstr "_Dodaj"
 
@@ -8357,7 +8544,7 @@ msgid "Upload Queue Properties"
 msgstr "Lastnosti čakalne vrste za nalaganje"
 
 #: cqueuepropertiesdlg;control;1 cgraphlistdlg;control;14
-#: cdownloadgroupdlg;control;12
+#: ciplistadddlg;control;13 cdownloadgroupdlg;control;12
 msgid "_Name:"
 msgstr "_Naziv:"
 
@@ -9254,6 +9441,26 @@ msgstr "u"
 msgid "m"
 msgstr "m"
 
+#: dialog;ciplistadddlg
+msgid "Add IP List"
+msgstr "Dodaj seznam IP"
+
+#: ciplistadddlg;control;1
+msgid "Tick the lists to add. Each one is downloaded over HTTPS and updated once a day; none is added unless you tick it."
+msgstr "Označite sezname, ki jih želite dodati. Vsak se prenese prek HTTPS in posodobi enkrat na dan; noben ni dodan, če ga ne označite."
+
+#: ciplistadddlg;control;12
+msgid "Your own list"
+msgstr "Lasten seznam"
+
+#: ciplistadddlg;control;15
+msgid "_URL:"
+msgstr "_URL:"
+
+#: ciplistadddlg;control;17
+msgid "Accepted formats: PeerGuardian (.p2p), eMule (ipfilter.dat), Gnucleus (.net), CIDR, plain addresses and Spamhaus DROP JSON, as text, gzip or zip. The URL must start with https://."
+msgstr "Sprejete oblike: PeerGuardian (.p2p), eMule (ipfilter.dat), Gnucleus (.net), CIDR, preprosti naslovi in Spamhaus DROP JSON, kot besedilo, gzip ali zip. URL se mora začeti s https://."
+
 #: dialog;csharemanagerdlg
 msgid "Shared Folder Manager"
 msgstr "Upravljalec deljenih map"
@@ -9875,6 +10082,18 @@ msgstr "Prednost"
 msgid "Comment"
 msgstr "Komentar"
 
+#: column;list
+msgid "List"
+msgstr "Seznam"
+
+#: column;ranges
+msgid "Ranges"
+msgstr "Obsegi"
+
+#: column;updated
+msgid "Updated"
+msgstr "Posodobljeno"
+
 #: column;lastseen
 msgid "LastSeen"
 msgstr "Zadnje videno"
@@ -10136,3 +10355,6 @@ msgstr "Naslednji"
 
 #~ msgid "Saturday"
 #~ msgstr "sobota"
+
+#~ msgid "Remove the selected security rules."
+#~ msgstr "Odstrani izbrana varnostna pravila."
