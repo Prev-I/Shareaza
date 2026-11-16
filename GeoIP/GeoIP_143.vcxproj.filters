@@ -14,9 +14,33 @@
     <ClCompile Include="GeoIP.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GeoIPCity.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeoIP_deprecated.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pread.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="regionName.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="timeZone.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeoIP.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeoIPCity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeoIP_internal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pread.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
