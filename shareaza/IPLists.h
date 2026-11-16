@@ -70,20 +70,25 @@ public:
 	// Startup and exit. Load never parses or downloads; it reads IPLists.dat
 	// and the cached ranges. A cache that is missing (after a success), cannot
 	// be read or fails its checks loads empty, with status IDS_IPLIST_CACHE_BAD
-	// and no last success, so the list is due again.
-	BOOL	Load();
-	BOOL	Save();
+	// (IDS_IPLIST_CACHE_BAD_IMPORT for a list without URLs) and no last success,
+	// so the list is due again. If IPLists.dat exists but cannot be read, Save
+	// refuses to write for the rest of the session.
+	BOOL	Load();		// Must not be called with Security.m_pSection held (takes m_pFileSection first).
+	BOOL	Save();		// Must not be called with Security.m_pSection held (takes m_pFileSection first).
 
 	// Adds an enabled list with no ranges and returns it. The pointer stays
 	// valid until Remove; read its mutable fields only under Security.m_pSection.
 	CIPList* Add(const CString& sName, const CStringArray& pURLs, const CString& sSource);
-	BOOL	Remove(const GUID& oGUID);		// also deletes its <guid>.bin
+	// Also deletes its <guid>.bin.
+	// Must not be called with Security.m_pSection held (takes m_pFileSection first).
+	BOOL	Remove(const GUID& oGUID);
 	void	SetEnabled(const GUID& oGUID, BOOL bEnabled);
 
 	// pRanges must be Finish()ed and pass IPList::CheckSanity. Writes <guid>.bin,
 	// then swaps the ranges in and records a success at tWhen. Returns false and
 	// changes nothing when the set is refused, the list is gone or the cache
 	// cannot be written; the caller then reports the failure with SetFailed.
+	// Must not be called with Security.m_pSection held (takes m_pFileSection first).
 	bool	SetRanges(const GUID& oGUID, std::shared_ptr< const IPList::RangeSet > pRanges, DWORD tWhen);
 	void	SetFailed(const GUID& oGUID, const CString& sReason, DWORD tWhen);
 
@@ -101,6 +106,7 @@ public:
 private:
 	std::vector< CIPList* >	m_pLists;		// guarded by Security.m_pSection
 	CCriticalSection		m_pFileSection;	// file writers; taken before Security.m_pSection
+	bool					m_bSaveBlocked;	// IPLists.dat exists but was not loaded; guarded by m_pFileSection
 
 	CIPList*	Find(const GUID& oGUID) const;	// caller holds Security.m_pSection
 

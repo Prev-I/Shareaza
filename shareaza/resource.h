@@ -1594,6 +1594,7 @@
 #define IDS_SELECT_FOLDER_TORRENTS      20270
 #define IDS_SELECT_FOLDER_COLLECTIONS   20271
 #define IDS_IPLIST_CACHE_BAD            20272
+#define IDS_IPLIST_CACHE_BAD_IMPORT     20273
 #define ID_HELP_ABOUT                   32772
 #define ID_HELP_VERSION_CHECK           32773
 #define ID_CHECKMARK                    32774

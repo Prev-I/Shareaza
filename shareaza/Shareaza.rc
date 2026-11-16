@@ -3464,6 +3464,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_IPLIST_CACHE_BAD    "Cached copy unreadable; it will be downloaded again."
+    IDS_IPLIST_CACHE_BAD_IMPORT "Cached copy unreadable; import the file again."
 END
 
 STRINGTABLE 

@@ -3485,6 +3485,7 @@
 		<string id="20270" value="Store Torrents Here"/>
 		<string id="20271" value="Store Collections Here"/>
 		<string id="20272" value="Cached copy unreadable; it will be downloaded again."/>
+		<string id="20273" value="Cached copy unreadable; import the file again."/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->

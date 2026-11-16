@@ -256,6 +256,7 @@ CIPList& CIPList::operator=(const CIPList& other)
 // CIPLists construction
 
 CIPLists::CIPLists()
+	: m_bSaveBlocked( false )
 {
 }
 
@@ -287,9 +288,11 @@ BOOL CIPLists::Load()
 
 	std::vector< CIPList* > pLoaded;
 	BOOL bResult = TRUE;
+	m_bSaveBlocked = false;
 
 	CFile pFile;
-	if ( pFile.Open( strFile, CFile::modeRead | CFile::shareDenyWrite | CFile::osSequentialScan ) )
+	CFileException pError;
+	if ( pFile.Open( strFile, CFile::modeRead | CFile::shareDenyWrite | CFile::osSequentialScan, &pError ) )
 	{
 		bool bFailed = false;
 		try
@@ -334,14 +337,26 @@ BOOL CIPLists::Load()
 				delete pLoaded[ i ];
 			pLoaded.clear();
 
-			// Keep the unreadable file aside, so Save does not overwrite the
-			// user's subscriptions with an empty set.
-			MoveFileEx( strFile, strFile + _T(".bad"), MOVEFILE_COPY_ALLOWED | MOVEFILE_REPLACE_EXISTING );
+			// Keep the unreadable file aside under a new name, never over an
+			// earlier one, so Save does not overwrite the user's subscriptions
+			// with an empty set. If it cannot be moved, Save must not write.
+			CString strBad;
+			strBad.Format( _T("%s.%lu.bad"), (LPCTSTR)strFile, static_cast< DWORD >( time( NULL ) ) );
+			if ( ! MoveFileEx( strFile, strBad, MOVEFILE_COPY_ALLOWED ) )
+				m_bSaveBlocked = true;
 			theApp.Message( MSG_ERROR, _T("Failed to load IP lists: %s"), (LPCTSTR)strFile );
 			bResult = FALSE;
 		}
 	}
-	// No file: no lists yet.
+	else if ( pError.m_lOsError != ERROR_FILE_NOT_FOUND && pError.m_lOsError != ERROR_PATH_NOT_FOUND )
+	{
+		// The file exists but cannot be opened (sharing violation, access
+		// denied): never replace it with this session's empty set.
+		m_bSaveBlocked = true;
+		theApp.Message( MSG_ERROR, _T("Failed to load IP lists: %s"), (LPCTSTR)strFile );
+		bResult = FALSE;
+	}
+	// Otherwise no file: no lists yet.
 
 	// The cached ranges. Never parsed or downloaded here.
 	for ( size_t i = 0 ; i < pLoaded.size() ; ++i )
@@ -353,7 +368,9 @@ BOOL CIPLists::Load()
 		if ( nCache == cacheBad || ( nCache == cacheMissing && pList->m_tLastSuccess != 0 ) )
 		{
 			pList->m_pRanges.reset();
-			pList->m_sStatus = LoadString( IDS_IPLIST_CACHE_BAD );
+			// An import has no URL to download from; it must be imported again.
+			pList->m_sStatus = LoadString( pList->m_pURLs.GetSize() > 0 ?
+				IDS_IPLIST_CACHE_BAD : IDS_IPLIST_CACHE_BAD_IMPORT );
 			pList->m_tLastSuccess = 0;
 			pList->m_bLastFailed = FALSE;	// due as soon as updates may start
 			theApp.Message( MSG_ERROR, _T("Failed to load IP list: %s"), (LPCTSTR)CachePath( pList->m_oGUID ) );
@@ -378,11 +395,18 @@ BOOL CIPLists::Save()
 {
 	CQuickLock oFileLock( m_pFileSection );
 
+	const CString strFile = Settings.General.UserPath + _T("\\Data\\IPLists.dat");
+
+	if ( m_bSaveBlocked )
+	{
+		theApp.Message( MSG_ERROR, _T("Not saving IP lists: %s could not be loaded and is kept as it is"), (LPCTSTR)strFile );
+		return FALSE;
+	}
+
 	std::vector< CIPList > pLists;
 	Snapshot( pLists );
 
 	const CString strTemp = Settings.General.UserPath + _T("\\Data\\IPLists.tmp");
-	const CString strFile = Settings.General.UserPath + _T("\\Data\\IPLists.dat");
 
 	CFile pFile;
 	if ( ! pFile.Open( strTemp, CFile::modeWrite | CFile::modeCreate | CFile::shareExclusive | CFile::osSequentialScan ) )
@@ -490,17 +514,25 @@ BOOL CIPLists::Remove(const GUID& oGUID)
 void CIPLists::SetEnabled(const GUID& oGUID, BOOL bEnabled)
 {
 	bool bChanged = false;
+	bool bNowEnabled = false;
 	{
 		CQuickLock oLock( Security.m_pSection );
 		if ( CIPList* pList = Find( oGUID ) )
 		{
 			bChanged = ( ( pList->m_bEnabled != FALSE ) != ( bEnabled != FALSE ) );
 			pList->m_bEnabled = bEnabled ? TRUE : FALSE;
+			bNowEnabled = ( bEnabled != FALSE );
 		}
 	}
 
 	if ( bChanged )
+	{
 		Security.ClearMissCache();
+
+		// Drop connected hosts the list now denies
+		if ( bNowEnabled )
+			PostMainWndMessage( WM_SANITY_CHECK );
+	}
 }
 
 bool CIPLists::SetRanges(const GUID& oGUID, std::shared_ptr< const IPList::RangeSet > pRanges, DWORD tWhen)
@@ -553,6 +585,9 @@ bool CIPLists::SetRanges(const GUID& oGUID, std::shared_ptr< const IPList::Range
 	pOld.reset();	// frees the previous ranges outside the lock
 
 	Security.ClearMissCache();
+
+	// Drop connected hosts the new ranges deny
+	PostMainWndMessage( WM_SANITY_CHECK );
 
 	return true;
 }
