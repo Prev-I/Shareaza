@@ -461,7 +461,7 @@ void CDiscoveryServices::Stop()
 // CDiscoveryServices load and save
 
 // Raise this when DefaultServices.dat gains caches or loses bans that existing installs should get
-static const DWORD DISCOVERY_DEFAULTS_VERSION = 1;
+static const DWORD DISCOVERY_DEFAULTS_VERSION = 2;
 
 BOOL CDiscoveryServices::Load()
 {

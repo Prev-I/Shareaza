@@ -224,6 +224,7 @@ jobs:
                     Start-Process -FilePath "$app\Shareaza.exe" -WorkingDirectory $app
                 }
                 foreach ($i in 1..36) { if ((Test-Path gwc-requests.jsonl) -and @(Get-Content gwc-requests.jsonl).Count -gt $before) { break }; Start-Sleep 5 }
+                if (-not (Test-Path gwc-requests.jsonl) -or @(Get-Content gwc-requests.jsonl).Count -le $before) { throw "${Name}: the client sent no new cache request" }
                 & "$env:KIT\Watch-Oracle.ps1" -CacheUrl 'http://127.0.0.1:8080/gwc/' -Hours 0.015 -StatsEveryMinutes 1 -WorkDir $env:WORK
                 # While running: nothing visible in the shared folders.
                 $files = @(Get-ChildItem -File -Recurse "$env:WORK\shared" -ErrorAction SilentlyContinue)
