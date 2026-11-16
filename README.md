@@ -46,6 +46,9 @@ This fork stands on the work of others:
 - **ansani**, who continued it as 2.7.10.x with a Visual Studio 2022 build, HTTPS downloads and
   GitHub releases: [github.com/ansani/Shareaza](https://github.com/ansani/Shareaza). This
   repository is a fork of ansani's; its `master` branch is that code as imported.
+- **DB-IP**, whose free IP to Country Lite database gives hosts their country and flag
+  ([db-ip.com](https://db-ip.com), CC BY 4.0), and **Debian's `geoip-database`** package, which
+  converts it to the GeoIP format the client reads. Details: `setup/misc/LICENSE-GeoIP.txt`.
 
 ## Building
 

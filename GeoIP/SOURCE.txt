@@ -1,0 +1,9 @@
+package: geoip-database
+version: 20261101-1
+suite: sid
+deb-sha256: 878590767d49e314dee26a99d265e15c63d1468744d8546cd1189ee84bddba30
+file: GeoIP.dat
+file-sha256: 47101f4d1c2e7f820089b7bc1c4d0ffe4cca3b6b698c1d23c4b8f2ddb7a94bc4
+build: GEO-106FREE 20261110 Build
+inrelease-signer: 4CB50190207B4758A3F73A796ED0E7B82643E131
+verified: 2026-11-15

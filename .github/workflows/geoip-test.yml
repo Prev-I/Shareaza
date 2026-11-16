@@ -1,0 +1,37 @@
+name: GeoIP test
+
+on:
+    pull_request:
+      paths:
+        - GeoIP/**
+        - tests/geoip/**
+        - setup/scripts/main.iss
+        - setup/misc/LICENSE-GeoIP.txt
+        - .github/workflows/geoip-test.yml
+    push:
+      branches:
+        - main
+      paths:
+        - GeoIP/**
+        - tests/geoip/**
+        - setup/scripts/main.iss
+        - setup/misc/LICENSE-GeoIP.txt
+        - .github/workflows/geoip-test.yml
+
+permissions:
+    contents: read
+
+jobs:
+    geoip:
+        runs-on: ubuntu-latest
+        steps:
+        -   name: Checkout GIT sources
+            uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+            with:
+                persist-credentials: false
+
+        -   name: Install the Debian archive keyring
+            run: sudo apt-get update -q && sudo apt-get install -y -q debian-archive-keyring
+
+        -   name: Lookup test, SOURCE.txt check and refresh-script tests
+            run: bash tests/geoip/run_all.sh

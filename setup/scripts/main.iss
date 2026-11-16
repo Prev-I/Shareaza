@@ -212,6 +212,8 @@ Source: "{#Compiler}\{#PlatformName}\{#ConfigurationName}\sqlite3.dll"; DestDir:
 ; GeoIP
 Source: "{#Compiler}\{#PlatformName}\{#ConfigurationName}\GeoIP.dll"; DestDir: "{app}"; Flags: overwritereadonly replacesameversion restartreplace uninsremovereadonly sortfilesbyextension
 Source: "GeoIP\GeoIP.dat"; DestDir: "{app}"; Flags: overwritereadonly replacesameversion restartreplace uninsremovereadonly sortfilesbyextension
+Source: "setup\misc\LICENSE-GeoIP.txt"; DestDir: "{app}"; DestName: "LICENSE-GeoIP.txt"; Flags: overwritereadonly replacesameversion restartreplace uninsremovereadonly sortfilesbyextension
+Source: "GeoIP\License.txt"; DestDir: "{app}"; DestName: "LICENSE-GeoIP-LGPL-2.1.txt"; Flags: overwritereadonly replacesameversion restartreplace uninsremovereadonly sortfilesbyextension
 
 ; MiniUPnPc
 Source: "{#Compiler}\{#PlatformName}\{#ConfigurationName}\MiniUPnPc.dll"; DestDir: "{app}"; DestName: "MiniUPnPc.dll"; Flags: overwritereadonly replacesameversion restartreplace uninsremovereadonly sortfilesbyextension

@@ -51,6 +51,10 @@ the owner switches the ruleset off in Settings first, then switches it on again.
 
 ## Releasing
 
+0. Refresh the country data: run the `GeoIP refresh` workflow (`geoip-refresh.yml`) on `main`.
+   If it pushed a branch `prev-i/geoip-<version>`, open the pull request from it and merge it
+   before tagging; if it reports the data as current, there is nothing to do. A release that
+   carries a refresh says so in its notes.
 1. Push the annotated tag `v<version>-previ.N` on `main`.
 2. `release.yml` builds both installers and both symbols archives, attests them and creates a draft
    release.
