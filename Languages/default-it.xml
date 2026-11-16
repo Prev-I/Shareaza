@@ -3463,11 +3463,11 @@
 		<string id="20273" value="Copia in cache illeggibile; importa di nuovo il file."/>
 		<string id="20274" value="Reti dirottate e criminali; pochi falsi positivi. Dati (c) The Spamhaus Project."/>
 		<string id="20275" value="Host noti come compromessi."/>
-		<string id="20276" value="Aziende anti-P2P; molto grande (circa un quinto di tutti gli indirizzi IPv4); blocca interi provider e reti CDN (include il blocco 1.1.1.0 di Cloudflare)."/>
+		<string id="20276" value="Aziende anti-P2P; lista molto grande (circa un quinto di tutti gli indirizzi IPv4); blocca interi provider e intervalli CDN (include il blocco 1.1.1.0 di Cloudflare)."/>
 		<string id="20277" value="Raccolta di diverse liste su privacy e abusi."/>
-		<string id="20278" value="Spazio non assegnato; va tenuta aggiornata, altrimenti blocca le reti nuove."/>
+		<string id="20278" value="Spazio non assegnato; la lista va tenuta aggiornata, altrimenti blocca le reti nuove."/>
 		<string id="20279" value="L'indirizzo non inizia con https://."/>
-		<string id="20280" value="Il download non si è concluso su un indirizzo https://."/>
+		<string id="20280" value="L'indirizzo finale del download non inizia con https://."/>
 		<string id="20281" value="Impossibile raggiungere il server."/>
 		<string id="20282" value="Il server ha risposto con lo stato HTTP %d."/>
 		<string id="20283" value="Il download supera i 64 MB."/>
@@ -4710,7 +4710,7 @@
 		<list name="CSecurityWnd.Lists">
 			<column from="List" to="Lista"/>
 			<column from="Ranges" to="Intervalli"/>
-			<column from="Updated" to="Aggiornata"/>
+			<column from="Updated" to="Aggiornamento"/>
 			<column from="Hits" to="Hits"/>
 		</list>
 		<list name="CHostCacheWnd">

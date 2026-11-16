@@ -7578,7 +7578,7 @@ msgstr "Host noti come compromessi."
 
 #: string;20276
 msgid "Anti-P2P companies; very large (about a fifth of all IPv4 addresses); blocks whole providers and CDN ranges (it lists Cloudflare's 1.1.1.0 block)."
-msgstr "Aziende anti-P2P; molto grande (circa un quinto di tutti gli indirizzi IPv4); blocca interi provider e reti CDN (include il blocco 1.1.1.0 di Cloudflare)."
+msgstr "Aziende anti-P2P; lista molto grande (circa un quinto di tutti gli indirizzi IPv4); blocca interi provider e intervalli CDN (include il blocco 1.1.1.0 di Cloudflare)."
 
 #: string;20277
 msgid "Aggregate of several privacy and abuse lists."
@@ -7586,7 +7586,7 @@ msgstr "Raccolta di diverse liste su privacy e abusi."
 
 #: string;20278
 msgid "Unallocated space; must stay updated or it blocks new networks."
-msgstr "Spazio non assegnato; va tenuta aggiornata, altrimenti blocca le reti nuove."
+msgstr "Spazio non assegnato; la lista va tenuta aggiornata, altrimenti blocca le reti nuove."
 
 #: string;20279
 msgid "The address does not start with https://."
@@ -7594,7 +7594,7 @@ msgstr "L'indirizzo non inizia con https://."
 
 #: string;20280
 msgid "The download did not end at an https:// address."
-msgstr "Il download non si è concluso su un indirizzo https://."
+msgstr "L'indirizzo finale del download non inizia con https://."
 
 #: string;20281
 msgid "The server could not be reached."
@@ -10103,7 +10103,7 @@ msgstr "Intervalli"
 
 #: column;updated
 msgid "Updated"
-msgstr "Aggiornata"
+msgstr "Aggiornamento"
 
 #: column;lastseen
 msgid "LastSeen"
