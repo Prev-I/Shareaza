@@ -5334,6 +5334,7 @@ msgid "Hub neighbour %s won't accept us as a hub, closing connection."
 msgstr "Hub %s komşu bizi hub olarak kabul etmeyecek, bağlantı kapatılıyor."
 
 #: string;16153
+#, fuzzy
 msgid "Accepted neighbour %s as a shielded leaf."
 msgstr "%s komşusu güvenlik duvarı arkasındaki eş durumuna geri dönüyor."
 

@@ -5410,6 +5410,7 @@ msgid "Hub neighbour %s won't accept us as a hub, closing connection."
 msgstr "Hub nabo %s vil ikke godta oss som hub, lukker kobling."
 
 #: string;16153
+#, fuzzy
 msgid "Accepted neighbour %s as a shielded leaf."
 msgstr "Tilkoblet nabo %s går tilbake til vernet leaf mode."
 

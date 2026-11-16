@@ -5426,6 +5426,7 @@ msgid "Hub neighbour %s won't accept us as a hub, closing connection."
 msgstr "Κλείσιμο σύνδεσης με γειτονικό κόμβο %s, επειδή δεν μας αποδέχεται ως κόμβο."
 
 #: string;16153
+#, fuzzy
 msgid "Accepted neighbour %s as a shielded leaf."
 msgstr "Υπαναχώρηση σε θωρακισμένο του συνδεόμενου κόμβου %s."
 

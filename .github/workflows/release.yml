@@ -217,11 +217,10 @@ jobs:
             if [ -s body.md ]; then echo >> body.md; fi
             {
               echo "Verify:"
-              echo "* Needs the GitHub CLI signed in (\`gh auth login\`); \`Get-FileHash\` runs in PowerShell."
               echo "* Built by this repository's release workflow: \`gh attestation verify <file> --repo Prev-I/Shareaza --signer-workflow Prev-I/Shareaza/.github/workflows/release.yml\`"
               echo "* Unchanged since publication: \`gh release verify-asset ${GITHUB_REF_NAME} <file> --repo Prev-I/Shareaza\`"
-              echo "* Without gh: \`Get-FileHash <file> -Algorithm SHA256\`, compared with SHA256SUMS.txt or the sha256 shown beside each file"
-              echo "* \`gh\` 2.81.0 or later is needed."
+              echo "* The \`gh\` commands need the GitHub CLI, version 2.81.0 or later, signed in with \`gh auth login\`."
+              echo "* Without gh: \`Get-FileHash <file> -Algorithm SHA256\` in PowerShell, compared with SHA256SUMS.txt or the sha256 shown beside each file"
             } >> body.md
             cat body.md
         - name: Attest build provenance

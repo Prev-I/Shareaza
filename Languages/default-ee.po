@@ -5410,6 +5410,7 @@ msgid "Hub neighbour %s won't accept us as a hub, closing connection."
 msgstr "Jaotur %s ei aktsepteeri meid jaoturina, sulgen ühenduse."
 
 #: string;16153
+#, fuzzy
 msgid "Accepted neighbour %s as a shielded leaf."
 msgstr "Ühendan %s langen tagasi kaitstud leaf mode."
 

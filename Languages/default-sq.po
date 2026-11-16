@@ -5428,6 +5428,7 @@ msgid "Hub neighbour %s won't accept us as a hub, closing connection."
 msgstr "Fqinji nyjë %s nuk na pranon si nyjë, mbyllje e lidhjes."
 
 #: string;16153
+#, fuzzy
 msgid "Accepted neighbour %s as a shielded leaf."
 msgstr "Fqinji në lidhje %s kthehet pas në gjethe nyjë me mburojë."
 

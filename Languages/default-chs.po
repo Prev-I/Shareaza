@@ -5323,6 +5323,7 @@ msgid "Hub neighbour %s won't accept us as a hub, closing connection."
 msgstr "集端网络的 %s 主机不认可我们为集端，正在关闭连接。"
 
 #: string;16153
+#, fuzzy
 msgid "Accepted neighbour %s as a shielded leaf."
 msgstr "到邻居 %s 主机的连接失败使得退回到屏蔽子端模式。"
 

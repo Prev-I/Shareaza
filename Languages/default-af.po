@@ -5425,6 +5425,7 @@ msgid "Hub neighbour %s won't accept us as a hub, closing connection."
 msgstr "Hub-Gasheer %s weier ons as 'n hub, konneksie word gesluit."
 
 #: string;16153
+#, fuzzy
 msgid "Accepted neighbour %s as a shielded leaf."
 msgstr "Gasheer %s is besig om terug te val na geskermde kliëntmodus."
 

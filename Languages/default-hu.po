@@ -5387,6 +5387,7 @@ msgid "Hub neighbour %s won't accept us as a hub, closing connection."
 msgstr "A %s hub nem fogad el minket, mint hub. Kapcsolat megszakítása."
 
 #: string;16153
+#, fuzzy
 msgid "Accepted neighbour %s as a shielded leaf."
 msgstr "Kapcsolódás: %s, visszatérés álcázott(shielded) leaf módba."
 

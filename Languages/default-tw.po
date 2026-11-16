@@ -5276,6 +5276,7 @@ msgid "Hub neighbour %s won't accept us as a hub, closing connection."
 msgstr "結點鄰居 %s 不接受我們當結點， 關閉連線中。"
 
 #: string;16153
+#, fuzzy
 msgid "Accepted neighbour %s as a shielded leaf."
 msgstr "連線至鄰居 %s 回朔至被保護的葉節點模式。"
 

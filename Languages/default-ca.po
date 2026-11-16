@@ -5414,6 +5414,7 @@ msgid "Hub neighbour %s won't accept us as a hub, closing connection."
 msgstr "El hub veí %s no ens acceptarà com a hub, tancant la connexió..."
 
 #: string;16153
+#, fuzzy
 msgid "Accepted neighbour %s as a shielded leaf."
 msgstr "La connexió amb l'amfitrió a veí %s ha tornat enrere perquè és un mode leaf protegit."
 

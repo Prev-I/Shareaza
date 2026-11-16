@@ -5418,6 +5418,7 @@ msgid "Hub neighbour %s won't accept us as a hub, closing connection."
 msgstr "Kaimynas-mazgas adresu %s nepriims mūsų kaip mazgo, nutraukiamas ryšys."
 
 #: string;16153
+#, fuzzy
 msgid "Accepted neighbour %s as a shielded leaf."
 msgstr "Kaimynas adresu %s ryšio užmezgimo metu grįžo į apsaugotos atšakos veikseną."
 

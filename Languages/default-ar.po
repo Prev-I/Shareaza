@@ -5423,6 +5423,7 @@ msgid "Hub neighbour %s won't accept us as a hub, closing connection."
 msgstr "جوار المحور %s لن يقبلنا كمحور ، إغلاق الإتصال"
 
 #: string;16153
+#, fuzzy
 msgid "Accepted neighbour %s as a shielded leaf."
 msgstr "الإتصال بالجوار %s تراجع إلى نمط التفرع المحمي"
 

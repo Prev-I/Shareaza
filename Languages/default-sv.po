@@ -5416,6 +5416,7 @@ msgid "Hub neighbour %s won't accept us as a hub, closing connection."
 msgstr "Navgranne %s vill inte acceptera oss som nav, stänger anslutning."
 
 #: string;16153
+#, fuzzy
 msgid "Accepted neighbour %s as a shielded leaf."
 msgstr "Anslutande granne %s byter till skyddat lövläge."
 

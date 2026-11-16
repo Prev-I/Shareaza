@@ -5417,6 +5417,7 @@ msgid "Hub neighbour %s won't accept us as a hub, closing connection."
 msgstr "Sousední uzel %s nás nebude akceptovat jako uzel, spojení ukonečno."
 
 #: string;16153
+#, fuzzy
 msgid "Accepted neighbour %s as a shielded leaf."
 msgstr "Sousední spojení %s vypadlo zpět do chráněného režimu."
 

@@ -5414,6 +5414,7 @@ msgid "Hub neighbour %s won't accept us as a hub, closing connection."
 msgstr "ハブ近隣 %s がハブとして受け付けない為接続を閉じています"
 
 #: string;16153
+#, fuzzy
 msgid "Accepted neighbour %s as a shielded leaf."
 msgstr "保護されたリーフノードへ退行している近隣 %s へ接続中です"
 

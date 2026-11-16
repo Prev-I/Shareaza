@@ -5346,6 +5346,7 @@ msgid "Hub neighbour %s won't accept us as a hub, closing connection."
 msgstr "Соседний узел %s не принял нас как узел, соединение закрывается."
 
 #: string;16153
+#, fuzzy
 msgid "Accepted neighbour %s as a shielded leaf."
 msgstr "Подсоединяющийся хост %s возвращается обратно в режим защищенного лепесткового узла."
 
