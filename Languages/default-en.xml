@@ -3506,6 +3506,11 @@
 		<string id="20291" value="The list could not be saved."/>
 		<string id="20292" value="IP list %s updated: %lu lines taken, %lu rejected, %lu ranges after merging."/>
 		<string id="20293" value="IP list %s not updated: %s"/>
+		<string id="20294" value="%s: %Iu ranges imported, %Iu lines rejected."/>
+		<string id="20295" value="%s could not be imported."/>
+		<string id="20296" value="%s could not be written."/>
+		<string id="20297" value="%s could not be imported: %s"/>
+		<string id="20298" value="The file is larger than 64 MB."/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->

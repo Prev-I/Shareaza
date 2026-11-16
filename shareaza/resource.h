@@ -1615,6 +1615,11 @@
 #define IDS_IPLIST_ERR_SAVE             20291
 #define IDS_IPLIST_LOG_UPDATED          20292
 #define IDS_IPLIST_LOG_FAILED           20293
+#define IDS_IPLIST_IMPORTED             20294
+#define IDS_SECURITY_IMPORT_FAILED      20295
+#define IDS_SECURITY_EXPORT_FAILED      20296
+#define IDS_IPLIST_IMPORT_FAILED        20297
+#define IDS_IPLIST_IMPORT_TOO_LARGE     20298
 #define ID_HELP_ABOUT                   32772
 #define ID_HELP_VERSION_CHECK           32773
 #define ID_CHECKMARK                    32774

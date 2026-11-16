@@ -71,6 +71,9 @@ public:
 	// to stop.
 	static BOOL LoadAndParse(const CBuffer& oData, IPList::RangeSet& oOut, IPList::ParseStats& oStats, CString& sError, const CThreadImpl* pThread = NULL);
 
+	// The string ID that explains an IPList::CheckSanity refusal.
+	static UINT RefusalString(IPList::Refusal nRefusal);
+
 protected:
 	struct QueueItem
 	{

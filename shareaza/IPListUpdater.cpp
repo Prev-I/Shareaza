@@ -67,24 +67,6 @@ bool IsHttps(const CString& sURL)
 	return _tcsnicmp( sURL, _T("https://"), 8 ) == 0;
 }
 
-UINT RefusalString(IPList::Refusal nRefusal)
-{
-	switch ( nRefusal )
-	{
-	case IPList::Refusal::Empty:
-		return IDS_IPLIST_ERR_EMPTY;
-	case IPList::Refusal::TooManyRanges:
-		return IDS_IPLIST_ERR_TOO_MANY;
-	case IPList::Refusal::V4RangeTooWide:
-		return IDS_IPLIST_ERR_V4_TOO_WIDE;
-	case IPList::Refusal::V4CoverageTooHigh:
-		return IDS_IPLIST_ERR_V4_COVERAGE;
-	case IPList::Refusal::V6CoversGlobalUnicast:
-	default:
-		return IDS_IPLIST_ERR_V6_GLOBAL;
-	}
-}
-
 // A copy of the list with that GUID; false if there is none.
 bool FindList(const GUID& oGUID, CIPList& oOut)
 {
@@ -737,6 +719,24 @@ bool CIPListUpdater::Fetch(const CString& sURL, IPList::RangeSet& oRanges, IPLis
 
 //////////////////////////////////////////////////////////////////////
 // CIPListUpdater file contents
+
+UINT CIPListUpdater::RefusalString(IPList::Refusal nRefusal)
+{
+	switch ( nRefusal )
+	{
+	case IPList::Refusal::Empty:
+		return IDS_IPLIST_ERR_EMPTY;
+	case IPList::Refusal::TooManyRanges:
+		return IDS_IPLIST_ERR_TOO_MANY;
+	case IPList::Refusal::V4RangeTooWide:
+		return IDS_IPLIST_ERR_V4_TOO_WIDE;
+	case IPList::Refusal::V4CoverageTooHigh:
+		return IDS_IPLIST_ERR_V4_COVERAGE;
+	case IPList::Refusal::V6CoversGlobalUnicast:
+	default:
+		return IDS_IPLIST_ERR_V6_GLOBAL;
+	}
+}
 
 BOOL CIPListUpdater::LoadAndParse(const CBuffer& oData, IPList::RangeSet& oOut, IPList::ParseStats& oStats, CString& sError, const CThreadImpl* pThread)
 {

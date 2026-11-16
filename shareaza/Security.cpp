@@ -1311,48 +1311,12 @@ BOOL CSecurity::Import(LPCTSTR pszFile)
 	CXMLElement* pXML = CXMLElement::FromBytes( pBuffer.m_pBuffer, pBuffer.m_nLength, TRUE );
 	BOOL bResult = FALSE;
 
+	// Shareaza XML only: the Security window parses every other file as an
+	// IP list (CIPListUpdater::LoadAndParse), Gnucleus lines included.
 	if ( pXML != NULL )
 	{
 		bResult = FromXML( pXML );
 		delete pXML;
-	}
-	else
-	{
-		CString strLine;
-
-		while ( pBuffer.ReadLine( strLine ) )
-		{
-			strLine.TrimLeft();
-			strLine.TrimRight();
-			if ( strLine.IsEmpty() ) continue;
-			if ( strLine.GetAt( 0 ) == ';' ) continue;
-
-			CSecureRule* pRule = new CSecureRule();
-
-			if ( pRule->FromGnucleusString( strLine ) )
-			{
-				CQuickLock oLock( m_pSection );
-
-				pRule->MaskFix();
-
-				// special treatment for single IP security rules
-				if ( pRule->m_nType == CSecureRule::srAddress &&
-					*(DWORD*)pRule->m_nMask == 0xffffffff )
-				{
-					m_pIPRules[ *(DWORD*) pRule->m_nIP ] = pRule;
-				}
-				else
-				{
-					m_pRules.AddTail( pRule );
-				}
-
-				bResult = TRUE;
-			}
-			else
-			{
-				delete pRule;
-			}
-		}
 	}
 
 	if ( bResult ) ClearMissCache();

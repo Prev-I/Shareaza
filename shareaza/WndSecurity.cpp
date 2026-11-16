@@ -21,6 +21,7 @@
 
 #include "StdAfx.h"
 #include "Shareaza.h"
+#include "Buffer.h"
 #include "Settings.h"
 #include "Security.h"
 #include "LiveList.h"
@@ -29,6 +30,8 @@
 #include "CoolInterface.h"
 #include "SchemaCache.h"
 #include "XML.h"
+#include "IPLists.h"
+#include "IPListUpdater.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -43,6 +46,167 @@ const static UINT nImageID[] =
 	IDI_FIREWALLED,
 	NULL
 };
+
+namespace
+{
+
+// Shareaza's own export format: '<' first, after an optional UTF-8 or UTF-16
+// byte order mark and whitespace.
+bool IsXMLFile(const BYTE* pData, DWORD nData)
+{
+	DWORD nPos = 0;
+	DWORD nStep = 1;	// bytes per character
+	DWORD nLow = 0;		// offset of the byte that holds an ASCII character
+	if ( nData >= 3 && pData[ 0 ] == 0xEF && pData[ 1 ] == 0xBB && pData[ 2 ] == 0xBF )
+	{
+		nPos = 3;
+	}
+	else if ( nData >= 2 && pData[ 0 ] == 0xFF && pData[ 1 ] == 0xFE )
+	{
+		nPos = 2;
+		nStep = 2;
+	}
+	else if ( nData >= 2 && pData[ 0 ] == 0xFE && pData[ 1 ] == 0xFF )
+	{
+		nPos = 2;
+		nStep = 2;
+		nLow = 1;
+	}
+
+	for ( ; nData - nPos >= nStep ; nPos += nStep )
+	{
+		if ( nStep == 2 && pData[ nPos + 1 - nLow ] != 0 )
+			return false;
+		const BYTE c = pData[ nPos + nLow ];
+		if ( c == ' ' || c == '\t' || c == '\r' || c == '\n' )
+			continue;
+		return c == '<';
+	}
+	return false;
+}
+
+// Reads the whole file into oData. FALSE if it cannot be read, or if it is
+// larger than IPList::kMaxDownload (bTooLarge is then set and nothing read).
+BOOL ReadImportFile(LPCTSTR pszFile, CBuffer& oData, bool& bTooLarge)
+{
+	bTooLarge = false;
+
+	CFile pFile;
+	if ( ! pFile.Open( pszFile, CFile::modeRead | CFile::shareDenyWrite ) )
+		return FALSE;
+
+	try
+	{
+		const ULONGLONG nLength = pFile.GetLength();
+		if ( nLength > IPList::kMaxDownload )
+		{
+			bTooLarge = true;
+			return FALSE;
+		}
+
+		const DWORD nSize = static_cast< DWORD >( nLength );
+		if ( nSize )
+		{
+			if ( ! oData.EnsureBuffer( nSize ) )
+				return FALSE;
+			if ( pFile.Read( oData.m_pBuffer, nSize ) != nSize )
+				return FALSE;
+			oData.m_nLength = nSize;
+		}
+	}
+	catch ( CException* pException )
+	{
+		pException->Delete();
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+// Parses any file other than Shareaza XML into an IP list named after the
+// file. Re-importing a file of the same name replaces that list's ranges.
+// Reports the outcome in a message box.
+void ImportIPList(const CString& strName, const CBuffer& pBuffer)
+{
+	IPList::RangeSet oRanges;
+	IPList::ParseStats oStats;
+	CString strError;
+
+	BOOL bOK = CIPListUpdater::LoadAndParse( pBuffer, oRanges, oStats, strError );
+	if ( bOK )
+	{
+		oRanges.Finish();
+		const IPList::Refusal nRefusal = IPList::CheckSanity( oRanges );
+		if ( nRefusal != IPList::Refusal::None )
+		{
+			bOK = FALSE;
+			strError = LoadString( CIPListUpdater::RefusalString( nRefusal ) );
+		}
+	}
+
+	CString strMessage;
+
+	if ( ! bOK )
+	{
+		strMessage.Format( LoadString( IDS_IPLIST_IMPORT_FAILED ), (LPCTSTR)strName, (LPCTSTR)strError );
+		AfxMessageBox( strMessage, MB_ICONEXCLAMATION );
+		return;
+	}
+
+	// An imported list has no URLs and remembers its file name
+	GUID oGUID = {};
+	bool bNew = true;
+	{
+		std::vector< CIPList > pLists;
+		IPLists.Snapshot( pLists );
+		for ( size_t i = 0 ; i < pLists.size() ; ++i )
+		{
+			if ( pLists[ i ].m_pURLs.GetSize() == 0 &&
+				pLists[ i ].m_sSource.CompareNoCase( strName ) == 0 )
+			{
+				oGUID = pLists[ i ].m_oGUID;
+				bNew = false;
+				break;
+			}
+		}
+	}
+
+	if ( bNew )
+	{
+		const CStringArray pNoURLs;
+		oGUID = IPLists.Add( strName, pNoURLs, strName )->m_oGUID;
+	}
+
+	const DWORD tNow = static_cast< DWORD >( time( NULL ) );
+	std::shared_ptr< const IPList::RangeSet > pRanges =
+		std::make_shared< IPList::RangeSet >( std::move( oRanges ) );
+
+	if ( IPLists.SetRanges( oGUID, pRanges, tNow ) )
+	{
+		IPLists.Save();
+		strMessage.Format( LoadString( IDS_IPLIST_IMPORTED ), (LPCTSTR)strName,
+			oStats.taken, oStats.rejected );
+		AfxMessageBox( strMessage, MB_ICONINFORMATION );
+		return;
+	}
+
+	strError = LoadString( IDS_IPLIST_ERR_SAVE );
+	if ( bNew )
+	{
+		// Leave no empty list behind
+		IPLists.Remove( oGUID );
+	}
+	else
+	{
+		// The list keeps its previous ranges
+		IPLists.SetFailed( oGUID, strError, tNow );
+	}
+
+	strMessage.Format( LoadString( IDS_IPLIST_IMPORT_FAILED ), (LPCTSTR)strName, (LPCTSTR)strError );
+	AfxMessageBox( strMessage, MB_ICONEXCLAMATION );
+}
+
+}	// namespace
 
 IMPLEMENT_SERIAL(CSecurityWnd, CPanelWnd, 0)
 
@@ -396,8 +560,9 @@ void CSecurityWnd::OnSecurityExport()
 	
 	if ( ! pFile.Open( dlg.GetPathName(), CFile::modeWrite|CFile::modeCreate ) )
 	{
-		// TODO: Error
-		AfxMessageBox( _T("Error") );
+		CString strMessage;
+		strMessage.Format( LoadString( IDS_SECURITY_EXPORT_FAILED ), (LPCTSTR)dlg.GetFileName() );
+		AfxMessageBox( strMessage, MB_ICONEXCLAMATION );
 		return;
 	}
 
@@ -456,23 +621,45 @@ void CSecurityWnd::OnSecurityExport()
 
 void CSecurityWnd::OnSecurityImport() 
 {
-	CFileDialog dlg( TRUE, _T("xml"), NULL, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT,
-		_T("Security Rules|*.xml;*.net|") +
-		SchemaCache.GetFilter( CSchema::uriAllFiles ) +
-		_T("|"), this );
+	CFileDialog dlg( TRUE, _T("xml"), NULL, OFN_HIDEREADONLY|OFN_FILEMUSTEXIST,
+		_T("Security Rules|*.xml;*.net|IP lists|*.p2p;*.dat;*.txt;*.gz;*.zip|All Files|*.*||"), this );
 	
 	if ( dlg.DoModal() != IDOK ) return;
 
+	const CString strPath = dlg.GetPathName();
+	const CString strName = dlg.GetFileName();
+	CString strMessage;
+
 	CWaitCursor pCursor;
 
-	if ( Security.Import( dlg.GetPathName() ) )
+	CBuffer pBuffer;
+	bool bTooLarge = false;
+	if ( ! ReadImportFile( strPath, pBuffer, bTooLarge ) )
+	{
+		if ( bTooLarge )
+			strMessage.Format( LoadString( IDS_IPLIST_IMPORT_FAILED ), (LPCTSTR)strName,
+				(LPCTSTR)LoadString( IDS_IPLIST_IMPORT_TOO_LARGE ) );
+		else
+			strMessage.Format( LoadString( IDS_SECURITY_IMPORT_FAILED ), (LPCTSTR)strName );
+		AfxMessageBox( strMessage, MB_ICONEXCLAMATION );
+		return;
+	}
+
+	// Shareaza XML goes into the user's rules; anything else becomes an IP list
+	if ( ! IsXMLFile( pBuffer.m_pBuffer, pBuffer.m_nLength ) )
+	{
+		ImportIPList( strName, pBuffer );
+		return;
+	}
+
+	if ( Security.Import( strPath ) )
 	{
 		Security.Save();
 	}
 	else
 	{
-		// TODO: Error message, unable to import rules
-		AfxMessageBox( _T("Error") );
+		strMessage.Format( LoadString( IDS_SECURITY_IMPORT_FAILED ), (LPCTSTR)strName );
+		AfxMessageBox( strMessage, MB_ICONEXCLAMATION );
 	}
 }
 

@@ -3485,6 +3485,11 @@ BEGIN
     IDS_IPLIST_ERR_SAVE     "The list could not be saved."
     IDS_IPLIST_LOG_UPDATED  "IP list %s updated: %lu lines taken, %lu rejected, %lu ranges after merging."
     IDS_IPLIST_LOG_FAILED   "IP list %s not updated: %s"
+    IDS_IPLIST_IMPORTED     "%s: %Iu ranges imported, %Iu lines rejected."
+    IDS_SECURITY_IMPORT_FAILED "%s could not be imported."
+    IDS_SECURITY_EXPORT_FAILED "%s could not be written."
+    IDS_IPLIST_IMPORT_FAILED "%s could not be imported: %s"
+    IDS_IPLIST_IMPORT_TOO_LARGE "The file is larger than 64 MB."
 END
 
 STRINGTABLE 
