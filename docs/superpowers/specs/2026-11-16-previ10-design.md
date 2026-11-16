@@ -1,6 +1,6 @@
 # previ.10: subscribable IP lists, current bogon checks, deferred fixes, and version 2.7.11.5: design
 
-Date: 2026-11-16. Status: draft for the owner's approval. The scope and the decisions marked
+Date: 2026-11-16. Status: approved by the owner on 2026-11-16. The scope and the decisions marked
 *(owner)* were settled with the owner on 2026-11-15/16; items marked *(designer's call)* were
 settled while writing.
 
@@ -173,13 +173,16 @@ The result reports ranges taken and lines rejected, by reason, for the import me
 - Download capped at 64 MB (`CHttpRequest::LimitContentLength`), decompressed content at 256 MB,
   2,000,000 ranges per list.
 - A list is refused, keeping the previous copy, when: it yields no range; any IPv4 range spans 2^31
-  addresses or more, or the IPv4 ranges together cover more than half the space; any IPv6 range
-  **inside `2000::/3`** is shorter than `/8`.
+  addresses or more, or the IPv4 ranges together cover more than half the space; any single IPv6
+  range contains all of `2000::/3`.
 - IPv6 ranges outside `2000::/3` are dropped silently, not counted as rejected: no global unicast
-  peer lives there, and Team Cymru's IPv6 fullbogons file is expected to list large unallocated
-  blocks outside it (for example `4000::/3`), which would otherwise trip the rule above
-  (builder check, 2026-11-16; not verified against the live file, whose HTTPS fetch failed from the
-  design machine).
+  peer lives there.
+- **Measured on 2026-11-16** (the live catalogue files): Team Cymru's IPv6 fullbogons lists
+  `8000::/1`, `4000::/2` and others outside `2000::/3`, and inside it unallocated blocks as short as
+  `3000::/4` and `2e00::/7` — so no prefix-length limit can apply inside `2000::/3`. IPv4 coverage
+  after merging: eMule-Security 22.6% of the space (176,176 ranges, largest 3 × /8),
+  CombinedPrivacy 14.2% (57,715, largest /4), fullbogons 13.9% (2,472, largest /4). All pass the
+  IPv4 limits above with margin.
 - A refused or failed update is logged with its reason and shown in the list's status.
 
 ### 1.5 Fetching
@@ -208,7 +211,7 @@ release; any that do not serve over HTTPS are dropped from the catalogue rather 
 |---|---|---|---|
 | Spamhaus DROP | `https://www.spamhaus.org/drop/drop_v4.json`, `…/drop_v6.json` | JSON lines | Hijacked and criminal networks; few false positives. Data © The Spamhaus Project. |
 | Emerging Threats compromised IPs | `https://rules.emergingthreats.net/blockrules/compromised-ips.txt` | addresses | Known compromised hosts. |
-| eMule-Security ipfilter | `https://upd.emule-security.org/ipfilter.zip` (HTTPS to be confirmed) | zip of `.p2p` | Anti-P2P companies; very large; may block whole providers. |
+| eMule-Security ipfilter | `https://upd.emule-security.org/ipfilter.zip` | zip holding `guarding.p2p`, which is in **eMule** line format despite its name | Anti-P2P companies; very large (about a fifth of all IPv4 addresses); blocks whole providers and CDN ranges (it lists Cloudflare's `1.1.1.0` block). |
 | CombinedPrivacy | `https://raw.githubusercontent.com/bongochong/CombinedPrivacyBlockLists/master/combined-final.p2p` | `.p2p` | Aggregate of several privacy and abuse lists. |
 | Team Cymru fullbogons | `https://www.team-cymru.org/Services/Bogons/fullbogons-ipv4.txt`, `…-ipv6.txt` | CIDR | Unallocated space; must stay updated or it blocks new networks. |
 
