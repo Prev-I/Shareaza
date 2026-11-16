@@ -142,6 +142,9 @@ int main()
 	const char* const pReservedV6[] = {
 		"::", "::1", "::ffff:1.2.3.4", "100::1", "2001:2::1", "2001:db8::1", "3fff::1",
 		"ff02::1",
+		// Edges of the newer False rows and of the IPv4-mapped block.
+		"64:ff9b:1::1", "100:0:0:1::1", "5f00::1", "3fff:fff::1", "::ffff:0:0",
+		"::ffff:ffff:ffff",
 	};
 	for ( const char* psz : pReservedV6 )
 		Check( ReservedV6( psz ), psz );
@@ -151,6 +154,8 @@ int main()
 		// Globally reachable rows inside or next to 2001::/23, and NAT64.
 		"2001:3::1", "2001:20::1", "2001:5::1", "2001:3::", "64:ff9b::1.2.3.4",
 		"::2", "2001:db9::1",
+		// Just outside the newer False rows and the IPv4-mapped block.
+		"3fff:1000::1", "100:0:0:2::1", "64:ff9b:2::1", "::fffe:ffff:ffff", "0:1:ffff::",
 	};
 	for ( const char* psz : pPublicV6 )
 		Check( ! ReservedV6( psz ), psz );
