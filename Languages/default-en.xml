@@ -3486,6 +3486,26 @@
 		<string id="20271" value="Store Collections Here"/>
 		<string id="20272" value="Cached copy unreadable; it will be downloaded again."/>
 		<string id="20273" value="Cached copy unreadable; import the file again."/>
+		<string id="20274" value="Hijacked and criminal networks; few false positives. Data (c) The Spamhaus Project."/>
+		<string id="20275" value="Known compromised hosts."/>
+		<string id="20276" value="Anti-P2P companies; very large (about a fifth of all IPv4 addresses); blocks whole providers and CDN ranges (it lists Cloudflare's 1.1.1.0 block)."/>
+		<string id="20277" value="Aggregate of several privacy and abuse lists."/>
+		<string id="20278" value="Unallocated space; must stay updated or it blocks new networks."/>
+		<string id="20279" value="The address does not start with https://."/>
+		<string id="20280" value="The download did not end at an https:// address."/>
+		<string id="20281" value="The server could not be reached."/>
+		<string id="20282" value="The server answered with HTTP status %d."/>
+		<string id="20283" value="The download is larger than 64 MB."/>
+		<string id="20284" value="The content is larger than 256 MB once decompressed."/>
+		<string id="20285" value="The compressed file could not be read."/>
+		<string id="20286" value="The list holds no address range."/>
+		<string id="20287" value="The list holds more than 2,000,000 ranges."/>
+		<string id="20288" value="The list holds an IPv4 range of half the address space or more."/>
+		<string id="20289" value="The list's IPv4 ranges cover more than half the address space."/>
+		<string id="20290" value="The list holds an IPv6 range that covers all of 2000::/3."/>
+		<string id="20291" value="The list could not be saved."/>
+		<string id="20292" value="IP list %s updated: %lu lines taken, %lu rejected, %lu ranges after merging."/>
+		<string id="20293" value="IP list %s not updated: %s"/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->

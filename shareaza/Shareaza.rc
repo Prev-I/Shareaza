@@ -3465,6 +3465,26 @@ STRINGTABLE
 BEGIN
     IDS_IPLIST_CACHE_BAD    "Cached copy unreadable; it will be downloaded again."
     IDS_IPLIST_CACHE_BAD_IMPORT "Cached copy unreadable; import the file again."
+    IDS_IPLIST_NOTE_SPAMHAUS "Hijacked and criminal networks; few false positives. Data (c) The Spamhaus Project."
+    IDS_IPLIST_NOTE_EMTHREATS "Known compromised hosts."
+    IDS_IPLIST_NOTE_EMULE   "Anti-P2P companies; very large (about a fifth of all IPv4 addresses); blocks whole providers and CDN ranges (it lists Cloudflare's 1.1.1.0 block)."
+    IDS_IPLIST_NOTE_COMBINED "Aggregate of several privacy and abuse lists."
+    IDS_IPLIST_NOTE_FULLBOGONS "Unallocated space; must stay updated or it blocks new networks."
+    IDS_IPLIST_ERR_NOT_HTTPS "The address does not start with https://."
+    IDS_IPLIST_ERR_FINAL_NOT_HTTPS "The download did not end at an https:// address."
+    IDS_IPLIST_ERR_NO_RESPONSE "The server could not be reached."
+    IDS_IPLIST_ERR_HTTP_STATUS "The server answered with HTTP status %d."
+    IDS_IPLIST_ERR_TOO_LARGE "The download is larger than 64 MB."
+    IDS_IPLIST_ERR_INFLATED_TOO_LARGE "The content is larger than 256 MB once decompressed."
+    IDS_IPLIST_ERR_DECOMPRESS "The compressed file could not be read."
+    IDS_IPLIST_ERR_EMPTY    "The list holds no address range."
+    IDS_IPLIST_ERR_TOO_MANY "The list holds more than 2,000,000 ranges."
+    IDS_IPLIST_ERR_V4_TOO_WIDE "The list holds an IPv4 range of half the address space or more."
+    IDS_IPLIST_ERR_V4_COVERAGE "The list's IPv4 ranges cover more than half the address space."
+    IDS_IPLIST_ERR_V6_GLOBAL "The list holds an IPv6 range that covers all of 2000::/3."
+    IDS_IPLIST_ERR_SAVE     "The list could not be saved."
+    IDS_IPLIST_LOG_UPDATED  "IP list %s updated: %lu lines taken, %lu rejected, %lu ranges after merging."
+    IDS_IPLIST_LOG_FAILED   "IP list %s not updated: %s"
 END
 
 STRINGTABLE 

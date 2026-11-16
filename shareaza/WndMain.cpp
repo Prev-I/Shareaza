@@ -54,6 +54,7 @@
 #include "Scheduler.h"
 #include "SchemaCache.h"
 #include "TlsPolicy.h"
+#include "IPListUpdater.h"
 
 #include "WndMain.h"
 #include "WndChild.h"
@@ -963,6 +964,9 @@ void CMainWnd::OnTimer(UINT_PTR nIDEvent)
 
 			// Network / disk space / directory checks
 			LocalSystemChecks();
+
+			// IP lists due for an update
+			IPListUpdater.OnTimer60();
 		}
 
 		m_bTrayUpdate = TRUE;

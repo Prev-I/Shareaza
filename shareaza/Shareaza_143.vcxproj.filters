@@ -300,6 +300,9 @@
     <ClCompile Include="IPLists.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="IPListUpdater.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="Kademlia.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -1419,7 +1422,13 @@
     <ClInclude Include="ImageServices.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="IPListCatalogue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="IPLists.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IPListUpdater.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Kademlia.h">

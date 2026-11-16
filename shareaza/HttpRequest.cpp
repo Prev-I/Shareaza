@@ -61,6 +61,7 @@ void CHttpRequest::Clear()
 	Cancel();
 	
 	m_sURL.Empty();
+	m_sFinalURL.Empty();
 	m_sRequestHeaders.Empty();
 	
 	m_nLimit		= 0;
@@ -91,6 +92,11 @@ BOOL CHttpRequest::SetURL(LPCTSTR pszURL)
 CString CHttpRequest::GetURL() const
 {
 	return m_sURL;
+}
+
+CString CHttpRequest::GetFinalURL() const
+{
+	return IsPending() ? _T("") : m_sFinalURL;
 }
 
 void CHttpRequest::AddHeader(LPCTSTR pszKey, LPCTSTR pszValue)
@@ -195,6 +201,7 @@ bool CHttpRequest::Execute(bool bBackground)
 
 	m_hInternet = NULL;
 	m_nStatusCode = 0;
+	m_sFinalURL.Empty();
 	m_sStatusString.Empty();
 	m_pResponseHeaders.RemoveAll();
 
@@ -257,6 +264,20 @@ void CHttpRequest::OnRun()
 			( m_bUseCookie ? 0 : INTERNET_FLAG_NO_COOKIES ) );
 		if ( hURL )
 		{
+			// The address the response comes from, after any redirects
+			DWORD nURL = 0;
+			if ( ! InternetQueryOption( hURL, INTERNET_OPTION_URL, NULL, &nURL ) &&
+				GetLastError() == ERROR_INSUFFICIENT_BUFFER && nURL )
+			{
+				const DWORD nChars = nURL / sizeof( TCHAR ) + 1;
+				LPTSTR pszURL = m_sFinalURL.GetBuffer( nChars );
+				DWORD nSize = nChars * sizeof( TCHAR );
+				if ( ! InternetQueryOption( hURL, INTERNET_OPTION_URL, pszURL, &nSize ) )
+					pszURL[ 0 ] = 0;
+				pszURL[ nChars - 1 ] = 0;
+				m_sFinalURL.ReleaseBuffer();
+			}
+
 			DWORD nLength = 255;
 			BYTE nNull = 0;
 			if ( ! IsThreadEnabled() || ! HttpQueryInfo( hURL, HTTP_QUERY_STATUS_TEXT,

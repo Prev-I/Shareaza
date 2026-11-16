@@ -44,6 +44,7 @@
 #include "HostCache.h"
 #include "IEProtocol.h"
 #include "IPLists.h"
+#include "IPListUpdater.h"
 #include "Library.h"
 #include "LibraryBuilder.h"
 #include "Neighbours.h"
@@ -499,6 +500,7 @@ BOOL CShareazaApp::InitInstance()
 			Settings.Security.DefaultsVersion = 1;
 		}
 		IPLists.Load();
+		IPListUpdater.Start();
 		LoadTlsTrust();
 		AdultFilter.Load();
 		MessageFilter.Load();
@@ -582,6 +584,7 @@ int CShareazaApp::ExitInstance()
 
 		SplashStep( L"Disconnecting" );
 		VersionChecker.Stop();
+		IPListUpdater.Stop();	// before IPLists.Save: no list update runs after it
 		DiscoveryServices.Stop();
 		Network.Disconnect();
 

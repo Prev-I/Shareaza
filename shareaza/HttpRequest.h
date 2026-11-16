@@ -37,6 +37,7 @@ public:
 public:
 	void		Clear();
 	CString		GetURL() const;
+	CString		GetFinalURL() const;	// the address the response came from, after redirects
 	BOOL		SetURL(LPCTSTR pszURL);
 	void		AddHeader(LPCTSTR pszKey, LPCTSTR pszValue);
 	void		SetPostData(LPCVOID pBody, DWORD nBody);
@@ -59,6 +60,7 @@ public:
 protected:
 	HINTERNET	m_hInternet;
 	CString		m_sURL;
+	CString		m_sFinalURL;
 	CString		m_sRequestHeaders;
 	DWORD		m_nLimit;
 	int			m_nStatusCode;
