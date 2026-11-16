@@ -38,3 +38,6 @@ jobs:
 
         -   name: Build and run the range-set test
             run: g++ -std=c++14 -Wall -Wextra -Werror -include tests/ip-lists/minmax_trap.h -I shareaza -o /tmp/rset tests/ip-lists/test_range_set.cpp && /tmp/rset
+
+        -   name: Build and run the parser test
+            run: g++ -std=c++14 -Wall -Wextra -Werror -include tests/ip-lists/minmax_trap.h -I shareaza -o /tmp/parser tests/ip-lists/test_parser.cpp && /tmp/parser
