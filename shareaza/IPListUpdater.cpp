@@ -85,23 +85,72 @@ UINT RefusalString(IPList::Refusal nRefusal)
 	}
 }
 
-// Decompressed text goes to IPList::ParseText in whole lines, so a line split
-// between two chunks is parsed once, whole. Every byte counts against
-// IPList::kMaxInflated, shared by all the sinks of one file through nTotal.
+// A copy of the list with that GUID; false if there is none.
+bool FindList(const GUID& oGUID, CIPList& oOut)
+{
+	std::vector< CIPList > pLists;
+	IPLists.Snapshot( pLists );
+	for ( size_t i = 0 ; i < pLists.size() ; ++i )
+	{
+		if ( pLists[ i ].m_oGUID == oGUID )
+		{
+			oOut = pLists[ i ];
+			return true;
+		}
+	}
+	return false;
+}
+
+enum class Inflated
+{
+	OK,
+	Failed,			// not readable as gzip or zip
+	TooLarge,		// more than kMaxInflated bytes
+	Cancelled		// the thread was asked to stop
+};
+
+const uInt   kChunk   = 65536;	// bytes handed to the sink at a time
+const size_t kMaxLine = 65536;	// longest line kept across chunks
+
+// Text goes to IPList::ParseText in whole lines, so a line split between two
+// chunks is parsed once, whole. Every byte counts against IPList::kMaxInflated,
+// shared by all the sinks of one file through nTotal. A line longer than
+// kMaxLine is not kept: it counts as one rejected line and the input is skipped
+// to the next '\n'. Each Add first checks that pThread (if any) may continue.
 class CTextSink
 {
 public:
-	CTextSink(IPList::RangeSet& oOut, IPList::ParseStats& oStats, uint64_t& nTotal)
-		: m_oOut( oOut ), m_oStats( oStats ), m_nTotal( nTotal ) {}
+	CTextSink(IPList::RangeSet& oOut, IPList::ParseStats& oStats, uint64_t& nTotal,
+		const CThreadImpl* pThread)
+		: m_oOut( oOut ), m_oStats( oStats ), m_nTotal( nTotal ), m_pThread( pThread )
+		, m_bSkipping( false ), m_nStop( Inflated::OK ) {}
 
-	// False, adding nothing, when the content would exceed kMaxInflated.
+	// False, adding nothing, when the thread is asked to stop or the content
+	// would exceed kMaxInflated; Stop() then says which.
 	bool Add(const char* p, size_t n)
 	{
-		if ( n > IPList::kMaxInflated - m_nTotal )	// m_nTotal <= kMaxInflated
+		if ( m_pThread && ! m_pThread->IsThreadEnabled() )
+		{
+			m_nStop = Inflated::Cancelled;
 			return false;
+		}
+		if ( n > IPList::kMaxInflated - m_nTotal )	// m_nTotal <= kMaxInflated
+		{
+			m_nStop = Inflated::TooLarge;
+			return false;
+		}
 		m_nTotal += n;
 
 		const char* const pEnd = p + n;
+		if ( m_bSkipping )
+		{
+			const char* pEol = static_cast< const char* >( memchr( p, '\n', n ) );
+			if ( ! pEol )
+				return true;
+			p = pEol + 1;
+			m_bSkipping = false;
+		}
+
 		const char* pRest = NULL;				// just past the last '\n'
 		for ( const char* q = pEnd ; q > p ; )
 		{
@@ -113,20 +162,31 @@ public:
 		}
 		if ( ! pRest )
 		{
-			m_sCarry.append( p, n );
+			Carry( p, pEnd );
 			return true;
 		}
 
-		if ( m_sCarry.empty() )
+		if ( ! m_sCarry.empty() )
 		{
+			// Complete the carried line with this chunk's first line
+			const char* pEol = static_cast< const char* >(
+				memchr( p, '\n', static_cast< size_t >( pEnd - p ) ) );
+			const size_t nFirst = static_cast< size_t >( pEol - p );	// without '\n'
+			if ( m_sCarry.size() + nFirst > kMaxLine )
+			{
+				++m_oStats.rejected;
+			}
+			else
+			{
+				m_sCarry.append( p, nFirst + 1 );
+				IPList::ParseText( m_sCarry.data(), m_sCarry.size(), m_oOut, m_oStats );
+			}
+			m_sCarry.clear();
+			p = pEol + 1;
+		}
+		if ( pRest > p )
 			IPList::ParseText( p, static_cast< size_t >( pRest - p ), m_oOut, m_oStats );
-		}
-		else
-		{
-			m_sCarry.append( p, static_cast< size_t >( pRest - p ) );
-			IPList::ParseText( m_sCarry.data(), m_sCarry.size(), m_oOut, m_oStats );
-		}
-		m_sCarry.assign( pRest, static_cast< size_t >( pEnd - pRest ) );
+		Carry( pRest, pEnd );
 		return true;
 	}
 
@@ -136,26 +196,39 @@ public:
 		if ( ! m_sCarry.empty() )
 			IPList::ParseText( m_sCarry.data(), m_sCarry.size(), m_oOut, m_oStats );
 		std::string().swap( m_sCarry );
+		m_bSkipping = false;
 	}
+
+	Inflated Stop() const { return m_nStop; }
 
 private:
 	IPList::RangeSet&	m_oOut;
 	IPList::ParseStats&	m_oStats;
 	uint64_t&			m_nTotal;
+	const CThreadImpl*	m_pThread;
 	std::string			m_sCarry;
+	bool				m_bSkipping;	// dropping the rest of an overlong line
+	Inflated			m_nStop;
+
+	// Keeps [p, pEnd), the start of a line, unless the line grows past kMaxLine.
+	void Carry(const char* p, const char* pEnd)
+	{
+		const size_t n = static_cast< size_t >( pEnd - p );
+		if ( m_sCarry.size() + n > kMaxLine )
+		{
+			std::string().swap( m_sCarry );
+			++m_oStats.rejected;
+			m_bSkipping = true;
+		}
+		else
+		{
+			m_sCarry.append( p, n );
+		}
+	}
 
 	CTextSink(const CTextSink&);
 	CTextSink& operator=(const CTextSink&);
 };
-
-enum class Inflated
-{
-	OK,
-	Failed,			// not readable as gzip or zip
-	TooLarge		// more than kMaxInflated bytes
-};
-
-const uInt kChunk = 65536;
 
 // A gzip file, possibly of several members one after another.
 Inflated Gunzip(const BYTE* pData, DWORD nData, CTextSink& oSink)
@@ -179,7 +252,7 @@ Inflated Gunzip(const BYTE* pData, DWORD nData, CTextSink& oSink)
 		const size_t nOut = kChunk - oStream.avail_out;
 		if ( nOut && ! oSink.Add( &pOut[ 0 ], nOut ) )
 		{
-			nResult = Inflated::TooLarge;
+			nResult = oSink.Stop();
 			break;
 		}
 
@@ -277,11 +350,13 @@ int ZCALLBACK MemError(voidpf /*opaque*/, voidpf /*stream*/)
 	return 0;
 }
 
-// Every member of a zip file, each parsed as text. A member's size is checked
-// against what is left of kMaxInflated before it is read; minizip never returns
-// more than that declared size, and the sink counts what it does return.
+// Every member of a zip file, each parsed as text. Only the 32-bit minizip API
+// is used: the client may compile against either minizip header in the tree,
+// and both declare it alike. A member's declared size is checked against what
+// is left of kMaxInflated before it is read, and what is read must match it
+// (a zip64 size does not fit the 32-bit field, so it cannot match).
 Inflated Unzip(const BYTE* pData, DWORD nData, IPList::RangeSet& oOut,
-	IPList::ParseStats& oStats, uint64_t& nTotal)
+	IPList::ParseStats& oStats, uint64_t& nTotal, const CThreadImpl* pThread)
 {
 	CMemoryFile oFile = { pData, nData, 0 };
 	zlib_filefunc_def oFuncs =
@@ -298,8 +373,8 @@ Inflated Unzip(const BYTE* pData, DWORD nData, IPList::RangeSet& oOut,
 	int nError = unzGoToFirstFile( hZip );
 	for ( ; nError == UNZ_OK ; nError = unzGoToNextFile( hZip ) )
 	{
-		unz_file_info64 oInfo;
-		if ( unzGetCurrentFileInfo64( hZip, &oInfo, NULL, 0, NULL, 0, NULL, 0 ) != UNZ_OK )
+		unz_file_info oInfo;
+		if ( unzGetCurrentFileInfo( hZip, &oInfo, NULL, 0, NULL, 0, NULL, 0 ) != UNZ_OK )
 			break;
 		if ( oInfo.flag & 1 )			// encrypted
 			break;
@@ -311,19 +386,28 @@ Inflated Unzip(const BYTE* pData, DWORD nData, IPList::RangeSet& oOut,
 		if ( unzOpenCurrentFile( hZip ) != UNZ_OK )
 			break;
 
-		CTextSink oSink( oOut, oStats, nTotal );
+		CTextSink oSink( oOut, oStats, nTotal, pThread );
+		uint64_t nMember = 0;
+		bool bStopped = false;
 		int nRead = 0;
 		while ( ( nRead = unzReadCurrentFile( hZip, &pOut[ 0 ], kChunk ) ) > 0 )
 		{
+			nMember += static_cast< uint64_t >( nRead );
+			if ( nMember > oInfo.uncompressed_size )
+			{
+				bStopped = true;		// more than declared
+				break;
+			}
 			if ( ! oSink.Add( &pOut[ 0 ], static_cast< size_t >( nRead ) ) )
 			{
-				nResult = Inflated::TooLarge;
+				nResult = oSink.Stop();
+				bStopped = true;
 				break;
 			}
 		}
 		// Reports a CRC mismatch once the whole member has been read
 		const int nClose = unzCloseCurrentFile( hZip );
-		if ( nResult == Inflated::TooLarge || nRead < 0 || nClose != UNZ_OK )
+		if ( bStopped || nRead < 0 || nClose != UNZ_OK || nMember != oInfo.uncompressed_size )
 			break;
 		oSink.Flush();
 	}
@@ -332,6 +416,35 @@ Inflated Unzip(const BYTE* pData, DWORD nData, IPList::RangeSet& oOut,
 
 	unzClose( hZip );
 	return nResult;
+}
+
+// One file's content, by its first bytes: gzip, zip or text.
+Inflated ParseFile(const BYTE* pData, DWORD nData, IPList::RangeSet& oOut,
+	IPList::ParseStats& oStats, const CThreadImpl* pThread)
+{
+	uint64_t nTotal = 0;
+
+	if ( nData >= 2 && pData[ 0 ] == 0x1F && pData[ 1 ] == 0x8B )
+	{
+		CTextSink oSink( oOut, oStats, nTotal, pThread );
+		return Gunzip( pData, nData, oSink );
+	}
+	if ( nData >= 4 && pData[ 0 ] == 'P' && pData[ 1 ] == 'K' && pData[ 2 ] == 3 && pData[ 3 ] == 4 )
+	{
+		return Unzip( pData, nData, oOut, oStats, nTotal, pThread );
+	}
+
+	// Plain text, in chunks too, so a stop request is seen
+	CTextSink oSink( oOut, oStats, nTotal, pThread );
+	for ( DWORD nPos = 0 ; nPos < nData ; )
+	{
+		const DWORD nPart = ( nData - nPos < kChunk ) ? ( nData - nPos ) : kChunk;
+		if ( ! oSink.Add( reinterpret_cast< const char* >( pData + nPos ), nPart ) )
+			return oSink.Stop();
+		nPos += nPart;
+	}
+	oSink.Flush();
+	return Inflated::OK;
 }
 
 }	// namespace
@@ -371,9 +484,11 @@ void CIPListUpdater::Stop()
 		m_pQueue.clear();
 	}
 
-	// The thread cancels its own download when it sees the request (Fetch), so
-	// m_pRequest is only ever touched by the thread.
-	CloseThread();
+	// The thread cancels its own download and parsing when it sees the request
+	// (Fetch, LoadAndParse), so m_pRequest is only ever touched by the thread,
+	// and it is waited for without a timeout: it must never be terminated
+	// while it holds a lock (IPLists' file lock, Security.m_pSection, the heap).
+	CloseThread( INFINITE );
 }
 
 void CIPListUpdater::OnTimer60()
@@ -386,14 +501,14 @@ void CIPListUpdater::OnTimer60()
 		tStarted = m_tStarted;
 	}
 
-	Enqueue( IPLists.GetDue( static_cast< DWORD >( time( NULL ) ), tStarted ) );
+	Enqueue( IPLists.GetDue( static_cast< DWORD >( time( NULL ) ), tStarted ), false );
 }
 
 void CIPListUpdater::UpdateNow(const std::vector< GUID >& oLists)
 {
 	if ( ! oLists.empty() )
 	{
-		Enqueue( oLists );
+		Enqueue( oLists, true );
 		return;
 	}
 
@@ -406,10 +521,10 @@ void CIPListUpdater::UpdateNow(const std::vector< GUID >& oLists)
 		if ( pLists[ i ].m_pURLs.GetSize() > 0 )
 			pAll.push_back( pLists[ i ].m_oGUID );
 	}
-	Enqueue( pAll );
+	Enqueue( pAll, true );
 }
 
-void CIPListUpdater::Enqueue(const std::vector< GUID >& oLists)
+void CIPListUpdater::Enqueue(const std::vector< GUID >& oLists, bool bForced)
 {
 	{
 		CQuickLock oLock( m_pSection );
@@ -421,9 +536,21 @@ void CIPListUpdater::Enqueue(const std::vector< GUID >& oLists)
 			const GUID& oGUID = oLists[ i ];
 			if ( m_bBusy && m_oCurrent == oGUID )
 				continue;
-			if ( std::find( m_pQueue.begin(), m_pQueue.end(), oGUID ) != m_pQueue.end() )
-				continue;
-			m_pQueue.push_back( oGUID );
+			bool bQueued = false;
+			for ( size_t j = 0 ; j < m_pQueue.size() ; ++j )
+			{
+				if ( m_pQueue[ j ].oGUID == oGUID )
+				{
+					m_pQueue[ j ].bForced = m_pQueue[ j ].bForced || bForced;
+					bQueued = true;
+					break;
+				}
+			}
+			if ( ! bQueued )
+			{
+				const QueueItem oItem = { oGUID, bForced };
+				m_pQueue.push_back( oItem );
+			}
 		}
 	}
 
@@ -452,27 +579,25 @@ void CIPListUpdater::OnRun()
 	while ( IsThreadEnabled() )
 	{
 		GUID oGUID;
+		bool bForced;
 		{
 			CQuickLock oLock( m_pSection );
 			if ( m_pQueue.empty() )
 				break;
-			oGUID = m_pQueue.front();
+			oGUID = m_pQueue.front().oGUID;
+			bForced = m_pQueue.front().bForced;
 			m_pQueue.erase( m_pQueue.begin() );
 			m_oCurrent = oGUID;
 			m_bBusy = true;
 		}
 
-		// Read the list's URLs now: it may have changed or gone since it was queued
-		std::vector< CIPList > pLists;
-		IPLists.Snapshot( pLists );
-		for ( size_t i = 0 ; i < pLists.size() ; ++i )
+		// Read the list now: it may have changed or gone since it was queued.
+		// A list queued because it was due is skipped if it was disabled since.
+		CIPList oList;
+		if ( FindList( oGUID, oList ) && oList.m_pURLs.GetSize() > 0 &&
+			( bForced || oList.m_bEnabled ) )
 		{
-			if ( pLists[ i ].m_oGUID == oGUID )
-			{
-				if ( pLists[ i ].m_pURLs.GetSize() > 0 )
-					Update( pLists[ i ] );
-				break;
-			}
+			Update( oList );
 		}
 
 		CQuickLock oLock( m_pSection );
@@ -499,6 +624,11 @@ void CIPListUpdater::Update(const CIPList& oList)
 	if ( ! IsThreadEnabled() )
 		return;
 
+	// Removed while it was being fetched: nothing to record
+	CIPList oCurrent;
+	if ( ! FindList( oList.m_oGUID, oCurrent ) )
+		return;
+
 	if ( bOK )
 	{
 		oRanges.Finish();
@@ -514,6 +644,10 @@ void CIPListUpdater::Update(const CIPList& oList)
 
 	if ( bOK )
 	{
+		// Checked again: Stop waits for this thread without a timeout
+		if ( ! IsThreadEnabled() )
+			return;
+
 		std::shared_ptr< const IPList::RangeSet > pRanges =
 			std::make_shared< IPList::RangeSet >( std::move( oRanges ) );
 		if ( IPLists.SetRanges( oList.m_oGUID, pRanges, tNow ) )
@@ -523,6 +657,8 @@ void CIPListUpdater::Update(const CIPList& oList)
 				static_cast< DWORD >( pRanges->CountV4() + pRanges->CountV6() ) );
 			return;
 		}
+		if ( ! FindList( oList.m_oGUID, oCurrent ) )
+			return;		// removed meanwhile, not a failure
 		sError = LoadString( IDS_IPLIST_ERR_SAVE );
 	}
 
@@ -538,8 +674,11 @@ bool CIPListUpdater::Fetch(const CString& sURL, IPList::RangeSet& oRanges, IPLis
 		return false;
 	}
 
+	// CHttpRequest::SetURL compares the scheme case-sensitively
+	const CString sRequestURL = _T("https://") + sURL.Mid( 8 );
+
 	m_pRequest.Clear();
-	if ( ! IsThreadEnabled() || ! m_pRequest.SetURL( sURL ) )
+	if ( ! IsThreadEnabled() || ! m_pRequest.SetURL( sRequestURL ) )
 	{
 		sError = LoadString( IDS_IPLIST_ERR_NO_RESPONSE );
 		return false;
@@ -593,37 +732,15 @@ bool CIPListUpdater::Fetch(const CString& sURL, IPList::RangeSet& oRanges, IPLis
 		return false;
 	}
 
-	return LoadAndParse( *pResponse, oRanges, oStats, sError ) != FALSE;
+	return LoadAndParse( *pResponse, oRanges, oStats, sError, this ) != FALSE;
 }
 
 //////////////////////////////////////////////////////////////////////
 // CIPListUpdater file contents
 
-BOOL CIPListUpdater::LoadAndParse(const CBuffer& oData, IPList::RangeSet& oOut, IPList::ParseStats& oStats, CString& sError)
+BOOL CIPListUpdater::LoadAndParse(const CBuffer& oData, IPList::RangeSet& oOut, IPList::ParseStats& oStats, CString& sError, const CThreadImpl* pThread)
 {
-	const BYTE* pData = oData.m_pBuffer;
-	const DWORD nData = oData.m_nLength;
-	uint64_t nTotal = 0;
-	Inflated nResult;
-
-	if ( nData >= 2 && pData[ 0 ] == 0x1F && pData[ 1 ] == 0x8B )
-	{
-		CTextSink oSink( oOut, oStats, nTotal );
-		nResult = Gunzip( pData, nData, oSink );
-	}
-	else if ( nData >= 4 && pData[ 0 ] == 'P' && pData[ 1 ] == 'K' && pData[ 2 ] == 3 && pData[ 3 ] == 4 )
-	{
-		nResult = Unzip( pData, nData, oOut, oStats, nTotal );
-	}
-	else if ( nData > IPList::kMaxInflated )
-	{
-		nResult = Inflated::TooLarge;
-	}
-	else
-	{
-		IPList::ParseText( reinterpret_cast< const char* >( pData ), nData, oOut, oStats );
-		nResult = Inflated::OK;
-	}
+	const Inflated nResult = ParseFile( oData.m_pBuffer, oData.m_nLength, oOut, oStats, pThread );
 
 	switch ( nResult )
 	{
@@ -631,6 +748,9 @@ BOOL CIPListUpdater::LoadAndParse(const CBuffer& oData, IPList::RangeSet& oOut, 
 		return TRUE;
 	case Inflated::TooLarge:
 		sError = LoadString( IDS_IPLIST_ERR_INFLATED_TOO_LARGE );
+		return FALSE;
+	case Inflated::Cancelled:
+		sError.Empty();
 		return FALSE;
 	default:
 		sError = LoadString( IDS_IPLIST_ERR_DECOMPRESS );

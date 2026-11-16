@@ -269,7 +269,8 @@ void CHttpRequest::OnRun()
 			if ( ! InternetQueryOption( hURL, INTERNET_OPTION_URL, NULL, &nURL ) &&
 				GetLastError() == ERROR_INSUFFICIENT_BUFFER && nURL )
 			{
-				const DWORD nChars = nURL / sizeof( TCHAR ) + 1;
+				// nURL is in bytes; nURL + 1 characters is enough even if it were characters
+				const DWORD nChars = nURL + 1;
 				LPTSTR pszURL = m_sFinalURL.GetBuffer( nChars );
 				DWORD nSize = nChars * sizeof( TCHAR );
 				if ( ! InternetQueryOption( hURL, INTERNET_OPTION_URL, pszURL, &nSize ) )

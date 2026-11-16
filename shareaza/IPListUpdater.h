@@ -66,12 +66,20 @@ public:
 	// (1F 8B) and zip (PK 03 04) are decompressed, every zip member parsed;
 	// anything else is parsed as text. Decompressed content is limited to
 	// IPList::kMaxInflated bytes in total. Does not Finish oOut. On failure
-	// returns FALSE with the reason in sError.
-	static BOOL LoadAndParse(const CBuffer& oData, IPList::RangeSet& oOut, IPList::ParseStats& oStats, CString& sError);
+	// returns FALSE with the reason in sError. Every 64 KiB it gives up,
+	// returning FALSE with sError empty, once pThread (if not NULL) is asked
+	// to stop.
+	static BOOL LoadAndParse(const CBuffer& oData, IPList::RangeSet& oOut, IPList::ParseStats& oStats, CString& sError, const CThreadImpl* pThread = NULL);
 
 protected:
+	struct QueueItem
+	{
+		GUID	oGUID;
+		bool	bForced;		// UpdateNow: fetched even if disabled meanwhile
+	};
+
 	CCriticalSection	m_pSection;		// guards the members below
-	std::vector< GUID >	m_pQueue;		// lists waiting, in order
+	std::vector< QueueItem > m_pQueue;	// lists waiting, in order
 	GUID				m_oCurrent;		// the list being updated, if m_bBusy
 	bool				m_bBusy;
 	bool				m_bStarted;		// between Start and Stop
@@ -79,7 +87,7 @@ protected:
 
 	CHttpRequest		m_pRequest;		// worker thread only
 
-	void	Enqueue(const std::vector< GUID >& oLists);
+	void	Enqueue(const std::vector< GUID >& oLists, bool bForced);
 	void	StartThread();
 	void	Update(const CIPList& oList);
 	bool	Fetch(const CString& sURL, IPList::RangeSet& oRanges, IPList::ParseStats& oStats, CString& sError);
