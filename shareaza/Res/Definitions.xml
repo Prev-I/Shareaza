@@ -472,6 +472,10 @@
 	<resource code="33326" id="ID_SCHEDULER_DEACTIVATE"/>
 	<resource code="33327" id="ID_SCHEDULER_ADD"/>
 	<resource code="33328" id="ID_SCHEDULER_REMOVE_ALL"/>
+	<resource code="33329" id="ID_SECURITY_ADD_LIST"/>
+	<resource code="33330" id="ID_SECURITY_UPDATE_LISTS"/>
+	<resource code="33331" id="ID_SECURITY_LIST_REMOVE"/>
+	<resource code="33332" id="ID_SECURITY_LIST_ENABLE"/>
 	<resource code="57344" id="AFX_IDS_APP_TITLE"/>
 	<resource code="57345" id="AFX_IDS_IDLEMESSAGE"/>
 	<resource code="57649" id="ID_WINDOW_ARRANGE"/>

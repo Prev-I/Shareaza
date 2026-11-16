@@ -625,6 +625,7 @@
     <ClCompile Include="DlgGraphList.cpp" />
     <ClCompile Include="DlgHelp.cpp" />
     <ClCompile Include="DlgHitColumns.cpp" />
+    <ClCompile Include="DlgIPListAdd.cpp" />
     <ClCompile Include="DlgIrcInput.cpp" />
     <ClCompile Include="DlgLanguage.cpp" />
     <ClCompile Include="DlgMediaVis.cpp" />
@@ -1058,6 +1059,7 @@
     <ClInclude Include="DlgGraphList.h" />
     <ClInclude Include="DlgHelp.h" />
     <ClInclude Include="DlgHitColumns.h" />
+    <ClInclude Include="DlgIPListAdd.h" />
     <ClInclude Include="DlgIrcInput.h" />
     <ClInclude Include="DlgLanguage.h" />
     <ClInclude Include="DlgMediaVis.h" />

@@ -23,6 +23,8 @@
 
 #include "WndPanel.h"
 
+#include <vector>
+
 class CSecureRule;
 
 
@@ -36,14 +38,28 @@ public:
 
 protected:
 	CCoolBarCtrl	m_wndToolBar;
-	CListCtrl		m_wndList;
+	CListCtrl		m_wndList;			// My rules, below
+	CListCtrl		m_wndLists;			// IP lists, above
 	CImageList		m_gdiImageList;
 	CLiveListSizer	m_pSizer;
 	DWORD			tLastUpdate;
+	std::vector< GUID > m_pListGUIDs;	// the list shown in each row of m_wndLists
+	int				m_nListsSize;		// height of the IP lists pane (pixels)
+	BOOL			m_bListsFocus;		// the IP lists pane had the focus last
+	BOOL			m_bListsUpdating;	// m_wndLists is being refilled: its notifications are ours
 
 	void			Update(int nColumn = -1, BOOL bSort = TRUE);
 	CSecureRule*	GetItem(int nItem);
 	virtual void	OnSkinChange();
+
+	// IP lists pane
+	void			UpdateLists();
+	std::vector< GUID > GetSelectedLists() const;
+	CRect			GetPanesRect() const;			// client area above the toolbar
+	int				GetListsHeight(const CRect& rcPanes) const;
+	CRect			GetSplitRect() const;
+	void			LayoutPanes();
+	void			DoSizeLists();
 
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 
@@ -73,8 +89,22 @@ protected:
 	afx_msg void OnUpdateSecurityExport(CCmdUI* pCmdUI);
 	afx_msg void OnSecurityExport();
 	afx_msg void OnSecurityImport();
+	afx_msg void OnPaint();
+	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
+	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnItemChangedLists(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnSetFocusLists(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnSetFocusRules(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnSecurityAddList();
+	afx_msg void OnUpdateSecurityUpdateLists(CCmdUI* pCmdUI);
+	afx_msg void OnSecurityUpdateLists();
+	afx_msg void OnUpdateSecurityListRemove(CCmdUI* pCmdUI);
+	afx_msg void OnSecurityListRemove();
+	afx_msg void OnUpdateSecurityListEnable(CCmdUI* pCmdUI);
+	afx_msg void OnSecurityListEnable();
 
 	DECLARE_MESSAGE_MAP()
 };
 
 #define IDC_RULES		100
+#define IDC_IPLISTS		101

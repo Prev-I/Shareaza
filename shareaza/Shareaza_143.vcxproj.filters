@@ -825,6 +825,9 @@
     <ClCompile Include="DlgHitColumns.cpp">
       <Filter>Source Files\Dialogs</Filter>
     </ClCompile>
+    <ClCompile Include="DlgIPListAdd.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
     <ClCompile Include="DlgIrcInput.cpp">
       <Filter>Source Files\Dialogs</Filter>
     </ClCompile>
@@ -2056,6 +2059,9 @@
       <Filter>Header Files\Dialogs</Filter>
     </ClInclude>
     <ClInclude Include="DlgHitColumns.h">
+      <Filter>Header Files\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgIPListAdd.h">
       <Filter>Header Files\Dialogs</Filter>
     </ClInclude>
     <ClInclude Include="DlgIrcInput.h">

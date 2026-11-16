@@ -205,6 +205,7 @@
 #define IDR_XSL_DCFileListStyle         351
 #define IDR_XSL_ShareazaFileListStyle   352
 #define IDD_SETTINGS_TLS                353
+#define IDD_IPLIST_ADD                  354
 #define IDR_CHANSFRAME                  991
 #define IDD_DOWNLOAD_ACTIONS            993
 #define IDR_USERSFRAME                  995
@@ -831,6 +832,18 @@
 #define IDC_TLS_POLICY                  1631
 #define IDC_TLS_POLICY_WARNING          1632
 #define IDC_TLS_FORGET                  1633
+#define IDC_IPLIST_CAT_0                1634
+#define IDC_IPLIST_CAT_1                1635
+#define IDC_IPLIST_CAT_2                1636
+#define IDC_IPLIST_CAT_3                1637
+#define IDC_IPLIST_CAT_4                1638
+#define IDC_IPLIST_NOTE_0               1639
+#define IDC_IPLIST_NOTE_1               1640
+#define IDC_IPLIST_NOTE_2               1641
+#define IDC_IPLIST_NOTE_3               1642
+#define IDC_IPLIST_NOTE_4               1643
+#define IDC_IPLIST_NAME                 1644
+#define IDC_IPLIST_URL                  1645
 #define IDS_FILTER_DELETE_CONFIRM       7000
 #define IDS_SCHEMAS                     7001
 #define IDS_MULTIPLE_VALUES             7002
@@ -1620,6 +1633,11 @@
 #define IDS_SECURITY_EXPORT_FAILED      20296
 #define IDS_IPLIST_IMPORT_FAILED        20297
 #define IDS_IPLIST_IMPORT_TOO_LARGE     20298
+#define IDS_IPLIST_HTTPS_ONLY           20299
+#define IDS_IPLIST_REMOVE_CONFIRM       20300
+#define IDS_IPLIST_STATUS_IMPORTED      20301
+#define IDS_IPLIST_STATUS_FAILED        20302
+#define IDS_IPLIST_STATUS_PENDING       20303
 #define ID_HELP_ABOUT                   32772
 #define ID_HELP_VERSION_CHECK           32773
 #define ID_CHECKMARK                    32774
@@ -2002,15 +2020,19 @@
 #define ID_SCHEDULER_DEACTIVATE         33326
 #define ID_SCHEDULER_ADD                33327
 #define ID_SCHEDULER_REMOVE_ALL         33328
+#define ID_SECURITY_ADD_LIST            33329
+#define ID_SECURITY_UPDATE_LISTS        33330
+#define ID_SECURITY_LIST_REMOVE         33331
+#define ID_SECURITY_LIST_ENABLE         33332
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        354
-#define _APS_NEXT_COMMAND_VALUE         33329
-#define _APS_NEXT_CONTROL_VALUE         1634
+#define _APS_NEXT_RESOURCE_VALUE        355
+#define _APS_NEXT_COMMAND_VALUE         33333
+#define _APS_NEXT_CONTROL_VALUE         1646
 #define _APS_NEXT_SYMED_VALUE           104
 #endif
 #endif

@@ -861,6 +861,32 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,135,200,50,14
 END
 
+IDD_IPLIST_ADD DIALOGEX 0, 0, 300, 284
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Add IP List"
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    LTEXT           "Tick the lists to add. Each one is downloaded over HTTPS and updated once a day; none is added unless you tick it.",IDC_STATIC,5,5,290,16
+    CONTROL         "",IDC_IPLIST_CAT_0,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,5,25,290,10
+    LTEXT           "",IDC_IPLIST_NOTE_0,17,36,278,18
+    CONTROL         "",IDC_IPLIST_CAT_1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,5,55,290,10
+    LTEXT           "",IDC_IPLIST_NOTE_1,17,66,278,18
+    CONTROL         "",IDC_IPLIST_CAT_2,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,5,85,290,10
+    LTEXT           "",IDC_IPLIST_NOTE_2,17,96,278,18
+    CONTROL         "",IDC_IPLIST_CAT_3,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,5,115,290,10
+    LTEXT           "",IDC_IPLIST_NOTE_3,17,126,278,18
+    CONTROL         "",IDC_IPLIST_CAT_4,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,5,145,290,10
+    LTEXT           "",IDC_IPLIST_NOTE_4,17,156,278,18
+    GROUPBOX        "Your own list",IDC_STATIC,5,178,290,80,WS_GROUP
+    LTEXT           "&Name:",IDC_STATIC,15,192,40,12,SS_CENTERIMAGE | NOT WS_GROUP
+    EDITTEXT        IDC_IPLIST_NAME,60,192,225,12,ES_AUTOHSCROLL
+    LTEXT           "&URL:",IDC_STATIC,15,210,40,12,SS_CENTERIMAGE | NOT WS_GROUP
+    EDITTEXT        IDC_IPLIST_URL,60,210,225,12,ES_AUTOHSCROLL
+    LTEXT           "Accepted formats: PeerGuardian (.p2p), eMule (ipfilter.dat), Gnucleus (.net), CIDR, plain addresses and Spamhaus DROP JSON, as text, gzip or zip. The URL must start with https://.",IDC_STATIC,15,228,270,24
+    DEFPUSHBUTTON   "&Add",IDOK,190,264,50,14,WS_GROUP
+    PUSHBUTTON      "Cancel",IDCANCEL,245,264,50,14
+END
+
 IDD_FILE_COPY DIALOGEX 0, 0, 217, 194
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Copy Files|Move Files"
@@ -2278,6 +2304,14 @@ BEGIN
         BOTTOMMARGIN, 213
     END
 
+    IDD_IPLIST_ADD, DIALOG
+    BEGIN
+        LEFTMARGIN, 5
+        RIGHTMARGIN, 295
+        TOPMARGIN, 5
+        BOTTOMMARGIN, 278
+    END
+
     IDD_FILE_COPY, DIALOG
     BEGIN
         LEFTMARGIN, 7
@@ -3490,6 +3524,11 @@ BEGIN
     IDS_SECURITY_EXPORT_FAILED "%s could not be written."
     IDS_IPLIST_IMPORT_FAILED "%s could not be imported: %s"
     IDS_IPLIST_IMPORT_TOO_LARGE "The file is larger than 64 MB."
+    IDS_IPLIST_HTTPS_ONLY   "IP lists are downloaded over HTTPS only: the URL must start with https://."
+    IDS_IPLIST_REMOVE_CONFIRM "Remove the selected IP lists? Their downloaded copies are deleted too."
+    IDS_IPLIST_STATUS_IMPORTED "Imported"
+    IDS_IPLIST_STATUS_FAILED "Failed: %s"
+    IDS_IPLIST_STATUS_PENDING "Not downloaded yet"
 END
 
 STRINGTABLE 
@@ -5105,6 +5144,10 @@ END
 STRINGTABLE 
 BEGIN
     ID_SCHEDULER_REMOVE_ALL "Removes all scheduled tasks."
+    ID_SECURITY_ADD_LIST    "Add IP block lists from the catalogue, or your own list from an https:// address..."
+    ID_SECURITY_UPDATE_LISTS "Download the selected IP lists now, or all of them when none is selected."
+    ID_SECURITY_LIST_REMOVE "Remove the selected IP lists."
+    ID_SECURITY_LIST_ENABLE "Turn the selected IP lists on or off."
 END
 
 #endif    // English resources
