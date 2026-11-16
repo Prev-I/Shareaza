@@ -39,6 +39,7 @@ static char THIS_FILE[]=__FILE__;
 
 CIPListUpdater IPListUpdater;
 
+// The Windows oracle (oracle-windows.yml) lists these hosts; update it too.
 const CatalogueEntry kCatalogue[ 5 ] =
 {
 	{ _T("Spamhaus DROP"), IDS_IPLIST_NOTE_SPAMHAUS,

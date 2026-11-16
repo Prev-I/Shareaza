@@ -31,8 +31,8 @@ permissions:
 jobs:
     oracle:
         runs-on: windows-2022
-        # Eight client runs of about 7 minutes each, with headroom for the install and the checks.
-        timeout-minutes: 80
+        # Eight client runs of about 7 minutes each, one of them longer, with headroom for the install and the checks.
+        timeout-minutes: 85
         strategy:
             fail-fast: false
             matrix:
@@ -204,7 +204,10 @@ jobs:
                 if ($b.Length -lt 10) { throw "$file is $($b.Length) bytes, too short for a rule count" }
                 $version = [BitConverter]::ToInt32($b, 0)
                 $count = [uint32][BitConverter]::ToUInt16($b, 8)
-                if ($count -eq 0xFFFF) { $count = [BitConverter]::ToUInt32($b, 10) }
+                if ($count -eq 0xFFFF) {
+                    if ($b.Length -lt 14) { throw "$file is $($b.Length) bytes, too short for its DWORD rule count" }
+                    $count = [BitConverter]::ToUInt32($b, 10)
+                }
                 $defaults = Get-RegValue "$script:ShareazaKey\Security" 'DefaultsVersion'
                 $line = "run $Name`: Security.dat $($b.Length) bytes, version $version, $count rule(s); Security\DefaultsVersion $defaults"
                 $line
@@ -244,7 +247,7 @@ jobs:
                 Remove-Item gwc-requests.jsonl   # the readiness probe is not a client request
                 # A helper the run steps share: start Shareaza, wait for a query, watch, close it cleanly.
                 @'
-                param([string] $Name, [switch] $ExpectIPv6, [switch] $Resize, [switch] $ExpectRTL, [switch] $RequireQuery)
+                param([string] $Name, [switch] $ExpectIPv6, [switch] $Resize, [switch] $ExpectRTL, [switch] $RequireQuery, [double] $Hours = 0.015)
                 $ErrorActionPreference = 'Stop'
                 $before = if (Test-Path gwc-requests.jsonl) { @(Get-Content gwc-requests.jsonl | Where-Object { $_ -match '"/gwc/\?' }).Count } else { 0 }
                 $app = (Get-ItemProperty 'HKCU:\Software\Shareaza\Shareaza').Path
@@ -259,7 +262,7 @@ jobs:
                 }
                 foreach ($i in 1..36) { if ((Test-Path gwc-requests.jsonl) -and @(Get-Content gwc-requests.jsonl | Where-Object { $_ -match '"/gwc/\?' }).Count -gt $before) { break }; Start-Sleep 5 }
                 if ($RequireQuery -and (-not (Test-Path gwc-requests.jsonl) -or @(Get-Content gwc-requests.jsonl | Where-Object { $_ -match '"/gwc/\?' }).Count -le $before)) { throw "${Name}: the client sent no new cache request" }
-                & "$env:KIT\Watch-Oracle.ps1" -CacheUrl 'http://127.0.0.1:8080/gwc/' -Hours 0.015 -StatsEveryMinutes 1 -WorkDir $env:WORK
+                & "$env:KIT\Watch-Oracle.ps1" -CacheUrl 'http://127.0.0.1:8080/gwc/' -Hours $Hours -StatsEveryMinutes 1 -WorkDir $env:WORK
                 # While running: nothing visible in the shared folders.
                 $files = @(Get-ChildItem -File -Recurse "$env:WORK\shared" -ErrorAction SilentlyContinue)
                 $files | ForEach-Object { "shared: $($_.FullName)" }
@@ -569,7 +572,7 @@ jobs:
             # 60 rules of the old DefaultSecurity.dat, and no Security\DefaultsVersion is set yet.
             # Prepared as a hub on 6347 like run 2, so the collect checks of the last run still hold.
             if: env.HAS_EMPTY_SECURITY == '1'
-            timeout-minutes: 12
+            timeout-minutes: 15
             run: |
                 $ErrorActionPreference = 'Stop'
                 & "$env:KIT\Prepare-Oracle.ps1" -CacheUrl 'http://127.0.0.1:8080/gwc/' -Mode Hub -Port 6347 -WorkDir $env:WORK
@@ -578,19 +581,29 @@ jobs:
                 if ($null -ne $kit.Defaults) { throw "Prepare-Oracle.ps1 left Security\DefaultsVersion $($kit.Defaults)" }
                 # The last DefaultSecurity.dat upstream shipped, from the history: the checkout is shallow.
                 $old = 'ec36d58490f81c1448020e74327e02f39c9f7c97'
-                & git fetch --no-tags --depth=1 origin $old
-                if ($LASTEXITCODE -ne 0) { throw "could not fetch commit $old" }
                 $target = Join-Path $kit.UserData 'Data\Security.dat'
+                # git writes to stderr even when it succeeds, which 'Stop' would turn into an error
+                # (OracleCommon.ps1, Invoke-Native): judge both commands by their exit code alone.
+                # The sparse checkout is a blob:none partial clone; cat-file fetches the blob it lacks
+                # from origin by itself, and the size, version and count checks below catch anything else.
+                $ErrorActionPreference = 'Continue'
+                & git fetch --quiet --no-tags --depth=1 origin $old
+                $fetchCode = $LASTEXITCODE
                 # Through cmd.exe: PowerShell 5.1 would re-encode the bytes of a redirected native output.
-                & cmd.exe /c "git cat-file blob ${old}:Data/DefaultSecurity.dat > `"$target`""
-                if ($LASTEXITCODE -ne 0) { throw 'could not write the old DefaultSecurity.dat' }
+                if ($fetchCode -eq 0) { & cmd.exe /c "git cat-file blob ${old}:Data/DefaultSecurity.dat > `"$target`"" }
+                $catCode = $LASTEXITCODE
+                $ErrorActionPreference = 'Stop'
+                if ($fetchCode -ne 0) { throw "could not fetch commit $old (exit code $fetchCode)" }
+                if ($catCode -ne 0) { throw "could not write the old DefaultSecurity.dat (exit code $catCode)" }
                 $b = [IO.File]::ReadAllBytes($target)
                 $version = [BitConverter]::ToInt32($b, 0)
                 $count = [BitConverter]::ToUInt16($b, 8)
                 "planted the old shipped rules: $($b.Length) bytes, version $version, $count rule(s)"
                 Add-Content -Path "$env:WORK\security-rules.txt" -Value "run migration, before: Security.dat $($b.Length) bytes, version $version, $count rule(s)"
                 if ($b.Length -ne 17976 -or $version -ne 5 -or $count -ne 60) { throw 'the planted file is not the old DefaultSecurity.dat (17976 bytes, version 5, 60 rules)' }
-                .\run-client.ps1 -Name migration
+                # Three minutes of watching, not one: the IP list updater starts its timer 120 s after
+                # startup, so its path with no list runs at least once before the checks.
+                .\run-client.ps1 -Name migration -Hours 0.05
                 .\check-security-rules.ps1 -Name migration
 
         -   name: Prepare must refuse while a restore is unfinished
@@ -648,7 +661,8 @@ jobs:
                 if (-not ($log | Select-String -SimpleMatch 'port 6347.')) { Fail 'the last run did not listen on the prepared port 6347' }
                 if ($log | Select-String -SimpleMatch 'MyTorrents') { Fail 'the client touched the private torrent folder' }
                 if ($env:HAS_EMPTY_SECURITY -eq '1') {
-                    # No IP list was ever fetched: no update line in the log (IDS_IPLIST_LOG_UPDATED, _FAILED)...
+                    # No IP list was ever fetched: no update line (IDS_IPLIST_LOG_UPDATED, _FAILED) in the
+                    # last run's log, nor in any run's log below...
                     $fetched = $log | Select-String -Pattern 'IP list .+ updated'
                     if ($fetched) { Fail "the client fetched an IP list by itself: $fetched" }
                     # ...and in every run's data folder, kept under runs\, no list and no cached ranges.
@@ -662,11 +676,20 @@ jobs:
                             $b = [IO.File]::ReadAllBytes($f)
                             if ($b.Length -lt 6) { Fail "$f is $($b.Length) bytes, too short for a list count" }
                             $lists = [uint32][BitConverter]::ToUInt16($b, 4)
-                            if ($lists -eq 0xFFFF) { $lists = [BitConverter]::ToUInt32($b, 6) }
+                            if ($lists -eq 0xFFFF) {
+                                if ($b.Length -lt 10) { Fail "$f is $($b.Length) bytes, too short for its DWORD list count" }
+                                $lists = [BitConverter]::ToUInt32($b, 6)
+                            }
                             "$f`: version $([BitConverter]::ToInt32($b, 0)), $lists list(s)"
                             if ($lists -ne 0) { Fail "$f holds $lists IP list(s), not 0" }
                         } else {
                             "$f`: absent"
+                        }
+                        foreach ($name in 'Shareaza.log', 'Shareaza.old.log') {
+                            $runLog = Join-Path $d.FullName $name
+                            if (-not (Test-Path $runLog)) { continue }
+                            $fetched = Get-Content -Encoding Unicode $runLog | Select-String -Pattern 'IP list .+ updated'
+                            if ($fetched) { Fail "the client fetched an IP list by itself ($runLog): $fetched" }
                         }
                         $cached = @(Get-ChildItem -File -Recurse (Join-Path $d.FullName 'IPLists') -ErrorAction SilentlyContinue)
                         if ($cached) { Fail "IP list ranges were cached: $($cached.FullName -join ', ')" }
