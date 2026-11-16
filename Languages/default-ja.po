@@ -4750,6 +4750,10 @@ msgstr "Shareazaも新しいバージョンを検出しました。"
 msgid "Download Properties"
 msgstr "プロフィールを編集"
 
+#: string;8015
+msgid "Release notes"
+msgstr "リリースノート"
+
 #: string;8060
 msgid "Hub/Ultrapeer mode with %lu neighbour(s). %s in local library."
 msgstr "ハブ/ウルトラピアモード 近隣接続 %lu, 共有 %s"
@@ -5410,7 +5414,7 @@ msgid "Hub neighbour %s won't accept us as a hub, closing connection."
 msgstr "ハブ近隣 %s がハブとして受け付けない為接続を閉じています"
 
 #: string;16153
-msgid "Connecting neighbour %s falling back to shielded leaf mode."
+msgid "Accepted neighbour %s as a shielded leaf."
 msgstr "保護されたリーフノードへ退行している近隣 %s へ接続中です"
 
 #: string;16154

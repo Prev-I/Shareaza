@@ -4673,6 +4673,10 @@ msgstr "Yeni bir Shareaza sürümü henüz yoktur."
 msgid "Download Properties"
 msgstr "İndirme Özellikleri"
 
+#: string;8015
+msgid "Release notes"
+msgstr "Sürüm notları"
+
 #: string;8060
 msgid "Hub/Ultrapeer mode with %lu neighbour(s). %s in local library."
 msgstr "%lu komşusu ile Hub/Ultrapeer mod.  %s yerel kütüphanede."
@@ -5330,7 +5334,7 @@ msgid "Hub neighbour %s won't accept us as a hub, closing connection."
 msgstr "Hub %s komşu bizi hub olarak kabul etmeyecek, bağlantı kapatılıyor."
 
 #: string;16153
-msgid "Connecting neighbour %s falling back to shielded leaf mode."
+msgid "Accepted neighbour %s as a shielded leaf."
 msgstr "%s komşusu güvenlik duvarı arkasındaki eş durumuna geri dönüyor."
 
 #: string;16154

@@ -4762,6 +4762,10 @@ msgstr "Nessuna nuova versione di Shareaza rilevata."
 msgid "Download Properties"
 msgstr "Proprietà del download"
 
+#: string;8015
+msgid "Release notes"
+msgstr "Note di rilascio"
+
 #: string;8060
 msgid "Hub/Ultrapeer mode with %lu neighbour(s). %s in local library."
 msgstr "Modalità Hub/Ultrapeer con %lu vicino(i). %s nella libreria locale."
@@ -5422,8 +5426,8 @@ msgid "Hub neighbour %s won't accept us as a hub, closing connection."
 msgstr "L'host hub %s non ti accetta come hub, chiusura della connessione."
 
 #: string;16153
-msgid "Connecting neighbour %s falling back to shielded leaf mode."
-msgstr "La connessione con l'host %s caduta a causa della modalità leaf protetta."
+msgid "Accepted neighbour %s as a shielded leaf."
+msgstr "Connessione dal leaf %s accettata in modalità leaf protetta."
 
 #: string;16154
 msgid "Hub connection established, closing peer connections."
@@ -5451,7 +5455,7 @@ msgstr "Chiudo la connessione con l'host non-G2 %s."
 
 #: string;16191
 msgid "Received a packet from %s for %s which excess query limits, ignoring."
-msgstr ""
+msgstr "Ricevuto da %s un pacchetto per %s oltre il limite di ricerche (una ogni 5 secondi per indirizzo), ignorato."
 
 #: string;16192
 msgid "Neighbour %s forwarded a packet of excessive size, dropping connection."
@@ -5495,7 +5499,7 @@ msgstr "Pacchetto di richiesta malformattato ricevuto da %s, ignorato."
 
 #: string;16202
 msgid "Received a malformatted query hit packet from %s, ignoring."
-msgstr "Pacchetto di richiesta malformattato ricevuto da %s, ignorato."
+msgstr "Ricevuto un pacchetto di risposta (query hit) malformato da %s, ignorato."
 
 #: string;16203
 msgid "Neighbour %s forwarded a push packet with invalid length, ignoring."

@@ -4687,6 +4687,10 @@ msgstr "Aucune mise à jour n'est disponible."
 msgid "Download Properties"
 msgstr "Propriétés du téléchargement"
 
+#: string;8015
+msgid "Release notes"
+msgstr "Notes de version"
+
 #: string;8060
 msgid "Hub/Ultrapeer mode with %lu neighbour(s). %s in local library."
 msgstr "En mode Hub/Ultrapair avec %lu voisin(s). %s dans votre bibliothèque locale."
@@ -5344,7 +5348,7 @@ msgid "Hub neighbour %s won't accept us as a hub, closing connection."
 msgstr "Le « hub » voisin %s ne veut pas nous accepter comme « hub », fermeture de la connexion."
 
 #: string;16153
-msgid "Connecting neighbour %s falling back to shielded leaf mode."
+msgid "Accepted neighbour %s as a shielded leaf."
 msgstr "Connexion au voisin %s, retour en mode « leaf » protégé."
 
 #: string;16154

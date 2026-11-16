@@ -4746,6 +4746,10 @@ msgstr "No new Shareaza version detected."
 msgid "Download Properties"
 msgstr "Download Properties"
 
+#: string;8015
+msgid "Release notes"
+msgstr "Väljalaskemärkmed"
+
 #: string;8060
 msgid "Hub/Ultrapeer mode with %lu neighbour(s). %s in local library."
 msgstr "Hub/Ultrapeer mode with %lu neighbour(s).  %s kohalikus raamatukogus."
@@ -5406,7 +5410,7 @@ msgid "Hub neighbour %s won't accept us as a hub, closing connection."
 msgstr "Jaotur %s ei aktsepteeri meid jaoturina, sulgen ühenduse."
 
 #: string;16153
-msgid "Connecting neighbour %s falling back to shielded leaf mode."
+msgid "Accepted neighbour %s as a shielded leaf."
 msgstr "Ühendan %s langen tagasi kaitstud leaf mode."
 
 #: string;16154

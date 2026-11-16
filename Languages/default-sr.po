@@ -4750,6 +4750,10 @@ msgstr "Нема нових Схареаза верзији откривена."
 msgid "Download Properties"
 msgstr "Podešavanja Skidam"
 
+#: string;8015
+msgid "Release notes"
+msgstr "Napomene o izdanju"
+
 #: string;8060
 msgid "Hub/Ultrapeer mode with %lu neighbour(s). %s in local library."
 msgstr "Hub/Ultrapeer način sa %lu suseda.%s u vašoj kolekciji."
@@ -5410,7 +5414,7 @@ msgid "Hub neighbour %s won't accept us as a hub, closing connection."
 msgstr "Hub sused %s vas ne prihvata kao hub, prekidam vezu."
 
 #: string;16153
-msgid "Connecting neighbour %s falling back to shielded leaf mode."
+msgid "Accepted neighbour %s as a shielded leaf."
 msgstr "Spojeni sused %s prelazi u zaštićeni leaf način."
 
 #: string;16154

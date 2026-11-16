@@ -4036,6 +4036,10 @@ msgstr ""
 msgid "Download Properties"
 msgstr ""
 
+#: string;8015
+msgid "Release notes"
+msgstr ""
+
 #: string;8060
 msgid "Hub/Ultrapeer mode with %lu neighbour(s). %s in local library."
 msgstr ""
@@ -4693,7 +4697,7 @@ msgid "Hub neighbour %s won't accept us as a hub, closing connection."
 msgstr ""
 
 #: string;16153
-msgid "Connecting neighbour %s falling back to shielded leaf mode."
+msgid "Accepted neighbour %s as a shielded leaf."
 msgstr ""
 
 #: string;16154

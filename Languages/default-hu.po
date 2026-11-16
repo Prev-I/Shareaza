@@ -4723,6 +4723,10 @@ msgstr "Nem találtam frissebb Shareaza verziót."
 msgid "Download Properties"
 msgstr "Letöltés tulajdonságai"
 
+#: string;8015
+msgid "Release notes"
+msgstr "Kiadási megjegyzések"
+
 #: string;8060
 msgid "Hub/Ultrapeer mode with %lu neighbour(s). %s in local library."
 msgstr "Hub/Ultrapeer mód %lu szomszéddal.  %s a helyi könyvtárban."
@@ -5383,7 +5387,7 @@ msgid "Hub neighbour %s won't accept us as a hub, closing connection."
 msgstr "A %s hub nem fogad el minket, mint hub. Kapcsolat megszakítása."
 
 #: string;16153
-msgid "Connecting neighbour %s falling back to shielded leaf mode."
+msgid "Accepted neighbour %s as a shielded leaf."
 msgstr "Kapcsolódás: %s, visszatérés álcázott(shielded) leaf módba."
 
 #: string;16154
