@@ -34,7 +34,7 @@ jobs:
                 persist-credentials: false
 
         -   name: Build and run the reserved-address test
-            run: g++ -std=c++14 -Wall -Wextra -Werror -I shareaza -o /tmp/rsv tests/ip-lists/test_reserved.cpp && /tmp/rsv
+            run: g++ -std=c++14 -Wall -Wextra -Werror -include tests/ip-lists/minmax_trap.h -I shareaza -o /tmp/rsv tests/ip-lists/test_reserved.cpp && /tmp/rsv
 
         -   name: Build and run the range-set test
-            run: g++ -std=c++14 -Wall -Wextra -Werror -I shareaza -o /tmp/rset tests/ip-lists/test_range_set.cpp && /tmp/rset
+            run: g++ -std=c++14 -Wall -Wextra -Werror -include tests/ip-lists/minmax_trap.h -I shareaza -o /tmp/rset tests/ip-lists/test_range_set.cpp && /tmp/rset

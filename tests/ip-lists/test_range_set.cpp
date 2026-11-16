@@ -123,6 +123,11 @@ static bool BruteForceV6( uint16_t g0, uint16_t g6 )
 		if ( s.ContainsV6( A6( g0, 0, 0, 0, 0, 0, g6, uint16_t( a ) ) ) != pMap[ a ] ) bOK = false;
 	if ( s.ContainsV6( A6( g0, 0, 0, 0, 0, 0, uint16_t( g6 - 1 ), 0xffff ) ) ) bOK = false;
 	if ( s.ContainsV6( A6( g0, 0, 0, 0, 0, 0, uint16_t( g6 + 1 ), 0 ) ) ) bOK = false;
+
+	size_t nRuns = 0;
+	for ( uint32_t a = 0; a <= 0xffff; ++a )
+		if ( pMap[ a ] && ( a == 0 || ! pMap[ a - 1 ] ) ) ++nRuns;
+	if ( s.CountV6() != nRuns ) bOK = false;
 	return bOK;
 }
 
@@ -220,6 +225,25 @@ static void TestV6OutsideDropped()
 	Check( IPList::CheckSanity( t ) == IPList::Refusal::V6CoversGlobalUnicast,
 		"v6 outside 2000::/3 dropped: ::/0 refused" );
 
+	// A range straddling only the lower edge, or only the upper edge, is clipped there.
+	IPList::RangeSet w;
+	w.AddV6( A6( 0x1fff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xfff0 ), A6( 0x2000, 0, 0, 0, 0, 0, 0, 5 ) );
+	w.AddV6( A6( 0x3fff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xff00 ), A6( 0x4000, 0, 0, 0, 0, 0, 0, 5 ) );
+	w.Finish();
+	Check( w.Added() == 2 && w.CountV6() == 2, "v6 clipped at one edge: both kept" );
+	Check( w.RangesV6().size() == 2
+		&& w.RangesV6()[ 0 ].first == A6( 0x2000, 0, 0, 0, 0, 0, 0, 0 )
+		&& w.RangesV6()[ 0 ].last == A6( 0x2000, 0, 0, 0, 0, 0, 0, 5 )
+		&& w.RangesV6()[ 1 ].first == A6( 0x3fff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xff00 )
+		&& w.RangesV6()[ 1 ].last == A6( 0x3fff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff ),
+		"v6 clipped at one edge: exact bounds" );
+	Check( ! w.ContainsV6( A6( 0x1fff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff ) )
+		&& w.ContainsV6( A6( 0x2000, 0, 0, 0, 0, 0, 0, 0 ) ) && w.ContainsV6( A6( 0x2000, 0, 0, 0, 0, 0, 0, 5 ) )
+		&& ! w.ContainsV6( A6( 0x2000, 0, 0, 0, 0, 0, 0, 6 ) )
+		&& w.ContainsV6( A6( 0x3fff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff ) )
+		&& ! w.ContainsV6( A6( 0x4000, 0, 0, 0, 0, 0, 0, 0 ) ),
+		"v6 clipped at one edge: lookups" );
+
 	// Two halves that merge into the whole of 2000::/3 are refused as well.
 	IPList::RangeSet u;
 	u.AddV6( A6( 0x2000, 0, 0, 0, 0, 0, 0, 0 ), A6( 0x2fff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff ) );
@@ -277,6 +301,11 @@ static void TestSanity()
 			s.AddV4( i * 2, i * 2 );
 		Check( s.Added() == IPList::kMaxRanges + 1, "sanity: every add counted" );
 		Check( IPList::CheckSanity( s ) == Refusal::TooManyRanges, "sanity: kMaxRanges + 1" );
+		s.Finish();
+		Check( s.Overflowed(), "overflowed: flagged" );
+		Check( IPList::CheckSanity( s ) == Refusal::TooManyRanges, "overflowed: refused once finished" );
+		Check( ! s.ContainsV4( 0 ) && ! s.ContainsV4( 2 ), "overflowed: no lookups" );
+		Check( IPList::Serialize( s ).empty(), "overflowed: does not serialize" );
 	}
 	{
 		IPList::RangeSet s;
@@ -284,6 +313,7 @@ static void TestSanity()
 			s.AddV4( i * 2, i * 2 );
 		s.Finish();
 		Check( IPList::CheckSanity( s ) == Refusal::None, "sanity: kMaxRanges exactly" );
+		Check( ! s.Overflowed() && s.ContainsV4( 0 ), "sanity: kMaxRanges exactly is not overflowed" );
 	}
 	// The order when several apply: Empty, TooManyRanges, V4RangeTooWide,
 	// V4CoverageTooHigh, V6CoversGlobalUnicast.
@@ -364,6 +394,10 @@ static void TestRoundTrip()
 	Check( bSame, "round trip: same lookups" );
 	Check( IPList::Serialize( t ) == pData, "round trip: serializes identically" );
 
+	IPList::RangeSet g;
+	g.AddV4( 1, 2 );
+	Check( IPList::Serialize( g ).empty(), "unfinished set does not serialize" );
+
 	IPList::RangeSet e;
 	e.Finish();
 	const std::vector< uint8_t > pEmpty = IPList::Serialize( e );
@@ -420,6 +454,67 @@ static void TestDeserializeRejectsTruncation()
 		"crc-32 check value" );
 }
 
+// Overwrites bytes of a serialized buffer and recomputes its trailing CRC, so only
+// the structural checks can reject it.
+static std::vector< uint8_t > Patch( const std::vector< uint8_t >& pData, size_t nOffset,
+	const std::vector< uint8_t >& pBytes )
+{
+	std::vector< uint8_t > p = pData;
+	for ( size_t i = 0; i < pBytes.size(); ++i )
+		p[ nOffset + i ] = pBytes[ i ];
+	const size_t n = p.size() - 4;
+	const uint32_t nCRC = IPList::Crc32( p.data(), n );
+	for ( size_t i = 0; i < 4; ++i )
+		p[ n + i ] = uint8_t( nCRC >> ( 8 * i ) );
+	return p;
+}
+
+static std::vector< uint8_t > LE( uint32_t n )
+{
+	return std::vector< uint8_t >{ uint8_t( n ), uint8_t( n >> 8 ), uint8_t( n >> 16 ), uint8_t( n >> 24 ) };
+}
+
+static void CheckRejected( const std::vector< uint8_t >& pBad, const char* pszName )
+{
+	IPList::RangeSet t;
+	t.AddV4( 5, 5 );
+	t.Finish();
+	const bool bLoaded = IPList::Deserialize( pBad.data(), pBad.size(), t );
+	Check( ! bLoaded, pszName );
+	Check( t.Added() == 1 && t.CountV4() == 1 && t.CountV6() == 0 && t.ContainsV4( 5 ) && ! t.ContainsV4( 0x01020304u ),
+		pszName );
+}
+
+static void TestDeserializeRejectsBadRanges()
+{
+	// SampleSet layout: header 16 bytes; IPv4 ranges at 16, 24, 32 (first, last);
+	// IPv6 ranges at 40 and 72 (first 16 bytes, last 16 bytes); CRC at 104.
+	const std::vector< uint8_t > pData = IPList::Serialize( SampleSet() );
+	Check( pData.size() == 108, "bad ranges: sample layout" );
+	if ( pData.size() != 108 ) return;
+
+	{
+		IPList::RangeSet t;
+		const std::vector< uint8_t > pSame = Patch( pData, 16, LE( 0x01020304u ) );
+		Check( IPList::Deserialize( pSame.data(), pSame.size(), t ) && t.ContainsV4( 0x01020304u ),
+			"bad ranges: an unchanged patch still loads" );
+	}
+
+	std::vector< uint8_t > pReversed = LE( 0x01020310u );
+	const std::vector< uint8_t > pLast = LE( 0x01020304u );
+	pReversed.insert( pReversed.end(), pLast.begin(), pLast.end() );
+	CheckRejected( Patch( pData, 16, pReversed ), "bad ranges: reversed v4" );
+	CheckRejected( Patch( pData, 24, LE( 0x01020310u ) ), "bad ranges: overlapping v4" );
+	CheckRejected( Patch( pData, 24, LE( 0x01020311u ) ), "bad ranges: adjacent v4" );
+
+	std::vector< uint8_t > pSwapped( pData.begin() + 24, pData.begin() + 32 );
+	pSwapped.insert( pSwapped.end(), pData.begin() + 16, pData.begin() + 24 );
+	CheckRejected( Patch( pData, 16, pSwapped ), "bad ranges: unsorted v4" );
+
+	CheckRejected( Patch( pData, 40, std::vector< uint8_t >{ 0x1f, 0xff } ), "bad ranges: v6 first below 2000::/3" );
+	CheckRejected( Patch( pData, 72 + 16, std::vector< uint8_t >{ 0x40, 0x00 } ), "bad ranges: v6 last above 2000::/3" );
+}
+
 static void TestIsDue()
 {
 	using IPList::IsDue;
@@ -457,6 +552,7 @@ int main()
 	TestSanity();
 	TestRoundTrip();
 	TestDeserializeRejectsTruncation();
+	TestDeserializeRejectsBadRanges();
 	TestIsDue();
 
 	if ( g_nFailed == 0 )

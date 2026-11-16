@@ -115,8 +115,9 @@ public:
 	RangeSet() : m_nAdded( 0 ), m_bFinished( true ) {}
 
 	// Bounds may come in either order. Once more than kMaxRanges ranges have been
-	// added, further ranges are counted but not stored: CheckSanity refuses such a
-	// set anyway, and an oversized list cannot grow the set without bound.
+	// added, further ranges are counted but not stored, so an oversized list cannot
+	// grow the set without bound. Such a set is Overflowed(): it answers no lookup,
+	// does not serialize, and CheckSanity refuses it.
 	void AddV4(uint32_t first, uint32_t last)
 	{
 		if ( first > last )
@@ -160,8 +161,12 @@ public:
 		{
 			const RangeV4& r = m_pV4[ i ];
 			// 64-bit, so a range ending at 255.255.255.255 does not wrap to 0.
+			// No std::max: windows.h defines a max macro in the MFC build.
 			if ( nOut && uint64_t( r.first ) <= uint64_t( m_pV4[ nOut - 1 ].last ) + 1 )
-				m_pV4[ nOut - 1 ].last = std::max( m_pV4[ nOut - 1 ].last, r.last );
+			{
+				if ( m_pV4[ nOut - 1 ].last < r.last )
+					m_pV4[ nOut - 1 ].last = r.last;
+			}
 			else
 				m_pV4[ nOut++ ] = r;
 		}
@@ -186,10 +191,11 @@ public:
 		m_bFinished = true;
 	}
 
-	// False until Finish has been called after the last Add.
+	// False until Finish has been called after the last Add, and on an
+	// overflowed set.
 	bool ContainsV4(uint32_t a) const
 	{
-		if ( ! m_bFinished )
+		if ( ! m_bFinished || Overflowed() )
 			return false;
 		auto it = std::upper_bound( m_pV4.begin(), m_pV4.end(), a,
 			[] (uint32_t v, const RangeV4& r) { return v < r.first; } );
@@ -201,7 +207,7 @@ public:
 
 	bool ContainsV6(const Addr6& a) const
 	{
-		if ( ! m_bFinished )
+		if ( ! m_bFinished || Overflowed() )
 			return false;
 		auto it = std::upper_bound( m_pV6.begin(), m_pV6.end(), a,
 			[] (const Addr6& v, const RangeV6& r) { return v < r.first; } );
@@ -220,6 +226,10 @@ public:
 	size_t Added() const { return m_nAdded; }
 
 	bool IsFinished() const { return m_bFinished; }
+
+	// More than kMaxRanges added: the stored ranges are incomplete.
+	bool Overflowed() const { return m_nAdded > kMaxRanges; }
+
 	const std::vector< RangeV4 >& RangesV4() const { return m_pV4; }
 	const std::vector< RangeV6 >& RangesV6() const { return m_pV6; }
 
@@ -310,6 +320,9 @@ inline uint32_t Crc32(const uint8_t* p, size_t n)
 	return nCRC ^ 0xFFFFFFFFu;
 }
 
+namespace detail
+{
+
 inline void PutU32(std::vector< uint8_t >& p, uint32_t n)
 {
 	p.push_back( static_cast< uint8_t >( n ) );
@@ -324,19 +337,19 @@ inline uint32_t GetU32(const uint8_t* p)
 		| ( uint32_t( p[ 2 ] ) << 16 ) | ( uint32_t( p[ 3 ] ) << 24 );
 }
 
+} // namespace detail
+
 // Cache format, every integer little-endian:
 //   "SZIL", uint32 version (1), uint32 IPv4 count, uint32 IPv6 count,
 //   IPv4 ranges (uint32 first, uint32 last), IPv6 ranges (16 + 16 bytes,
 //   network byte order), uint32 CRC-32 of everything before it.
-// The merged ranges are written; an unfinished set is finished on a copy.
+// The merged ranges are written. An unfinished or overflowed set gives an empty
+// vector, which callers treat as failure (a valid cache is never empty).
 inline std::vector< uint8_t > Serialize(const RangeSet& s)
 {
-	if ( ! s.IsFinished() )
-	{
-		RangeSet t( s );
-		t.Finish();
-		return Serialize( t );
-	}
+	using detail::PutU32;
+	if ( ! s.IsFinished() || s.Overflowed() )
+		return std::vector< uint8_t >();
 
 	std::vector< uint8_t > p;
 	p.reserve( 20 + s.CountV4() * 8 + s.CountV6() * 32 );
@@ -366,6 +379,7 @@ inline std::vector< uint8_t > Serialize(const RangeSet& s)
 // adjacent, reversed, IPv6 outside 2000::/3, more than kMaxRanges).
 inline bool Deserialize(const uint8_t* p, size_t n, RangeSet& out)
 {
+	using detail::GetU32;
 	if ( p == nullptr || n < 20 )
 		return false;
 	if ( std::memcmp( p, "SZIL", 4 ) != 0 || GetU32( p + 4 ) != 1 )
