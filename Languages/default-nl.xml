@@ -2733,6 +2733,7 @@
 		<string id="8011" value="Als je van stijl verandert, worden alle geopende vensters gesloten. Wil je nu veranderen?"/>
 		<string id="8013" value="Er is geen nieuwe versie van Shareaza."/>
 		<string id="8014" value="Download eigenschappen"/>
+		<string id="8015" value="Release-opmerkingen"/>
 		<string id="8060" value="Hub/Ultrapeer Mode met %lu gastheren.  %s in lokale bibliotheek."/>
 		<string id="8061" value="Ultrapeer Mode met %lu gastheren. %s in lokale bibliotheek."/>
 		<string id="8062" value="Hub Mode met %lu gastheren. %s in lokale bibliotheek."/>

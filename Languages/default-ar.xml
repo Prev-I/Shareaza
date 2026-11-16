@@ -2737,6 +2737,7 @@
 		<string id="8011" value="إن تغيير العرض يؤدي إلى إغلاق النوافذ المفتوحة . هل تريد التغيير الآن ؟"/>
 		<string id="8013" value="ا Shareaza النسخة الجديدة المكتشفة"/>
 		<string id="8014" value="خصائص التحميل"/>
+		<string id="8015" value="ملاحظات الإصدار"/>
 		<string id="8060" value="نمط Hub/Ultrapeer مع جوار  %lu . %s في المكتبة المحلية"/>
 		<string id="8061" value="نمط Ultrapeer مع جوار  %lu . %s في المكتبة المحلية"/>
 		<string id="8062" value="نمط Hub مع جوار  %lu . %s في المكتبة المحلية"/>

@@ -2737,6 +2737,7 @@
 		<string id="8011" value="Cambiando la visualizzazione qualsiasi finestra aperta si chiuderà. Desideri cambiare ora?"/>
 		<string id="8013" value="Nessuna nuova versione di Shareaza rilevata."/>
 		<string id="8014" value="Proprietà del download"/>
+		<string id="8015" value="Note di rilascio"/>
 		<string id="8060" value="Modalità Hub/Ultrapeer con %lu vicino(i). %s nella libreria locale."/>
 		<string id="8061" value="Modalità Ultrapeer con %lu vicino(i). %s nella libreria locale."/>
 		<string id="8062" value="Modalità Hub con %lu vicino(i). %s nella tua libreria locale."/>
@@ -2912,14 +2913,14 @@
 		<string id="16150" value="Chiusura della connessione in surplus da %s."/>
 		<string id="16151" value="Connessione da %s rifiutata perchè è un nodo leaf protetto."/>
 		<string id="16152" value="L'host hub %s non ti accetta come hub, chiusura della connessione."/>
-		<string id="16153" value="La connessione con l'host %s caduta a causa della modalità leaf protetta."/>
+		<string id="16153" value="Connessione dal leaf %s accettata in modalità leaf protetta."/>
 		<string id="16154" value="Connessione hub stabilita, chiusura della connessione peer."/>
 		<string id="16155" value="Comportamento come hub con l'host leaf %s."/>
 		<string id="16156" value="L'host %s desidera diventare hub, chiusura della connessione."/>
 		<string id="16157" value="L'host %s non è hub, chiusura della connessione."/>
 		<string id="16158" value="Connessione Gnutella2 con %s stabilita con successo (%s)."/>
 		<string id="16159" value="Chiudo la connessione con l'host non-G2 %s."/>
-		<string id="16191" value="Received a packet from %s for %s which excess query limits, ignoring."/>
+		<string id="16191" value="Ricevuto da %s un pacchetto per %s oltre il limite di ricerche (una ogni 5 secondi per indirizzo), ignorato."/>
 		<string id="16192" value="L'host %s ha inviato un pacchetto di dimensioni eccessive, connessione chiusa."/>
 		<string id="16193" value="L'host %s ha inviato un pacchetto con TTL pari a zero, ignorato."/>
 		<string id="16194" value="L'host %s ha inviato un pacchetto con TTL eccessivo, chiusura del pacchetto (TTL=%i, Punti=%i)."/>
@@ -2930,7 +2931,7 @@
 		<string id="16199" value="L'host %s ha inviato un pacchetto sconosciuto (0x%.2x), ignorato."/>
 		<string id="16200" value="L'host %s ha inviato un pong con indirizzi errati, ignorato."/>
 		<string id="16201" value="Pacchetto di richiesta malformattato ricevuto da %s, ignorato."/>
-		<string id="16202" value="Pacchetto di richiesta malformattato ricevuto da %s, ignorato."/>
+		<string id="16202" value="Ricevuto un pacchetto di risposta (query hit) malformato da %s, ignorato."/>
 		<string id="16203" value="L'host %s ha inviato un push packet di lunghezza errata, ignorato."/>
 		<string id="16208" value="Ricezione di un aggiornamento inaspettato della richiesta routing table dall'host %s."/>
 		<string id="16209" value="L'host %s ha inviato un aggiornamento della richiesta routing table, chiusura della connessione."/>

@@ -2732,6 +2732,7 @@
 		<string id="8011" value="Das Wechseln der Ansicht schließt alle offenen Fenster. Wollen Sie die Ansicht jetzt wechseln?"/>
 		<string id="8013" value="Es wurde keine neue Shareaza-Version gefunden."/>
 		<string id="8014" value="Download-Eigenschaften"/>
+		<string id="8015" value="Versionshinweise"/>
 		<string id="8060" value="Hub/Ultrapeer-Modus mit %lu Nachbarn. %s in ihrer Bibliothek."/>
 		<string id="8061" value="Ultrapeer-Modus mit %lu Nachbarn. %s in ihrer Bibliothek."/>
 		<string id="8062" value="Hub-Modus mit %lu Nachbarn. %s in ihrer Bibliothek."/>

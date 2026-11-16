@@ -2717,6 +2717,7 @@
 		<string id="8011" value="更改显示模式将关闭您已经打开的窗口。您要立即更改吗？"/>
 		<string id="8013" value="没有检测到 Shareaza 的新版本"/>
 		<string id="8014" value="下载属性"/>
+		<string id="8015" value="发行说明"/>
 		<string id="8060" value="集端/超对等模式有 %lu 个邻居。%s 处于本地收藏中。"/>
 		<string id="8061" value="超对等模式有 %lu 个邻居。%s 处于本地收藏中。"/>
 		<string id="8062" value="集端模式有 %lu 个邻居。%s 处于本地收藏中。"/>

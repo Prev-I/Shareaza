@@ -3509,6 +3509,7 @@ BEGIN
     IDS_VIEW_MODE_CONFIRM   "Changing view will close any windows you have open. Would you like to change now?"
     IDS_UPGRADE_NO_NEW      "No new Shareaza version detected."
     IDS_DOWNLOAD_PROPERTIES "Download Properties"
+    IDS_HOME_RELEASE_NOTES  "Release notes"
 END
 
 STRINGTABLE 
