@@ -44,6 +44,7 @@ protected:
 	CLiveListSizer	m_pSizer;
 	DWORD			tLastUpdate;
 	std::vector< GUID > m_pListGUIDs;	// the list shown in each row of m_wndLists
+	std::vector< bool > m_pListHasURLs;	// per row: the list is downloaded (not imported)
 	int				m_nListsSize;		// height of the IP lists pane (pixels)
 	BOOL			m_bListsFocus;		// the IP lists pane had the focus last
 	BOOL			m_bListsUpdating;	// m_wndLists is being refilled: its notifications are ours
@@ -54,10 +55,12 @@ protected:
 
 	// IP lists pane
 	void			UpdateLists();
-	std::vector< GUID > GetSelectedLists() const;
+	std::vector< GUID > GetSelectedLists(bool bDownloadedOnly = false) const;
+	BOOL			IsListsPaneActive() const;		// has the focus and is not collapsed
 	CRect			GetPanesRect() const;			// client area above the toolbar
 	int				GetListsHeight(const CRect& rcPanes) const;
 	CRect			GetSplitRect() const;
+	CRect			GetCaptionRect(BOOL bLists) const;	// "IP lists" / "My rules" strip
 	void			LayoutPanes();
 	void			DoSizeLists();
 

@@ -392,7 +392,7 @@
 			<button id="ID_SECURITY_EDIT" text="Edit Rule"/>
 			<separator/>
 			<button id="ID_SECURITY_ADD" text="Add Rule"/>
-			<button id="ID_SECURITY_REMOVE" text="Remove Rule"/>
+			<button id="ID_SECURITY_REMOVE" text="Remove"/>
 			<separator/>
 			<button id="ID_SECURITY_MOVE_UP" text="Move Up"/>
 			<button id="ID_SECURITY_MOVE_DOWN" text="Move Down"/>
@@ -2632,7 +2632,7 @@
 		<tip id="ID_SECURITY_MOVE_UP" message="Move the selected security rules up the precedence list."/>
 		<tip id="ID_SECURITY_POLICY_ACCEPT" message="Set the default security policy to allow all hosts."/>
 		<tip id="ID_SECURITY_POLICY_DENY" message="Set the default security policy to deny all hosts."/>
-		<tip id="ID_SECURITY_REMOVE" message="Remove the selected security rules."/>
+		<tip id="ID_SECURITY_REMOVE" message="Remove the selected rules or IP lists."/>
 		<tip id="ID_SECURITY_RESET" message="Reset the hit counts on the selected rules."/>
 		<tip id="ID_SECURITY_UPDATE_LISTS" message="Download the selected IP lists now, or all of them when none is selected."/>
 		<tip id="ID_SYSTEM_CLEAR" message="Clear the status log."/>
@@ -3531,6 +3531,11 @@
 		<string id="20301" value="Imported"/>
 		<string id="20302" value="Failed: %s"/>
 		<string id="20303" value="Not downloaded yet"/>
+		<string id="20304" value="IP lists"/>
+		<string id="20305" value="My rules"/>
+		<string id="20306" value="Enter the https:// address of your own list, or clear its name."/>
+		<string id="20307" value="Nothing was added: the lists you chose are already in your IP lists."/>
+		<string id="20308" value="Tick a list, or enter the address of your own list."/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->

@@ -29,6 +29,7 @@
 #include "DlgSecureRule.h"
 #include "DlgIPListAdd.h"
 #include "CoolInterface.h"
+#include "Skin.h"
 #include "SchemaCache.h"
 #include "XML.h"
 #include "IPLists.h"
@@ -42,6 +43,7 @@ static char THIS_FILE[] = __FILE__;
 
 #define SPLIT_SIZE		6
 #define TOOLBAR_HEIGHT	28
+#define CAPTION_HEIGHT	20
 
 const static UINT nImageID[] =
 {
@@ -205,6 +207,7 @@ void ImportIPList(const CString& strName, const CBuffer& pBuffer)
 	{
 		// The list keeps its previous ranges
 		IPLists.SetFailed( oGUID, strError, tNow );
+		IPLists.Save();
 	}
 
 	strMessage.Format( LoadString( IDS_IPLIST_IMPORT_FAILED ), (LPCTSTR)strName, (LPCTSTR)strError );
@@ -541,7 +544,7 @@ void CSecurityWnd::OnSecurityReset()
 void CSecurityWnd::OnUpdateSecurityRemove(CCmdUI* pCmdUI) 
 {
 	// Remove acts on the pane that has the focus
-	if ( m_bListsFocus )
+	if ( IsListsPaneActive() )
 	{
 		OnUpdateSecurityListRemove( pCmdUI );
 		return;
@@ -552,7 +555,7 @@ void CSecurityWnd::OnUpdateSecurityRemove(CCmdUI* pCmdUI)
 
 void CSecurityWnd::OnSecurityRemove() 
 {
-	if ( m_bListsFocus )
+	if ( IsListsPaneActive() )
 	{
 		OnSecurityListRemove();
 		return;
@@ -801,7 +804,8 @@ void CSecurityWnd::OnSecurityPolicyDeny()
 
 BOOL CSecurityWnd::PreTranslateMessage(MSG* pMsg) 
 {
-	if ( pMsg->message == WM_KEYDOWN && ::GetFocus() == m_wndLists.GetSafeHwnd() )
+	if ( pMsg->message == WM_KEYDOWN && ::GetFocus() == m_wndLists.GetSafeHwnd() &&
+		GetListsHeight( GetPanesRect() ) > 0 )
 	{
 		// The IP lists pane: its own commands, none of the rules'
 		if ( ( GetAsyncKeyState( VK_CONTROL ) & 0x8000 ) == 0 )
@@ -877,6 +881,7 @@ void CSecurityWnd::UpdateLists()
 
 		m_wndLists.DeleteAllItems();
 		m_pListGUIDs.clear();
+		m_pListHasURLs.clear();
 
 		for ( size_t i = 0 ; i < pLists.size() ; ++i )
 		{
@@ -884,6 +889,7 @@ void CSecurityWnd::UpdateLists()
 			if ( nItem != static_cast< int >( i ) )
 				break;	// out of memory: show what fits
 			m_pListGUIDs.push_back( pLists[ i ].m_oGUID );
+			m_pListHasURLs.push_back( pLists[ i ].m_pURLs.GetSize() > 0 );
 
 			for ( size_t j = 0 ; j < pSelected.size() ; ++j )
 			{
@@ -921,15 +927,23 @@ void CSecurityWnd::UpdateLists()
 	m_bListsUpdating = FALSE;
 }
 
-std::vector< GUID > CSecurityWnd::GetSelectedLists() const
+std::vector< GUID > CSecurityWnd::GetSelectedLists(bool bDownloadedOnly) const
 {
 	std::vector< GUID > pSelected;
 	for ( int nItem = -1 ; ( nItem = m_wndLists.GetNextItem( nItem, LVNI_SELECTED ) ) >= 0 ; )
 	{
-		if ( static_cast< size_t >( nItem ) < m_pListGUIDs.size() )
-			pSelected.push_back( m_pListGUIDs[ nItem ] );
+		if ( static_cast< size_t >( nItem ) >= m_pListGUIDs.size() )
+			continue;
+		if ( bDownloadedOnly && ! m_pListHasURLs[ nItem ] )
+			continue;
+		pSelected.push_back( m_pListGUIDs[ nItem ] );
 	}
 	return pSelected;
+}
+
+BOOL CSecurityWnd::IsListsPaneActive() const
+{
+	return m_bListsFocus && GetListsHeight( GetPanesRect() ) > 0;
 }
 
 CRect CSecurityWnd::GetPanesRect() const
@@ -944,7 +958,7 @@ CRect CSecurityWnd::GetPanesRect() const
 
 int CSecurityWnd::GetListsHeight(const CRect& rcPanes) const
 {
-	int nMax = rcPanes.Height() - SPLIT_SIZE;
+	int nMax = rcPanes.Height() - 2 * CAPTION_HEIGHT - SPLIT_SIZE;
 	if ( nMax < 0 )
 		nMax = 0;
 
@@ -958,13 +972,37 @@ int CSecurityWnd::GetListsHeight(const CRect& rcPanes) const
 
 CRect CSecurityWnd::GetSplitRect() const
 {
-	CRect rc = GetPanesRect();
-	rc.top += GetListsHeight( rc );
+	const CRect rcPanes = GetPanesRect();
+	CRect rc( rcPanes );
+	rc.top += CAPTION_HEIGHT + GetListsHeight( rcPanes );
 	rc.bottom = rc.top + SPLIT_SIZE;
+
+	// A window too small for it stops at the toolbar
+	if ( rc.bottom > rcPanes.bottom )
+		rc.bottom = rcPanes.bottom;
+	if ( rc.top > rc.bottom )
+		rc.top = rc.bottom;
 	return rc;
 }
 
-// Toolbar at the bottom, IP lists above, then the split bar and the rules.
+CRect CSecurityWnd::GetCaptionRect(BOOL bLists) const
+{
+	const CRect rcPanes = GetPanesRect();
+	CRect rc( rcPanes );
+	if ( ! bLists )
+		rc.top = GetSplitRect().bottom;
+	rc.bottom = rc.top + CAPTION_HEIGHT;
+
+	// A window too small for both stops at the toolbar
+	if ( rc.bottom > rcPanes.bottom )
+		rc.bottom = rcPanes.bottom;
+	if ( rc.top > rc.bottom )
+		rc.top = rc.bottom;
+	return rc;
+}
+
+// Toolbar at the bottom; above it, from the top: the "IP lists" caption and
+// table, the split bar, the "My rules" caption and table.
 void CSecurityWnd::LayoutPanes()
 {
 	if ( ! m_wndList.GetSafeHwnd() || ! m_wndLists.GetSafeHwnd() || ! m_wndToolBar.GetSafeHwnd() )
@@ -974,7 +1012,8 @@ void CSecurityWnd::LayoutPanes()
 	GetClientRect( &rcClient );
 	const CRect rcPanes = GetPanesRect();
 	const int nLists = GetListsHeight( rcPanes );
-	int nRules = rcPanes.Height() - nLists - SPLIT_SIZE;
+	const int nRulesTop = rcPanes.top + CAPTION_HEIGHT + nLists + SPLIT_SIZE + CAPTION_HEIGHT;
+	int nRules = rcPanes.bottom - nRulesTop;
 	if ( nRules < 0 )
 		nRules = 0;
 
@@ -983,10 +1022,10 @@ void CSecurityWnd::LayoutPanes()
 		rcPanes.left, rcPanes.bottom, rcPanes.Width(), rcClient.bottom - rcPanes.bottom,
 		SWP_SHOWWINDOW | SWP_NOACTIVATE | SWP_NOZORDER );
 	hPos = DeferWindowPos( hPos, m_wndLists.GetSafeHwnd(), NULL,
-		rcPanes.left, rcPanes.top, rcPanes.Width(), nLists,
+		rcPanes.left, rcPanes.top + CAPTION_HEIGHT, rcPanes.Width(), nLists,
 		SWP_SHOWWINDOW | SWP_NOACTIVATE | SWP_NOZORDER );
 	hPos = DeferWindowPos( hPos, m_wndList.GetSafeHwnd(), NULL,
-		rcPanes.left, rcPanes.top + nLists + SPLIT_SIZE, rcPanes.Width(), nRules,
+		rcPanes.left, nRulesTop, rcPanes.Width(), nRules,
 		SWP_SHOWWINDOW | SWP_NOACTIVATE | SWP_NOZORDER );
 	EndDeferWindowPos( hPos );
 
@@ -1020,15 +1059,16 @@ void CSecurityWnd::DoSizeLists()
 		GetCursorPos( &point );
 		ScreenToClient( &point );
 
-		int nSplit = point.y - rcPanes.top;
+		int nSplit = point.y - rcPanes.top - CAPTION_HEIGHT;
 
 		if ( nOffset == 0xFFFF ) nOffset = GetListsHeight( rcPanes ) - nSplit;
 		nSplit += nOffset;
 
+		const int nMax = rcPanes.Height() - 2 * CAPTION_HEIGHT - SPLIT_SIZE;
 		if ( nSplit < 8 )
 			nSplit = 0;
-		if ( nSplit > rcPanes.Height() - SPLIT_SIZE - 8 )
-			nSplit = rcPanes.Height() - SPLIT_SIZE;
+		if ( nSplit > nMax - 8 )
+			nSplit = nMax;
 		if ( nSplit < 0 )
 			nSplit = 0;
 
@@ -1054,6 +1094,23 @@ void CSecurityWnd::OnPaint()
 	dc.FillSolidRect( rcBar.left, rcBar.top + 1, rcBar.Width(), 1, CoolInterface.m_crResizebarHighlight );
 	dc.FillSolidRect( rcBar.left, rcBar.bottom - 1, rcBar.Width(), 1, CoolInterface.m_crResizebarShadow );
 	dc.FillSolidRect( rcBar.left, rcBar.top + 2, rcBar.Width(), rcBar.Height() - 3, CoolInterface.m_crResizebarFace );
+
+	// Pane captions, in the banner colours CSearchWnd uses for its status strip
+	CFont* pOldFont = (CFont*)dc.SelectObject( &CoolInterface.m_fntBold );
+	dc.SetBkMode( TRANSPARENT );
+	dc.SetTextColor( Skin.m_crBannerText );
+
+	for ( int nPane = 0 ; nPane < 2 ; ++nPane )
+	{
+		CRect rcCaption = GetCaptionRect( nPane == 0 );
+		dc.FillSolidRect( &rcCaption, Skin.m_crBannerBack );
+
+		const CString strCaption = LoadString( nPane == 0 ? IDS_IPLIST_PANE_LISTS : IDS_IPLIST_PANE_RULES );
+		rcCaption.DeflateRect( 6, 0 );
+		dc.DrawText( strCaption, &rcCaption, DT_LEFT|DT_VCENTER|DT_SINGLELINE|DT_NOPREFIX|DT_END_ELLIPSIS );
+	}
+
+	dc.SelectObject( pOldFont );
 }
 
 BOOL CSecurityWnd::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
@@ -1130,36 +1187,20 @@ void CSecurityWnd::OnSecurityAddList()
 
 void CSecurityWnd::OnUpdateSecurityUpdateLists(CCmdUI* pCmdUI)
 {
-	pCmdUI->Enable( m_wndLists.GetItemCount() > 0 );
+	// Something to download: a selected list with URLs, or with no selection any list
+	if ( m_wndLists.GetSelectedCount() > 0 )
+		pCmdUI->Enable( ! GetSelectedLists( true ).empty() );
+	else
+		pCmdUI->Enable( m_wndLists.GetItemCount() > 0 );
 }
 
 void CSecurityWnd::OnSecurityUpdateLists()
 {
 	// The selected lists, or every list when none is selected. Imported lists
 	// have nothing to download.
-	const std::vector< GUID > pSelected = GetSelectedLists();
-	std::vector< GUID > pUpdate;
-
-	if ( pSelected.size() )
-	{
-		std::vector< CIPList > pLists;
-		IPLists.Snapshot( pLists );
-		for ( size_t i = 0 ; i < pLists.size() ; ++i )
-		{
-			if ( pLists[ i ].m_pURLs.GetSize() == 0 )
-				continue;
-			for ( size_t j = 0 ; j < pSelected.size() ; ++j )
-			{
-				if ( pSelected[ j ] == pLists[ i ].m_oGUID )
-				{
-					pUpdate.push_back( pLists[ i ].m_oGUID );
-					break;
-				}
-			}
-		}
-		if ( pUpdate.empty() )
-			return;
-	}
+	const std::vector< GUID > pUpdate = GetSelectedLists( true );
+	if ( m_wndLists.GetSelectedCount() > 0 && pUpdate.empty() )
+		return;
 
 	IPListUpdater.UpdateNow( pUpdate );
 }

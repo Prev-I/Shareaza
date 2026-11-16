@@ -861,30 +861,30 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,135,200,50,14
 END
 
-IDD_IPLIST_ADD DIALOGEX 0, 0, 300, 284
+IDD_IPLIST_ADD DIALOGEX 0, 0, 300, 340
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Add IP List"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
-    LTEXT           "Tick the lists to add. Each one is downloaded over HTTPS and updated once a day; none is added unless you tick it.",IDC_STATIC,5,5,290,16
-    CONTROL         "",IDC_IPLIST_CAT_0,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,5,25,290,10
-    LTEXT           "",IDC_IPLIST_NOTE_0,17,36,278,18
-    CONTROL         "",IDC_IPLIST_CAT_1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,5,55,290,10
-    LTEXT           "",IDC_IPLIST_NOTE_1,17,66,278,18
-    CONTROL         "",IDC_IPLIST_CAT_2,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,5,85,290,10
-    LTEXT           "",IDC_IPLIST_NOTE_2,17,96,278,18
-    CONTROL         "",IDC_IPLIST_CAT_3,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,5,115,290,10
-    LTEXT           "",IDC_IPLIST_NOTE_3,17,126,278,18
-    CONTROL         "",IDC_IPLIST_CAT_4,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,5,145,290,10
-    LTEXT           "",IDC_IPLIST_NOTE_4,17,156,278,18
-    GROUPBOX        "Your own list",IDC_STATIC,5,178,290,80,WS_GROUP
-    LTEXT           "&Name:",IDC_STATIC,15,192,40,12,SS_CENTERIMAGE | NOT WS_GROUP
-    EDITTEXT        IDC_IPLIST_NAME,60,192,225,12,ES_AUTOHSCROLL
-    LTEXT           "&URL:",IDC_STATIC,15,210,40,12,SS_CENTERIMAGE | NOT WS_GROUP
-    EDITTEXT        IDC_IPLIST_URL,60,210,225,12,ES_AUTOHSCROLL
-    LTEXT           "Accepted formats: PeerGuardian (.p2p), eMule (ipfilter.dat), Gnucleus (.net), CIDR, plain addresses and Spamhaus DROP JSON, as text, gzip or zip. The URL must start with https://.",IDC_STATIC,15,228,270,24
-    DEFPUSHBUTTON   "&Add",IDOK,190,264,50,14,WS_GROUP
-    PUSHBUTTON      "Cancel",IDCANCEL,245,264,50,14
+    LTEXT           "Tick the lists to add. Each one is downloaded over HTTPS and updated once a day; none is added unless you tick it.",IDC_STATIC,5,5,290,24
+    CONTROL         "",IDC_IPLIST_CAT_0,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,5,32,290,10
+    LTEXT           "",IDC_IPLIST_NOTE_0,17,43,278,26
+    CONTROL         "",IDC_IPLIST_CAT_1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,5,70,290,10
+    LTEXT           "",IDC_IPLIST_NOTE_1,17,81,278,26
+    CONTROL         "",IDC_IPLIST_CAT_2,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,5,108,290,10
+    LTEXT           "",IDC_IPLIST_NOTE_2,17,119,278,26
+    CONTROL         "",IDC_IPLIST_CAT_3,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,5,146,290,10
+    LTEXT           "",IDC_IPLIST_NOTE_3,17,157,278,26
+    CONTROL         "",IDC_IPLIST_CAT_4,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,5,184,290,10
+    LTEXT           "",IDC_IPLIST_NOTE_4,17,195,278,26
+    GROUPBOX        "Your own list",IDC_STATIC,5,226,290,88,WS_GROUP
+    LTEXT           "&Name:",IDC_STATIC,15,240,40,12,SS_CENTERIMAGE | NOT WS_GROUP
+    EDITTEXT        IDC_IPLIST_NAME,60,240,225,12,ES_AUTOHSCROLL
+    LTEXT           "&URL:",IDC_STATIC,15,258,40,12,SS_CENTERIMAGE | NOT WS_GROUP
+    EDITTEXT        IDC_IPLIST_URL,60,258,225,12,ES_AUTOHSCROLL
+    LTEXT           "Accepted formats: PeerGuardian (.p2p), eMule (ipfilter.dat), Gnucleus (.net), CIDR, plain addresses and Spamhaus DROP JSON, as text, gzip or zip. The URL must start with https://.",IDC_STATIC,15,276,270,32
+    DEFPUSHBUTTON   "&Add",IDOK,190,320,50,14,WS_GROUP
+    PUSHBUTTON      "Cancel",IDCANCEL,245,320,50,14
 END
 
 IDD_FILE_COPY DIALOGEX 0, 0, 217, 194
@@ -2309,7 +2309,7 @@ BEGIN
         LEFTMARGIN, 5
         RIGHTMARGIN, 295
         TOPMARGIN, 5
-        BOTTOMMARGIN, 278
+        BOTTOMMARGIN, 334
     END
 
     IDD_FILE_COPY, DIALOG
@@ -3529,6 +3529,11 @@ BEGIN
     IDS_IPLIST_STATUS_IMPORTED "Imported"
     IDS_IPLIST_STATUS_FAILED "Failed: %s"
     IDS_IPLIST_STATUS_PENDING "Not downloaded yet"
+    IDS_IPLIST_PANE_LISTS   "IP lists"
+    IDS_IPLIST_PANE_RULES   "My rules"
+    IDS_IPLIST_URL_NEEDED   "Enter the https:// address of your own list, or clear its name."
+    IDS_IPLIST_ALREADY_ADDED "Nothing was added: the lists you chose are already in your IP lists."
+    IDS_IPLIST_NOTHING_CHOSEN "Tick a list, or enter the address of your own list."
 END
 
 STRINGTABLE 
@@ -4772,7 +4777,7 @@ END
 STRINGTABLE 
 BEGIN
     ID_SECURITY_EDIT        "Edit the selected security rule..."
-    ID_SECURITY_REMOVE      "Remove the selected security rules."
+    ID_SECURITY_REMOVE      "Remove the selected rules or IP lists."
     ID_SECURITY_RESET       "Reset the hit counts on the selected rules."
     ID_SECURITY_ADD         "Add a new rule to the security chain..."
     ID_SECURITY_POLICY_ACCEPT 

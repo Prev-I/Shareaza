@@ -121,6 +121,14 @@ void CIPListAddDlg::OnOK()
 	m_sName.Trim();
 	m_sURL.Trim();
 
+	if ( m_sName.GetLength() && m_sURL.IsEmpty() )
+	{
+		AfxMessageBox( LoadString( IDS_IPLIST_URL_NEEDED ), MB_ICONEXCLAMATION );
+		if ( CWnd* pURL = GetDlgItem( IDC_IPLIST_URL ) )
+			pURL->SetFocus();
+		return;
+	}
+
 	if ( m_sURL.GetLength() && ! IsHttpsURL( m_sURL ) )
 	{
 		AfxMessageBox( LoadString( IDS_IPLIST_HTTPS_ONLY ), MB_ICONEXCLAMATION );
@@ -134,11 +142,13 @@ void CIPListAddDlg::OnOK()
 
 	std::vector< GUID > pAdded;
 	const CString strNoSource;
+	bool bChosen = ( m_sURL.GetLength() > 0 );
 
 	for ( int i = 0 ; i < nCatalogue ; ++i )
 	{
 		if ( IsDlgButtonChecked( IDC_IPLIST_CAT_0 + i ) != BST_CHECKED )
 			continue;
+		bChosen = true;
 		if ( IsSubscribed( pLists, kCatalogue[ i ].szURLs[ 0 ] ) )
 			continue;
 
@@ -160,11 +170,16 @@ void CIPListAddDlg::OnOK()
 		pAdded.push_back( IPLists.Add( m_sName.GetLength() ? m_sName : m_sURL, pURLs, strNoSource )->m_oGUID );
 	}
 
-	if ( pAdded.size() )
+	// Adding nothing is not a silent success: say why and stay open
+	if ( pAdded.empty() )
 	{
-		IPLists.Save();
-		IPListUpdater.UpdateNow( pAdded );
+		AfxMessageBox( LoadString( bChosen ? IDS_IPLIST_ALREADY_ADDED : IDS_IPLIST_NOTHING_CHOSEN ),
+			MB_ICONINFORMATION );
+		return;
 	}
+
+	IPLists.Save();
+	IPListUpdater.UpdateNow( pAdded );
 
 	CSkinDialog::OnOK();
 }

@@ -1638,6 +1638,11 @@
 #define IDS_IPLIST_STATUS_IMPORTED      20301
 #define IDS_IPLIST_STATUS_FAILED        20302
 #define IDS_IPLIST_STATUS_PENDING       20303
+#define IDS_IPLIST_PANE_LISTS           20304
+#define IDS_IPLIST_PANE_RULES           20305
+#define IDS_IPLIST_URL_NEEDED           20306
+#define IDS_IPLIST_ALREADY_ADDED        20307
+#define IDS_IPLIST_NOTHING_CHOSEN       20308
 #define ID_HELP_ABOUT                   32772
 #define ID_HELP_VERSION_CHECK           32773
 #define ID_CHECKMARK                    32774
