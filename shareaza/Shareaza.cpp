@@ -43,6 +43,7 @@
 #include "GProfile.h"
 #include "HostCache.h"
 #include "IEProtocol.h"
+#include "IPLists.h"
 #include "Library.h"
 #include "LibraryBuilder.h"
 #include "Neighbours.h"
@@ -497,6 +498,7 @@ BOOL CShareazaApp::InitInstance()
 			Security.Save();
 			Settings.Security.DefaultsVersion = 1;
 		}
+		IPLists.Load();
 		LoadTlsTrust();
 		AdultFilter.Load();
 		MessageFilter.Load();
@@ -608,6 +610,7 @@ int CShareazaApp::ExitInstance()
 			DownloadGroups.Save();
 			Library.Save();
 			Security.Save();
+			IPLists.Save();
 			SaveTlsTrustAtExit();
 			HostCache.Save();
 			UploadQueues.Save();

@@ -3463,6 +3463,11 @@ END
 
 STRINGTABLE 
 BEGIN
+    IDS_IPLIST_CACHE_BAD    "Cached copy unreadable; it will be downloaded again."
+END
+
+STRINGTABLE 
+BEGIN
     IDS_LIBRARY_ALBUM_TRACK "#"
     IDS_LIBRARY_ALBUM_TITLE "Title"
     IDS_LIBRARY_ALBUM_LENGTH "Length"

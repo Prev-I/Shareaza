@@ -424,6 +424,7 @@
     <ClCompile Include="IEProtocol.cpp" />
     <ClCompile Include="ImageFile.cpp" />
     <ClCompile Include="ImageServices.cpp" />
+    <ClCompile Include="IPLists.cpp" />
     <ClCompile Include="Kademlia.cpp" />
     <ClCompile Include="Library.cpp" />
     <ClCompile Include="LibraryBuilder.cpp" />
@@ -836,6 +837,7 @@
     <ClInclude Include="IEProtocol.h" />
     <ClInclude Include="ImageFile.h" />
     <ClInclude Include="ImageServices.h" />
+    <ClInclude Include="IPLists.h" />
     <ClInclude Include="Kademlia.h" />
     <ClInclude Include="Library.h" />
     <ClInclude Include="LibraryBuilder.h" />

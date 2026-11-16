@@ -25,6 +25,7 @@
 #include "LiveList.h"
 #include "Settings.h"
 #include "Security.h"
+#include "IPLists.h"
 #include "ShippedRules.h"
 #include "ShareazaFile.h"
 #include "QuerySearch.h"
@@ -768,6 +769,10 @@ BOOL CSecurity::IsDenied(const IN_ADDR* pAddress)
 		}
 	}
 
+	// Fourth, the IP lists, which only deny. A hit is not cached as a miss.
+	if ( IPLists.IsDenied( ntohl( pAddress->s_addr ) ) )
+		return TRUE;
+
 	// If the IP is clean, add it to the miss cache
 	if ( m_Cache.size() >= MISS_CACHE_MAX )
 		m_Cache.clear();
@@ -840,6 +845,10 @@ BOOL CSecurity::IsDenied(const IN6_ADDR* pAddress)
 				return TRUE;
 		}
 	}
+
+	// Fourth, the IP lists, which only deny. A hit is not cached as a miss.
+	if ( IPLists.IsDenied( *pAddress ) )
+		return TRUE;
 
 	// If the IP is clean, add it to the miss cache
 	if ( m_CacheIPv6.size() >= MISS_CACHE_MAX )
