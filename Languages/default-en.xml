@@ -3536,6 +3536,7 @@
 		<string id="20306" value="Enter the https:// address of your own list, or clear its name."/>
 		<string id="20307" value="Nothing was added: the lists you chose are already in your IP lists."/>
 		<string id="20308" value="Tick a list, or enter the address of your own list."/>
+		<string id="20309" value="Already in your IP lists, so not added again: %s"/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->

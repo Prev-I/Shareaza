@@ -143,6 +143,7 @@ void CIPListAddDlg::OnOK()
 	std::vector< GUID > pAdded;
 	const CString strNoSource;
 	bool bChosen = ( m_sURL.GetLength() > 0 );
+	CString strSkipped;		// names already in the IP lists, not added again
 
 	for ( int i = 0 ; i < nCatalogue ; ++i )
 	{
@@ -150,7 +151,11 @@ void CIPListAddDlg::OnOK()
 			continue;
 		bChosen = true;
 		if ( IsSubscribed( pLists, kCatalogue[ i ].szURLs[ 0 ] ) )
+		{
+			if ( strSkipped.GetLength() ) strSkipped += _T(", ");
+			strSkipped += kCatalogue[ i ].szName;
 			continue;
+		}
 
 		CStringArray pURLs;
 		for ( int j = 0 ; j < static_cast< int >( _countof( kCatalogue[ i ].szURLs ) ) ; ++j )
@@ -162,12 +167,21 @@ void CIPListAddDlg::OnOK()
 		pAdded.push_back( IPLists.Add( kCatalogue[ i ].szName, pURLs, strNoSource )->m_oGUID );
 	}
 
-	if ( m_sURL.GetLength() && ! IsSubscribed( pLists, m_sURL ) )
+	if ( m_sURL.GetLength() )
 	{
-		CStringArray pURLs;
-		pURLs.Add( m_sURL );
+		const CString strName = m_sName.GetLength() ? m_sName : m_sURL;
+		if ( IsSubscribed( pLists, m_sURL ) )
+		{
+			if ( strSkipped.GetLength() ) strSkipped += _T(", ");
+			strSkipped += strName;
+		}
+		else
+		{
+			CStringArray pURLs;
+			pURLs.Add( m_sURL );
 
-		pAdded.push_back( IPLists.Add( m_sName.GetLength() ? m_sName : m_sURL, pURLs, strNoSource )->m_oGUID );
+			pAdded.push_back( IPLists.Add( strName, pURLs, strNoSource )->m_oGUID );
+		}
 	}
 
 	// Adding nothing is not a silent success: say why and stay open
@@ -180,6 +194,14 @@ void CIPListAddDlg::OnOK()
 
 	IPLists.Save();
 	IPListUpdater.UpdateNow( pAdded );
+
+	// Some were added, some were already there: name those
+	if ( strSkipped.GetLength() )
+	{
+		CString strMessage;
+		strMessage.Format( LoadString( IDS_IPLIST_SKIPPED ), (LPCTSTR)strSkipped );
+		AfxMessageBox( strMessage, MB_ICONINFORMATION );
+	}
 
 	CSkinDialog::OnOK();
 }

@@ -550,7 +550,9 @@ void CSecurityWnd::OnUpdateSecurityRemove(CCmdUI* pCmdUI)
 		return;
 	}
 
-	pCmdUI->Enable( m_wndList.GetSelectedCount() > 0 && m_wndList.GetItemCount() > 1 );
+	// Never on rules that are not shown
+	pCmdUI->Enable( GetRulesHeight( GetPanesRect() ) > 0 &&
+		m_wndList.GetSelectedCount() > 0 && m_wndList.GetItemCount() > 1 );
 }
 
 void CSecurityWnd::OnSecurityRemove() 
@@ -560,6 +562,9 @@ void CSecurityWnd::OnSecurityRemove()
 		OnSecurityListRemove();
 		return;
 	}
+
+	if ( GetRulesHeight( GetPanesRect() ) == 0 )
+		return;
 
 	if ( m_wndList.GetSelectedCount() <= 0 || m_wndList.GetItemCount() <= 1 )
 		return;
@@ -804,8 +809,14 @@ void CSecurityWnd::OnSecurityPolicyDeny()
 
 BOOL CSecurityWnd::PreTranslateMessage(MSG* pMsg) 
 {
-	if ( pMsg->message == WM_KEYDOWN && ::GetFocus() == m_wndLists.GetSafeHwnd() &&
-		GetListsHeight( GetPanesRect() ) > 0 )
+	// Keys act on the IP lists when that pane is shown and has the focus, or
+	// when the rules pane is collapsed; never on a pane that is not shown.
+	const CRect rcPanes = GetPanesRect();
+	const bool bListsShown = GetListsHeight( rcPanes ) > 0;
+	const bool bRulesShown = GetRulesHeight( rcPanes ) > 0;
+
+	if ( pMsg->message == WM_KEYDOWN && bListsShown &&
+		( ::GetFocus() == m_wndLists.GetSafeHwnd() || ! bRulesShown ) )
 	{
 		// The IP lists pane: its own commands, none of the rules'
 		if ( ( GetAsyncKeyState( VK_CONTROL ) & 0x8000 ) == 0 )
@@ -822,7 +833,7 @@ BOOL CSecurityWnd::PreTranslateMessage(MSG* pMsg)
 			}
 		}
 	}
-	else if ( pMsg->message == WM_KEYDOWN )
+	else if ( pMsg->message == WM_KEYDOWN && bRulesShown )
 	{
 		if ( GetAsyncKeyState( VK_CONTROL ) & 0x8000 )
 		{
@@ -943,7 +954,9 @@ std::vector< GUID > CSecurityWnd::GetSelectedLists(bool bDownloadedOnly) const
 
 BOOL CSecurityWnd::IsListsPaneActive() const
 {
-	return m_bListsFocus && GetListsHeight( GetPanesRect() ) > 0;
+	const CRect rcPanes = GetPanesRect();
+	return GetListsHeight( rcPanes ) > 0 &&
+		( m_bListsFocus || GetRulesHeight( rcPanes ) == 0 );
 }
 
 CRect CSecurityWnd::GetPanesRect() const
@@ -968,6 +981,13 @@ int CSecurityWnd::GetListsHeight(const CRect& rcPanes) const
 	if ( nHeight < 0 )
 		nHeight = 0;
 	return nHeight;
+}
+
+int CSecurityWnd::GetRulesHeight(const CRect& rcPanes) const
+{
+	const int nRulesTop = rcPanes.top + CAPTION_HEIGHT + GetListsHeight( rcPanes ) + SPLIT_SIZE + CAPTION_HEIGHT;
+	const int nHeight = rcPanes.bottom - nRulesTop;
+	return nHeight > 0 ? nHeight : 0;
 }
 
 CRect CSecurityWnd::GetSplitRect() const
@@ -1013,9 +1033,7 @@ void CSecurityWnd::LayoutPanes()
 	const CRect rcPanes = GetPanesRect();
 	const int nLists = GetListsHeight( rcPanes );
 	const int nRulesTop = rcPanes.top + CAPTION_HEIGHT + nLists + SPLIT_SIZE + CAPTION_HEIGHT;
-	int nRules = rcPanes.bottom - nRulesTop;
-	if ( nRules < 0 )
-		nRules = 0;
+	const int nRules = GetRulesHeight( rcPanes );
 
 	HDWP hPos = BeginDeferWindowPos( 3 );
 	hPos = DeferWindowPos( hPos, m_wndToolBar.GetSafeHwnd(), NULL,

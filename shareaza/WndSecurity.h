@@ -56,9 +56,10 @@ protected:
 	// IP lists pane
 	void			UpdateLists();
 	std::vector< GUID > GetSelectedLists(bool bDownloadedOnly = false) const;
-	BOOL			IsListsPaneActive() const;		// has the focus and is not collapsed
+	BOOL			IsListsPaneActive() const;		// shown, and has the focus or the rules are hidden
 	CRect			GetPanesRect() const;			// client area above the toolbar
 	int				GetListsHeight(const CRect& rcPanes) const;
+	int				GetRulesHeight(const CRect& rcPanes) const;
 	CRect			GetSplitRect() const;
 	CRect			GetCaptionRect(BOOL bLists) const;	// "IP lists" / "My rules" strip
 	void			LayoutPanes();
