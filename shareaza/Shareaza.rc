@@ -628,7 +628,7 @@ BEGIN
     LTEXT           "Copyright © Claudio Previtali (Prev-I), 2026",IDC_STATIC,7,57,279,10
     LTEXT           "Shareaza is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.",IDC_STATIC,7,71,279,28
     LTEXT           "Logo by Kid at pakkeimak.com",IDC_STATIC,7,103,279,10
-    LTEXT           "This product includes GeoLite data created by MaxMind, available from http://maxmind.com/",IDC_STATIC,7,116,279,20
+    LTEXT           "IP geolocation by DB-IP (db-ip.com), CC BY 4.0, converted to GeoIP format by Debian.",IDC_STATIC,7,116,279,20
     LTEXT           "https://github.com/Prev-I/Shareaza",IDC_WEB,7,139,279,10
     DEFPUSHBUTTON   "OK",IDOK,226,156,60,16
 END

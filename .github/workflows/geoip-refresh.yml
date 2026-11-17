@@ -1,0 +1,56 @@
+name: GeoIP refresh
+
+# Run by hand before a release (docs/RELEASING.md). Fetches Debian's geoip-database, verifies it
+# (GeoIP/refresh.sh) and, if it is newer than GeoIP/SOURCE.txt, pushes it to a branch
+# prev-i/geoip-<version>. Open the pull request from that branch yourself: a push made with the
+# workflow token starts no checks, opening the pull request does.
+
+on:
+    workflow_dispatch:
+
+permissions:
+    contents: read
+
+jobs:
+    refresh:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+        steps:
+        -   name: Checkout GIT sources
+            uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+        -   name: Install the Debian archive keyring
+            run: sudo apt-get update -q && sudo apt-get install -y -q debian-archive-keyring
+
+        -   name: Refresh and verify
+            id: refresh
+            run: |
+                bash GeoIP/refresh.sh | tee "$RUNNER_TEMP/refresh.out"
+                read -r state version < "$RUNNER_TEMP/refresh.out"
+                echo "state=$state" >> "$GITHUB_OUTPUT"
+                echo "version=$version" >> "$GITHUB_OUTPUT"
+
+        -   name: Push the refreshed data to a branch
+            if: steps.refresh.outputs.state == 'updated'
+            env:
+                VERSION: ${{ steps.refresh.outputs.version }}
+            run: |
+                branch="prev-i/geoip-$VERSION"
+                git config user.name "github-actions[bot]"
+                git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+                git switch -c "$branch"
+                git add GeoIP/GeoIP.dat GeoIP/SOURCE.txt
+                git commit -m "chore: refresh GeoIP country data to Debian geoip-database $VERSION"
+                git push origin "$branch"
+                {
+                    echo "Pushed \`$branch\` with geoip-database $VERSION."
+                    echo
+                    echo "Open the pull request from it into \`main\` and merge it before tagging."
+                } >> "$GITHUB_STEP_SUMMARY"
+
+        -   name: Report current data
+            if: steps.refresh.outputs.state == 'current'
+            env:
+                VERSION: ${{ steps.refresh.outputs.version }}
+            run: echo "GeoIP data is current (geoip-database $VERSION). Nothing pushed." >> "$GITHUB_STEP_SUMMARY"

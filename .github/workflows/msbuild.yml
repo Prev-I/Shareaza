@@ -97,6 +97,24 @@ jobs:
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       run: msbuild ${{env.SOLUTION_FILE_PATH}} /nologo /v:m /t:Rebuild /p:Configuration=${{ matrix.type }} /p:Platform=${{ matrix.platform }} /p:DefineConstants=BUILDFROMMSBUILD /p:RevisionSHA=${{ steps.gitversion.outputs.ShortSha }} /p:RevisionDate=${{ steps.gitversion.outputs.commitDate }} /fl /flp:Summary
 
+    - name: Check the GeoIP DLL's exports
+      # The client resolves these by name (Shareaza.cpp, LoadCountry). libGeoIP 1.6.12 exports
+      # nothing unless GEOIP_EXPORTS is defined, and a DLL without them loads fine but gives
+      # every host an empty country.
+      shell: pwsh
+      run: |
+          $dll = @(Get-ChildItem -Path vc143 -Recurse -Filter GeoIP.dll | Where-Object { $_.FullName -like "*\${{ matrix.platform }}\${{ matrix.type }}\*" })
+          if ($dll.Count -ne 1) { throw "expected one GeoIP.dll for ${{ matrix.platform }}|${{ matrix.type }}, found $($dll.Count): $($dll.FullName -join ', ')" }
+          $vs = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+          $dumpbin = Get-ChildItem -Path "$vs\VC\Tools\MSVC\*\bin\Hostx64\x64\dumpbin.exe" | Select-Object -Last 1
+          if (-not $dumpbin) { throw "dumpbin.exe not found under $vs" }
+          $exports = & $dumpbin.FullName /nologo /exports $dll[0].FullName
+          $names = 'GeoIP_new', 'GeoIP_cleanup', 'GeoIP_delete', 'GeoIP_country_code_by_ipnum', 'GeoIP_country_name_by_ipnum', 'GeoIP_country_code_by_ipnum_v6', 'GeoIP_country_name_by_ipnum_v6'
+          # x64 lists "name"; Win32 lists "name = _name" (cdecl decoration of the internal symbol).
+          $missing = @($names | Where-Object { -not ($exports -match "^\s+\d+\s+[0-9A-F]+\s+[0-9A-F]+\s+$_(\s+=|\s*$)") })
+          if ($missing.Count) { $exports | Out-Host; throw "$($dll[0].FullName) does not export: $($missing -join ', ')" }
+          Write-Output "$($dll[0].FullName) exports all $($names.Count) functions the client loads"
+
     - name: Test the installer and its VC++ runtime check
       # Installs the build, then a second build of the same script with the
       # runtime minimum set out of reach, so Setup has to download and run
