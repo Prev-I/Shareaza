@@ -97,7 +97,7 @@ dat="$work/extract/usr/share/GeoIP/GeoIP.dat"
 [ -f "$dat" ] || die "the package holds no usr/share/GeoIP/GeoIP.dat"
 
 # 4. The lookup test, built from the bundled library.
-gcc -std=gnu99 -Wall -DPACKAGE_VERSION='"1.6.12"' -DGEOIPDATADIR='"/tmp"' -I GeoIP \
+gcc -std=gnu99 -Wall -Werror=implicit-function-declaration -DHAVE_GETTIMEOFDAY -DPACKAGE_VERSION='"1.6.12"' -DGEOIPDATADIR='"/tmp"' -I GeoIP \
 	-o "$work/build/test_geoip" tests/geoip/test_geoip.c GeoIP/GeoIP.c GeoIP/GeoIPCity.c \
 	GeoIP/GeoIP_deprecated.c GeoIP/regionName.c GeoIP/timeZone.c 2>"$work/build/gcc.log" \
 	|| { cat "$work/build/gcc.log" >&2; die "lookup test did not build"; }

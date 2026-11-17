@@ -5,7 +5,7 @@
  * Exit 0 when every check passes; otherwise one line per failure and exit 1.
  *
  * Build (from the repository root):
- *   gcc -std=gnu99 -Wall -DPACKAGE_VERSION='"1.6.12"' -DGEOIPDATADIR='"/tmp"' -I GeoIP \
+ *   gcc -std=gnu99 -Wall -Werror=implicit-function-declaration -DHAVE_GETTIMEOFDAY -DPACKAGE_VERSION='"1.6.12"' -DGEOIPDATADIR='"/tmp"' -I GeoIP \
  *       -o /tmp/test_geoip tests/geoip/test_geoip.c GeoIP/GeoIP.c GeoIP/GeoIPCity.c \
  *       GeoIP/GeoIP_deprecated.c GeoIP/regionName.c GeoIP/timeZone.c
  */
