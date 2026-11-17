@@ -249,6 +249,17 @@ void SetListText(CListCtrl& wndList, int nItem, int nSubItem, const CString& str
 		wndList.SetItemText( nItem, nSubItem, strText );
 }
 
+// The check box state image: 0 = none yet, 1 = unticked, 2 = ticked
+UINT GetListCheckState(const CListCtrl& wndList, int nItem)
+{
+	return ( wndList.GetItemState( nItem, LVIS_STATEIMAGEMASK ) & LVIS_STATEIMAGEMASK ) >> 12;
+}
+
+bool IsListChecked(const CListCtrl& wndList, int nItem)
+{
+	return GetListCheckState( wndList, nItem ) == 2;
+}
+
 }	// namespace
 
 IMPLEMENT_SERIAL(CSecurityWnd, CPanelWnd, 0)
@@ -931,7 +942,10 @@ void CSecurityWnd::UpdateLists()
 		strText.Format( _T("%lu (%lu)"), oList.m_nToday, oList.m_nEver );
 		SetListText( m_wndLists, nItem, 3, strText );
 
-		if ( ( m_wndLists.GetCheck( nItem ) != FALSE ) != ( oList.m_bEnabled != FALSE ) )
+		// A new row has no check box state yet (state image 0), which GetCheck
+		// reports as -1, so set it explicitly whenever it is missing or wrong
+		const UINT nState = GetListCheckState( m_wndLists, nItem );
+		if ( nState == 0 || ( nState == 2 ) != ( oList.m_bEnabled != FALSE ) )
 			m_wndLists.SetCheck( nItem, oList.m_bEnabled != FALSE );
 	}
 
@@ -1254,7 +1268,7 @@ void CSecurityWnd::OnUpdateSecurityListEnable(CCmdUI* pCmdUI)
 	BOOL bAllEnabled = TRUE;
 	for ( int nItem = -1 ; ( nItem = m_wndLists.GetNextItem( nItem, LVNI_SELECTED ) ) >= 0 ; )
 	{
-		if ( ! m_wndLists.GetCheck( nItem ) )
+		if ( ! IsListChecked( m_wndLists, nItem ) )
 		{
 			bAllEnabled = FALSE;
 			break;
@@ -1271,7 +1285,7 @@ void CSecurityWnd::OnSecurityListEnable()
 	BOOL bAllEnabled = TRUE;
 	for ( int nItem = -1 ; ( nItem = m_wndLists.GetNextItem( nItem, LVNI_SELECTED ) ) >= 0 ; )
 	{
-		if ( ! m_wndLists.GetCheck( nItem ) )
+		if ( ! IsListChecked( m_wndLists, nItem ) )
 		{
 			bAllEnabled = FALSE;
 			break;
