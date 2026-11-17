@@ -379,10 +379,13 @@
 			<button id="ID_SECURITY_EDIT" text="编辑规则"/>
 			<separator/>
 			<button id="ID_SECURITY_ADD" text="添加规则"/>
-			<button id="ID_SECURITY_REMOVE" text="删除规则"/>
+			<button id="ID_SECURITY_REMOVE" text="移除"/>
 			<separator/>
 			<button id="ID_SECURITY_MOVE_UP" text="上移"/>
 			<button id="ID_SECURITY_MOVE_DOWN" text="下移"/>
+			<separator/>
+			<button id="ID_SECURITY_ADD_LIST" text="添加列表..."/>
+			<button id="ID_SECURITY_UPDATE_LISTS" text="立即更新"/>
 			<rightAlign/>
 			<button id="ID_SECURITY_RESET" text="重置列表"/>
 			<button id="ID_SECURITY_IMPORT" text="导入列表"/>
@@ -1561,6 +1564,14 @@
 			<separator/>
 			<item id="ID_SECURITY_EDIT" text="属性(_P)"/>
 		</menu>
+		<menu name="CSecurityWnd.Lists">
+			<item id="ID_SECURITY_ADD_LIST" text="添加列表(_A)..."/>
+			<separator/>
+			<item id="ID_SECURITY_UPDATE_LISTS" text="立即更新(_U)"/>
+			<item id="ID_SECURITY_LIST_ENABLE" text="启用(_E)"/>
+			<separator/>
+			<item id="ID_SECURITY_LIST_REMOVE" text="移除(_R)"/>
+		</menu>
 		<!-- SCHEDULER WINDOW -->
 		<menu name="CSchedulerWnd">
 			<item id="ID_SCHEDULER_ADD" text="添加计划任务(_A)"/>
@@ -2571,16 +2582,20 @@
 		<tip id="ID_SEARCHMONITOR_CLEAR" message="清除搜索监视器缓存。"/>
 		<tip id="ID_SEARCHMONITOR_PAUSE" message="暂停搜索监视器。"/>
 		<tip id="ID_SECURITY_ADD" message="添加新的规则到选定的安全链..."/>
+		<tip id="ID_SECURITY_ADD_LIST" message="从目录添加 IP 屏蔽列表，或从 https:// 地址添加你自己的列表..."/>
 		<tip id="ID_SECURITY_BAN" message="禁止选定主机在此期间的活动。"/>
 		<tip id="ID_SECURITY_EDIT" message="编辑选定的安全策略..."/>
 		<tip id="ID_SECURITY_EXPORT" message="导出选定的安全策略到文件..."/>
 		<tip id="ID_SECURITY_IMPORT" message="导入选定的安全策略于文件..."/>
+		<tip id="ID_SECURITY_LIST_ENABLE" message="启用或停用选中的 IP 列表。"/>
+		<tip id="ID_SECURITY_LIST_REMOVE" message="移除选中的 IP 列表。"/>
 		<tip id="ID_SECURITY_MOVE_DOWN" message="降低选定安全策略的优先级。"/>
 		<tip id="ID_SECURITY_MOVE_UP" message="提升选定安全策略的优先级。"/>
 		<tip id="ID_SECURITY_POLICY_ACCEPT" message="对所有的主机使用默认的安全策略。"/>
 		<tip id="ID_SECURITY_POLICY_DENY" message="使用默认的安全策略拒绝主机。"/>
-		<tip id="ID_SECURITY_REMOVE" message="清除选定的安全策略。"/>
+		<tip id="ID_SECURITY_REMOVE" message="移除选中的规则或 IP 列表。"/>
 		<tip id="ID_SECURITY_RESET" message="重置选定规则的命中计数器。"/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="立即下载选中的 IP 列表；未选中任何列表时下载所有已启用的列表。"/>
 		<tip id="ID_SYSTEM_CLEAR" message="清除状态日志。"/>
 		<tip id="ID_SYSTEM_COPY" message="复制选中的状态日志。"/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="记录每行的时间戳。"/>
@@ -3424,6 +3439,45 @@
 		<string id="20269" value="只在已连接的网络下载和上传。"/>
 		<string id="20270" value="保存种子到"/>
 		<string id="20271" value="在这里储存收集"/>
+		<string id="20272" value="缓存副本无法读取；将重新下载。"/>
+		<string id="20273" value="缓存副本无法读取；请重新导入该文件。"/>
+		<string id="20274" value="被劫持的网络和犯罪网络；误报很少。数据 (c) The Spamhaus Project。"/>
+		<string id="20275" value="已知被入侵的主机。"/>
+		<string id="20276" value="反 P2P 公司；非常大（约占全部 IPv4 地址的五分之一）；会屏蔽整个运营商和 CDN 地址段（包括 Cloudflare 的 1.1.1.0 地址块）。"/>
+		<string id="20277" value="多个隐私和滥用列表的合集。"/>
+		<string id="20278" value="未分配的地址空间；必须保持更新，否则会屏蔽新网络。"/>
+		<string id="20279" value="地址不是以 https:// 开头。"/>
+		<string id="20280" value="下载的最终地址不是 https:// 地址。"/>
+		<string id="20281" value="无法连接到服务器。"/>
+		<string id="20282" value="服务器返回 HTTP 状态 %d。"/>
+		<string id="20283" value="下载内容超过 64 MB。"/>
+		<string id="20284" value="解压后的内容超过 256 MB。"/>
+		<string id="20285" value="无法读取压缩文件。"/>
+		<string id="20286" value="列表中没有任何地址段。"/>
+		<string id="20287" value="列表中的地址段超过 2,000,000 个。"/>
+		<string id="20288" value="列表中有一个 IPv4 地址段达到或超过地址空间的一半。"/>
+		<string id="20289" value="列表的 IPv4 地址段覆盖了超过一半的地址空间。"/>
+		<string id="20290" value="列表中有一个 IPv6 地址段覆盖了整个 2000::/3。"/>
+		<string id="20291" value="无法保存列表。"/>
+		<string id="20292" value="IP 列表 %s 已更新：接受 %lu 行，拒绝 %lu 行，合并后共 %lu 个地址段。"/>
+		<string id="20293" value="IP 列表 %s 未更新：%s"/>
+		<string id="20294" value="%s：已导入 %Iu 个地址段，拒绝 %Iu 行。"/>
+		<string id="20295" value="无法导入 %s。"/>
+		<string id="20296" value="无法写入 %s。"/>
+		<string id="20297" value="无法导入 %s：%s"/>
+		<string id="20298" value="文件超过 64 MB。"/>
+		<string id="20299" value="IP 列表只能通过 HTTPS 下载：URL 必须以 https:// 开头。"/>
+		<string id="20300" value="移除选中的 IP 列表吗？已下载的副本也将被删除。"/>
+		<string id="20301" value="已导入"/>
+		<string id="20302" value="失败：%s"/>
+		<string id="20303" value="尚未下载"/>
+		<string id="20304" value="IP 列表"/>
+		<string id="20305" value="我的规则"/>
+		<string id="20306" value="请输入你自己列表的 https:// 地址，或清除其名称。"/>
+		<string id="20307" value="未添加任何列表：所选列表已在你的 IP 列表中。"/>
+		<string id="20308" value="请勾选一个列表，或输入你自己列表的地址。"/>
+		<string id="20309" value="已在你的 IP 列表中，因此未重复添加：%s"/>
+		<string id="20310" value="下载在完成前被中断。"/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->
@@ -4264,6 +4318,27 @@
 			<control caption="确定"/>
 			<control caption="取消"/>
 		</dialog>
+		<dialog name="CIPListAddDlg" cookie="StBuStBuStBuStBuStBuStBuStEdStEdStBuBu" caption="添加 IP 列表">
+			<control caption="勾选要添加的列表。每个列表都通过 HTTPS 下载并每天更新一次；未勾选的列表不会被添加。"/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control caption="你自己的列表"/>
+			<control caption="名称(_N):"/>
+			<control/>
+			<control caption="URL(_U):"/>
+			<control/>
+			<control caption="支持的格式：PeerGuardian (.p2p)、eMule (ipfilter.dat)、Gnucleus (.net)、CIDR、纯地址和 Spamhaus DROP JSON，可为文本、gzip 或 zip。URL 必须以 https:// 开头。"/>
+			<control caption="添加(_A)"/>
+			<control caption="取消"/>
+		</dialog>
 		<dialog name="CShareManagerDlg" cookie="StSyBuBuBuBu" caption="共享文件夹管理器">
 			<control caption="此列表显示了您收藏中的所有文件夹。您可以使用右边的按钮进行添加和移除。新添加的文件夹最初是共享给其他用户的，但是您可以在 Shareaza 收藏中取消共享。"/>
 			<control/>
@@ -4612,6 +4687,12 @@
 			<column from="Precedence" to="优先级"/>
 			<column from="Hits" to="命中"/>
 			<column from="Comment" to="注释"/>
+		</list>
+		<list name="CSecurityWnd.Lists">
+			<column from="List" to="列表"/>
+			<column from="Ranges" to="地址段"/>
+			<column from="Updated" to="更新时间"/>
+			<column from="Hits" to="命中"/>
 		</list>
 		<list name="CHostCacheWnd">
 			<column from="Address" to="地址"/>

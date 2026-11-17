@@ -351,6 +351,9 @@ void CSettings::Load()
 	Add( _T("Discovery"), _T("DefaultsVersion"), &Discovery.DefaultsVersion, 0, 1, 0, 1000 );
 	Add( _T("Discovery"), _T("AccessPeriod"), &Discovery.AccessPeriod, 30*60, 60, 1, 60*24, _T(" m") );
 
+	Add( _T("Security"), _T("DefaultsVersion"), &Security.DefaultsVersion, 0, 1, 0, 1000 );
+	Add( _T("Security"), _T("ListsPaneSize"), &Security.ListsPaneSize, 150 );
+
 	Add( _T("Gnutella"), _T("ConnectFactor"), &Gnutella.ConnectFactor, 4, 1, 1, 20, _T("x") );
 	Add( _T("Gnutella"), _T("ConnectThrottle"), &Gnutella.ConnectThrottle, 30, 1, 0, 60*60, _T(" s") );
 	Add( _T("Gnutella"), _T("DeflateHub2Hub"), &Gnutella.DeflateHub2Hub, true );

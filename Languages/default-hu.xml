@@ -379,10 +379,13 @@
 			<button id="ID_SECURITY_EDIT" text="Edit Rule"/>
 			<separator/>
 			<button id="ID_SECURITY_ADD" text="Add Rule"/>
-			<button id="ID_SECURITY_REMOVE" text="Remove Rule"/>
+			<button id="ID_SECURITY_REMOVE" text="Eltávolítás"/>
 			<separator/>
 			<button id="ID_SECURITY_MOVE_UP" text="Move Up"/>
 			<button id="ID_SECURITY_MOVE_DOWN" text="Move Down"/>
+			<separator/>
+			<button id="ID_SECURITY_ADD_LIST" text="Lista hozzáadása..."/>
+			<button id="ID_SECURITY_UPDATE_LISTS" text="Frissítés most"/>
 			<rightAlign/>
 			<button id="ID_SECURITY_RESET" text="Reset List"/>
 			<button id="ID_SECURITY_IMPORT" text="Import List"/>
@@ -1561,6 +1564,14 @@
 			<separator/>
 			<item id="ID_SECURITY_EDIT" text="T_ulajdonságok"/>
 		</menu>
+		<menu name="CSecurityWnd.Lists">
+			<item id="ID_SECURITY_ADD_LIST" text="_Lista hozzáadása..."/>
+			<separator/>
+			<item id="ID_SECURITY_UPDATE_LISTS" text="_Frissítés most"/>
+			<item id="ID_SECURITY_LIST_ENABLE" text="Enge_délyezve"/>
+			<separator/>
+			<item id="ID_SECURITY_LIST_REMOVE" text="_Eltávolít"/>
+		</menu>
 		<!-- SCHEDULER WINDOW -->
 		<menu name="CSchedulerWnd">
 			<item id="ID_SCHEDULER_ADD" text="_Add Scheduled Task"/>
@@ -2591,16 +2602,20 @@
 		<tip id="ID_SEARCHMONITOR_CLEAR" message="Törli az összes keresési bejegyzést."/>
 		<tip id="ID_SEARCHMONITOR_PAUSE" message="Keresések megfigelésének leállítása."/>
 		<tip id="ID_SECURITY_ADD" message="Új szabály hozzáadása..."/>
+		<tip id="ID_SECURITY_ADD_LIST" message="IP-tiltólisták hozzáadása a katalógusból, vagy saját lista egy https:// címről..."/>
 		<tip id="ID_SECURITY_BAN" message="A kiválasztott felhasználó kitiltása egy időre."/>
 		<tip id="ID_SECURITY_EDIT" message="A kiválasztott biztonsági szabály szerkesztése..."/>
 		<tip id="ID_SECURITY_EXPORT" message="Biztonsági szabályok exportálása..."/>
 		<tip id="ID_SECURITY_IMPORT" message="Biztonsági szabályok importálása..."/>
+		<tip id="ID_SECURITY_LIST_ENABLE" message="A kijelölt IP-listák be- vagy kikapcsolása."/>
+		<tip id="ID_SECURITY_LIST_REMOVE" message="A kijelölt IP-listák eltávolítása."/>
 		<tip id="ID_SECURITY_MOVE_DOWN" message="A kiválasztott szabály lejjebb tolása az elsőbbségi listán."/>
 		<tip id="ID_SECURITY_MOVE_UP" message="A kiválasztott szabály feljebb tolása az elsőbbségi listán."/>
 		<tip id="ID_SECURITY_POLICY_ACCEPT" message="Beállítja az alapértelmezett biztonsági szabályt, ami mindenhol engedélyezett."/>
 		<tip id="ID_SECURITY_POLICY_DENY" message="Beállítja az alapértelmezett biztonsági szabályt, ami mindenhol tiltva van."/>
-		<tip id="ID_SECURITY_REMOVE" message="A kiválasztott biztonsági szabály eltávolítása."/>
+		<tip id="ID_SECURITY_REMOVE" message="A kijelölt szabályok vagy IP-listák eltávolítása."/>
 		<tip id="ID_SECURITY_RESET" message="A kiválasztott biztonsági szabály számlálójának nullázása."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="A kijelölt IP-listák letöltése most, vagy az összes engedélyezett listáé, ha egy sincs kijelölve."/>
 		<tip id="ID_SYSTEM_CLEAR" message="A napló törlése."/>
 		<tip id="ID_SYSTEM_COPY" message="Copy selected line(s) of status log."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="Minden sorhoz időbélyeget ad."/>
@@ -3444,6 +3459,45 @@
 		<string id="20269" value="Félkész letöltések mappája"/>
 		<string id="20270" value="Torrentfájlok mappája"/>
 		<string id="20271" value="Gyűjtemények tárolása"/>
+		<string id="20272" value="A gyorsítótárazott másolat olvashatatlan; újra le lesz töltve."/>
+		<string id="20273" value="A gyorsítótárazott másolat olvashatatlan; importáld újra a fájlt."/>
+		<string id="20274" value="Eltérített és bűnözői hálózatok; kevés téves találat. Adatok (c) The Spamhaus Project."/>
+		<string id="20275" value="Ismert feltört gépek."/>
+		<string id="20276" value="P2P-ellenes cégek; nagyon nagy (az összes IPv4-cím kb. ötöde); teljes szolgáltatókat és CDN-tartományokat tilt (tartalmazza a Cloudflare 1.1.1.0 blokkját)."/>
+		<string id="20277" value="Több adatvédelmi és visszaélési lista összesítése."/>
+		<string id="20278" value="Ki nem osztott címtér; frissen kell tartani, különben új hálózatokat tilt."/>
+		<string id="20279" value="A cím nem https:// előtaggal kezdődik."/>
+		<string id="20280" value="A letöltés nem https:// címen ért véget."/>
+		<string id="20281" value="A kiszolgáló nem érhető el."/>
+		<string id="20282" value="A kiszolgáló %d HTTP-állapotkóddal válaszolt."/>
+		<string id="20283" value="A letöltés nagyobb 64 MB-nál."/>
+		<string id="20284" value="A tartalom kicsomagolva nagyobb 256 MB-nál."/>
+		<string id="20285" value="A tömörített fájl nem olvasható."/>
+		<string id="20286" value="A lista nem tartalmaz címtartományt."/>
+		<string id="20287" value="A lista több mint 2 000 000 tartományt tartalmaz."/>
+		<string id="20288" value="A lista egy legalább a címtér felét kitevő IPv4-tartományt tartalmaz."/>
+		<string id="20289" value="A lista IPv4-tartományai a címtér több mint felét lefedik."/>
+		<string id="20290" value="A lista egy a teljes 2000::/3-at lefedő IPv6-tartományt tartalmaz."/>
+		<string id="20291" value="A lista nem menthető."/>
+		<string id="20292" value="%s IP-lista frissítve: %lu sor elfogadva, %lu elutasítva, %lu tartomány az összevonás után."/>
+		<string id="20293" value="%s IP-lista nincs frissítve: %s"/>
+		<string id="20294" value="%s: %Iu tartomány importálva, %Iu sor elutasítva."/>
+		<string id="20295" value="%s nem importálható."/>
+		<string id="20296" value="%s nem írható."/>
+		<string id="20297" value="%s nem importálható: %s"/>
+		<string id="20298" value="A fájl nagyobb 64 MB-nál."/>
+		<string id="20299" value="Az IP-listák csak HTTPS-en keresztül töltődnek le: az URL-nek https://-sel kell kezdődnie."/>
+		<string id="20300" value="Eltávolítod a kijelölt IP-listákat? A letöltött másolataik is törlődnek."/>
+		<string id="20301" value="Importálva"/>
+		<string id="20302" value="Sikertelen: %s"/>
+		<string id="20303" value="Még nincs letöltve"/>
+		<string id="20304" value="IP-listák"/>
+		<string id="20305" value="Saját szabályok"/>
+		<string id="20306" value="Add meg a saját listád https:// címét, vagy töröld a nevét."/>
+		<string id="20307" value="Semmi sem került hozzáadásra: a választott listák már szerepelnek az IP-listáid között."/>
+		<string id="20308" value="Jelölj be egy listát, vagy add meg a saját listád címét."/>
+		<string id="20309" value="Már szerepel az IP-listáid között, ezért nem lett újra hozzáadva: %s"/>
+		<string id="20310" value="A letöltés megszakadt, mielőtt véget ért volna."/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->
@@ -4284,6 +4338,27 @@
 			<control caption="OK"/>
 			<control caption="Mégse"/>
 		</dialog>
+		<dialog name="CIPListAddDlg" cookie="StBuStBuStBuStBuStBuStBuStEdStEdStBuBu" caption="IP-lista hozzáadása">
+			<control caption="Jelöld be a hozzáadandó listákat. Mindegyik HTTPS-en töltődik le és naponta egyszer frissül; csak a bejelölt listák kerülnek hozzáadásra."/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control caption="Saját lista"/>
+			<control caption="_Név"/>
+			<control/>
+			<control caption="_URL:"/>
+			<control/>
+			<control caption="Elfogadott formátumok: PeerGuardian (.p2p), eMule (ipfilter.dat), Gnucleus (.net), CIDR, egyszerű címek és Spamhaus DROP JSON, szövegként, gzip vagy zip formában. Az URL-nek https://-sel kell kezdődnie."/>
+			<control caption="_Hozzáad"/>
+			<control caption="Mégse"/>
+		</dialog>
 		<dialog name="CShareManagerDlg" cookie="StSyBuBuBuBu" caption="Megosztott mappák">
 			<control caption="Az itt felvett mappák automatikusan megosztásra kerülnek, de később letilthatja a megoszásukat a Könyvtárban."/>
 			<control/>
@@ -4632,6 +4707,12 @@
 			<column from="Precedence" to="Elsőbbség"/>
 			<column from="Hits" to="Találatok"/>
 			<column from="Comment" to="Megjegyzés"/>
+		</list>
+		<list name="CSecurityWnd.Lists">
+			<column from="List" to="Lista"/>
+			<column from="Ranges" to="Tartományok"/>
+			<column from="Updated" to="Frissítve"/>
+			<column from="Hits" to="Találatok"/>
 		</list>
 		<list name="CHostCacheWnd">
 			<column from="Address" to="Cím"/>

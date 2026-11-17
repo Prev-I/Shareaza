@@ -379,10 +379,13 @@
 			<button id="ID_SECURITY_EDIT" text="Edito Rregullin"/>
 			<separator/>
 			<button id="ID_SECURITY_ADD" text="Shto Rregull"/>
-			<button id="ID_SECURITY_REMOVE" text="Hiqe Rregullin"/>
+			<button id="ID_SECURITY_REMOVE" text="Fshije"/>
 			<separator/>
 			<button id="ID_SECURITY_MOVE_UP" text="Lëvize Sipër"/>
 			<button id="ID_SECURITY_MOVE_DOWN" text="Lëvize Poshtë"/>
+			<separator/>
+			<button id="ID_SECURITY_ADD_LIST" text="Shto Listë..."/>
+			<button id="ID_SECURITY_UPDATE_LISTS" text="Përditëso Tani"/>
 			<rightAlign/>
 			<button id="ID_SECURITY_RESET" text="Rivendose Listën"/>
 			<button id="ID_SECURITY_IMPORT" text="Importo Listën"/>
@@ -1561,6 +1564,14 @@
 			<separator/>
 			<item id="ID_SECURITY_EDIT" text="_Veti"/>
 		</menu>
+		<menu name="CSecurityWnd.Lists">
+			<item id="ID_SECURITY_ADD_LIST" text="_Shto listë..."/>
+			<separator/>
+			<item id="ID_SECURITY_UPDATE_LISTS" text="_Përditëso tani"/>
+			<item id="ID_SECURITY_LIST_ENABLE" text="_Aktive"/>
+			<separator/>
+			<item id="ID_SECURITY_LIST_REMOVE" text="_Fshije"/>
+		</menu>
 		<!-- SCHEDULER WINDOW -->
 		<menu name="CSchedulerWnd">
 			<item id="ID_SCHEDULER_ADD" text="_Add Scheduled Task"/>
@@ -2591,16 +2602,20 @@
 		<tip id="ID_SEARCHMONITOR_CLEAR" message="Pastron zbutësin e monitorit kërkues."/>
 		<tip id="ID_SEARCHMONITOR_PAUSE" message="Pushon monitorimin e kërkimit."/>
 		<tip id="ID_SECURITY_ADD" message="Shton një rregull të ri tek zinxhiri i sigurisë..."/>
+		<tip id="ID_SECURITY_ADD_LIST" message="Shto lista bllokimi IP nga katalogu, ose listën tënde nga një adresë https://..."/>
 		<tip id="ID_SECURITY_BAN" message="Dëbon hostin e zgjedhur për zgjatje të sesionit."/>
 		<tip id="ID_SECURITY_EDIT" message="Editon rregullin e zgjedhur të sigurisë..."/>
 		<tip id="ID_SECURITY_EXPORT" message="Eksporton në skedë rregullin e zgjedhur të sigurisë..."/>
 		<tip id="ID_SECURITY_IMPORT" message="Importon nga një skedë rregullat e sigurisë..."/>
+		<tip id="ID_SECURITY_LIST_ENABLE" message="Aktivizo ose çaktivizo listat IP të zgjedhura."/>
+		<tip id="ID_SECURITY_LIST_REMOVE" message="Hiq listat IP të zgjedhura."/>
 		<tip id="ID_SECURITY_MOVE_DOWN" message="Lëviz poshtë në listën e përparësive rregullat e zgjedhur të sigurisë."/>
 		<tip id="ID_SECURITY_MOVE_UP" message="Lëviz lart në listën e përparësive rregullat e zgjedhur të sigurisë."/>
 		<tip id="ID_SECURITY_POLICY_ACCEPT" message="Vendos dëftesën e sigurisë tipike për të lejuar tërë hostet."/>
 		<tip id="ID_SECURITY_POLICY_DENY" message="Vendos dëftesën e sigurisë tipike për të mohuar tërë hostet."/>
-		<tip id="ID_SECURITY_REMOVE" message="Fshin rregullin e zgjedhur të sigurisë."/>
+		<tip id="ID_SECURITY_REMOVE" message="Hiq rregullat ose listat IP të zgjedhura."/>
 		<tip id="ID_SECURITY_RESET" message="Rivendos numërimin e hiteve në rregullin e zgjedhur."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="Shkarko tani listat IP të zgjedhura, ose të gjitha listat e aktivizuara kur nuk është zgjedhur asnjë."/>
 		<tip id="ID_SYSTEM_CLEAR" message="Pastron ditarin e statusit."/>
 		<tip id="ID_SYSTEM_COPY" message="Copy selected line(s) of status log."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="Regjistron shtypjen e kohës për secilën vijë."/>
@@ -3444,6 +3459,45 @@
 		<string id="20269" value="Depozito Këtu Skedat Kohëshkurtër të Papërfunduara"/>
 		<string id="20270" value="Depozito Këtu Torrentet"/>
 		<string id="20271" value="Depozito Këtu Koleksionet"/>
+		<string id="20272" value="Kopja në memorien e përkohshme është e palexueshme; do të shkarkohet përsëri."/>
+		<string id="20273" value="Kopja në memorien e përkohshme është e palexueshme; importoje skedarin përsëri."/>
+		<string id="20274" value="Rrjete të rrëmbyera dhe kriminale; pak pozitive të rreme. Të dhënat (c) The Spamhaus Project."/>
+		<string id="20275" value="Hoste të njohur si të komprometuar."/>
+		<string id="20276" value="Kompani anti-P2P; shumë e madhe (rreth një e pesta e adresave IPv4); bllokon ofrues të tërë dhe vargje CDN (përfshin bllokun 1.1.1.0 të Cloudflare)."/>
+		<string id="20277" value="Përmbledhje e disa listave për privatësinë dhe abuzimet."/>
+		<string id="20278" value="Hapësirë e pashpërndarë; duhet mbajtur e përditësuar, përndryshe bllokon rrjete të reja."/>
+		<string id="20279" value="Adresa nuk fillon me https://."/>
+		<string id="20280" value="Shkarkimi nuk përfundoi në një adresë https://."/>
+		<string id="20281" value="Serveri nuk u arrit."/>
+		<string id="20282" value="Serveri u përgjigj me gjendjen HTTP %d."/>
+		<string id="20283" value="Shkarkimi është më i madh se 64 MB."/>
+		<string id="20284" value="Përmbajtja është më e madhe se 256 MB pasi çngjishet."/>
+		<string id="20285" value="Skedari i ngjeshur nuk u lexua dot."/>
+		<string id="20286" value="Lista nuk përmban asnjë varg adresash."/>
+		<string id="20287" value="Lista përmban më shumë se 2.000.000 vargje."/>
+		<string id="20288" value="Lista përmban një varg IPv4 sa gjysma e hapësirës së adresave ose më shumë."/>
+		<string id="20289" value="Vargjet IPv4 të listës mbulojnë më shumë se gjysmën e hapësirës së adresave."/>
+		<string id="20290" value="Lista përmban një varg IPv6 që mbulon gjithë 2000::/3."/>
+		<string id="20291" value="Lista nuk u ruajt dot."/>
+		<string id="20292" value="Lista IP %s u përditësua: %lu rreshta të pranuar, %lu të refuzuar, %lu vargje pas bashkimit."/>
+		<string id="20293" value="Lista IP %s nuk u përditësua: %s"/>
+		<string id="20294" value="%s: %Iu vargje të importuara, %Iu rreshta të refuzuar."/>
+		<string id="20295" value="%s nuk u importua dot."/>
+		<string id="20296" value="%s nuk u shkrua dot."/>
+		<string id="20297" value="%s nuk u importua dot: %s"/>
+		<string id="20298" value="Skedari është më i madh se 64 MB."/>
+		<string id="20299" value="Listat IP shkarkohen vetëm përmes HTTPS: URL-ja duhet të fillojë me https://."/>
+		<string id="20300" value="Të hiqen listat IP të zgjedhura? Do të fshihen edhe kopjet e tyre të shkarkuara."/>
+		<string id="20301" value="E importuar"/>
+		<string id="20302" value="Dështoi: %s"/>
+		<string id="20303" value="Ende e pashkarkuar"/>
+		<string id="20304" value="Listat IP"/>
+		<string id="20305" value="Rregullat e mia"/>
+		<string id="20306" value="Jep adresën https:// të listës tënde, ose pastro emrin e saj."/>
+		<string id="20307" value="S'u shtua asgjë: listat që zgjodhe janë tashmë te listat e tua IP."/>
+		<string id="20308" value="Zgjidh një listë, ose jep adresën e listës tënde."/>
+		<string id="20309" value="Tashmë te listat e tua IP, prandaj nuk u shtuan sërish: %s"/>
+		<string id="20310" value="Shkarkimi u ndërpre para se të përfundonte."/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->
@@ -4284,6 +4338,27 @@
 			<control caption="OK"/>
 			<control caption="Anulo"/>
 		</dialog>
+		<dialog name="CIPListAddDlg" cookie="StBuStBuStBuStBuStBuStBuStEdStEdStBuBu" caption="Shto Listë IP">
+			<control caption="Zgjidh listat për t'u shtuar. Secila shkarkohet përmes HTTPS dhe përditësohet një herë në ditë; asnjë nuk shtohet nëse nuk e zgjedh."/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control caption="Lista jote"/>
+			<control caption="_Emri:"/>
+			<control/>
+			<control caption="_URL:"/>
+			<control/>
+			<control caption="Formatet e pranuara: PeerGuardian (.p2p), eMule (ipfilter.dat), Gnucleus (.net), CIDR, adresa të thjeshta dhe Spamhaus DROP JSON, si tekst, gzip ose zip. URL-ja duhet të fillojë me https://."/>
+			<control caption="_Shto"/>
+			<control caption="Anulo"/>
+		</dialog>
 		<dialog name="CShareManagerDlg" cookie="StSyBuBuBuBu" caption="Menaxheri i Dosjeve të Shpërndara">
 			<control caption="Kjo është lista me dosje në librarinë tënde. Dosjet mund të shtohen dhe hiqen duke përdorur butonat majtas. Kur shtohet një dosje e re, në fillim ajo shpërndahet me përdoruesit e tjerë; gjithsesi, kjo mund të çaktivizohet në librarinë e Shareaza-s."/>
 			<control/>
@@ -4632,6 +4707,12 @@
 			<column from="Precedence" to="Paraprirje"/>
 			<column from="Hits" to="Hite"/>
 			<column from="Comment" to="Komenti"/>
+		</list>
+		<list name="CSecurityWnd.Lists">
+			<column from="List" to="Lista"/>
+			<column from="Ranges" to="Vargje"/>
+			<column from="Updated" to="Përditësuar"/>
+			<column from="Hits" to="Hite"/>
 		</list>
 		<list name="CHostCacheWnd">
 			<column from="Address" to="Adresa"/>

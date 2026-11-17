@@ -379,10 +379,13 @@
 			<button id="ID_SECURITY_EDIT" text="Regel bearbeiten"/>
 			<separator/>
 			<button id="ID_SECURITY_ADD" text="Regel hinzufügen"/>
-			<button id="ID_SECURITY_REMOVE" text="Regel löschen"/>
+			<button id="ID_SECURITY_REMOVE" text="Entfernen"/>
 			<separator/>
 			<button id="ID_SECURITY_MOVE_UP" text="Nach oben"/>
 			<button id="ID_SECURITY_MOVE_DOWN" text="Nach unten"/>
+			<separator/>
+			<button id="ID_SECURITY_ADD_LIST" text="Liste hinzufügen..."/>
+			<button id="ID_SECURITY_UPDATE_LISTS" text="Jetzt aktualisieren"/>
 			<rightAlign/>
 			<button id="ID_SECURITY_RESET" text="Zähler zurücksetzen"/>
 			<button id="ID_SECURITY_IMPORT" text="Importieren"/>
@@ -1561,6 +1564,14 @@
 			<separator/>
 			<item id="ID_SECURITY_EDIT" text="Ei_genschaften..."/>
 		</menu>
+		<menu name="CSecurityWnd.Lists">
+			<item id="ID_SECURITY_ADD_LIST" text="Liste _hinzufügen..."/>
+			<separator/>
+			<item id="ID_SECURITY_UPDATE_LISTS" text="Jetzt _aktualisieren"/>
+			<item id="ID_SECURITY_LIST_ENABLE" text="A_ktiviert"/>
+			<separator/>
+			<item id="ID_SECURITY_LIST_REMOVE" text="_Entfernen"/>
+		</menu>
 		<!-- SCHEDULER WINDOW -->
 		<menu name="CSchedulerWnd">
 			<item id="ID_SCHEDULER_ADD" text="_Add Scheduled Task"/>
@@ -2586,16 +2597,20 @@
 		<tip id="ID_SEARCHMONITOR_CLEAR" message="Suchmonitor-Puffer leeren."/>
 		<tip id="ID_SEARCHMONITOR_PAUSE" message="Den Suchmonitor anhalten."/>
 		<tip id="ID_SECURITY_ADD" message="Eine neue Regel hinzufügen..."/>
+		<tip id="ID_SECURITY_ADD_LIST" message="IP-Sperrlisten aus dem Katalog oder eine eigene Liste von einer https://-Adresse hinzufügen..."/>
 		<tip id="ID_SECURITY_BAN" message="Den markierten Host für die Dauer dieser Sitzung bannen."/>
 		<tip id="ID_SECURITY_EDIT" message="Die markierte Sicherheitsregel bearbeiten..."/>
 		<tip id="ID_SECURITY_EXPORT" message="Die markierten Sicherheitsregeln in eine Datei exportieren..."/>
 		<tip id="ID_SECURITY_IMPORT" message="Sicherheitsregeln aus Datei importieren..."/>
+		<tip id="ID_SECURITY_LIST_ENABLE" message="Die markierten IP-Listen ein- oder ausschalten."/>
+		<tip id="ID_SECURITY_LIST_REMOVE" message="Die markierten IP-Listen entfernen."/>
 		<tip id="ID_SECURITY_MOVE_DOWN" message="Die Priorität dieser Regel verringern."/>
 		<tip id="ID_SECURITY_MOVE_UP" message="Die Priorität dieser Regel erhöhen."/>
 		<tip id="ID_SECURITY_POLICY_ACCEPT" message="Standardverhalten auf &quot;Alle Hosts zulassen&quot; setzen."/>
 		<tip id="ID_SECURITY_POLICY_DENY" message="Standardverhalten auf &quot;Alle Hosts abweisen&quot; setzen."/>
-		<tip id="ID_SECURITY_REMOVE" message="Die markierte(n) Sicherheitsregel(n) löschen."/>
+		<tip id="ID_SECURITY_REMOVE" message="Die markierten Regeln oder IP-Listen entfernen."/>
 		<tip id="ID_SECURITY_RESET" message="Die Trefferzähler der markierte(n) Sicherheitsregel(n) zurücksetzen."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="Die markierten IP-Listen jetzt herunterladen, oder alle aktivierten, wenn keine markiert ist."/>
 		<tip id="ID_SYSTEM_CLEAR" message="Den Konsolenpuffer leeren."/>
 		<tip id="ID_SYSTEM_COPY" message="Die kopierte(n) Zeile(n) des Status Logs kopieren."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="Für jede Zeile einen Zeitstempel anzeigen."/>
@@ -3439,6 +3454,45 @@
 		<string id="20269" value="Unvollständige Dateien"/>
 		<string id="20270" value="Torrents hier speichern"/>
 		<string id="20271" value="Kollektionen hier speichern"/>
+		<string id="20272" value="Zwischengespeicherte Kopie unlesbar; sie wird erneut heruntergeladen."/>
+		<string id="20273" value="Zwischengespeicherte Kopie unlesbar; importieren Sie die Datei erneut."/>
+		<string id="20274" value="Gekaperte und kriminelle Netze; wenige Fehlalarme. Daten (c) The Spamhaus Project."/>
+		<string id="20275" value="Bekannte kompromittierte Hosts."/>
+		<string id="20276" value="Anti-P2P-Firmen; sehr groß (etwa ein Fünftel aller IPv4-Adressen); sperrt ganze Provider und CDN-Bereiche (enthält den Block 1.1.1.0 von Cloudflare)."/>
+		<string id="20277" value="Sammlung mehrerer Datenschutz- und Missbrauchslisten."/>
+		<string id="20278" value="Nicht vergebener Adressraum; muss aktuell bleiben, sonst sperrt sie neue Netze."/>
+		<string id="20279" value="Die Adresse beginnt nicht mit https://."/>
+		<string id="20280" value="Der Download endete nicht bei einer https://-Adresse."/>
+		<string id="20281" value="Der Server war nicht erreichbar."/>
+		<string id="20282" value="Der Server antwortete mit HTTP-Status %d."/>
+		<string id="20283" value="Der Download ist größer als 64 MB."/>
+		<string id="20284" value="Der Inhalt ist entpackt größer als 256 MB."/>
+		<string id="20285" value="Die komprimierte Datei konnte nicht gelesen werden."/>
+		<string id="20286" value="Die Liste enthält keinen Adressbereich."/>
+		<string id="20287" value="Die Liste enthält mehr als 2.000.000 Bereiche."/>
+		<string id="20288" value="Die Liste enthält einen IPv4-Bereich von mindestens der Hälfte des Adressraums."/>
+		<string id="20289" value="Die IPv4-Bereiche der Liste decken mehr als die Hälfte des Adressraums ab."/>
+		<string id="20290" value="Die Liste enthält einen IPv6-Bereich, der ganz 2000::/3 abdeckt."/>
+		<string id="20291" value="Die Liste konnte nicht gespeichert werden."/>
+		<string id="20292" value="IP-Liste %s aktualisiert: %lu Zeilen übernommen, %lu abgelehnt, %lu Bereiche nach dem Zusammenführen."/>
+		<string id="20293" value="IP-Liste %s nicht aktualisiert: %s"/>
+		<string id="20294" value="%s: %Iu Bereiche importiert, %Iu Zeilen abgelehnt."/>
+		<string id="20295" value="%s konnte nicht importiert werden."/>
+		<string id="20296" value="%s konnte nicht geschrieben werden."/>
+		<string id="20297" value="%s konnte nicht importiert werden: %s"/>
+		<string id="20298" value="Die Datei ist größer als 64 MB."/>
+		<string id="20299" value="IP-Listen werden nur über HTTPS heruntergeladen: Die URL muss mit https:// beginnen."/>
+		<string id="20300" value="Die markierten IP-Listen entfernen? Ihre heruntergeladenen Kopien werden ebenfalls gelöscht."/>
+		<string id="20301" value="Importiert"/>
+		<string id="20302" value="Fehlgeschlagen: %s"/>
+		<string id="20303" value="Noch nicht heruntergeladen"/>
+		<string id="20304" value="IP-Listen"/>
+		<string id="20305" value="Eigene Regeln"/>
+		<string id="20306" value="Geben Sie die https://-Adresse Ihrer eigenen Liste ein oder leeren Sie ihren Namen."/>
+		<string id="20307" value="Nichts hinzugefügt: Die gewählten Listen sind bereits in Ihren IP-Listen."/>
+		<string id="20308" value="Kreuzen Sie eine Liste an oder geben Sie die Adresse Ihrer eigenen Liste ein."/>
+		<string id="20309" value="Bereits in Ihren IP-Listen, daher nicht erneut hinzugefügt: %s"/>
+		<string id="20310" value="Der Download wurde vor seinem Ende abgebrochen."/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->
@@ -4279,6 +4333,27 @@
 			<control caption="OK"/>
 			<control caption="Abbrechen"/>
 		</dialog>
+		<dialog name="CIPListAddDlg" cookie="StBuStBuStBuStBuStBuStBuStEdStEdStBuBu" caption="IP-Liste hinzufügen">
+			<control caption="Kreuzen Sie die hinzuzufügenden Listen an. Jede wird über HTTPS heruntergeladen und täglich aktualisiert; ohne Häkchen wird keine hinzugefügt."/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control caption="Eigene Liste"/>
+			<control caption="_Name:"/>
+			<control/>
+			<control caption="_URL:"/>
+			<control/>
+			<control caption="Akzeptierte Formate: PeerGuardian (.p2p), eMule (ipfilter.dat), Gnucleus (.net), CIDR, einfache Adressen und Spamhaus DROP JSON, als Text, gzip oder zip. Die URL muss mit https:// beginnen."/>
+			<control caption="_Hinzufügen"/>
+			<control caption="Abbrechen"/>
+		</dialog>
 		<dialog name="CShareManagerDlg" cookie="StSyBuBuBuBu" caption="Ordner verwalten">
 			<control caption="Das ist eine Liste der Ordner Ihrer Bibliothek. Sie können mit den Buttons links Ordner hinzufügen oder entfernen. Wenn Sie einen neuen Ordner hinzufügen, wird er standardmäßig freigegeben. Sie können die Freigabe in der Bibliothek jedoch wieder aufheben."/>
 			<control/>
@@ -4627,6 +4702,12 @@
 			<column from="Precedence" to="Priorität"/>
 			<column from="Hits" to="Hits"/>
 			<column from="Comment" to="Kommentar"/>
+		</list>
+		<list name="CSecurityWnd.Lists">
+			<column from="List" to="Liste"/>
+			<column from="Ranges" to="Bereiche"/>
+			<column from="Updated" to="Aktualisiert"/>
+			<column from="Hits" to="Hits"/>
 		</list>
 		<list name="CHostCacheWnd">
 			<column from="Address" to="Adresse"/>

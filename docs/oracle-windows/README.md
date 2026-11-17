@@ -18,11 +18,13 @@ stub cache:
 - install, prepare as a leaf, run;
 - prepare again as a hub, run;
 - with IPv6 on, with incoming traffic blocked, with a right-to-left layout, and with the window resized;
+- with the old shipped rules planted, as an upgrade (builds that ship an empty `DefaultSecurity.dat`);
 - restore, then a second restore, which must refuse.
 
 It plants a fake "own setup" first, including a private torrent folder. It checks:
 - the folder is never shared, and the setup comes back unchanged;
 - the client runs with its security rules;
+- no deny rules after a fresh install or an upgrade; no IP list subscribed, cached or fetched;
 - Prepare refuses while a restore is unfinished.
 
 It starts Shareaza through `explorer.exe` as you would, unelevated. If the runner gives Explorer

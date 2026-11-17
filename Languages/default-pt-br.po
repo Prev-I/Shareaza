@@ -388,9 +388,10 @@ msgstr "Editar Regra"
 msgid "Add Rule"
 msgstr "Adicionar Regra"
 
-#: button;id_security_remove
-msgid "Remove Rule"
-msgstr "Remover Regra"
+#: button;id_security_remove button;id_hostcache_remove string;17021
+#: cfavouritesprofilepage;control;8
+msgid "Remove"
+msgstr "Remover"
 
 #: button;id_security_move_up
 msgid "Move Up"
@@ -399,6 +400,14 @@ msgstr "Mover pra Cima"
 #: button;id_security_move_down
 msgid "Move Down"
 msgstr "Mover pra Baixo"
+
+#: button;id_security_add_list
+msgid "Add List..."
+msgstr "Adicionar Lista..."
+
+#: button;id_security_update_lists
+msgid "Update Now"
+msgstr "Atualizar Agora"
 
 #: button;id_security_reset
 msgid "Reset List"
@@ -439,10 +448,6 @@ msgstr "Remover Tudo"
 #: button;id_hitmonitor_search
 msgid "Requery"
 msgstr "Interrogar de Novo"
-
-#: button;id_hostcache_remove string;17021 cfavouritesprofilepage;control;8
-msgid "Remove"
-msgstr "Remover"
 
 #: button;id_hostcache_g2_horizon
 msgid "G2 Cluster"
@@ -1477,6 +1482,7 @@ msgstr "_Explorar"
 #: clibrarytree.physical.basic;item;id_library_remove
 #: clibrarytree.physical;item;id_library_remove
 #: cmedialist;item;id_media_remove csecuritywnd;item;id_security_remove
+#: csecuritywnd.lists;item;id_security_list_remove
 #: cschedulerwnd;item;id_scheduler_remove
 #: cdiscoverywnd;item;id_discovery_remove clibrarysettingspage;control;19
 #: clibrarysettingspage;control;23 cmediasettingspage;control;8
@@ -1889,6 +1895,18 @@ msgstr "_Aceitar"
 #: csecuritywnd;61;item;id_security_policy_deny
 msgid "_Deny"
 msgstr "_Negar"
+
+#: csecuritywnd.lists;item;id_security_add_list
+msgid "_Add List..."
+msgstr "Adicionar _Lista..."
+
+#: csecuritywnd.lists;item;id_security_update_lists
+msgid "_Update Now"
+msgstr "A_tualizar Agora"
+
+#: csecuritywnd.lists;item;id_security_list_enable
+msgid "_Enabled"
+msgstr "Ati_vada"
 
 #: cschedulerwnd;item;id_scheduler_add
 msgid "_Add Scheduled Task"
@@ -4173,6 +4191,10 @@ msgstr "Pausar a monitoração de busca."
 msgid "Add a new rule to the security chain..."
 msgstr "Adicionar uma nova regra para a cadeia de segurança..."
 
+#: message;id_security_add_list
+msgid "Add IP block lists from the catalogue, or your own list from an https:// address..."
+msgstr "Adicionar listas de bloqueio de IP do catálogo, ou sua própria lista de um endereço https://..."
+
 #: message;id_security_ban
 msgid "Ban the selected host for the duration of this session."
 msgstr "Banir o host selecionado pela duração desta sessão."
@@ -4188,6 +4210,14 @@ msgstr "Exportar a regra de segurança selecionada para um arquivo..."
 #: message;id_security_import
 msgid "Import security rules from a file..."
 msgstr "Importar regras de segurança de um arquivo..."
+
+#: message;id_security_list_enable
+msgid "Turn the selected IP lists on or off."
+msgstr "Ativar ou desativar as listas de IP selecionadas."
+
+#: message;id_security_list_remove
+msgid "Remove the selected IP lists."
+msgstr "Remover as listas de IP selecionadas."
 
 #: message;id_security_move_down
 msgid "Move the selected security rules down the precedence list."
@@ -4206,12 +4236,16 @@ msgid "Set the default security policy to deny all hosts."
 msgstr "Definir política padrão pra negar todos os hosts."
 
 #: message;id_security_remove
-msgid "Remove the selected security rules."
-msgstr "Remover a regras de segurança selecionadas."
+msgid "Remove the selected rules or IP lists."
+msgstr "Remover as regras ou listas de IP selecionadas."
 
 #: message;id_security_reset
 msgid "Reset the hit counts on the selected rules."
 msgstr "Reiniciar as contagens de acerto das regras de segurança selecionadas."
+
+#: message;id_security_update_lists
+msgid "Download the selected IP lists now, or every enabled list when none is selected."
+msgstr "Baixar agora as listas de IP selecionadas, ou todas as listas ativadas quando nenhuma estiver selecionada."
 
 #: message;id_system_clear
 msgid "Clear the status log."
@@ -7313,8 +7347,8 @@ msgstr "OK"
 #: cfilecopydlg;control;5 cfolderpropertiesdlg;control;8
 #: cgraphlistdlg;control;17 cgraphitemdlg;control;2
 #: cschemacolumnsdlg;control;4 csecureruledlg;control;34
-#: csharemanagerdlg;control;6 curlcopydlg;control;6 curlexportdlg;control;10
-#: curlactiondlg;control;11 cfilepreviewdlg;control;6
+#: ciplistadddlg;control;19 csharemanagerdlg;control;6 curlcopydlg;control;6
+#: curlexportdlg;control;10 curlactiondlg;control;11 cfilepreviewdlg;control;6
 #: cexistingfiledlg;control;2 cclosemodedlg;control;6
 #: cdonkeyserversdlg;control;5 cdeletefiledlg;control;5
 #: ctorrentseeddlg;control;4 cdownloadgroupdlg;control;2
@@ -7445,6 +7479,162 @@ msgstr "Armazenar Torrents Aqui"
 #: string;20271 clibrarysettingspage;control;24
 msgid "Store Collections Here"
 msgstr "Armazenar as Coleções Aqui"
+
+#: string;20272
+msgid "Cached copy unreadable; it will be downloaded again."
+msgstr "Cópia em cache ilegível; ela será baixada novamente."
+
+#: string;20273
+msgid "Cached copy unreadable; import the file again."
+msgstr "Cópia em cache ilegível; importe o arquivo novamente."
+
+#: string;20274
+msgid "Hijacked and criminal networks; few false positives. Data (c) The Spamhaus Project."
+msgstr "Redes sequestradas e criminosas; poucos falsos positivos. Dados (c) The Spamhaus Project."
+
+#: string;20275
+msgid "Known compromised hosts."
+msgstr "Hosts comprometidos conhecidos."
+
+#: string;20276
+msgid "Anti-P2P companies; very large (about a fifth of all IPv4 addresses); blocks whole providers and CDN ranges (it lists Cloudflare's 1.1.1.0 block)."
+msgstr "Empresas anti-P2P; muito grande (cerca de um quinto de todos os endereços IPv4); bloqueia provedores inteiros e faixas de CDN (inclui o bloco 1.1.1.0 da Cloudflare)."
+
+#: string;20277
+msgid "Aggregate of several privacy and abuse lists."
+msgstr "Agregado de várias listas de privacidade e abuso."
+
+#: string;20278
+msgid "Unallocated space; must stay updated or it blocks new networks."
+msgstr "Espaço não alocado; deve ser mantida atualizada ou bloqueará redes novas."
+
+#: string;20279
+msgid "The address does not start with https://."
+msgstr "O endereço não começa com https://."
+
+#: string;20280
+msgid "The download did not end at an https:// address."
+msgstr "O download não terminou em um endereço https://."
+
+#: string;20281
+msgid "The server could not be reached."
+msgstr "Não foi possível contatar o servidor."
+
+#: string;20282
+msgid "The server answered with HTTP status %d."
+msgstr "O servidor respondeu com o status HTTP %d."
+
+#: string;20283
+msgid "The download is larger than 64 MB."
+msgstr "O download é maior que 64 MB."
+
+#: string;20284
+msgid "The content is larger than 256 MB once decompressed."
+msgstr "O conteúdo é maior que 256 MB depois de descompactado."
+
+#: string;20285
+msgid "The compressed file could not be read."
+msgstr "Não foi possível ler o arquivo compactado."
+
+#: string;20286
+msgid "The list holds no address range."
+msgstr "A lista não contém nenhuma faixa de endereços."
+
+#: string;20287
+msgid "The list holds more than 2,000,000 ranges."
+msgstr "A lista contém mais de 2.000.000 de faixas."
+
+#: string;20288
+msgid "The list holds an IPv4 range of half the address space or more."
+msgstr "A lista contém uma faixa IPv4 de metade do espaço de endereços ou mais."
+
+#: string;20289
+msgid "The list's IPv4 ranges cover more than half the address space."
+msgstr "As faixas IPv4 da lista cobrem mais da metade do espaço de endereços."
+
+#: string;20290
+msgid "The list holds an IPv6 range that covers all of 2000::/3."
+msgstr "A lista contém uma faixa IPv6 que cobre todo o 2000::/3."
+
+#: string;20291
+msgid "The list could not be saved."
+msgstr "Não foi possível salvar a lista."
+
+#: string;20292
+msgid "IP list %s updated: %lu lines taken, %lu rejected, %lu ranges after merging."
+msgstr "Lista de IP %s atualizada: %lu linhas aceitas, %lu rejeitadas, %lu faixas após a mesclagem."
+
+#: string;20293
+msgid "IP list %s not updated: %s"
+msgstr "Lista de IP %s não atualizada: %s"
+
+#: string;20294
+msgid "%s: %Iu ranges imported, %Iu lines rejected."
+msgstr "%s: %Iu faixas importadas, %Iu linhas rejeitadas."
+
+#: string;20295
+msgid "%s could not be imported."
+msgstr "Não foi possível importar %s."
+
+#: string;20296
+msgid "%s could not be written."
+msgstr "Não foi possível gravar %s."
+
+#: string;20297
+msgid "%s could not be imported: %s"
+msgstr "Não foi possível importar %s: %s"
+
+#: string;20298
+msgid "The file is larger than 64 MB."
+msgstr "O arquivo é maior que 64 MB."
+
+#: string;20299
+msgid "IP lists are downloaded over HTTPS only: the URL must start with https://."
+msgstr "As listas de IP são baixadas somente por HTTPS: a URL deve começar com https://."
+
+#: string;20300
+msgid "Remove the selected IP lists? Their downloaded copies are deleted too."
+msgstr "Remover as listas de IP selecionadas? As cópias baixadas também serão excluídas."
+
+#: string;20301
+msgid "Imported"
+msgstr "Importada"
+
+#: string;20302
+msgid "Failed: %s"
+msgstr "Falhou: %s"
+
+#: string;20303
+msgid "Not downloaded yet"
+msgstr "Ainda não baixada"
+
+#: string;20304
+msgid "IP lists"
+msgstr "Listas de IP"
+
+#: string;20305
+msgid "My rules"
+msgstr "Minhas regras"
+
+#: string;20306
+msgid "Enter the https:// address of your own list, or clear its name."
+msgstr "Digite o endereço https:// da sua própria lista, ou apague o nome dela."
+
+#: string;20307
+msgid "Nothing was added: the lists you chose are already in your IP lists."
+msgstr "Nada foi adicionado: as listas escolhidas já estão nas suas listas de IP."
+
+#: string;20308
+msgid "Tick a list, or enter the address of your own list."
+msgstr "Marque uma lista, ou digite o endereço da sua própria lista."
+
+#: string;20309
+msgid "Already in your IP lists, so not added again: %s"
+msgstr "Já estão nas suas listas de IP, por isso não foram adicionadas de novo: %s"
+
+#: string;20310
+msgid "The download was cut off before its end."
+msgstr "O download foi interrompido antes do fim."
 
 #: csettingsheet;control;4 cprofilemanagerdlg;control;4
 msgid "Apply"
@@ -7589,7 +7779,8 @@ msgstr "_Seguro para Abrir:"
 
 #: clibrarysettingspage;control;18 clibrarysettingspage;control;22
 #: cmediasettingspage;control;7 cwebsettingspage;control;12
-#: cfilesourcespage;control;5 cdownloadgroupdlg;control;7
+#: cfilesourcespage;control;5 ciplistadddlg;control;18
+#: cdownloadgroupdlg;control;7
 msgid "_Add"
 msgstr "_Adicionar"
 
@@ -8288,7 +8479,7 @@ msgid "Upload Queue Properties"
 msgstr "Propriedades da Fila de Upload"
 
 #: cqueuepropertiesdlg;control;1 cgraphlistdlg;control;14
-#: cdownloadgroupdlg;control;12
+#: ciplistadddlg;control;13 cdownloadgroupdlg;control;12
 msgid "_Name:"
 msgstr "_ Nome:"
 
@@ -9185,6 +9376,26 @@ msgstr "h"
 msgid "m"
 msgstr "m"
 
+#: dialog;ciplistadddlg
+msgid "Add IP List"
+msgstr "Adicionar Lista de IP"
+
+#: ciplistadddlg;control;1
+msgid "Tick the lists to add. Each one is downloaded over HTTPS and updated once a day; none is added unless you tick it."
+msgstr "Marque as listas a adicionar. Cada uma é baixada por HTTPS e atualizada uma vez por dia; nenhuma é adicionada se você não marcar."
+
+#: ciplistadddlg;control;12
+msgid "Your own list"
+msgstr "Sua própria lista"
+
+#: ciplistadddlg;control;15
+msgid "_URL:"
+msgstr "_URL:"
+
+#: ciplistadddlg;control;17
+msgid "Accepted formats: PeerGuardian (.p2p), eMule (ipfilter.dat), Gnucleus (.net), CIDR, plain addresses and Spamhaus DROP JSON, as text, gzip or zip. The URL must start with https://."
+msgstr "Formatos aceitos: PeerGuardian (.p2p), eMule (ipfilter.dat), Gnucleus (.net), CIDR, endereços simples e Spamhaus DROP JSON, como texto, gzip ou zip. A URL deve começar com https://."
+
 #: dialog;csharemanagerdlg
 msgid "Shared Folder Manager"
 msgstr "Gerenciador de Pasta Compartilhada"
@@ -9805,6 +10016,18 @@ msgstr "Prioridade"
 msgid "Comment"
 msgstr "Comentário"
 
+#: column;list
+msgid "List"
+msgstr "Lista"
+
+#: column;ranges
+msgid "Ranges"
+msgstr "Faixas"
+
+#: column;updated
+msgid "Updated"
+msgstr "Atualizada"
+
 #: column;lastseen
 msgid "LastSeen"
 msgstr "Última Vez Visto"
@@ -10191,3 +10414,9 @@ msgstr "PróximaExecução"
 
 #~ msgid "The scheduler is designed to allow you to set times when Shareaza will connect and download files. {n}{n}{n}Note: If you have Shareaza open while the scheduler is active, you may see it changing settings- This is normal!"
 #~ msgstr "A agenda é designada para permitir a você definir os horários quando o Shareaza conectará e baixará arquivos. {n}{n}{n}Nota: Se você tem o Shareaza aberto enquanto a agenda está ativa, você pode vê-lo mudando as configurações - Isto é normal!"
+
+#~ msgid "Remove Rule"
+#~ msgstr "Remover Regra"
+
+#~ msgid "Remove the selected security rules."
+#~ msgstr "Remover a regras de segurança selecionadas."

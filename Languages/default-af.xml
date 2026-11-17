@@ -379,10 +379,13 @@
 			<button id="ID_SECURITY_EDIT" text="Edit Rule"/>
 			<separator/>
 			<button id="ID_SECURITY_ADD" text="Add Rule"/>
-			<button id="ID_SECURITY_REMOVE" text="Remove Rule"/>
+			<button id="ID_SECURITY_REMOVE" text="Verwyder"/>
 			<separator/>
 			<button id="ID_SECURITY_MOVE_UP" text="Move Up"/>
 			<button id="ID_SECURITY_MOVE_DOWN" text="Move Down"/>
+			<separator/>
+			<button id="ID_SECURITY_ADD_LIST" text="Voeg lys by..."/>
+			<button id="ID_SECURITY_UPDATE_LISTS" text="Dateer nou op"/>
 			<rightAlign/>
 			<button id="ID_SECURITY_RESET" text="Reset List"/>
 			<button id="ID_SECURITY_IMPORT" text="Import List"/>
@@ -1561,6 +1564,14 @@
 			<separator/>
 			<item id="ID_SECURITY_EDIT" text="_Properties"/>
 		</menu>
+		<menu name="CSecurityWnd.Lists">
+			<item id="ID_SECURITY_ADD_LIST" text="Voeg _lys by..."/>
+			<separator/>
+			<item id="ID_SECURITY_UPDATE_LISTS" text="_Dateer nou op"/>
+			<item id="ID_SECURITY_LIST_ENABLE" text="_Geaktiveer"/>
+			<separator/>
+			<item id="ID_SECURITY_LIST_REMOVE" text="_Verwyder"/>
+		</menu>
 		<!-- SCHEDULER WINDOW -->
 		<menu name="CSchedulerWnd">
 			<item id="ID_SCHEDULER_ADD" text="_Add Scheduled Task"/>
@@ -2591,16 +2602,20 @@
 		<tip id="ID_SEARCHMONITOR_CLEAR" message="Maak die soekmonitor buffer skoon."/>
 		<tip id="ID_SEARCHMONITOR_PAUSE" message="Vries die soekmonitor."/>
 		<tip id="ID_SECURITY_ADD" message="Voeg 'n nuwe reël by die sekuriteitsketting..."/>
+		<tip id="ID_SECURITY_ADD_LIST" message="Voeg IP-bloklyste uit die katalogus by, of jou eie lys van 'n https://-adres af..."/>
 		<tip id="ID_SECURITY_BAN" message="Verban die geselekteerde gasheer vir die duur van die sessie."/>
 		<tip id="ID_SECURITY_EDIT" message="Verander die geselekteerde sekuriteitsreël..."/>
 		<tip id="ID_SECURITY_EXPORT" message="Voer die geselekteerde sekuriteitsreëls uit na 'n lêer..."/>
 		<tip id="ID_SECURITY_IMPORT" message="Trek sekuriteitsreëls in van 'n lêer..."/>
+		<tip id="ID_SECURITY_LIST_ENABLE" message="Skakel die gekose IP-lyste aan of af."/>
+		<tip id="ID_SECURITY_LIST_REMOVE" message="Verwyder die gekose IP-lyste."/>
 		<tip id="ID_SECURITY_MOVE_DOWN" message="Skuif die geselekteerde sekuriteitsreëls af in die prioriteitslys."/>
 		<tip id="ID_SECURITY_MOVE_UP" message="Skuif die geselekteerde sekuriteitsreëls op in die prioriteitslys."/>
 		<tip id="ID_SECURITY_POLICY_ACCEPT" message="Stel die standaard sekuriteitsbeleid in sodat alle gashere toegelaat word."/>
 		<tip id="ID_SECURITY_POLICY_DENY" message="Stel die standaard sekuriteitsbeleid in sodat alle gashere geweier word."/>
-		<tip id="ID_SECURITY_REMOVE" message="Verwyder die geselekteerde sekuriteitsreëls."/>
+		<tip id="ID_SECURITY_REMOVE" message="Verwyder die gekose reëls of IP-lyste."/>
 		<tip id="ID_SECURITY_RESET" message="Herstel die trefteller van die geselekteerde reëls."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="Laai die gekose IP-lyste nou af, of elke geaktiveerde lys as niks gekies is nie."/>
 		<tip id="ID_SYSTEM_CLEAR" message="Maak die statuslog skoon."/>
 		<tip id="ID_SYSTEM_COPY" message="Copy selected line(s) of status log."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="Hou rekord van die tyd van elke lyn."/>
@@ -3444,6 +3459,45 @@
 		<string id="20269" value="Stoor Onvolledige Aflaaie Hier"/>
 		<string id="20270" value="Stoor Torrents Hier"/>
 		<string id="20271" value="Stoor Versamelings Hier"/>
+		<string id="20272" value="Gekaste kopie onleesbaar; dit sal weer afgelaai word."/>
+		<string id="20273" value="Gekaste kopie onleesbaar; voer die lêer weer in."/>
+		<string id="20274" value="Gekaapte en kriminele netwerke; min vals positiewe. Data (c) The Spamhaus Project."/>
+		<string id="20275" value="Bekende gekompromitteerde gashere."/>
+		<string id="20276" value="Anti-P2P-maatskappye; baie groot (omtrent 'n vyfde van alle IPv4-adresse); blokkeer hele verskaffers en CDN-reekse (sluit Cloudflare se 1.1.1.0-blok in)."/>
+		<string id="20277" value="Samevoeging van verskeie privaatheids- en misbruiklyste."/>
+		<string id="20278" value="Ongetoekende adresruimte; moet bygewerk bly, anders blokkeer dit nuwe netwerke."/>
+		<string id="20279" value="Die adres begin nie met https:// nie."/>
+		<string id="20280" value="Die aflaai het nie by 'n https://-adres geëindig nie."/>
+		<string id="20281" value="Die bediener kon nie bereik word nie."/>
+		<string id="20282" value="Die bediener het met HTTP-status %d geantwoord."/>
+		<string id="20283" value="Die aflaai is groter as 64 MB."/>
+		<string id="20284" value="Die inhoud is groter as 256 MB wanneer dit uitgepak is."/>
+		<string id="20285" value="Die saamgepersde lêer kon nie gelees word nie."/>
+		<string id="20286" value="Die lys bevat geen adresreeks nie."/>
+		<string id="20287" value="Die lys bevat meer as 2 000 000 reekse."/>
+		<string id="20288" value="Die lys bevat 'n IPv4-reeks van die helfte van die adresruimte of meer."/>
+		<string id="20289" value="Die lys se IPv4-reekse dek meer as die helfte van die adresruimte."/>
+		<string id="20290" value="Die lys bevat 'n IPv6-reeks wat die hele 2000::/3 dek."/>
+		<string id="20291" value="Die lys kon nie gestoor word nie."/>
+		<string id="20292" value="IP-lys %s bygewerk: %lu reëls aanvaar, %lu verwerp, %lu reekse na samevoeging."/>
+		<string id="20293" value="IP-lys %s nie bygewerk nie: %s"/>
+		<string id="20294" value="%s: %Iu reekse ingevoer, %Iu reëls verwerp."/>
+		<string id="20295" value="%s kon nie ingevoer word nie."/>
+		<string id="20296" value="%s kon nie geskryf word nie."/>
+		<string id="20297" value="%s kon nie ingevoer word nie: %s"/>
+		<string id="20298" value="Die lêer is groter as 64 MB."/>
+		<string id="20299" value="IP-lyste word slegs oor HTTPS afgelaai: die URL moet met https:// begin."/>
+		<string id="20300" value="Verwyder die gekose IP-lyste? Hul afgelaaide kopieë word ook geskrap."/>
+		<string id="20301" value="Ingevoer"/>
+		<string id="20302" value="Misluk: %s"/>
+		<string id="20303" value="Nog nie afgelaai nie"/>
+		<string id="20304" value="IP-lyste"/>
+		<string id="20305" value="My reëls"/>
+		<string id="20306" value="Voer die https://-adres van jou eie lys in, of maak sy naam skoon."/>
+		<string id="20307" value="Niks is bygevoeg nie: die lyste wat jy gekies het, is reeds in jou IP-lyste."/>
+		<string id="20308" value="Merk 'n lys, of voer die adres van jou eie lys in."/>
+		<string id="20309" value="Reeds in jou IP-lyste, dus nie weer bygevoeg nie: %s"/>
+		<string id="20310" value="Die aflaai is afgesny voordat dit klaar was."/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->
@@ -4284,6 +4338,27 @@
 			<control caption="OK"/>
 			<control caption="Kanselleer"/>
 		</dialog>
+		<dialog name="CIPListAddDlg" cookie="StBuStBuStBuStBuStBuStBuStEdStEdStBuBu" caption="Voeg IP-lys by">
+			<control caption="Merk die lyste om by te voeg. Elkeen word oor HTTPS afgelaai en een keer per dag bygewerk; niks word bygevoeg tensy jy dit merk nie."/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control caption="Jou eie lys"/>
+			<control caption="_Naam:"/>
+			<control/>
+			<control caption="_URL:"/>
+			<control/>
+			<control caption="Aanvaarde formate: PeerGuardian (.p2p), eMule (ipfilter.dat), Gnucleus (.net), CIDR, gewone adresse en Spamhaus DROP JSON, as teks, gzip of zip. Die URL moet met https:// begin."/>
+			<control caption="_Voeg by"/>
+			<control caption="Kanselleer"/>
+		</dialog>
 		<dialog name="CShareManagerDlg" cookie="StSyBuBuBuBu" caption="Gedeelde Lêers Beheerder">
 			<control caption="Hierdie is 'n lys van gidse in jou biblioteek.  Jy kan gidse byvoeg of verwyder deur die knoppies aan die linkerkant te gebruik.  Wanneer jy 'n nuwe gids byvoeg word dit outomaties gedeel met ander gebruikers, maar jy kan dit afskakel vanuit die Shareaza biblioteek as jy wil."/>
 			<control/>
@@ -4632,6 +4707,12 @@
 			<column from="Precedence" to="Volgorde"/>
 			<column from="Hits" to="Treflaaie"/>
 			<column from="Comment" to="Kommentaar"/>
+		</list>
+		<list name="CSecurityWnd.Lists">
+			<column from="List" to="Lys"/>
+			<column from="Ranges" to="Reekse"/>
+			<column from="Updated" to="Bygewerk"/>
+			<column from="Hits" to="Treflaaie"/>
 		</list>
 		<list name="CHostCacheWnd">
 			<column from="Address" to="Adres"/>

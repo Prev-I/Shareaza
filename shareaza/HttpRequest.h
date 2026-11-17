@@ -37,6 +37,7 @@ public:
 public:
 	void		Clear();
 	CString		GetURL() const;
+	CString		GetFinalURL() const;	// the address the response came from, after redirects
 	BOOL		SetURL(LPCTSTR pszURL);
 	void		AddHeader(LPCTSTR pszKey, LPCTSTR pszValue);
 	void		SetPostData(LPCVOID pBody, DWORD nBody);
@@ -49,6 +50,7 @@ public:
 	CString		GetResponseString(UINT nCodePage = CP_UTF8) const;
 	CBuffer*	GetResponseBuffer() const;
 	BOOL		InflateResponse();
+	bool		GetReadError() const;	// reading the body failed: what was read is not the whole of it
 	bool		Execute(bool bBackground);
 	BOOL		IsPending() const;
 	BOOL		IsFinished() const;
@@ -59,6 +61,7 @@ public:
 protected:
 	HINTERNET	m_hInternet;
 	CString		m_sURL;
+	CString		m_sFinalURL;
 	CString		m_sRequestHeaders;
 	DWORD		m_nLimit;
 	int			m_nStatusCode;
@@ -70,6 +73,7 @@ protected:
 	UINT		m_nNotifyMsg;
 	WPARAM		m_nNotifyParam;
 	bool		m_bUseCookie;
+	bool		m_bReadError;
 
 	void		OnRun();
 

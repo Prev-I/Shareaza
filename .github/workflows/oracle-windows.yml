@@ -31,8 +31,8 @@ permissions:
 jobs:
     oracle:
         runs-on: windows-2022
-        # Seven client runs of about 7 minutes each, with headroom for the install and the checks.
-        timeout-minutes: 70
+        # Eight client runs of about 7 minutes each, one of them longer, with headroom for the install and the checks.
+        timeout-minutes: 85
         strategy:
             fail-fast: false
             matrix:
@@ -180,6 +180,43 @@ jobs:
                     Add-Content -Path $env:GITHUB_ENV -Value 'HAS_IPV6_SETTING=0'
                     '::notice::this build has no Connection.EnableIPv6 setting: the IPv6 and BugSplat checks are skipped'
                 }
+                # Builds that ship no deny rules (2.7.11.5 on) install an empty DefaultSecurity.dat:
+                # version, deny policy and a zero rule count, 10 bytes. They also remove the old
+                # shipped rules on upgrade and fetch no IP list unless the user added one.
+                $securityDefaults = Get-Item "$app\Data\DefaultSecurity.dat" -ErrorAction SilentlyContinue
+                if ($securityDefaults -and $securityDefaults.Length -eq 10) {
+                    Add-Content -Path $env:GITHUB_ENV -Value 'HAS_EMPTY_SECURITY=1'
+                    'DefaultSecurity.dat is empty (10 bytes): the shipped-rules and IP list checks apply'
+                } else {
+                    Add-Content -Path $env:GITHUB_ENV -Value 'HAS_EMPTY_SECURITY=0'
+                    "::notice::this build ships DefaultSecurity.dat of $(if ($securityDefaults) { $securityDefaults.Length } else { 'no' }) bytes, not the empty one: the shipped-rules and IP list checks are skipped"
+                }
+                # Security.dat (Security.cpp, CSecurity::Serialize): int32 version, int32 deny policy,
+                # then the rule count as a WORD at offset 8 (0xFFFF: a DWORD follows). Reads the user's
+                # copy through the kit's own paths, and the setting that records the cleanup.
+                @'
+                param([string] $Name)
+                $ErrorActionPreference = 'Stop'
+                . "$env:KIT\OracleCommon.ps1"
+                $file = Join-Path $script:UserData 'Data\Security.dat'
+                if (-not (Test-Path $file)) { throw "$file is missing after the run" }
+                $b = [IO.File]::ReadAllBytes($file)
+                if ($b.Length -lt 10) { throw "$file is $($b.Length) bytes, too short for a rule count" }
+                $version = [BitConverter]::ToInt32($b, 0)
+                $count = [uint32][BitConverter]::ToUInt16($b, 8)
+                if ($count -eq 0xFFFF) {
+                    if ($b.Length -lt 14) { throw "$file is $($b.Length) bytes, too short for its DWORD rule count" }
+                    $count = [BitConverter]::ToUInt32($b, 10)
+                }
+                $defaults = Get-RegValue "$script:ShareazaKey\Security" 'DefaultsVersion'
+                $line = "run $Name`: Security.dat $($b.Length) bytes, version $version, $count rule(s); Security\DefaultsVersion $defaults"
+                $line
+                Add-Content -Path "$env:WORK\security-rules.txt" -Value $line
+                if ($version -ne 6) { throw "Security.dat has version $version, not 6" }
+                if ($count -ne 0) { throw "Security.dat holds $count rule(s), not 0: shipped rules are left" }
+                if ($defaults -ne 1) { throw "Security\DefaultsVersion is '$defaults', not 1" }
+                'no security rules, and the cleanup is recorded'
+                '@ | Set-Content -Encoding ASCII check-security-rules.ps1
 
         -   name: Start a stub cache
             run: |
@@ -210,7 +247,7 @@ jobs:
                 Remove-Item gwc-requests.jsonl   # the readiness probe is not a client request
                 # A helper the run steps share: start Shareaza, wait for a query, watch, close it cleanly.
                 @'
-                param([string] $Name, [switch] $ExpectIPv6, [switch] $Resize, [switch] $ExpectRTL, [switch] $RequireQuery)
+                param([string] $Name, [switch] $ExpectIPv6, [switch] $Resize, [switch] $ExpectRTL, [switch] $RequireQuery, [double] $Hours = 0.015)
                 $ErrorActionPreference = 'Stop'
                 $before = if (Test-Path gwc-requests.jsonl) { @(Get-Content gwc-requests.jsonl | Where-Object { $_ -match '"/gwc/\?' }).Count } else { 0 }
                 $app = (Get-ItemProperty 'HKCU:\Software\Shareaza\Shareaza').Path
@@ -225,13 +262,33 @@ jobs:
                 }
                 foreach ($i in 1..36) { if ((Test-Path gwc-requests.jsonl) -and @(Get-Content gwc-requests.jsonl | Where-Object { $_ -match '"/gwc/\?' }).Count -gt $before) { break }; Start-Sleep 5 }
                 if ($RequireQuery -and (-not (Test-Path gwc-requests.jsonl) -or @(Get-Content gwc-requests.jsonl | Where-Object { $_ -match '"/gwc/\?' }).Count -le $before)) { throw "${Name}: the client sent no new cache request" }
-                & "$env:KIT\Watch-Oracle.ps1" -CacheUrl 'http://127.0.0.1:8080/gwc/' -Hours 0.015 -StatsEveryMinutes 1 -WorkDir $env:WORK
+                & "$env:KIT\Watch-Oracle.ps1" -CacheUrl 'http://127.0.0.1:8080/gwc/' -Hours $Hours -StatsEveryMinutes 1 -WorkDir $env:WORK
                 # While running: nothing visible in the shared folders.
                 $files = @(Get-ChildItem -File -Recurse "$env:WORK\shared" -ErrorAction SilentlyContinue)
                 $files | ForEach-Object { "shared: $($_.FullName)" }
                 if ($files) { throw "files appeared in the shared folders: $($files.Name -join ', ')" }
                 $p = Get-Process -Name Shareaza -ErrorAction SilentlyContinue
                 if (-not $p) { throw 'Shareaza was not running' }
+                # Every TCP connection of the client, in any state, not only listeners.
+                $all = @(Get-NetTCPConnection -OwningProcess $p.Id -ErrorAction SilentlyContinue)
+                # The client contacts no IP list server by itself: none of its connections goes to a
+                # catalogue host (IPListUpdater.cpp), resolved now. Only the client's own connections
+                # count, so the runner's traffic to shared hosts such as GitHub does not.
+                if ($env:HAS_EMPTY_SECURITY -eq '1') {
+                    # Addresses compared as .NET prints them; an IPv4-mapped IPv6 one as IPv4.
+                    function Get-PlainAddress([string] $a) { $ip = [Net.IPAddress]::Parse($a); if ($ip.IsIPv4MappedToIPv6) { $ip = $ip.MapToIPv4() }; $ip.ToString() }
+                    $catalogue = @{}
+                    foreach ($h in 'www.spamhaus.org', 'rules.emergingthreats.net', 'upd.emule-security.org', 'raw.githubusercontent.com', 'www.team-cymru.org') {
+                        $addrs = @(Resolve-DnsName -Name $h -ErrorAction SilentlyContinue | Where-Object { $_.PSObject.Properties['IPAddress'] -and $_.IPAddress } | ForEach-Object { $_.IPAddress })
+                        if (-not $addrs) { "::warning::$h did not resolve on this runner" }
+                        foreach ($a in $addrs) { $catalogue[(Get-PlainAddress $a)] = $h }
+                    }
+                    if ($catalogue.Count -eq 0) { throw 'no IP list catalogue host resolved: the connection check would prove nothing' }
+                    "catalogue hosts: $($catalogue.Count) address(es)"
+                    $hits = @($all | Where-Object { $catalogue.ContainsKey((Get-PlainAddress "$($_.RemoteAddress)")) })
+                    if ($hits) { throw "the client connected to an IP list host by itself: $(($hits | ForEach-Object { "$($_.RemoteAddress) port $($_.RemotePort) ($($catalogue[(Get-PlainAddress "$($_.RemoteAddress)")]))" }) -join ', ')" }
+                    "no connection to an IP list host among $($all.Count) TCP connections"
+                }
                 # Which addresses the client's sockets use, for builds with the IPv6 setting.
                 if ($env:HAS_IPV6_SETTING -eq '1') {
                     $tcp = @(Get-NetTCPConnection -State Listen -OwningProcess $p.Id -ErrorAction SilentlyContinue)
@@ -243,10 +300,8 @@ jobs:
                         if (-not ($udp | Where-Object { $_.LocalAddress -eq '::' })) { throw 'IPv6 is on, but no UDP socket is bound to ::' }
                         'IPv6 on: TCP and UDP sockets on ::'
                     } else {
-                        # Every TCP connection of the client, in any state, not only listeners:
-                        # an outgoing IPv6 connection must not slip past. IPv4 and loopback
-                        # addresses contain no colon.
-                        $all = @(Get-NetTCPConnection -OwningProcess $p.Id -ErrorAction SilentlyContinue)
+                        # Every TCP connection of the client ($all, above): an outgoing IPv6
+                        # connection must not slip past. IPv4 and loopback addresses contain no colon.
                         $v6 = @(@($all) + @($udp) | Where-Object { $_.LocalAddress -match ':' -or ($_.PSObject.Properties['RemoteAddress'] -and $_.RemoteAddress -match ':' -and $_.RemoteAddress -ne '::') })
                         if ($v6) { throw "IPv6 is off, but these sockets use IPv6: $(($v6 | ForEach-Object { $r = if ($_.PSObject.Properties['RemoteAddress']) { " to $($_.RemoteAddress) port $($_.RemotePort)" } else { '' }; "$($_.LocalAddress) port $($_.LocalPort)$r" }) -join ', ')" }
                         "IPv6 off: no IPv6 socket among $($all.Count) TCP connections and $($udp.Count) UDP endpoints"
@@ -333,7 +388,12 @@ jobs:
 
         -   name: Run 1, as a leaf
             timeout-minutes: 10
-            run: .\run-client.ps1 -Name leaf -RequireQuery
+            run: |
+                $ErrorActionPreference = 'Stop'
+                .\run-client.ps1 -Name leaf -RequireQuery
+                # A fresh install starts with no rules: Prepare-Oracle.ps1 copied the installer's
+                # DefaultSecurity.dat, and the client saved it back on exit.
+                if ($env:HAS_EMPTY_SECURITY -eq '1') { .\check-security-rules.ps1 -Name leaf }
 
         -   name: Prepare again, as a hub, with the kit
             run: |
@@ -507,6 +567,45 @@ jobs:
                     Remove-ItemProperty -Path "$k\Settings" -Name LanguageRTL -ErrorAction SilentlyContinue
                 }
 
+        -   name: Run with the old shipped rules, which an upgrade removes
+            # An upgrade from a build that shipped deny rules: the user's Security.dat still holds the
+            # 60 rules of the old DefaultSecurity.dat, and no Security\DefaultsVersion is set yet.
+            # Prepared as a hub on 6347 like run 2, so the collect checks of the last run still hold.
+            if: env.HAS_EMPTY_SECURITY == '1'
+            timeout-minutes: 15
+            run: |
+                $ErrorActionPreference = 'Stop'
+                & "$env:KIT\Prepare-Oracle.ps1" -CacheUrl 'http://127.0.0.1:8080/gwc/' -Mode Hub -Port 6347 -WorkDir $env:WORK
+                # The kit's paths. In a child scope, so its strict mode does not reach run-client.ps1.
+                $kit = & { . "$env:KIT\OracleCommon.ps1"; @{ UserData = $script:UserData; Defaults = (Get-RegValue "$script:ShareazaKey\Security" 'DefaultsVersion') } }
+                if ($null -ne $kit.Defaults) { throw "Prepare-Oracle.ps1 left Security\DefaultsVersion $($kit.Defaults)" }
+                # The last DefaultSecurity.dat upstream shipped, from the history: the checkout is shallow.
+                $old = 'ec36d58490f81c1448020e74327e02f39c9f7c97'
+                $target = Join-Path $kit.UserData 'Data\Security.dat'
+                # git writes to stderr even when it succeeds, which 'Stop' would turn into an error
+                # (OracleCommon.ps1, Invoke-Native): judge both commands by their exit code alone.
+                # The sparse checkout is a blob:none partial clone; cat-file fetches the blob it lacks
+                # from origin by itself, and the size, version and count checks below catch anything else.
+                $ErrorActionPreference = 'Continue'
+                & git fetch --quiet --no-tags --depth=1 origin $old
+                $fetchCode = $LASTEXITCODE
+                # Through cmd.exe: PowerShell 5.1 would re-encode the bytes of a redirected native output.
+                if ($fetchCode -eq 0) { & cmd.exe /c "git cat-file blob ${old}:Data/DefaultSecurity.dat > `"$target`"" }
+                $catCode = $LASTEXITCODE
+                $ErrorActionPreference = 'Stop'
+                if ($fetchCode -ne 0) { throw "could not fetch commit $old (exit code $fetchCode)" }
+                if ($catCode -ne 0) { throw "could not write the old DefaultSecurity.dat (exit code $catCode)" }
+                $b = [IO.File]::ReadAllBytes($target)
+                $version = [BitConverter]::ToInt32($b, 0)
+                $count = [BitConverter]::ToUInt16($b, 8)
+                "planted the old shipped rules: $($b.Length) bytes, version $version, $count rule(s)"
+                Add-Content -Path "$env:WORK\security-rules.txt" -Value "run migration, before: Security.dat $($b.Length) bytes, version $version, $count rule(s)"
+                if ($b.Length -ne 17976 -or $version -ne 5 -or $count -ne 60) { throw 'the planted file is not the old DefaultSecurity.dat (17976 bytes, version 5, 60 rules)' }
+                # Three minutes of watching, not one: the IP list updater starts its timer 120 s after
+                # startup, so its path with no list runs at least once before the checks.
+                .\run-client.ps1 -Name migration -Hours 0.05
+                .\check-security-rules.ps1 -Name migration
+
         -   name: Prepare must refuse while a restore is unfinished
             run: |
                 $marker = "$env:WORK\session\restoring"
@@ -561,6 +660,41 @@ jobs:
                 if ($log | Select-String -SimpleMatch 'Failed to load security rules') { Fail 'the client ran without security rules' }
                 if (-not ($log | Select-String -SimpleMatch 'port 6347.')) { Fail 'the last run did not listen on the prepared port 6347' }
                 if ($log | Select-String -SimpleMatch 'MyTorrents') { Fail 'the client touched the private torrent folder' }
+                if ($env:HAS_EMPTY_SECURITY -eq '1') {
+                    # No IP list was ever fetched: no update line (IDS_IPLIST_LOG_UPDATED, _FAILED) in the
+                    # last run's log, nor in any run's log below...
+                    $fetched = $log | Select-String -Pattern 'IP list .+ updated'
+                    if ($fetched) { Fail "the client fetched an IP list by itself: $fetched" }
+                    # ...and in every run's data folder, kept under runs\, no list and no cached ranges.
+                    # IPLists.dat (IPLists.cpp, CIPLists::Save): int32 version, then the list count as a
+                    # WORD at offset 4 (0xFFFF: a DWORD follows).
+                    $data = @(Get-Item "$env:WORK\runs\*\AppData-Shareaza\Data" -ErrorAction SilentlyContinue | Where-Object { $_.PSIsContainer })
+                    if (-not $data) { Fail 'no run data folder under runs\ to check for IP lists' }
+                    foreach ($d in $data) {
+                        $f = Join-Path $d.FullName 'IPLists.dat'
+                        if (Test-Path $f) {
+                            $b = [IO.File]::ReadAllBytes($f)
+                            if ($b.Length -lt 6) { Fail "$f is $($b.Length) bytes, too short for a list count" }
+                            $lists = [uint32][BitConverter]::ToUInt16($b, 4)
+                            if ($lists -eq 0xFFFF) {
+                                if ($b.Length -lt 10) { Fail "$f is $($b.Length) bytes, too short for its DWORD list count" }
+                                $lists = [BitConverter]::ToUInt32($b, 6)
+                            }
+                            "$f`: version $([BitConverter]::ToInt32($b, 0)), $lists list(s)"
+                            if ($lists -ne 0) { Fail "$f holds $lists IP list(s), not 0" }
+                        } else {
+                            "$f`: absent"
+                        }
+                        foreach ($name in 'Shareaza.log', 'Shareaza.old.log') {
+                            $runLog = Join-Path $d.FullName $name
+                            if (-not (Test-Path $runLog)) { continue }
+                            $fetched = Get-Content -Encoding Unicode $runLog | Select-String -Pattern 'IP list .+ updated'
+                            if ($fetched) { Fail "the client fetched an IP list by itself ($runLog): $fetched" }
+                        }
+                        $cached = @(Get-ChildItem -File -Recurse (Join-Path $d.FullName 'IPLists') -ErrorAction SilentlyContinue)
+                        if ($cached) { Fail "IP list ranges were cached: $($cached.FullName -join ', ')" }
+                    }
+                }
                 $reg = Get-Content "$ev\shareaza.reg"
                 $settings = ($reg -join "`n") -split '(?=\[HKEY)' | Where-Object { $_ -match '\\Shareaza\\Settings\]' }
                 if ($settings -notmatch '"Running"=dword:00000000') { Fail 'the last run did not finish with a clean exit save' }
@@ -629,7 +763,7 @@ jobs:
             if: always()
             run: |
                 New-Item -ItemType Directory -Force evidence | Out-Null
-                foreach ($p in "$env:WORK\evidence-*.zip", "$env:WORK\install-*.log", "$env:WORK\screen-*.png", "$env:WORK\blocked-notice.txt", "$env:WORK\firewall-profiles-blocked.txt", 'gwc-requests.jsonl') {
+                foreach ($p in "$env:WORK\evidence-*.zip", "$env:WORK\install-*.log", "$env:WORK\screen-*.png", "$env:WORK\blocked-notice.txt", "$env:WORK\firewall-profiles-blocked.txt", "$env:WORK\security-rules.txt", 'gwc-requests.jsonl') {
                     Copy-Item $p evidence -ErrorAction SilentlyContinue
                 }
                 # Which profile Windows gave the runner's network: Public blocks what Private allows.

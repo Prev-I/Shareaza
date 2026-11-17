@@ -424,6 +424,8 @@
     <ClCompile Include="IEProtocol.cpp" />
     <ClCompile Include="ImageFile.cpp" />
     <ClCompile Include="ImageServices.cpp" />
+    <ClCompile Include="IPLists.cpp" />
+    <ClCompile Include="IPListUpdater.cpp" />
     <ClCompile Include="Kademlia.cpp" />
     <ClCompile Include="Library.cpp" />
     <ClCompile Include="LibraryBuilder.cpp" />
@@ -623,6 +625,7 @@
     <ClCompile Include="DlgGraphList.cpp" />
     <ClCompile Include="DlgHelp.cpp" />
     <ClCompile Include="DlgHitColumns.cpp" />
+    <ClCompile Include="DlgIPListAdd.cpp" />
     <ClCompile Include="DlgIrcInput.cpp" />
     <ClCompile Include="DlgLanguage.cpp" />
     <ClCompile Include="DlgMediaVis.cpp" />
@@ -836,6 +839,11 @@
     <ClInclude Include="IEProtocol.h" />
     <ClInclude Include="ImageFile.h" />
     <ClInclude Include="ImageServices.h" />
+    <ClInclude Include="IPListCatalogue.h" />
+    <ClInclude Include="IPListParser.h" />
+    <ClInclude Include="IPLists.h" />
+    <ClInclude Include="IPListUpdater.h" />
+    <ClInclude Include="IPRangeSet.h" />
     <ClInclude Include="Kademlia.h" />
     <ClInclude Include="Library.h" />
     <ClInclude Include="LibraryBuilder.h" />
@@ -877,6 +885,7 @@
     <ClInclude Include="Registry.h" />
     <ClInclude Include="RelatedSearch.h" />
     <ClInclude Include="Remote.h" />
+    <ClInclude Include="ReservedAddresses.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="ResultFilters.h" />
     <ClInclude Include="revision.h" />
@@ -903,6 +912,7 @@
     <ClInclude Include="ShareazaURL.h" />
     <ClInclude Include="SharedFile.h" />
     <ClInclude Include="SharedFolder.h" />
+    <ClInclude Include="ShippedRules.h" />
     <ClInclude Include="Shell.h" />
     <ClInclude Include="ShellIcons.h" />
     <ClInclude Include="Skin.h" />
@@ -1053,6 +1063,7 @@
     <ClInclude Include="DlgGraphList.h" />
     <ClInclude Include="DlgHelp.h" />
     <ClInclude Include="DlgHitColumns.h" />
+    <ClInclude Include="DlgIPListAdd.h" />
     <ClInclude Include="DlgIrcInput.h" />
     <ClInclude Include="DlgLanguage.h" />
     <ClInclude Include="DlgMediaVis.h" />

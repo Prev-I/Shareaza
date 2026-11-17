@@ -861,6 +861,32 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,135,200,50,14
 END
 
+IDD_IPLIST_ADD DIALOGEX 0, 0, 380, 277
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Add IP List"
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    LTEXT           "Tick the lists to add. Each one is downloaded over HTTPS and updated once a day; none is added unless you tick it.",IDC_STATIC,5,5,370,16
+    CONTROL         "",IDC_IPLIST_CAT_0,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,5,24,370,10
+    LTEXT           "",IDC_IPLIST_NOTE_0,17,35,358,18
+    CONTROL         "",IDC_IPLIST_CAT_1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,5,54,370,10
+    LTEXT           "",IDC_IPLIST_NOTE_1,17,65,358,18
+    CONTROL         "",IDC_IPLIST_CAT_2,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,5,84,370,10
+    LTEXT           "",IDC_IPLIST_NOTE_2,17,95,358,18
+    CONTROL         "",IDC_IPLIST_CAT_3,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,5,114,370,10
+    LTEXT           "",IDC_IPLIST_NOTE_3,17,125,358,18
+    CONTROL         "",IDC_IPLIST_CAT_4,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,5,144,370,10
+    LTEXT           "",IDC_IPLIST_NOTE_4,17,155,358,18
+    GROUPBOX        "Your own list",IDC_STATIC,5,177,370,74,WS_GROUP
+    LTEXT           "&Name:",IDC_STATIC,15,190,40,12,SS_CENTERIMAGE | NOT WS_GROUP
+    EDITTEXT        IDC_IPLIST_NAME,60,190,305,12,ES_AUTOHSCROLL
+    LTEXT           "&URL:",IDC_STATIC,15,206,40,12,SS_CENTERIMAGE | NOT WS_GROUP
+    EDITTEXT        IDC_IPLIST_URL,60,206,305,12,ES_AUTOHSCROLL
+    LTEXT           "Accepted formats: PeerGuardian (.p2p), eMule (ipfilter.dat), Gnucleus (.net), CIDR, plain addresses and Spamhaus DROP JSON, as text, gzip or zip. The URL must start with https://.",IDC_STATIC,15,222,350,24
+    DEFPUSHBUTTON   "&Add",IDOK,270,257,50,14,WS_GROUP
+    PUSHBUTTON      "Cancel",IDCANCEL,325,257,50,14
+END
+
 IDD_FILE_COPY DIALOGEX 0, 0, 217, 194
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Copy Files|Move Files"
@@ -2278,6 +2304,14 @@ BEGIN
         BOTTOMMARGIN, 213
     END
 
+    IDD_IPLIST_ADD, DIALOG
+    BEGIN
+        LEFTMARGIN, 5
+        RIGHTMARGIN, 375
+        TOPMARGIN, 5
+        BOTTOMMARGIN, 271
+    END
+
     IDD_FILE_COPY, DIALOG
     BEGIN
         LEFTMARGIN, 7
@@ -3459,6 +3493,49 @@ BEGIN
     IDS_SELECT_FOLDER_INCOMPLETE "Store Temporary Incomplete Files Here"
     IDS_SELECT_FOLDER_TORRENTS "Store Torrents Here"
     IDS_SELECT_FOLDER_COLLECTIONS "Store Collections Here"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_IPLIST_CACHE_BAD    "Cached copy unreadable; it will be downloaded again."
+    IDS_IPLIST_CACHE_BAD_IMPORT "Cached copy unreadable; import the file again."
+    IDS_IPLIST_NOTE_SPAMHAUS "Hijacked and criminal networks; few false positives. Data (c) The Spamhaus Project."
+    IDS_IPLIST_NOTE_EMTHREATS "Known compromised hosts."
+    IDS_IPLIST_NOTE_EMULE   "Anti-P2P companies; very large (about a fifth of all IPv4 addresses); blocks whole providers and CDN ranges (it lists Cloudflare's 1.1.1.0 block)."
+    IDS_IPLIST_NOTE_COMBINED "Aggregate of several privacy and abuse lists."
+    IDS_IPLIST_NOTE_FULLBOGONS "Unallocated space; must stay updated or it blocks new networks."
+    IDS_IPLIST_ERR_NOT_HTTPS "The address does not start with https://."
+    IDS_IPLIST_ERR_FINAL_NOT_HTTPS "The download did not end at an https:// address."
+    IDS_IPLIST_ERR_NO_RESPONSE "The server could not be reached."
+    IDS_IPLIST_ERR_HTTP_STATUS "The server answered with HTTP status %d."
+    IDS_IPLIST_ERR_TOO_LARGE "The download is larger than 64 MB."
+    IDS_IPLIST_ERR_INFLATED_TOO_LARGE "The content is larger than 256 MB once decompressed."
+    IDS_IPLIST_ERR_DECOMPRESS "The compressed file could not be read."
+    IDS_IPLIST_ERR_EMPTY    "The list holds no address range."
+    IDS_IPLIST_ERR_TOO_MANY "The list holds more than 2,000,000 ranges."
+    IDS_IPLIST_ERR_V4_TOO_WIDE "The list holds an IPv4 range of half the address space or more."
+    IDS_IPLIST_ERR_V4_COVERAGE "The list's IPv4 ranges cover more than half the address space."
+    IDS_IPLIST_ERR_V6_GLOBAL "The list holds an IPv6 range that covers all of 2000::/3."
+    IDS_IPLIST_ERR_SAVE     "The list could not be saved."
+    IDS_IPLIST_LOG_UPDATED  "IP list %s updated: %lu lines taken, %lu rejected, %lu ranges after merging."
+    IDS_IPLIST_LOG_FAILED   "IP list %s not updated: %s"
+    IDS_IPLIST_IMPORTED     "%s: %Iu ranges imported, %Iu lines rejected."
+    IDS_SECURITY_IMPORT_FAILED "%s could not be imported."
+    IDS_SECURITY_EXPORT_FAILED "%s could not be written."
+    IDS_IPLIST_IMPORT_FAILED "%s could not be imported: %s"
+    IDS_IPLIST_IMPORT_TOO_LARGE "The file is larger than 64 MB."
+    IDS_IPLIST_HTTPS_ONLY   "IP lists are downloaded over HTTPS only: the URL must start with https://."
+    IDS_IPLIST_REMOVE_CONFIRM "Remove the selected IP lists? Their downloaded copies are deleted too."
+    IDS_IPLIST_STATUS_IMPORTED "Imported"
+    IDS_IPLIST_STATUS_FAILED "Failed: %s"
+    IDS_IPLIST_STATUS_PENDING "Not downloaded yet"
+    IDS_IPLIST_PANE_LISTS   "IP lists"
+    IDS_IPLIST_PANE_RULES   "My rules"
+    IDS_IPLIST_URL_NEEDED   "Enter the https:// address of your own list, or clear its name."
+    IDS_IPLIST_ALREADY_ADDED "Nothing was added: the lists you chose are already in your IP lists."
+    IDS_IPLIST_NOTHING_CHOSEN "Tick a list, or enter the address of your own list."
+    IDS_IPLIST_SKIPPED      "Already in your IP lists, so not added again: %s"
+    IDS_IPLIST_ERR_TRUNCATED "The download was cut off before its end."
 END
 
 STRINGTABLE 
@@ -4702,7 +4779,7 @@ END
 STRINGTABLE 
 BEGIN
     ID_SECURITY_EDIT        "Edit the selected security rule..."
-    ID_SECURITY_REMOVE      "Remove the selected security rules."
+    ID_SECURITY_REMOVE      "Remove the selected rules or IP lists."
     ID_SECURITY_RESET       "Reset the hit counts on the selected rules."
     ID_SECURITY_ADD         "Add a new rule to the security chain..."
     ID_SECURITY_POLICY_ACCEPT 
@@ -5074,6 +5151,10 @@ END
 STRINGTABLE 
 BEGIN
     ID_SCHEDULER_REMOVE_ALL "Removes all scheduled tasks."
+    ID_SECURITY_ADD_LIST    "Add IP block lists from the catalogue, or your own list from an https:// address..."
+    ID_SECURITY_UPDATE_LISTS "Download the selected IP lists now, or every enabled list when none is selected."
+    ID_SECURITY_LIST_REMOVE "Remove the selected IP lists."
+    ID_SECURITY_LIST_ENABLE "Turn the selected IP lists on or off."
 END
 
 #endif    // English resources

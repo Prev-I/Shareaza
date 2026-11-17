@@ -338,6 +338,12 @@ public:
 		DWORD		DefaultsVersion;			// Default service list last merged into this install (CDiscoveryServices::Load)
 	} Discovery;
 
+	struct sSecurity
+	{
+		DWORD		DefaultsVersion;			// Shipped rules last cleaned from this install (CShareazaApp::InitInstance)
+		DWORD		ListsPaneSize;				// Height of the IP lists pane in the Security window (pixels)
+	} Security;
+
 	struct sGnutella
 	{
 		DWORD		ConnectFactor;				// Number of hosts we simultaneously try when connecting to single hub

@@ -383,6 +383,9 @@
 			<separator/>
 			<button id="ID_SECURITY_MOVE_UP" text="Aukštyn"/>
 			<button id="ID_SECURITY_MOVE_DOWN" text="Žemyn"/>
+			<separator/>
+			<button id="ID_SECURITY_ADD_LIST" text="Pridėti sąrašą..."/>
+			<button id="ID_SECURITY_UPDATE_LISTS" text="Atnaujinti dabar"/>
 			<rightAlign/>
 			<button id="ID_SECURITY_RESET" text="Apnulinti"/>
 			<button id="ID_SECURITY_IMPORT" text="Importuoti..."/>
@@ -1561,6 +1564,14 @@
 			<separator/>
 			<item id="ID_SECURITY_EDIT" text="Sa_vybės"/>
 		</menu>
+		<menu name="CSecurityWnd.Lists">
+			<item id="ID_SECURITY_ADD_LIST" text="Pridėti _sąrašą..."/>
+			<separator/>
+			<item id="ID_SECURITY_UPDATE_LISTS" text="A_tnaujinti dabar"/>
+			<item id="ID_SECURITY_LIST_ENABLE" text="Į_jungtas"/>
+			<separator/>
+			<item id="ID_SECURITY_LIST_REMOVE" text="Š_alinti"/>
+		</menu>
 		<!-- SCHEDULER WINDOW -->
 		<menu name="CSchedulerWnd">
 			<item id="ID_SCHEDULER_ADD" text="_Add Scheduled Task"/>
@@ -2592,16 +2603,20 @@
 		<tip id="ID_SEARCHMONITOR_CLEAR" message="Išvalyti paieškos užklausų monitoriaus buferį."/>
 		<tip id="ID_SEARCHMONITOR_PAUSE" message="Pristabdyti paieškos užklausų stebėjimą."/>
 		<tip id="ID_SECURITY_ADD" message="Pridėti naują taisyklę prie apsaugos sekos..."/>
+		<tip id="ID_SECURITY_ADD_LIST" message="Pridėti IP blokavimo sąrašus iš katalogo arba savo sąrašą iš https:// adreso..."/>
 		<tip id="ID_SECURITY_BAN" message="Užkirsti pasirinkto adresato prieigą visos šios sesijos metu."/>
 		<tip id="ID_SECURITY_EDIT" message="Taisyti pasirinktą saugos taisyklę..."/>
 		<tip id="ID_SECURITY_EXPORT" message="Eksportuoti pasirinktas saugos taisykles į failą..."/>
 		<tip id="ID_SECURITY_IMPORT" message="Importuoti saugos taisykles iš failo..."/>
+		<tip id="ID_SECURITY_LIST_ENABLE" message="Įjungti arba išjungti pažymėtus IP sąrašus."/>
+		<tip id="ID_SECURITY_LIST_REMOVE" message="Šalinti pažymėtus IP sąrašus."/>
 		<tip id="ID_SECURITY_MOVE_DOWN" message="Perkelti pasirinktas saugos taisykles į apačią, suteikiant žemesnį rangą."/>
 		<tip id="ID_SECURITY_MOVE_UP" message="Perkelti pasirinktas saugos taisykles į viršų, suteikiant aukštesnį rangą."/>
 		<tip id="ID_SECURITY_POLICY_ACCEPT" message="Nustatyti, kad saugos politika, leidžianti visų adresatų prieigą, būtų numatytąja."/>
 		<tip id="ID_SECURITY_POLICY_DENY" message="Nustatyti, kad saugos politika, draudžianti visų adresatų prieigą, būtų numatytąja."/>
-		<tip id="ID_SECURITY_REMOVE" message="Pašalinti pasirinktą(-as) saugos taisyklę(-es)."/>
+		<tip id="ID_SECURITY_REMOVE" message="Šalinti pažymėtas taisykles arba IP sąrašus."/>
 		<tip id="ID_SECURITY_RESET" message="Apnulinti pasirinktų saugos taisyklių kreipinių skaitliukus."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="Atsisiųsti pažymėtus IP sąrašus dabar arba visus įjungtus sąrašus, jei nė vienas nepažymėtas."/>
 		<tip id="ID_SYSTEM_CLEAR" message="Valyti būsenos žurnalą."/>
 		<tip id="ID_SYSTEM_COPY" message="Copy selected line(s) of status log."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="Registruoti laiką kiekvienoje eilutėje."/>
@@ -3445,6 +3460,45 @@
 		<string id="20269" value="Laikyti nebaigtus siųstis failus čia"/>
 		<string id="20270" value="Laikyti torrent failus čia"/>
 		<string id="20271" value="Laikyti rinkinius čia"/>
+		<string id="20272" value="Podėlio kopija neperskaitoma; ji bus atsiųsta iš naujo."/>
+		<string id="20273" value="Podėlio kopija neperskaitoma; importuokite failą iš naujo."/>
+		<string id="20274" value="Užgrobti ir nusikalstami tinklai; mažai klaidingų teigiamų. Duomenys (c) The Spamhaus Project."/>
+		<string id="20275" value="Žinomi pažeisti kompiuteriai."/>
+		<string id="20276" value="Anti-P2P įmonės; labai didelis (apie penktadalį visų IPv4 adresų); blokuoja ištisus tiekėjus ir CDN intervalus (įtrauktas Cloudflare blokas 1.1.1.0)."/>
+		<string id="20277" value="Kelių privatumo ir piktnaudžiavimo sąrašų rinkinys."/>
+		<string id="20278" value="Nepaskirstyta erdvė; turi būti nuolat atnaujinamas, kitaip blokuos naujus tinklus."/>
+		<string id="20279" value="Adresas neprasideda https://."/>
+		<string id="20280" value="Atsisiuntimas nesibaigė https:// adresu."/>
+		<string id="20281" value="Nepavyko pasiekti serverio."/>
+		<string id="20282" value="Serveris atsakė HTTP būsena %d."/>
+		<string id="20283" value="Atsisiunčiamas failas didesnis nei 64 MB."/>
+		<string id="20284" value="Išskleistas turinys didesnis nei 256 MB."/>
+		<string id="20285" value="Nepavyko perskaityti suglaudinto failo."/>
+		<string id="20286" value="Sąraše nėra nė vieno adresų intervalo."/>
+		<string id="20287" value="Sąraše daugiau nei 2 000 000 intervalų."/>
+		<string id="20288" value="Sąraše yra IPv4 intervalas, apimantis pusę adresų erdvės ar daugiau."/>
+		<string id="20289" value="Sąrašo IPv4 intervalai apima daugiau nei pusę adresų erdvės."/>
+		<string id="20290" value="Sąraše yra IPv6 intervalas, apimantis visą 2000::/3."/>
+		<string id="20291" value="Nepavyko įrašyti sąrašo."/>
+		<string id="20292" value="IP sąrašas %s atnaujintas: priimta eilučių %lu, atmesta %lu, intervalų po sujungimo %lu."/>
+		<string id="20293" value="IP sąrašas %s neatnaujintas: %s"/>
+		<string id="20294" value="%s: importuota intervalų %Iu, atmesta eilučių %Iu."/>
+		<string id="20295" value="Nepavyko importuoti %s."/>
+		<string id="20296" value="Nepavyko įrašyti %s."/>
+		<string id="20297" value="Nepavyko importuoti %s: %s"/>
+		<string id="20298" value="Failas didesnis nei 64 MB."/>
+		<string id="20299" value="IP sąrašai atsisiunčiami tik per HTTPS: URL turi prasidėti https://."/>
+		<string id="20300" value="Šalinti pažymėtus IP sąrašus? Bus ištrintos ir jų atsisiųstos kopijos."/>
+		<string id="20301" value="Importuotas"/>
+		<string id="20302" value="Nepavyko: %s"/>
+		<string id="20303" value="Dar neatsisiųstas"/>
+		<string id="20304" value="IP sąrašai"/>
+		<string id="20305" value="Mano taisyklės"/>
+		<string id="20306" value="Įveskite savo sąrašo https:// adresą arba išvalykite jo pavadinimą."/>
+		<string id="20307" value="Nieko nepridėta: pasirinkti sąrašai jau yra jūsų IP sąrašuose."/>
+		<string id="20308" value="Pažymėkite sąrašą arba įveskite savo sąrašo adresą."/>
+		<string id="20309" value="Jau yra jūsų IP sąrašuose, todėl nepridėti dar kartą: %s"/>
+		<string id="20310" value="Atsisiuntimas nutrūko nepasibaigęs."/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->
@@ -4285,6 +4339,27 @@
 			<control caption="Gerai"/>
 			<control caption="Atšaukti"/>
 		</dialog>
+		<dialog name="CIPListAddDlg" cookie="StBuStBuStBuStBuStBuStBuStEdStEdStBuBu" caption="Pridėti IP sąrašą">
+			<control caption="Pažymėkite norimus pridėti sąrašus. Kiekvienas atsisiunčiamas per HTTPS ir atnaujinamas kartą per dieną; nepažymėti sąrašai nepridedami."/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control caption="Savas sąrašas"/>
+			<control caption="_Pavadinimas:"/>
+			<control/>
+			<control caption="_URL:"/>
+			<control/>
+			<control caption="Palaikomi formatai: PeerGuardian (.p2p), eMule (ipfilter.dat), Gnucleus (.net), CIDR, paprasti adresai ir Spamhaus DROP JSON, kaip tekstas, gzip arba zip. URL turi prasidėti https://."/>
+			<control caption="_Pridėti"/>
+			<control caption="Atšaukti"/>
+		</dialog>
 		<dialog name="CShareManagerDlg" cookie="StSyBuBuBuBu" caption="Bendrintų aplankų tvarkytuvė">
 			<control caption="Čia yra Jūsų kolekcijos aplankų sąrašas. Jūs galite pridėti ar pašalinti aplankus naudodamiesi mygtukais apačioje. Kai Jūs pridėsite naują aplanką, jis iš pradžių taps bendrintas, tačiau Jūs galėsite atjungti bendrinimą iš Shareaza kolekcijos lango."/>
 			<control/>
@@ -4633,6 +4708,12 @@
 			<column from="Precedence" to="Pirmumas"/>
 			<column from="Hits" to="Kreipinių"/>
 			<column from="Comment" to="Komentaras"/>
+		</list>
+		<list name="CSecurityWnd.Lists">
+			<column from="List" to="Sąrašas"/>
+			<column from="Ranges" to="Intervalai"/>
+			<column from="Updated" to="Atnaujinta"/>
+			<column from="Hits" to="Kreipinių"/>
 		</list>
 		<list name="CHostCacheWnd">
 			<column from="Address" to="Adresas"/>

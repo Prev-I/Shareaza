@@ -379,10 +379,13 @@
 			<button id="ID_SECURITY_EDIT" text="Edit Rule"/>
 			<separator/>
 			<button id="ID_SECURITY_ADD" text="Add Rule"/>
-			<button id="ID_SECURITY_REMOVE" text="Remove Rule"/>
+			<button id="ID_SECURITY_REMOVE" text="Poista"/>
 			<separator/>
 			<button id="ID_SECURITY_MOVE_UP" text="Move Up"/>
 			<button id="ID_SECURITY_MOVE_DOWN" text="Move Down"/>
+			<separator/>
+			<button id="ID_SECURITY_ADD_LIST" text="Lisää lista..."/>
+			<button id="ID_SECURITY_UPDATE_LISTS" text="Päivitä nyt"/>
 			<rightAlign/>
 			<button id="ID_SECURITY_RESET" text="Reset List"/>
 			<button id="ID_SECURITY_IMPORT" text="Import List"/>
@@ -1561,6 +1564,14 @@
 			<separator/>
 			<item id="ID_SECURITY_EDIT" text="Kehittynyt _Editointi"/>
 		</menu>
+		<menu name="CSecurityWnd.Lists">
+			<item id="ID_SECURITY_ADD_LIST" text="Lisää _lista..."/>
+			<separator/>
+			<item id="ID_SECURITY_UPDATE_LISTS" text="Päivitä _nyt"/>
+			<item id="ID_SECURITY_LIST_ENABLE" text="_Käytössä"/>
+			<separator/>
+			<item id="ID_SECURITY_LIST_REMOVE" text="_Poista"/>
+		</menu>
 		<!-- SCHEDULER WINDOW -->
 		<menu name="CSchedulerWnd">
 			<item id="ID_SCHEDULER_ADD" text="_Add Scheduled Task"/>
@@ -2591,16 +2602,20 @@
 		<tip id="ID_SEARCHMONITOR_CLEAR" message="Clear the search monitor buffer."/>
 		<tip id="ID_SEARCHMONITOR_PAUSE" message="Pause search monitoring."/>
 		<tip id="ID_SECURITY_ADD" message="Add a new rule to the security chain..."/>
+		<tip id="ID_SECURITY_ADD_LIST" message="Lisää IP-estolistoja luettelosta tai oma lista https://-osoitteesta..."/>
 		<tip id="ID_SECURITY_BAN" message="Ban the selected host for the duration of this session."/>
 		<tip id="ID_SECURITY_EDIT" message="Edit the selected security rule..."/>
 		<tip id="ID_SECURITY_EXPORT" message="Export the selected security rules to a file..."/>
 		<tip id="ID_SECURITY_IMPORT" message="Import security rules from a file..."/>
+		<tip id="ID_SECURITY_LIST_ENABLE" message="Ota valitut IP-listat käyttöön tai pois käytöstä."/>
+		<tip id="ID_SECURITY_LIST_REMOVE" message="Poista valitut IP-listat."/>
 		<tip id="ID_SECURITY_MOVE_DOWN" message="Move the selected security rules down the precedence list."/>
 		<tip id="ID_SECURITY_MOVE_UP" message="Move the selected security rules up the precedence list."/>
 		<tip id="ID_SECURITY_POLICY_ACCEPT" message="Set the default security policy to allow all hosts."/>
 		<tip id="ID_SECURITY_POLICY_DENY" message="Set the default security policy to deny all hosts."/>
-		<tip id="ID_SECURITY_REMOVE" message="Remove the selected security rules."/>
+		<tip id="ID_SECURITY_REMOVE" message="Poista valitut säännöt tai IP-listat."/>
 		<tip id="ID_SECURITY_RESET" message="Reset the hit counts on the selected rules."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="Lataa valitut IP-listat nyt, tai kaikki käytössä olevat, jos mitään ei ole valittu."/>
 		<tip id="ID_SYSTEM_CLEAR" message="Clear the status log."/>
 		<tip id="ID_SYSTEM_COPY" message="Copy selected line(s) of status log."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="Record a timestamp for each line."/>
@@ -3444,6 +3459,45 @@
 		<string id="20269" value="Store Temporary Incomplete Files Here"/>
 		<string id="20270" value="Store Torrents Here"/>
 		<string id="20271" value="Store Collections Here"/>
+		<string id="20272" value="Välimuistissa oleva kopio on lukukelvoton; se ladataan uudelleen."/>
+		<string id="20273" value="Välimuistissa oleva kopio on lukukelvoton; tuo tiedosto uudelleen."/>
+		<string id="20274" value="Kaapatut ja rikolliset verkot; vähän vääriä hälytyksiä. Tiedot (c) The Spamhaus Project."/>
+		<string id="20275" value="Tunnetusti murretut koneet."/>
+		<string id="20276" value="P2P-vastaiset yritykset; hyvin suuri (noin viidennes kaikista IPv4-osoitteista); estää kokonaisia palveluntarjoajia ja CDN-alueita (sisältää Cloudflaren lohkon 1.1.1.0)."/>
+		<string id="20277" value="Kooste useista yksityisyys- ja väärinkäyttölistoista."/>
+		<string id="20278" value="Jakamaton osoiteavaruus; on pidettävä ajan tasalla, muuten se estää uusia verkkoja."/>
+		<string id="20279" value="Osoite ei ala https://."/>
+		<string id="20280" value="Lataus ei päättynyt https://-osoitteeseen."/>
+		<string id="20281" value="Palvelimeen ei saatu yhteyttä."/>
+		<string id="20282" value="Palvelin vastasi HTTP-tilakoodilla %d."/>
+		<string id="20283" value="Lataus on yli 64 Mt."/>
+		<string id="20284" value="Sisältö on purettuna yli 256 Mt."/>
+		<string id="20285" value="Pakattua tiedostoa ei voitu lukea."/>
+		<string id="20286" value="Listassa ei ole yhtään osoitealuetta."/>
+		<string id="20287" value="Listassa on yli 2 000 000 aluetta."/>
+		<string id="20288" value="Listassa on IPv4-alue, joka kattaa vähintään puolet osoiteavaruudesta."/>
+		<string id="20289" value="Listan IPv4-alueet kattavat yli puolet osoiteavaruudesta."/>
+		<string id="20290" value="Listassa on IPv6-alue, joka kattaa koko 2000::/3:n."/>
+		<string id="20291" value="Listaa ei voitu tallentaa."/>
+		<string id="20292" value="IP-lista %s päivitetty: %lu riviä hyväksytty, %lu hylätty, %lu aluetta yhdistämisen jälkeen."/>
+		<string id="20293" value="IP-listaa %s ei päivitetty: %s"/>
+		<string id="20294" value="%s: %Iu aluetta tuotu, %Iu riviä hylätty."/>
+		<string id="20295" value="Tiedostoa %s ei voitu tuoda."/>
+		<string id="20296" value="Tiedostoa %s ei voitu kirjoittaa."/>
+		<string id="20297" value="Tiedostoa %s ei voitu tuoda: %s"/>
+		<string id="20298" value="Tiedosto on yli 64 Mt."/>
+		<string id="20299" value="IP-listat ladataan vain HTTPS:n kautta: URL-osoitteen on alettava https://."/>
+		<string id="20300" value="Poistetaanko valitut IP-listat? Myös niiden ladatut kopiot poistetaan."/>
+		<string id="20301" value="Tuotu"/>
+		<string id="20302" value="Epäonnistui: %s"/>
+		<string id="20303" value="Ei vielä ladattu"/>
+		<string id="20304" value="IP-listat"/>
+		<string id="20305" value="Omat säännöt"/>
+		<string id="20306" value="Anna oman listasi https://-osoite tai tyhjennä sen nimi."/>
+		<string id="20307" value="Mitään ei lisätty: valitsemasi listat ovat jo IP-listoissasi."/>
+		<string id="20308" value="Valitse lista tai anna oman listasi osoite."/>
+		<string id="20309" value="Jo IP-listoissasi, joten niitä ei lisätty uudelleen: %s"/>
+		<string id="20310" value="Lataus katkesi ennen loppuaan."/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->
@@ -4284,6 +4338,27 @@
 			<control caption="OK"/>
 			<control caption="Cancel"/>
 		</dialog>
+		<dialog name="CIPListAddDlg" cookie="StBuStBuStBuStBuStBuStBuStEdStEdStBuBu" caption="Lisää IP-lista">
+			<control caption="Valitse lisättävät listat. Jokainen ladataan HTTPS:n kautta ja päivitetään kerran päivässä; mitään ei lisätä, ellet valitse sitä."/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control caption="Oma lista"/>
+			<control caption="_Name:"/>
+			<control/>
+			<control caption="_URL:"/>
+			<control/>
+			<control caption="Hyväksytyt muodot: PeerGuardian (.p2p), eMule (ipfilter.dat), Gnucleus (.net), CIDR, pelkät osoitteet ja Spamhaus DROP JSON, tekstinä, gzip- tai zip-muodossa. URL-osoitteen on alettava https://."/>
+			<control caption="_Add"/>
+			<control caption="Cancel"/>
+		</dialog>
 		<dialog name="CShareManagerDlg" cookie="StSyBuBuBuBu" caption="Shared Folder Manager">
 			<control caption="This is a list of folders in your library.  You can add and remove folders using the buttons on the left.  When you add a new folder it is initially shared with other users, however you can unshare it from the Shareaza library if you wish."/>
 			<control/>
@@ -4632,6 +4707,12 @@
 			<column from="Precedence" to="Precedence"/>
 			<column from="Hits" to="Hits"/>
 			<column from="Comment" to="Comment"/>
+		</list>
+		<list name="CSecurityWnd.Lists">
+			<column from="List" to="Lista"/>
+			<column from="Ranges" to="Alueet"/>
+			<column from="Updated" to="Päivitetty"/>
+			<column from="Hits" to="Hits"/>
 		</list>
 		<list name="CHostCacheWnd">
 			<column from="Address" to="Address"/>

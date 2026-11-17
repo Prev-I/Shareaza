@@ -43,6 +43,8 @@
 #include "GProfile.h"
 #include "HostCache.h"
 #include "IEProtocol.h"
+#include "IPLists.h"
+#include "IPListUpdater.h"
 #include "Library.h"
 #include "LibraryBuilder.h"
 #include "Neighbours.h"
@@ -489,7 +491,17 @@ BOOL CShareazaApp::InitInstance()
 	SplashStep( L"Profile" );
 		MyProfile.Load();
 	SplashStep( L"Security Services" );
-		Security.Load();
+		if ( Security.Load() && Settings.Security.DefaultsVersion < 1 )
+		{
+			// Older versions shipped deny rules; remove them once. Only after a
+			// good load, so Save() never overwrites a file that failed to load.
+			// Marked done only once saved, so a failed save is retried next start.
+			Security.RemoveShippedRules();
+			if ( Security.Save() )
+				Settings.Security.DefaultsVersion = 1;
+		}
+		IPLists.Load();
+		IPListUpdater.Start();
 		LoadTlsTrust();
 		AdultFilter.Load();
 		MessageFilter.Load();
@@ -573,6 +585,7 @@ int CShareazaApp::ExitInstance()
 
 		SplashStep( L"Disconnecting" );
 		VersionChecker.Stop();
+		IPListUpdater.Stop();	// before IPLists.Save: no list update runs after it
 		DiscoveryServices.Stop();
 		Network.Disconnect();
 
@@ -601,6 +614,7 @@ int CShareazaApp::ExitInstance()
 			DownloadGroups.Save();
 			Library.Save();
 			Security.Save();
+			IPLists.Save();
 			SaveTlsTrustAtExit();
 			HostCache.Save();
 			UploadQueues.Save();

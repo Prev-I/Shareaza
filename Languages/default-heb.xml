@@ -379,10 +379,13 @@
 			<button id="ID_SECURITY_EDIT" text="Edit Rule"/>
 			<separator/>
 			<button id="ID_SECURITY_ADD" text="Add Rule"/>
-			<button id="ID_SECURITY_REMOVE" text="Remove Rule"/>
+			<button id="ID_SECURITY_REMOVE" text="‪הסר"/>
 			<separator/>
 			<button id="ID_SECURITY_MOVE_UP" text="Move Up"/>
 			<button id="ID_SECURITY_MOVE_DOWN" text="Move Down"/>
+			<separator/>
+			<button id="ID_SECURITY_ADD_LIST" text="הוסף רשימה..."/>
+			<button id="ID_SECURITY_UPDATE_LISTS" text="עדכן עכשיו"/>
 			<rightAlign/>
 			<button id="ID_SECURITY_RESET" text="Reset List"/>
 			<button id="ID_SECURITY_IMPORT" text="Import List"/>
@@ -1561,6 +1564,14 @@
 			<separator/>
 			<item id="ID_SECURITY_EDIT" text="‪_עריכה מתקדמת"/>
 		</menu>
+		<menu name="CSecurityWnd.Lists">
+			<item id="ID_SECURITY_ADD_LIST" text="הוסף _רשימה..."/>
+			<separator/>
+			<item id="ID_SECURITY_UPDATE_LISTS" text="_עדכן עכשיו"/>
+			<item id="ID_SECURITY_LIST_ENABLE" text="_פעילה"/>
+			<separator/>
+			<item id="ID_SECURITY_LIST_REMOVE" text="‪_הסר"/>
+		</menu>
 		<!-- SCHEDULER WINDOW -->
 		<menu name="CSchedulerWnd">
 			<item id="ID_SCHEDULER_ADD" text="_Add Scheduled Task"/>
@@ -2592,16 +2603,20 @@
 		<tip id="ID_SEARCHMONITOR_CLEAR" message="נקה את זכירון המטמון של מוניטור החיפוש"/>
 		<tip id="ID_SEARCHMONITOR_PAUSE" message="השהה ניטור חיפוש"/>
 		<tip id="ID_SECURITY_ADD" message="הוסף חוק חדש לשרשרת האבטחה"/>
+		<tip id="ID_SECURITY_ADD_LIST" message="הוסף רשימות חסימת IP מהקטלוג, או רשימה משלך מכתובת https://..."/>
 		<tip id="ID_SECURITY_BAN" message="חסום את הכתובת למשך ההפעלה הנוכחית"/>
 		<tip id="ID_SECURITY_EDIT" message="ערוך את חוק האבטחה הנבחר"/>
 		<tip id="ID_SECURITY_EXPORT" message=".ייצא חוקי אבטחה לקובץ"/>
 		<tip id="ID_SECURITY_IMPORT" message="ייבא חוקי אבטחה מקובץ"/>
+		<tip id="ID_SECURITY_LIST_ENABLE" message="הפעל או השבת את רשימות ה-IP שנבחרו."/>
+		<tip id="ID_SECURITY_LIST_REMOVE" message="הסר את רשימות ה-IP שנבחרו."/>
 		<tip id="ID_SECURITY_MOVE_DOWN" message="Move the selected security rules down the precedence list."/>
 		<tip id="ID_SECURITY_MOVE_UP" message="Move the selected security rules up the precedence list."/>
 		<tip id="ID_SECURITY_POLICY_ACCEPT" message="Set the default security policy to allow all hosts."/>
 		<tip id="ID_SECURITY_POLICY_DENY" message="Set the default security policy to deny all hosts."/>
-		<tip id="ID_SECURITY_REMOVE" message="הסר את חוקי האבטחה הנבחרים"/>
+		<tip id="ID_SECURITY_REMOVE" message="הסר את החוקים או רשימות ה-IP שנבחרו."/>
 		<tip id="ID_SECURITY_RESET" message="אפס את המונה לחוקי אבטחה הנבחרים"/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="הורד עכשיו את רשימות ה-IP שנבחרו, או את כל הרשימות הפעילות אם לא נבחרה אף אחת."/>
 		<tip id="ID_SYSTEM_CLEAR" message="נקה את רישום המצב"/>
 		<tip id="ID_SYSTEM_COPY" message="Copy selected line(s) of status log."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="הצג זמן/שעה לכל שורה"/>
@@ -3445,6 +3460,45 @@
 		<string id="20269" value="אכסן קבצים זמניים כאן"/>
 		<string id="20270" value="אכסן טורנטים כאן"/>
 		<string id="20271" value="אגור כאן את האוספים"/>
+		<string id="20272" value="העותק השמור במטמון אינו קריא; הוא יורד מחדש."/>
+		<string id="20273" value="העותק השמור במטמון אינו קריא; ייבא את הקובץ שוב."/>
+		<string id="20274" value="רשתות חטופות ופליליות; מעט התראות שווא. נתונים (c) The Spamhaus Project."/>
+		<string id="20275" value="מחשבים מארחים שידוע שנפרצו."/>
+		<string id="20276" value="חברות נגד P2P; גדולה מאוד (כחמישית מכל כתובות ה-IPv4); חוסמת ספקים שלמים וטווחי CDN (כוללת את בלוק 1.1.1.0 של Cloudflare)."/>
+		<string id="20277" value="איגוד של כמה רשימות פרטיות ושימוש לרעה."/>
+		<string id="20278" value="מרחב שלא הוקצה; חייבת להישאר מעודכנת, אחרת תחסום רשתות חדשות."/>
+		<string id="20279" value="הכתובת אינה מתחילה ב-https://."/>
+		<string id="20280" value="ההורדה לא הסתיימה בכתובת https://."/>
+		<string id="20281" value="לא ניתן היה להגיע לשרת."/>
+		<string id="20282" value="השרת ענה עם מצב HTTP %d."/>
+		<string id="20283" value="ההורדה גדולה מ-64 MB."/>
+		<string id="20284" value="התוכן גדול מ-256 MB לאחר פריסה."/>
+		<string id="20285" value="לא ניתן היה לקרוא את הקובץ הדחוס."/>
+		<string id="20286" value="הרשימה אינה מכילה אף טווח כתובות."/>
+		<string id="20287" value="הרשימה מכילה יותר מ-2,000,000 טווחים."/>
+		<string id="20288" value="הרשימה מכילה טווח IPv4 של חצי ממרחב הכתובות או יותר."/>
+		<string id="20289" value="טווחי ה-IPv4 ברשימה מכסים יותר מחצי ממרחב הכתובות."/>
+		<string id="20290" value="הרשימה מכילה טווח IPv6 שמכסה את כל 2000::/3."/>
+		<string id="20291" value="לא ניתן היה לשמור את הרשימה."/>
+		<string id="20292" value="רשימת IP %s עודכנה: %lu שורות התקבלו, %lu נדחו, %lu טווחים לאחר מיזוג."/>
+		<string id="20293" value="רשימת IP %s לא עודכנה: %s"/>
+		<string id="20294" value="%s: %Iu טווחים יובאו, %Iu שורות נדחו."/>
+		<string id="20295" value="לא ניתן היה לייבא את %s."/>
+		<string id="20296" value="לא ניתן היה לכתוב את %s."/>
+		<string id="20297" value="לא ניתן היה לייבא את %s: %s"/>
+		<string id="20298" value="הקובץ גדול מ-64 MB."/>
+		<string id="20299" value="רשימות IP מורדות דרך HTTPS בלבד: הכתובת חייבת להתחיל ב-https://."/>
+		<string id="20300" value="להסיר את רשימות ה-IP שנבחרו? גם העותקים שהורדו יימחקו."/>
+		<string id="20301" value="יובאה"/>
+		<string id="20302" value="נכשל: %s"/>
+		<string id="20303" value="טרם הורדה"/>
+		<string id="20304" value="רשימות IP"/>
+		<string id="20305" value="החוקים שלי"/>
+		<string id="20306" value="הזן את כתובת ה-https:// של הרשימה שלך, או נקה את שמה."/>
+		<string id="20307" value="לא נוסף דבר: הרשימות שבחרת כבר נמצאות ברשימות ה-IP שלך."/>
+		<string id="20308" value="סמן רשימה, או הזן את הכתובת של רשימה משלך."/>
+		<string id="20309" value="כבר נמצאות ברשימות ה-IP שלך, ולכן לא נוספו שוב: %s"/>
+		<string id="20310" value="ההורדה נקטעה לפני סופה."/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->
@@ -4285,6 +4339,27 @@
 			<control caption="אישור"/>
 			<control caption="ביטול"/>
 		</dialog>
+		<dialog name="CIPListAddDlg" cookie="StBuStBuStBuStBuStBuStBuStEdStEdStBuBu" caption="הוסף רשימת IP">
+			<control caption="סמן את הרשימות להוספה. כל אחת מורדת דרך HTTPS ומתעדכנת פעם ביום; לא תתווסף אף רשימה שלא סימנת."/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control caption="רשימה משלך"/>
+			<control caption=":שם"/>
+			<control/>
+			<control caption=":URL"/>
+			<control/>
+			<control caption="תבניות נתמכות: PeerGuardian (.p2p), eMule (ipfilter.dat), Gnucleus (.net), CIDR, כתובות פשוטות ו-Spamhaus DROP JSON, כטקסט, gzip או zip. הכתובת חייבת להתחיל ב-https://."/>
+			<control caption="הוסף"/>
+			<control caption="ביטול"/>
+		</dialog>
 		<dialog name="CShareManagerDlg" cookie="StSyBuBuBuBu" caption="מנהל תיקיית שיתוף">
 			<control caption="זוהי רשימת התיקיות שבספריה שלך. אתה יכול להוסיף ולהסיר תיקיות בעזרת הכפתורים משמאל. כשאתה מוסיף תיקייה חדשה היא באופן אוטומטי מתחילה להיות משותפת עם המשתמשים, תוכל לבחור לא לשתף אותה מתוך הספריה"/>
 			<control/>
@@ -4633,6 +4708,12 @@
 			<column from="Precedence" to="Precedence"/>
 			<column from="Hits" to="‪‫תוצאות"/>
 			<column from="Comment" to="הערה"/>
+		</list>
+		<list name="CSecurityWnd.Lists">
+			<column from="List" to="רשימה"/>
+			<column from="Ranges" to="טווחים"/>
+			<column from="Updated" to="עודכנה"/>
+			<column from="Hits" to="‪‫תוצאות"/>
 		</list>
 		<list name="CHostCacheWnd">
 			<column from="Address" to="כתובת"/>

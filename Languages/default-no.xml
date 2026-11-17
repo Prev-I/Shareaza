@@ -379,10 +379,13 @@
 			<button id="ID_SECURITY_EDIT" text="Edit Rule"/>
 			<separator/>
 			<button id="ID_SECURITY_ADD" text="Add Rule"/>
-			<button id="ID_SECURITY_REMOVE" text="Remove Rule"/>
+			<button id="ID_SECURITY_REMOVE" text="Fjern"/>
 			<separator/>
 			<button id="ID_SECURITY_MOVE_UP" text="Move Up"/>
 			<button id="ID_SECURITY_MOVE_DOWN" text="Move Down"/>
+			<separator/>
+			<button id="ID_SECURITY_ADD_LIST" text="Legg til liste..."/>
+			<button id="ID_SECURITY_UPDATE_LISTS" text="Oppdater nå"/>
 			<rightAlign/>
 			<button id="ID_SECURITY_RESET" text="Reset List"/>
 			<button id="ID_SECURITY_IMPORT" text="Import List"/>
@@ -1561,6 +1564,14 @@
 			<separator/>
 			<item id="ID_SECURITY_EDIT" text="Avansert redigering"/>
 		</menu>
+		<menu name="CSecurityWnd.Lists">
+			<item id="ID_SECURITY_ADD_LIST" text="Legg til _liste..."/>
+			<separator/>
+			<item id="ID_SECURITY_UPDATE_LISTS" text="_Oppdater nå"/>
+			<item id="ID_SECURITY_LIST_ENABLE" text="_Aktivert"/>
+			<separator/>
+			<item id="ID_SECURITY_LIST_REMOVE" text="Fjern"/>
+		</menu>
 		<!-- SCHEDULER WINDOW -->
 		<menu name="CSchedulerWnd">
 			<item id="ID_SCHEDULER_ADD" text="_Add Scheduled Task"/>
@@ -2591,16 +2602,20 @@
 		<tip id="ID_SEARCHMONITOR_CLEAR" message="Oppdater søkemonitor-bufferen."/>
 		<tip id="ID_SEARCHMONITOR_PAUSE" message="Sett monitoren på pause."/>
 		<tip id="ID_SECURITY_ADD" message="Legg til en ny regel til sikkerhetslisten."/>
+		<tip id="ID_SECURITY_ADD_LIST" message="Legg til IP-blokkeringslister fra katalogen, eller din egen liste fra en https://-adresse..."/>
 		<tip id="ID_SECURITY_BAN" message="Blokker valgte vert til neste gang du starter Shareaza."/>
 		<tip id="ID_SECURITY_EDIT" message="Endre valgte sikkerhetsregel."/>
 		<tip id="ID_SECURITY_EXPORT" message="Lagre de valgte sikkerhetsreglene som en fil..."/>
 		<tip id="ID_SECURITY_IMPORT" message="Åpne lagrede sikkerhetsregler..."/>
+		<tip id="ID_SECURITY_LIST_ENABLE" message="Slå de valgte IP-listene av eller på."/>
+		<tip id="ID_SECURITY_LIST_REMOVE" message="Fjern de valgte IP-listene."/>
 		<tip id="ID_SECURITY_MOVE_DOWN" message="Flytt valgte sikkerhetsregler ned i prioritetslisten."/>
 		<tip id="ID_SECURITY_MOVE_UP" message="Flytt valgte sikkerhetsregler opp i prioritetslisten."/>
 		<tip id="ID_SECURITY_POLICY_ACCEPT" message="Velg at normal sikkerhet skal godta alle verter."/>
 		<tip id="ID_SECURITY_POLICY_DENY" message="Velg at normal sikkerhet skal nekte alle verter."/>
-		<tip id="ID_SECURITY_REMOVE" message="Fjern valgte sikkerhetsregler."/>
+		<tip id="ID_SECURITY_REMOVE" message="Fjern de valgte reglene eller IP-listene."/>
 		<tip id="ID_SECURITY_RESET" message="Fjern treffresultat til valgte regler."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="Last ned de valgte IP-listene nå, eller alle aktiverte lister når ingen er valgt."/>
 		<tip id="ID_SYSTEM_CLEAR" message="Oppdater stausloggen."/>
 		<tip id="ID_SYSTEM_COPY" message="Copy selected line(s) of status log."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="Lag tidsstempel for hver linje."/>
@@ -3444,6 +3459,45 @@
 		<string id="20269" value="Lagre midlertidige filer her"/>
 		<string id="20270" value="Lagre Torrenter her"/>
 		<string id="20271" value="Lagre samlinger her"/>
+		<string id="20272" value="Hurtigbufret kopi kan ikke leses; den lastes ned på nytt."/>
+		<string id="20273" value="Hurtigbufret kopi kan ikke leses; importer filen på nytt."/>
+		<string id="20274" value="Kaprede og kriminelle nettverk; få falske positiver. Data (c) The Spamhaus Project."/>
+		<string id="20275" value="Kjente kompromitterte verter."/>
+		<string id="20276" value="Anti-P2P-selskaper; svært stor (omtrent en femdel av alle IPv4-adresser); blokkerer hele leverandører og CDN-områder (inneholder Cloudflares 1.1.1.0-blokk)."/>
+		<string id="20277" value="Samling av flere personvern- og misbrukslister."/>
+		<string id="20278" value="Ikke-tildelt adresserom; må holdes oppdatert, ellers blokkerer den nye nettverk."/>
+		<string id="20279" value="Adressen begynner ikke med https://."/>
+		<string id="20280" value="Nedlastingen endte ikke på en https://-adresse."/>
+		<string id="20281" value="Serveren kunne ikke nås."/>
+		<string id="20282" value="Serveren svarte med HTTP-status %d."/>
+		<string id="20283" value="Nedlastingen er større enn 64 MB."/>
+		<string id="20284" value="Innholdet er større enn 256 MB når det er pakket ut."/>
+		<string id="20285" value="Den komprimerte filen kunne ikke leses."/>
+		<string id="20286" value="Listen inneholder ingen adresseområder."/>
+		<string id="20287" value="Listen inneholder mer enn 2 000 000 områder."/>
+		<string id="20288" value="Listen inneholder et IPv4-område på halve adresserommet eller mer."/>
+		<string id="20289" value="Listens IPv4-områder dekker mer enn halve adresserommet."/>
+		<string id="20290" value="Listen inneholder et IPv6-område som dekker hele 2000::/3."/>
+		<string id="20291" value="Listen kunne ikke lagres."/>
+		<string id="20292" value="IP-liste %s oppdatert: %lu linjer godtatt, %lu avvist, %lu områder etter sammenslåing."/>
+		<string id="20293" value="IP-liste %s ikke oppdatert: %s"/>
+		<string id="20294" value="%s: %Iu områder importert, %Iu linjer avvist."/>
+		<string id="20295" value="%s kunne ikke importeres."/>
+		<string id="20296" value="%s kunne ikke skrives."/>
+		<string id="20297" value="%s kunne ikke importeres: %s"/>
+		<string id="20298" value="Filen er større enn 64 MB."/>
+		<string id="20299" value="IP-lister lastes bare ned over HTTPS: URL-en må begynne med https://."/>
+		<string id="20300" value="Fjerne de valgte IP-listene? De nedlastede kopiene deres slettes også."/>
+		<string id="20301" value="Importert"/>
+		<string id="20302" value="Mislyktes: %s"/>
+		<string id="20303" value="Ikke lastet ned ennå"/>
+		<string id="20304" value="IP-lister"/>
+		<string id="20305" value="Mine regler"/>
+		<string id="20306" value="Skriv inn https://-adressen til din egen liste, eller tøm navnet."/>
+		<string id="20307" value="Ingenting ble lagt til: listene du valgte, finnes allerede i IP-listene dine."/>
+		<string id="20308" value="Kryss av en liste, eller skriv inn adressen til din egen liste."/>
+		<string id="20309" value="Finnes allerede i IP-listene dine, så de ble ikke lagt til igjen: %s"/>
+		<string id="20310" value="Nedlastingen ble avbrutt før den var ferdig."/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->
@@ -4284,6 +4338,27 @@
 			<control caption="OK"/>
 			<control caption="Avbryt"/>
 		</dialog>
+		<dialog name="CIPListAddDlg" cookie="StBuStBuStBuStBuStBuStBuStEdStEdStBuBu" caption="Legg til IP-liste">
+			<control caption="Kryss av listene du vil legge til. Hver lastes ned over HTTPS og oppdateres én gang om dagen; ingen legges til uten at du krysser av."/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control caption="Din egen liste"/>
+			<control caption="_Navn:"/>
+			<control/>
+			<control caption="_URL:"/>
+			<control/>
+			<control caption="Godtatte formater: PeerGuardian (.p2p), eMule (ipfilter.dat), Gnucleus (.net), CIDR, enkle adresser og Spamhaus DROP JSON, som tekst, gzip eller zip. URL-en må begynne med https://."/>
+			<control caption="_Legg til"/>
+			<control caption="Avbryt"/>
+		</dialog>
 		<dialog name="CShareManagerDlg" cookie="StSyBuBuBuBu" caption="Delte mapper">
 			<control caption="Dette er en liste over mapper i mine filer. Du kan legge til og fjerne mapper med knappene til høyre. Når du legger til en mappe blir den automatisk delt med andre brukere, men du kan skru av delingen hvis du vil."/>
 			<control/>
@@ -4632,6 +4707,12 @@
 			<column from="Precedence" to="Prioritet"/>
 			<column from="Hits" to="Treff"/>
 			<column from="Comment" to="Kommentar"/>
+		</list>
+		<list name="CSecurityWnd.Lists">
+			<column from="List" to="Liste"/>
+			<column from="Ranges" to="Områder"/>
+			<column from="Updated" to="Oppdatert"/>
+			<column from="Hits" to="Treff"/>
 		</list>
 		<list name="CHostCacheWnd">
 			<column from="Address" to="Adresse"/>

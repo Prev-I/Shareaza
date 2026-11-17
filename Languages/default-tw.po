@@ -387,9 +387,10 @@ msgstr "編輯規則"
 msgid "Add Rule"
 msgstr "新增規則"
 
-#: button;id_security_remove
-msgid "Remove Rule"
-msgstr "移除規則"
+#: button;id_security_remove button;id_hostcache_remove string;17021
+#: cfavouritesprofilepage;control;8
+msgid "Remove"
+msgstr "移除"
 
 #: button;id_security_move_up
 msgid "Move Up"
@@ -398,6 +399,14 @@ msgstr "上移"
 #: button;id_security_move_down
 msgid "Move Down"
 msgstr "下移"
+
+#: button;id_security_add_list
+msgid "Add List..."
+msgstr "新增清單…"
+
+#: button;id_security_update_lists
+msgid "Update Now"
+msgstr "立即更新"
 
 #: button;id_security_reset
 msgid "Reset List"
@@ -438,10 +447,6 @@ msgstr "移除全部"
 #: button;id_hitmonitor_search
 msgid "Requery"
 msgstr "重新查詢"
-
-#: button;id_hostcache_remove string;17021 cfavouritesprofilepage;control;8
-msgid "Remove"
-msgstr "移除"
 
 #: button;id_hostcache_g2_horizon
 msgid "G2 Cluster"
@@ -1471,7 +1476,9 @@ msgstr "探索"
 
 #: clibrarytree.physical.basic;item;id_library_remove
 #: clibrarytree.physical;item;id_library_remove cmedialist;item;id_media_remove
-#: csecuritywnd;item;id_security_remove cschedulerwnd;item;id_scheduler_remove
+#: csecuritywnd;item;id_security_remove
+#: csecuritywnd.lists;item;id_security_list_remove
+#: cschedulerwnd;item;id_scheduler_remove
 #: cdiscoverywnd;item;id_discovery_remove clibrarysettingspage;control;19
 #: clibrarysettingspage;control;23 cmediasettingspage;control;8
 #: cwebsettingspage;control;13 cwizardsharepage;control;6
@@ -1883,6 +1890,18 @@ msgstr "接受"
 #: csecuritywnd;61;item;id_security_policy_deny
 msgid "_Deny"
 msgstr "拒絕"
+
+#: csecuritywnd.lists;item;id_security_add_list
+msgid "_Add List..."
+msgstr "新增清單…"
+
+#: csecuritywnd.lists;item;id_security_update_lists
+msgid "_Update Now"
+msgstr "立即更新"
+
+#: csecuritywnd.lists;item;id_security_list_enable
+msgid "_Enabled"
+msgstr "啟用"
 
 #: cschedulerwnd;item;id_scheduler_add
 msgid "_Add Scheduled Task"
@@ -4099,6 +4118,10 @@ msgstr "暫停搜尋要求監控。"
 msgid "Add a new rule to the security chain..."
 msgstr "在安全鍊中新增一個規則…"
 
+#: message;id_security_add_list
+msgid "Add IP block lists from the catalogue, or your own list from an https:// address..."
+msgstr "從目錄新增 IP 封鎖清單，或從 https:// 位址新增您自己的清單…"
+
 #: message;id_security_ban
 msgid "Ban the selected host for the duration of this session."
 msgstr "封鎖選取的主機直到會期結束。"
@@ -4114,6 +4137,14 @@ msgstr "匯出選取的安全性規則至檔案…"
 #: message;id_security_import
 msgid "Import security rules from a file..."
 msgstr "從檔案匯入安全性規則…"
+
+#: message;id_security_list_enable
+msgid "Turn the selected IP lists on or off."
+msgstr "啟用或停用選取的 IP 清單。"
+
+#: message;id_security_list_remove
+msgid "Remove the selected IP lists."
+msgstr "移除選取的 IP 清單。"
 
 #: message;id_security_move_down
 msgid "Move the selected security rules down the precedence list."
@@ -4132,12 +4163,16 @@ msgid "Set the default security policy to deny all hosts."
 msgstr "將預設的安全性方針設定成拒絕所有的主機。"
 
 #: message;id_security_remove
-msgid "Remove the selected security rules."
-msgstr "移除選取的安全性規則。"
+msgid "Remove the selected rules or IP lists."
+msgstr "移除選取的規則或 IP 清單。"
 
 #: message;id_security_reset
 msgid "Reset the hit counts on the selected rules."
 msgstr "重置選取規則的計數。"
+
+#: message;id_security_update_lists
+msgid "Download the selected IP lists now, or every enabled list when none is selected."
+msgstr "立即下載選取的 IP 清單；若未選取任何清單則下載所有已啟用的清單。"
 
 #: message;id_system_clear
 msgid "Clear the status log."
@@ -7228,8 +7263,9 @@ msgstr "確定"
 #: csavefilterasdlg;control;3 cdiscoveryservicedlg;control;6
 #: cfilecopydlg;control;5 cfolderpropertiesdlg;control;8
 #: cgraphlistdlg;control;17 cgraphitemdlg;control;2 cschemacolumnsdlg;control;4
-#: csecureruledlg;control;34 csharemanagerdlg;control;6 curlcopydlg;control;6
-#: curlexportdlg;control;10 curlactiondlg;control;11 cfilepreviewdlg;control;6
+#: csecureruledlg;control;34 ciplistadddlg;control;19
+#: csharemanagerdlg;control;6 curlcopydlg;control;6 curlexportdlg;control;10
+#: curlactiondlg;control;11 cfilepreviewdlg;control;6
 #: cexistingfiledlg;control;2 cclosemodedlg;control;6
 #: cdonkeyserversdlg;control;5 cdeletefiledlg;control;5
 #: ctorrentseeddlg;control;4 cdownloadgroupdlg;control;2 cmediavisdlg;control;6
@@ -7361,6 +7397,162 @@ msgstr "存放種子於此"
 #: string;20271 clibrarysettingspage;control;24
 msgid "Store Collections Here"
 msgstr "將組檔存放在這個位置"
+
+#: string;20272
+msgid "Cached copy unreadable; it will be downloaded again."
+msgstr "快取副本無法讀取；將重新下載。"
+
+#: string;20273
+msgid "Cached copy unreadable; import the file again."
+msgstr "快取副本無法讀取；請重新匯入檔案。"
+
+#: string;20274
+msgid "Hijacked and criminal networks; few false positives. Data (c) The Spamhaus Project."
+msgstr "遭劫持及犯罪網路；誤判很少。資料 (c) The Spamhaus Project。"
+
+#: string;20275
+msgid "Known compromised hosts."
+msgstr "已知遭入侵的主機。"
+
+#: string;20276
+msgid "Anti-P2P companies; very large (about a fifth of all IPv4 addresses); blocks whole providers and CDN ranges (it lists Cloudflare's 1.1.1.0 block)."
+msgstr "反 P2P 公司；非常龐大（約占所有 IPv4 位址的五分之一）；會封鎖整個供應商及 CDN 範圍（包含 Cloudflare 的 1.1.1.0 區塊）。"
+
+#: string;20277
+msgid "Aggregate of several privacy and abuse lists."
+msgstr "多份隱私與濫用清單的彙整。"
+
+#: string;20278
+msgid "Unallocated space; must stay updated or it blocks new networks."
+msgstr "未分配的位址空間；必須保持更新，否則會封鎖新網路。"
+
+#: string;20279
+msgid "The address does not start with https://."
+msgstr "位址不是以 https:// 開頭。"
+
+#: string;20280
+msgid "The download did not end at an https:// address."
+msgstr "下載最後的位址不是 https:// 位址。"
+
+#: string;20281
+msgid "The server could not be reached."
+msgstr "無法連線到伺服器。"
+
+#: string;20282
+msgid "The server answered with HTTP status %d."
+msgstr "伺服器回應 HTTP 狀態 %d。"
+
+#: string;20283
+msgid "The download is larger than 64 MB."
+msgstr "下載內容超過 64 MB。"
+
+#: string;20284
+msgid "The content is larger than 256 MB once decompressed."
+msgstr "解壓縮後的內容超過 256 MB。"
+
+#: string;20285
+msgid "The compressed file could not be read."
+msgstr "無法讀取壓縮檔。"
+
+#: string;20286
+msgid "The list holds no address range."
+msgstr "清單中沒有任何位址範圍。"
+
+#: string;20287
+msgid "The list holds more than 2,000,000 ranges."
+msgstr "清單中的範圍超過 2,000,000 個。"
+
+#: string;20288
+msgid "The list holds an IPv4 range of half the address space or more."
+msgstr "清單中有一個 IPv4 範圍達到位址空間的一半或以上。"
+
+#: string;20289
+msgid "The list's IPv4 ranges cover more than half the address space."
+msgstr "清單的 IPv4 範圍涵蓋超過一半的位址空間。"
+
+#: string;20290
+msgid "The list holds an IPv6 range that covers all of 2000::/3."
+msgstr "清單中有一個 IPv6 範圍涵蓋整個 2000::/3。"
+
+#: string;20291
+msgid "The list could not be saved."
+msgstr "無法儲存清單。"
+
+#: string;20292
+msgid "IP list %s updated: %lu lines taken, %lu rejected, %lu ranges after merging."
+msgstr "IP 清單 %s 已更新：接受 %lu 行，拒絕 %lu 行，合併後共 %lu 個範圍。"
+
+#: string;20293
+msgid "IP list %s not updated: %s"
+msgstr "IP 清單 %s 未更新：%s"
+
+#: string;20294
+msgid "%s: %Iu ranges imported, %Iu lines rejected."
+msgstr "%s：已匯入 %Iu 個範圍，拒絕 %Iu 行。"
+
+#: string;20295
+msgid "%s could not be imported."
+msgstr "無法匯入 %s。"
+
+#: string;20296
+msgid "%s could not be written."
+msgstr "無法寫入 %s。"
+
+#: string;20297
+msgid "%s could not be imported: %s"
+msgstr "無法匯入 %s：%s"
+
+#: string;20298
+msgid "The file is larger than 64 MB."
+msgstr "檔案超過 64 MB。"
+
+#: string;20299
+msgid "IP lists are downloaded over HTTPS only: the URL must start with https://."
+msgstr "IP 清單只能透過 HTTPS 下載：URL 必須以 https:// 開頭。"
+
+#: string;20300
+msgid "Remove the selected IP lists? Their downloaded copies are deleted too."
+msgstr "要移除選取的 IP 清單嗎？已下載的副本也會一併刪除。"
+
+#: string;20301
+msgid "Imported"
+msgstr "已匯入"
+
+#: string;20302
+msgid "Failed: %s"
+msgstr "失敗：%s"
+
+#: string;20303
+msgid "Not downloaded yet"
+msgstr "尚未下載"
+
+#: string;20304
+msgid "IP lists"
+msgstr "IP 清單"
+
+#: string;20305
+msgid "My rules"
+msgstr "我的規則"
+
+#: string;20306
+msgid "Enter the https:// address of your own list, or clear its name."
+msgstr "請輸入您自己清單的 https:// 位址，或清除其名稱。"
+
+#: string;20307
+msgid "Nothing was added: the lists you chose are already in your IP lists."
+msgstr "未新增任何清單：所選清單已在您的 IP 清單中。"
+
+#: string;20308
+msgid "Tick a list, or enter the address of your own list."
+msgstr "請勾選一份清單，或輸入您自己清單的位址。"
+
+#: string;20309
+msgid "Already in your IP lists, so not added again: %s"
+msgstr "已在您的 IP 清單中，因此未重複新增：%s"
+
+#: string;20310
+msgid "The download was cut off before its end."
+msgstr "下載在完成前遭到中斷。"
 
 #: csettingsheet;control;4 cprofilemanagerdlg;control;4
 msgid "Apply"
@@ -7505,7 +7697,8 @@ msgstr "以下可以安全開啟："
 
 #: clibrarysettingspage;control;18 clibrarysettingspage;control;22
 #: cmediasettingspage;control;7 cwebsettingspage;control;12
-#: cfilesourcespage;control;5 cdownloadgroupdlg;control;7
+#: cfilesourcespage;control;5 ciplistadddlg;control;18
+#: cdownloadgroupdlg;control;7
 msgid "_Add"
 msgstr "新增"
 
@@ -8201,7 +8394,7 @@ msgid "Upload Queue Properties"
 msgstr "上傳隊列屬性"
 
 #: cqueuepropertiesdlg;control;1 cgraphlistdlg;control;14
-#: cdownloadgroupdlg;control;12
+#: ciplistadddlg;control;13 cdownloadgroupdlg;control;12
 msgid "_Name:"
 msgstr "名稱："
 
@@ -9098,6 +9291,26 @@ msgstr "小時"
 msgid "m"
 msgstr "分"
 
+#: dialog;ciplistadddlg
+msgid "Add IP List"
+msgstr "新增 IP 清單"
+
+#: ciplistadddlg;control;1
+msgid "Tick the lists to add. Each one is downloaded over HTTPS and updated once a day; none is added unless you tick it."
+msgstr "勾選要新增的清單。每份清單都透過 HTTPS 下載並每天更新一次；未勾選的清單不會被新增。"
+
+#: ciplistadddlg;control;12
+msgid "Your own list"
+msgstr "您自己的清單"
+
+#: ciplistadddlg;control;15
+msgid "_URL:"
+msgstr "URL："
+
+#: ciplistadddlg;control;17
+msgid "Accepted formats: PeerGuardian (.p2p), eMule (ipfilter.dat), Gnucleus (.net), CIDR, plain addresses and Spamhaus DROP JSON, as text, gzip or zip. The URL must start with https://."
+msgstr "接受的格式：PeerGuardian (.p2p)、eMule (ipfilter.dat)、Gnucleus (.net)、CIDR、純位址及 Spamhaus DROP JSON，可為文字、gzip 或 zip。URL 必須以 https:// 開頭。"
+
 #: dialog;csharemanagerdlg
 msgid "Shared Folder Manager"
 msgstr "分享的資料夾管理員"
@@ -9718,6 +9931,18 @@ msgstr "優先順序"
 msgid "Comment"
 msgstr "備註"
 
+#: column;list
+msgid "List"
+msgstr "清單"
+
+#: column;ranges
+msgid "Ranges"
+msgstr "範圍"
+
+#: column;updated
+msgid "Updated"
+msgstr "更新時間"
+
 #: column;lastseen
 msgid "LastSeen"
 msgstr "最後看見"
@@ -10067,3 +10292,9 @@ msgstr "下一輪"
 
 #~ msgid "The scheduler is designed to allow you to set times when Shareaza will connect and download files. {n}{n}{n}Note: If you have Shareaza open while the scheduler is active, you may see it changing settings- This is normal!"
 #~ msgstr "您可以使用預定表設定Shareaza什麼時候應該連線下載檔案. {n}{n}{n}注意: 在 Shareaza 運作時, 如果預定表正在執行它的工作, 您會發覺設定被更改. 此為正常現象!"
+
+#~ msgid "Remove Rule"
+#~ msgstr "移除規則"
+
+#~ msgid "Remove the selected security rules."
+#~ msgstr "移除選取的安全性規則。"

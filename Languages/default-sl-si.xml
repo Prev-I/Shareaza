@@ -379,10 +379,13 @@
 			<button id="ID_SECURITY_EDIT" text="Edit Rule"/>
 			<separator/>
 			<button id="ID_SECURITY_ADD" text="Add Rule"/>
-			<button id="ID_SECURITY_REMOVE" text="Remove Rule"/>
+			<button id="ID_SECURITY_REMOVE" text="Odstrani"/>
 			<separator/>
 			<button id="ID_SECURITY_MOVE_UP" text="Move Up"/>
 			<button id="ID_SECURITY_MOVE_DOWN" text="Move Down"/>
+			<separator/>
+			<button id="ID_SECURITY_ADD_LIST" text="Dodaj seznam..."/>
+			<button id="ID_SECURITY_UPDATE_LISTS" text="Posodobi zdaj"/>
 			<rightAlign/>
 			<button id="ID_SECURITY_RESET" text="Reset List"/>
 			<button id="ID_SECURITY_IMPORT" text="Import List"/>
@@ -1561,6 +1564,14 @@
 			<separator/>
 			<item id="ID_SECURITY_EDIT" text="N_apredno urejanje..."/>
 		</menu>
+		<menu name="CSecurityWnd.Lists">
+			<item id="ID_SECURITY_ADD_LIST" text="Dodaj _seznam..."/>
+			<separator/>
+			<item id="ID_SECURITY_UPDATE_LISTS" text="_Posodobi zdaj"/>
+			<item id="ID_SECURITY_LIST_ENABLE" text="Omo_gočeno"/>
+			<separator/>
+			<item id="ID_SECURITY_LIST_REMOVE" text="_Odstrani"/>
+		</menu>
 		<!-- SCHEDULER WINDOW -->
 		<menu name="CSchedulerWnd">
 			<item id="ID_SCHEDULER_ADD" text="_Add Scheduled Task"/>
@@ -2593,16 +2604,20 @@
 		<tip id="ID_SEARCHMONITOR_CLEAR" message="Počisti medpomnilnik iskalnega nadzornika."/>
 		<tip id="ID_SEARCHMONITOR_PAUSE" message="Trenutno zaustavi nadziranje iskanja."/>
 		<tip id="ID_SECURITY_ADD" message="Dodaj novo pravilo v varnostno verigo..."/>
+		<tip id="ID_SECURITY_ADD_LIST" message="Dodaj sezname za blokiranje IP iz kataloga ali lasten seznam z naslova https://..."/>
 		<tip id="ID_SECURITY_BAN" message="Izobči (ban) izbranega gostitelja za čas trenutne seje."/>
 		<tip id="ID_SECURITY_EDIT" message="Uredi izbrano varnostno pravilo..."/>
 		<tip id="ID_SECURITY_EXPORT" message="Izvozi izbrana varnostna pravila v datoteko..."/>
 		<tip id="ID_SECURITY_IMPORT" message="Uvozi varnostna pravila iz datoteke..."/>
+		<tip id="ID_SECURITY_LIST_ENABLE" message="Vklopi ali izklopi izbrane sezname IP."/>
+		<tip id="ID_SECURITY_LIST_REMOVE" message="Odstrani izbrane sezname IP."/>
 		<tip id="ID_SECURITY_MOVE_DOWN" message="Premakni izbrana varnostna pravila navzdol po prednostni lestvici."/>
 		<tip id="ID_SECURITY_MOVE_UP" message="Premakni izbrana varnostna pravila navzgor po prednostni lestvici."/>
 		<tip id="ID_SECURITY_POLICY_ACCEPT" message="Nastavi privzeto varnostno politiko tako, da dovoli vse gostitelje."/>
 		<tip id="ID_SECURITY_POLICY_DENY" message="Nastavi privzeto varnostno politiko tako, da zavrne vse gostitelje."/>
-		<tip id="ID_SECURITY_REMOVE" message="Odstrani izbrana varnostna pravila."/>
+		<tip id="ID_SECURITY_REMOVE" message="Odstrani izbrana pravila ali sezname IP."/>
 		<tip id="ID_SECURITY_RESET" message="Ponastavi števce zadetkov na izbrana pravila."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="Prenesi izbrane sezname IP zdaj ali vse omogočene sezname, če ni izbran noben."/>
 		<tip id="ID_SYSTEM_CLEAR" message="Pobriši statusni dnevnik (log)."/>
 		<tip id="ID_SYSTEM_COPY" message="Copy selected line(s) of status log."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="Zapiši časovni žig za vsako vrstico."/>
@@ -3446,6 +3461,45 @@
 		<string id="20269" value="Shrani začasne nedokončane datoteke na tem mestu"/>
 		<string id="20270" value="Shrani Torrente na tem mestu"/>
 		<string id="20271" value="Shrani zbirke na tem mestu"/>
+		<string id="20272" value="Predpomnjena kopija ni berljiva; znova bo prenesena."/>
+		<string id="20273" value="Predpomnjena kopija ni berljiva; znova uvozite datoteko."/>
+		<string id="20274" value="Ugrabljena in kriminalna omrežja; malo lažnih zadetkov. Podatki (c) The Spamhaus Project."/>
+		<string id="20275" value="Znani ogroženi gostitelji."/>
+		<string id="20276" value="Podjetja proti P2P; zelo velik (približno petina vseh naslovov IPv4); blokira cele ponudnike in obsege CDN (vsebuje Cloudflarov blok 1.1.1.0)."/>
+		<string id="20277" value="Zbirka več seznamov za zasebnost in zlorabe."/>
+		<string id="20278" value="Nedodeljen prostor; mora ostati posodobljen, sicer blokira nova omrežja."/>
+		<string id="20279" value="Naslov se ne začne s https://."/>
+		<string id="20280" value="Prenos se ni končal na naslovu https://."/>
+		<string id="20281" value="Strežnika ni bilo mogoče doseči."/>
+		<string id="20282" value="Strežnik je odgovoril s stanjem HTTP %d."/>
+		<string id="20283" value="Prenos je večji od 64 MB."/>
+		<string id="20284" value="Vsebina je po razširitvi večja od 256 MB."/>
+		<string id="20285" value="Stisnjene datoteke ni bilo mogoče prebrati."/>
+		<string id="20286" value="Seznam ne vsebuje nobenega obsega naslovov."/>
+		<string id="20287" value="Seznam vsebuje več kot 2.000.000 obsegov."/>
+		<string id="20288" value="Seznam vsebuje obseg IPv4 polovice naslovnega prostora ali več."/>
+		<string id="20289" value="Obsegi IPv4 seznama pokrivajo več kot polovico naslovnega prostora."/>
+		<string id="20290" value="Seznam vsebuje obseg IPv6, ki pokriva ves 2000::/3."/>
+		<string id="20291" value="Seznama ni bilo mogoče shraniti."/>
+		<string id="20292" value="Seznam IP %s posodobljen: %lu vrstic sprejetih, %lu zavrnjenih, %lu obsegov po združitvi."/>
+		<string id="20293" value="Seznam IP %s ni posodobljen: %s"/>
+		<string id="20294" value="%s: %Iu obsegov uvoženih, %Iu vrstic zavrnjenih."/>
+		<string id="20295" value="%s ni bilo mogoče uvoziti."/>
+		<string id="20296" value="%s ni bilo mogoče zapisati."/>
+		<string id="20297" value="%s ni bilo mogoče uvoziti: %s"/>
+		<string id="20298" value="Datoteka je večja od 64 MB."/>
+		<string id="20299" value="Seznami IP se prenašajo samo prek HTTPS: URL se mora začeti s https://."/>
+		<string id="20300" value="Odstranim izbrane sezname IP? Izbrisane bodo tudi njihove prenesene kopije."/>
+		<string id="20301" value="Uvoženo"/>
+		<string id="20302" value="Ni uspelo: %s"/>
+		<string id="20303" value="Še ni preneseno"/>
+		<string id="20304" value="Seznami IP"/>
+		<string id="20305" value="Moja pravila"/>
+		<string id="20306" value="Vnesite naslov https:// lastnega seznama ali izbrišite njegovo ime."/>
+		<string id="20307" value="Nič ni bilo dodano: izbrani seznami so že med vašimi seznami IP."/>
+		<string id="20308" value="Označite seznam ali vnesite naslov lastnega seznama."/>
+		<string id="20309" value="Že med vašimi seznami IP, zato niso bili znova dodani: %s"/>
+		<string id="20310" value="Prenos je bil prekinjen pred koncem."/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->
@@ -4286,6 +4340,27 @@
 			<control caption="V redu"/>
 			<control caption="Prekliči"/>
 		</dialog>
+		<dialog name="CIPListAddDlg" cookie="StBuStBuStBuStBuStBuStBuStEdStEdStBuBu" caption="Dodaj seznam IP">
+			<control caption="Označite sezname, ki jih želite dodati. Vsak se prenese prek HTTPS in posodobi enkrat na dan; noben ni dodan, če ga ne označite."/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control caption="Lasten seznam"/>
+			<control caption="_Naziv:"/>
+			<control/>
+			<control caption="_URL:"/>
+			<control/>
+			<control caption="Sprejete oblike: PeerGuardian (.p2p), eMule (ipfilter.dat), Gnucleus (.net), CIDR, preprosti naslovi in Spamhaus DROP JSON, kot besedilo, gzip ali zip. URL se mora začeti s https://."/>
+			<control caption="_Dodaj"/>
+			<control caption="Prekliči"/>
+		</dialog>
 		<dialog name="CShareManagerDlg" cookie="StSyBuBuBuBu" caption="Upravljalec deljenih map">
 			<control caption="Tu je naveden seznam map v vaši knjižnici. S pomočjo spodnjih gumbov lahko dodajate in odstranjujete mape. Ko dodate novo mapo je ta takoj na voljo drugim uporabnikom na mreži vendar jo lahko naknadno umaknete iz seznama deljenih map."/>
 			<control/>
@@ -4634,6 +4709,12 @@
 			<column from="Precedence" to="Prednost"/>
 			<column from="Hits" to="Zadetki"/>
 			<column from="Comment" to="Komentar"/>
+		</list>
+		<list name="CSecurityWnd.Lists">
+			<column from="List" to="Seznam"/>
+			<column from="Ranges" to="Obsegi"/>
+			<column from="Updated" to="Posodobljeno"/>
+			<column from="Hits" to="Zadetki"/>
 		</list>
 		<list name="CHostCacheWnd">
 			<column from="Address" to="Naslov"/>

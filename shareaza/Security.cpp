@@ -25,6 +25,8 @@
 #include "LiveList.h"
 #include "Settings.h"
 #include "Security.h"
+#include "IPLists.h"
+#include "ShippedRules.h"
 #include "ShareazaFile.h"
 #include "QuerySearch.h"
 #include "XML.h"
@@ -343,6 +345,84 @@ void CSecurity::Clear()
 	m_pIPRules.clear();
 
 	m_Cache.clear();
+}
+
+void CSecurity::ClearMissCache()
+{
+	CQuickLock oLock( m_pSection );
+
+	m_Cache.clear();
+	m_CacheIPv6.clear();
+}
+
+static bool IsShippedGUID(const GUID& oGUID, const GUID* pShipped, int nShipped)
+{
+	for ( int i = 0 ; i < nShipped ; ++i )
+	{
+		if ( oGUID == pShipped[ i ] ) return true;
+	}
+	return false;
+}
+
+// Remove every rule that carries one of the GUIDs of the deny rules older
+// versions shipped in Data/DefaultSecurity.dat. Called once per install.
+void CSecurity::RemoveShippedRules()
+{
+	GUID pShipped[ ShippedRules::kCount ];
+	int nShipped = 0;
+	for ( int i = 0 ; i < ShippedRules::kCount ; ++i )
+	{
+		if ( Hashes::fromGuid( (LPCTSTR)CA2T( ShippedRules::kGuids[ i ] ), &pShipped[ nShipped ] ) )
+			++nShipped;
+	}
+
+	{
+		CQuickLock oLock( m_pSection );
+
+		// Unlink first, then free: a set frees each rule once even if it
+		// was filed in more than one container.
+		std::set< CSecureRule* > pRemoved;
+
+		for ( POSITION pos = m_pRules.GetHeadPosition() ; pos ; )
+		{
+			POSITION posThis = pos;
+			CSecureRule* pRule = m_pRules.GetNext( pos );
+			if ( IsShippedGUID( pRule->m_pGUID, pShipped, nShipped ) )
+			{
+				m_pRules.RemoveAt( posThis );
+				pRemoved.insert( pRule );
+			}
+		}
+
+		for ( CAddressRuleMap::iterator i = m_pIPRules.begin() ; i != m_pIPRules.end() ; )
+		{
+			if ( IsShippedGUID( (*i).second->m_pGUID, pShipped, nShipped ) )
+			{
+				pRemoved.insert( (*i).second );
+				i = m_pIPRules.erase( i );
+			}
+			else
+				++i;
+		}
+
+		for ( CAddressIPv6RuleMap::iterator i = m_pIPv6Rules.begin() ; i != m_pIPv6Rules.end() ; )
+		{
+			if ( IsShippedGUID( (*i).second->m_pGUID, pShipped, nShipped ) )
+			{
+				pRemoved.insert( (*i).second );
+				i = m_pIPv6Rules.erase( i );
+			}
+			else
+				++i;
+		}
+
+		for ( std::set< CSecureRule* >::const_iterator i = pRemoved.begin() ; i != pRemoved.end() ; ++i )
+		{
+			delete *i;
+		}
+	}
+
+	ClearMissCache();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -689,6 +769,10 @@ BOOL CSecurity::IsDenied(const IN_ADDR* pAddress)
 		}
 	}
 
+	// Fourth, the IP lists, which only deny. A hit is not cached as a miss.
+	if ( IPLists.IsDenied( ntohl( pAddress->s_addr ) ) )
+		return TRUE;
+
 	// If the IP is clean, add it to the miss cache
 	if ( m_Cache.size() >= MISS_CACHE_MAX )
 		m_Cache.clear();
@@ -761,6 +845,10 @@ BOOL CSecurity::IsDenied(const IN6_ADDR* pAddress)
 				return TRUE;
 		}
 	}
+
+	// Fourth, the IP lists, which only deny. A hit is not cached as a miss.
+	if ( IPLists.IsDenied( *pAddress ) )
+		return TRUE;
 
 	// If the IP is clean, add it to the miss cache
 	if ( m_CacheIPv6.size() >= MISS_CACHE_MAX )
@@ -1201,6 +1289,8 @@ BOOL CSecurity::FromXML(CXMLElement* pXML)
 		}
 	}
 
+	if ( nCount > 0 ) ClearMissCache();
+
 	return nCount > 0;
 }
 
@@ -1221,49 +1311,15 @@ BOOL CSecurity::Import(LPCTSTR pszFile)
 	CXMLElement* pXML = CXMLElement::FromBytes( pBuffer.m_pBuffer, pBuffer.m_nLength, TRUE );
 	BOOL bResult = FALSE;
 
+	// Shareaza XML only: the Security window parses every other file as an
+	// IP list (CIPListUpdater::LoadAndParse), Gnucleus lines included.
 	if ( pXML != NULL )
 	{
 		bResult = FromXML( pXML );
 		delete pXML;
 	}
-	else
-	{
-		CString strLine;
 
-		while ( pBuffer.ReadLine( strLine ) )
-		{
-			strLine.TrimLeft();
-			strLine.TrimRight();
-			if ( strLine.IsEmpty() ) continue;
-			if ( strLine.GetAt( 0 ) == ';' ) continue;
-
-			CSecureRule* pRule = new CSecureRule();
-
-			if ( pRule->FromGnucleusString( strLine ) )
-			{
-				CQuickLock oLock( m_pSection );
-
-				pRule->MaskFix();
-
-				// special treatment for single IP security rules
-				if ( pRule->m_nType == CSecureRule::srAddress &&
-					*(DWORD*)pRule->m_nMask == 0xffffffff )
-				{
-					m_pIPRules[ *(DWORD*) pRule->m_nIP ] = pRule;
-				}
-				else
-				{
-					m_pRules.AddTail( pRule );
-				}
-
-				bResult = TRUE;
-			}
-			else
-			{
-				delete pRule;
-			}
-		}
-	}
+	if ( bResult ) ClearMissCache();
 
 	// Check all lists for newly denied hosts
 	PostMainWndMessage( WM_SANITY_CHECK );

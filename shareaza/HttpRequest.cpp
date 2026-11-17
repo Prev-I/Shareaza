@@ -44,7 +44,8 @@ CHttpRequest::CHttpRequest() :
 	m_hNotifyWnd( NULL ),
 	m_nNotifyMsg( NULL ),
 	m_nNotifyParam( NULL ),
-	m_bUseCookie( true )
+	m_bUseCookie( true ),
+	m_bReadError( false )
 {
 }
 
@@ -61,10 +62,12 @@ void CHttpRequest::Clear()
 	Cancel();
 	
 	m_sURL.Empty();
+	m_sFinalURL.Empty();
 	m_sRequestHeaders.Empty();
 	
 	m_nLimit		= 0;
 	m_nStatusCode	= 0;
+	m_bReadError	= false;
 	
 	m_sStatusString.Empty();
 	m_pResponseHeaders.RemoveAll();
@@ -91,6 +94,11 @@ BOOL CHttpRequest::SetURL(LPCTSTR pszURL)
 CString CHttpRequest::GetURL() const
 {
 	return m_sURL;
+}
+
+CString CHttpRequest::GetFinalURL() const
+{
+	return IsPending() ? _T("") : m_sFinalURL;
 }
 
 void CHttpRequest::AddHeader(LPCTSTR pszKey, LPCTSTR pszValue)
@@ -166,6 +174,11 @@ CBuffer* CHttpRequest::GetResponseBuffer() const
 	return IsPending() ? NULL : m_pResponse;
 }
 
+bool CHttpRequest::GetReadError() const
+{
+	return ! IsPending() && m_bReadError;
+}
+
 BOOL CHttpRequest::InflateResponse()
 {
 	if ( IsPending() || m_pResponse == NULL )
@@ -195,6 +208,8 @@ bool CHttpRequest::Execute(bool bBackground)
 
 	m_hInternet = NULL;
 	m_nStatusCode = 0;
+	m_bReadError = false;
+	m_sFinalURL.Empty();
 	m_sStatusString.Empty();
 	m_pResponseHeaders.RemoveAll();
 
@@ -257,6 +272,21 @@ void CHttpRequest::OnRun()
 			( m_bUseCookie ? 0 : INTERNET_FLAG_NO_COOKIES ) );
 		if ( hURL )
 		{
+			// The address the response comes from, after any redirects
+			DWORD nURL = 0;
+			if ( ! InternetQueryOption( hURL, INTERNET_OPTION_URL, NULL, &nURL ) &&
+				GetLastError() == ERROR_INSUFFICIENT_BUFFER && nURL )
+			{
+				// nURL is in bytes; nURL + 1 characters is enough even if it were characters
+				const DWORD nChars = nURL + 1;
+				LPTSTR pszURL = m_sFinalURL.GetBuffer( nChars );
+				DWORD nSize = nChars * sizeof( TCHAR );
+				if ( ! InternetQueryOption( hURL, INTERNET_OPTION_URL, pszURL, &nSize ) )
+					pszURL[ 0 ] = 0;
+				pszURL[ nChars - 1 ] = 0;
+				m_sFinalURL.ReleaseBuffer();
+			}
+
 			DWORD nLength = 255;
 			BYTE nNull = 0;
 			if ( ! IsThreadEnabled() || ! HttpQueryInfo( hURL, HTTP_QUERY_STATUS_TEXT,
@@ -266,13 +296,21 @@ void CHttpRequest::OnRun()
 			{
 				m_pResponse = new CBuffer();
 				DWORD nRemaining = 0;
-				for ( ; IsThreadEnabled() &&
-					InternetQueryDataAvailable( hURL, &nRemaining, 0, 0 ) &&
-					nRemaining > 0 &&
-					m_pResponse->EnsureBuffer( nRemaining ); )
+				for ( ; IsThreadEnabled(); )
 				{
+					// A failed call is an error, not the end of the body
+					if ( ! InternetQueryDataAvailable( hURL, &nRemaining, 0, 0 ) )
+					{
+						m_bReadError = true;
+						break;
+					}
+					if ( nRemaining == 0 || ! m_pResponse->EnsureBuffer( nRemaining ) ) break;
 					if ( ! InternetReadFile( hURL, m_pResponse->m_pBuffer +
-						m_pResponse->m_nLength, nRemaining, &nRemaining ) ) break;
+						m_pResponse->m_nLength, nRemaining, &nRemaining ) )
+					{
+						m_bReadError = true;
+						break;
+					}
 					m_pResponse->m_nLength += nRemaining;
 					if ( m_nLimit > 0 && m_pResponse->m_nLength > m_nLimit ) break;
 				}

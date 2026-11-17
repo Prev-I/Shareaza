@@ -297,6 +297,12 @@
     <ClCompile Include="ImageServices.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="IPLists.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="IPListUpdater.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="Kademlia.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -817,6 +823,9 @@
       <Filter>Source Files\Dialogs</Filter>
     </ClCompile>
     <ClCompile Include="DlgHitColumns.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgIPListAdd.cpp">
       <Filter>Source Files\Dialogs</Filter>
     </ClCompile>
     <ClCompile Include="DlgIrcInput.cpp">
@@ -1414,6 +1423,27 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ImageServices.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IPListCatalogue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IPLists.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IPListUpdater.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IPListParser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IPRangeSet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ReservedAddresses.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ShippedRules.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Kademlia.h">
@@ -2041,6 +2071,9 @@
       <Filter>Header Files\Dialogs</Filter>
     </ClInclude>
     <ClInclude Include="DlgHitColumns.h">
+      <Filter>Header Files\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgIPListAdd.h">
       <Filter>Header Files\Dialogs</Filter>
     </ClInclude>
     <ClInclude Include="DlgIrcInput.h">

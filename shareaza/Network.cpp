@@ -42,6 +42,7 @@
 #include "QueryHashMaster.h"
 #include "QueryHit.h"
 #include "QueryKeys.h"
+#include "ReservedAddresses.h"
 #include "RouteCache.h"
 #include "SearchManager.h"
 #include "Statistics.h"
@@ -1118,60 +1119,19 @@ WORD CNetwork::GetPort() const
 	return m_pHost.sin_port ? ntohs( m_pHost.sin_port ) : (WORD)Settings.Connection.InPort;
 }
 
-// Returns TRUE if the IP address is reserved.
-// Private addresses are treated as reserved when Connection.IgnoreLocalIP = TRUE.
-// The code is based on nmap code and updated according to
-// http://www.cymru.com/Documents/bogon-bn-nonagg.txt
-// and http://www.iana.org/assignments/ipv4-address-space
+// Returns TRUE if the IP address is reserved: not globally reachable according to
+// the IANA Special-Purpose Address Registries, or multicast, 240.0.0.0/4 or broadcast.
+// Private-use and link-local addresses are not reserved here; IsFirewalledAddress
+// and Connection.IgnoreLocalIP handle them. The table is in ReservedAddresses.h.
 
 BOOL CNetwork::IsReserved(const IN_ADDR* pAddress) const
 {
-	char *ip = (char*)&(pAddress->s_addr);
-	unsigned char i1 = ip[ 0 ], i2 = ip[ 1 ], i3 = ip[ 2 ], i4 = ip[ 3 ];
-
-	switch ( i1 )
-	{
-		case 0:         // 000/8 is IANA reserved
-		case 6:         // USA Army ISC
-		case 7:         // used for BGP protocol
-		case 55:        // misc. USA Armed forces
-		case 127:       // 127/8 is reserved for loopback
-			return TRUE;
-		default:
-			break;
-	}
-
-	// 192.0.2.0/24 is reserved for documentation and examples
-	// 192.88.99.0/24 is used as 6to4 Relay anycast prefix by RFC3068
-	if ( i1 == 192 )
-	{
-		if ( i2 == 0 && i3 == 2 ) return TRUE;
-		if ( i2 == 88 && i3 == 99 ) return TRUE;
-	}
-
-	// 198.18.0.0/15 is used for benchmark tests by RFC2544
-	if ( i1 == 198 && i2 == 18 && i3 >= 1 && i3 <= 64 ) return TRUE;
-
-	// 204.152.64.0/23 is some Sun proprietary clustering thing
-	if ( i1 == 204 && i2 == 152 && ( i3 == 64 || i3 == 65 ) )
-		return TRUE;
-
-	// 224-239/8 is all multicast stuff
-	// 240-255/8 is IANA reserved
-	if ( i1 >= 224 ) return TRUE;
-
-	// 255.255.255.255, we already tested for i1
-	if ( i2 == 255 && i3 == 255 && i4 == 255 ) return TRUE;
-
-	return FALSE;
+	return Reserved::IsReservedV4( ntohl( pAddress->s_addr ) );
 }
 
 BOOL CNetwork::IsReserved(const IN6_ADDR* pAddress) const
 {
-	if ( IN6_IS_ADDR_UNSPECIFIED( pAddress ) ) return TRUE;
-	if ( IN6_IS_ADDR_MULTICAST( pAddress ) ) return TRUE;
-	if ( IN6_IS_ADDR_LOOPBACK( pAddress ) ) return TRUE;
-	return FALSE;
+	return Reserved::IsReservedV6( pAddress->u.Byte );
 }
 
 WORD CNetwork::RandomPort() const

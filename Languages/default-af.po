@@ -387,9 +387,10 @@ msgstr ""
 msgid "Add Rule"
 msgstr ""
 
-#: button;id_security_remove
-msgid "Remove Rule"
-msgstr ""
+#: button;id_security_remove button;id_hostcache_remove string;17021
+#: cfavouritesprofilepage;control;8
+msgid "Remove"
+msgstr "Verwyder"
 
 #: button;id_security_move_up
 msgid "Move Up"
@@ -398,6 +399,14 @@ msgstr ""
 #: button;id_security_move_down
 msgid "Move Down"
 msgstr ""
+
+#: button;id_security_add_list
+msgid "Add List..."
+msgstr "Voeg lys by..."
+
+#: button;id_security_update_lists
+msgid "Update Now"
+msgstr "Dateer nou op"
 
 #: button;id_security_reset
 msgid "Reset List"
@@ -438,10 +447,6 @@ msgstr ""
 #: button;id_hitmonitor_search
 msgid "Requery"
 msgstr "Hervra"
-
-#: button;id_hostcache_remove string;17021 cfavouritesprofilepage;control;8
-msgid "Remove"
-msgstr "Verwyder"
 
 #: button;id_hostcache_g2_horizon
 msgid "G2 Cluster"
@@ -1476,6 +1481,7 @@ msgstr "_Verken"
 #: clibrarytree.physical.basic;item;id_library_remove
 #: clibrarytree.physical;item;id_library_remove
 #: cmedialist;item;id_media_remove csecuritywnd;item;id_security_remove
+#: csecuritywnd.lists;item;id_security_list_remove
 #: cschedulerwnd;item;id_scheduler_remove
 #: cdiscoverywnd;item;id_discovery_remove clibrarysettingspage;control;19
 #: clibrarysettingspage;control;23 cmediasettingspage;control;8
@@ -1890,6 +1896,18 @@ msgstr "_Aanvaar"
 #: csecuritywnd;61;item;id_security_policy_deny
 msgid "_Deny"
 msgstr "_Keur Af"
+
+#: csecuritywnd.lists;item;id_security_add_list
+msgid "_Add List..."
+msgstr "Voeg _lys by..."
+
+#: csecuritywnd.lists;item;id_security_update_lists
+msgid "_Update Now"
+msgstr "_Dateer nou op"
+
+#: csecuritywnd.lists;item;id_security_list_enable
+msgid "_Enabled"
+msgstr "_Geaktiveer"
 
 #: cschedulerwnd;item;id_scheduler_add
 msgid "_Add Scheduled Task"
@@ -4239,6 +4257,10 @@ msgstr "Vries die soekmonitor."
 msgid "Add a new rule to the security chain..."
 msgstr "Voeg 'n nuwe reël by die sekuriteitsketting..."
 
+#: message;id_security_add_list
+msgid "Add IP block lists from the catalogue, or your own list from an https:// address..."
+msgstr "Voeg IP-bloklyste uit die katalogus by, of jou eie lys van 'n https://-adres af..."
+
 #: message;id_security_ban
 msgid "Ban the selected host for the duration of this session."
 msgstr "Verban die geselekteerde gasheer vir die duur van die sessie."
@@ -4254,6 +4276,14 @@ msgstr "Voer die geselekteerde sekuriteitsreëls uit na 'n lêer..."
 #: message;id_security_import
 msgid "Import security rules from a file..."
 msgstr "Trek sekuriteitsreëls in van 'n lêer..."
+
+#: message;id_security_list_enable
+msgid "Turn the selected IP lists on or off."
+msgstr "Skakel die gekose IP-lyste aan of af."
+
+#: message;id_security_list_remove
+msgid "Remove the selected IP lists."
+msgstr "Verwyder die gekose IP-lyste."
 
 #: message;id_security_move_down
 msgid "Move the selected security rules down the precedence list."
@@ -4272,12 +4302,16 @@ msgid "Set the default security policy to deny all hosts."
 msgstr "Stel die standaard sekuriteitsbeleid in sodat alle gashere geweier word."
 
 #: message;id_security_remove
-msgid "Remove the selected security rules."
-msgstr "Verwyder die geselekteerde sekuriteitsreëls."
+msgid "Remove the selected rules or IP lists."
+msgstr "Verwyder die gekose reëls of IP-lyste."
 
 #: message;id_security_reset
 msgid "Reset the hit counts on the selected rules."
 msgstr "Herstel die trefteller van die geselekteerde reëls."
+
+#: message;id_security_update_lists
+msgid "Download the selected IP lists now, or every enabled list when none is selected."
+msgstr "Laai die gekose IP-lyste nou af, of elke geaktiveerde lys as niks gekies is nie."
 
 #: message;id_system_clear
 msgid "Clear the status log."
@@ -7390,8 +7424,8 @@ msgstr "OK"
 #: cfilecopydlg;control;5 cfolderpropertiesdlg;control;8
 #: cgraphlistdlg;control;17 cgraphitemdlg;control;2
 #: cschemacolumnsdlg;control;4 csecureruledlg;control;34
-#: csharemanagerdlg;control;6 curlcopydlg;control;6 curlexportdlg;control;10
-#: curlactiondlg;control;11 cfilepreviewdlg;control;6
+#: ciplistadddlg;control;19 csharemanagerdlg;control;6 curlcopydlg;control;6
+#: curlexportdlg;control;10 curlactiondlg;control;11 cfilepreviewdlg;control;6
 #: cexistingfiledlg;control;2 cclosemodedlg;control;6
 #: cdonkeyserversdlg;control;5 cdeletefiledlg;control;5
 #: ctorrentseeddlg;control;4 cdownloadgroupdlg;control;2
@@ -7525,6 +7559,162 @@ msgstr "Stoor Torrents Hier"
 #: string;20271 clibrarysettingspage;control;24
 msgid "Store Collections Here"
 msgstr "Stoor Versamelings Hier"
+
+#: string;20272
+msgid "Cached copy unreadable; it will be downloaded again."
+msgstr "Gekaste kopie onleesbaar; dit sal weer afgelaai word."
+
+#: string;20273
+msgid "Cached copy unreadable; import the file again."
+msgstr "Gekaste kopie onleesbaar; voer die lêer weer in."
+
+#: string;20274
+msgid "Hijacked and criminal networks; few false positives. Data (c) The Spamhaus Project."
+msgstr "Gekaapte en kriminele netwerke; min vals positiewe. Data (c) The Spamhaus Project."
+
+#: string;20275
+msgid "Known compromised hosts."
+msgstr "Bekende gekompromitteerde gashere."
+
+#: string;20276
+msgid "Anti-P2P companies; very large (about a fifth of all IPv4 addresses); blocks whole providers and CDN ranges (it lists Cloudflare's 1.1.1.0 block)."
+msgstr "Anti-P2P-maatskappye; baie groot (omtrent 'n vyfde van alle IPv4-adresse); blokkeer hele verskaffers en CDN-reekse (sluit Cloudflare se 1.1.1.0-blok in)."
+
+#: string;20277
+msgid "Aggregate of several privacy and abuse lists."
+msgstr "Samevoeging van verskeie privaatheids- en misbruiklyste."
+
+#: string;20278
+msgid "Unallocated space; must stay updated or it blocks new networks."
+msgstr "Ongetoekende adresruimte; moet bygewerk bly, anders blokkeer dit nuwe netwerke."
+
+#: string;20279
+msgid "The address does not start with https://."
+msgstr "Die adres begin nie met https:// nie."
+
+#: string;20280
+msgid "The download did not end at an https:// address."
+msgstr "Die aflaai het nie by 'n https://-adres geëindig nie."
+
+#: string;20281
+msgid "The server could not be reached."
+msgstr "Die bediener kon nie bereik word nie."
+
+#: string;20282
+msgid "The server answered with HTTP status %d."
+msgstr "Die bediener het met HTTP-status %d geantwoord."
+
+#: string;20283
+msgid "The download is larger than 64 MB."
+msgstr "Die aflaai is groter as 64 MB."
+
+#: string;20284
+msgid "The content is larger than 256 MB once decompressed."
+msgstr "Die inhoud is groter as 256 MB wanneer dit uitgepak is."
+
+#: string;20285
+msgid "The compressed file could not be read."
+msgstr "Die saamgepersde lêer kon nie gelees word nie."
+
+#: string;20286
+msgid "The list holds no address range."
+msgstr "Die lys bevat geen adresreeks nie."
+
+#: string;20287
+msgid "The list holds more than 2,000,000 ranges."
+msgstr "Die lys bevat meer as 2 000 000 reekse."
+
+#: string;20288
+msgid "The list holds an IPv4 range of half the address space or more."
+msgstr "Die lys bevat 'n IPv4-reeks van die helfte van die adresruimte of meer."
+
+#: string;20289
+msgid "The list's IPv4 ranges cover more than half the address space."
+msgstr "Die lys se IPv4-reekse dek meer as die helfte van die adresruimte."
+
+#: string;20290
+msgid "The list holds an IPv6 range that covers all of 2000::/3."
+msgstr "Die lys bevat 'n IPv6-reeks wat die hele 2000::/3 dek."
+
+#: string;20291
+msgid "The list could not be saved."
+msgstr "Die lys kon nie gestoor word nie."
+
+#: string;20292
+msgid "IP list %s updated: %lu lines taken, %lu rejected, %lu ranges after merging."
+msgstr "IP-lys %s bygewerk: %lu reëls aanvaar, %lu verwerp, %lu reekse na samevoeging."
+
+#: string;20293
+msgid "IP list %s not updated: %s"
+msgstr "IP-lys %s nie bygewerk nie: %s"
+
+#: string;20294
+msgid "%s: %Iu ranges imported, %Iu lines rejected."
+msgstr "%s: %Iu reekse ingevoer, %Iu reëls verwerp."
+
+#: string;20295
+msgid "%s could not be imported."
+msgstr "%s kon nie ingevoer word nie."
+
+#: string;20296
+msgid "%s could not be written."
+msgstr "%s kon nie geskryf word nie."
+
+#: string;20297
+msgid "%s could not be imported: %s"
+msgstr "%s kon nie ingevoer word nie: %s"
+
+#: string;20298
+msgid "The file is larger than 64 MB."
+msgstr "Die lêer is groter as 64 MB."
+
+#: string;20299
+msgid "IP lists are downloaded over HTTPS only: the URL must start with https://."
+msgstr "IP-lyste word slegs oor HTTPS afgelaai: die URL moet met https:// begin."
+
+#: string;20300
+msgid "Remove the selected IP lists? Their downloaded copies are deleted too."
+msgstr "Verwyder die gekose IP-lyste? Hul afgelaaide kopieë word ook geskrap."
+
+#: string;20301
+msgid "Imported"
+msgstr "Ingevoer"
+
+#: string;20302
+msgid "Failed: %s"
+msgstr "Misluk: %s"
+
+#: string;20303
+msgid "Not downloaded yet"
+msgstr "Nog nie afgelaai nie"
+
+#: string;20304
+msgid "IP lists"
+msgstr "IP-lyste"
+
+#: string;20305
+msgid "My rules"
+msgstr "My reëls"
+
+#: string;20306
+msgid "Enter the https:// address of your own list, or clear its name."
+msgstr "Voer die https://-adres van jou eie lys in, of maak sy naam skoon."
+
+#: string;20307
+msgid "Nothing was added: the lists you chose are already in your IP lists."
+msgstr "Niks is bygevoeg nie: die lyste wat jy gekies het, is reeds in jou IP-lyste."
+
+#: string;20308
+msgid "Tick a list, or enter the address of your own list."
+msgstr "Merk 'n lys, of voer die adres van jou eie lys in."
+
+#: string;20309
+msgid "Already in your IP lists, so not added again: %s"
+msgstr "Reeds in jou IP-lyste, dus nie weer bygevoeg nie: %s"
+
+#: string;20310
+msgid "The download was cut off before its end."
+msgstr "Die aflaai is afgesny voordat dit klaar was."
 
 #: csettingsheet;control;4 cprofilemanagerdlg;control;4
 msgid "Apply"
@@ -7669,7 +7859,8 @@ msgstr "_Veilig om oop te maak:"
 
 #: clibrarysettingspage;control;18 clibrarysettingspage;control;22
 #: cmediasettingspage;control;7 cwebsettingspage;control;12
-#: cfilesourcespage;control;5 cdownloadgroupdlg;control;7
+#: cfilesourcespage;control;5 ciplistadddlg;control;18
+#: cdownloadgroupdlg;control;7
 msgid "_Add"
 msgstr "_Voeg by"
 
@@ -8368,7 +8559,7 @@ msgid "Upload Queue Properties"
 msgstr "Oplaai Waglys Verstellings"
 
 #: cqueuepropertiesdlg;control;1 cgraphlistdlg;control;14
-#: cdownloadgroupdlg;control;12
+#: ciplistadddlg;control;13 cdownloadgroupdlg;control;12
 msgid "_Name:"
 msgstr "_Naam:"
 
@@ -9265,6 +9456,26 @@ msgstr "h"
 msgid "m"
 msgstr "m"
 
+#: dialog;ciplistadddlg
+msgid "Add IP List"
+msgstr "Voeg IP-lys by"
+
+#: ciplistadddlg;control;1
+msgid "Tick the lists to add. Each one is downloaded over HTTPS and updated once a day; none is added unless you tick it."
+msgstr "Merk die lyste om by te voeg. Elkeen word oor HTTPS afgelaai en een keer per dag bygewerk; niks word bygevoeg tensy jy dit merk nie."
+
+#: ciplistadddlg;control;12
+msgid "Your own list"
+msgstr "Jou eie lys"
+
+#: ciplistadddlg;control;15
+msgid "_URL:"
+msgstr "_URL:"
+
+#: ciplistadddlg;control;17
+msgid "Accepted formats: PeerGuardian (.p2p), eMule (ipfilter.dat), Gnucleus (.net), CIDR, plain addresses and Spamhaus DROP JSON, as text, gzip or zip. The URL must start with https://."
+msgstr "Aanvaarde formate: PeerGuardian (.p2p), eMule (ipfilter.dat), Gnucleus (.net), CIDR, gewone adresse en Spamhaus DROP JSON, as teks, gzip of zip. Die URL moet met https:// begin."
+
 #: dialog;csharemanagerdlg
 msgid "Shared Folder Manager"
 msgstr "Gedeelde Lêers Beheerder"
@@ -9886,6 +10097,18 @@ msgstr "Volgorde"
 msgid "Comment"
 msgstr "Kommentaar"
 
+#: column;list
+msgid "List"
+msgstr "Lys"
+
+#: column;ranges
+msgid "Ranges"
+msgstr "Reekse"
+
+#: column;updated
+msgid "Updated"
+msgstr "Bygewerk"
+
 #: column;lastseen
 msgid "LastSeen"
 msgstr "Laaste Gesien"
@@ -10177,3 +10400,6 @@ msgstr "Volgende"
 
 #~ msgid "Saturday"
 #~ msgstr "Saterdag"
+
+#~ msgid "Remove the selected security rules."
+#~ msgstr "Verwyder die geselekteerde sekuriteitsreëls."

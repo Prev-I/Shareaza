@@ -379,10 +379,13 @@
 			<button id="ID_SECURITY_EDIT" text="Edit Rule"/>
 			<separator/>
 			<button id="ID_SECURITY_ADD" text="Add Rule"/>
-			<button id="ID_SECURITY_REMOVE" text="Remove Rule"/>
+			<button id="ID_SECURITY_REMOVE" text="Radera"/>
 			<separator/>
 			<button id="ID_SECURITY_MOVE_UP" text="Move Up"/>
 			<button id="ID_SECURITY_MOVE_DOWN" text="Move Down"/>
+			<separator/>
+			<button id="ID_SECURITY_ADD_LIST" text="Lägg till lista..."/>
+			<button id="ID_SECURITY_UPDATE_LISTS" text="Uppdatera nu"/>
 			<rightAlign/>
 			<button id="ID_SECURITY_RESET" text="Reset List"/>
 			<button id="ID_SECURITY_IMPORT" text="Import List"/>
@@ -1561,6 +1564,14 @@
 			<separator/>
 			<item id="ID_SECURITY_EDIT" text="Avancerad _redigering…"/>
 		</menu>
+		<menu name="CSecurityWnd.Lists">
+			<item id="ID_SECURITY_ADD_LIST" text="Lägg till _lista..."/>
+			<separator/>
+			<item id="ID_SECURITY_UPDATE_LISTS" text="_Uppdatera nu"/>
+			<item id="ID_SECURITY_LIST_ENABLE" text="_Aktiverad"/>
+			<separator/>
+			<item id="ID_SECURITY_LIST_REMOVE" text="_Radera"/>
+		</menu>
 		<!-- SCHEDULER WINDOW -->
 		<menu name="CSchedulerWnd">
 			<item id="ID_SCHEDULER_ADD" text="_Add Scheduled Task"/>
@@ -2591,16 +2602,20 @@
 		<tip id="ID_SEARCHMONITOR_CLEAR" message="Rensa sökmonitorns buffert."/>
 		<tip id="ID_SEARCHMONITOR_PAUSE" message="Gör en paus i sökmonitorn."/>
 		<tip id="ID_SECURITY_ADD" message="Lägg till en regel till säkerhetskedjan…"/>
+		<tip id="ID_SECURITY_ADD_LIST" message="Lägg till IP-blocklistor från katalogen, eller en egen lista från en https://-adress..."/>
 		<tip id="ID_SECURITY_BAN" message="Utestäng de valda värdarna under denna session."/>
 		<tip id="ID_SECURITY_EDIT" message="Redigera den valda säkerhetspolicyn…"/>
 		<tip id="ID_SECURITY_EXPORT" message="Exportera de valda säkerhetsreglerna till en fil…"/>
 		<tip id="ID_SECURITY_IMPORT" message="Importera säkerhetsregler från en fil…"/>
+		<tip id="ID_SECURITY_LIST_ENABLE" message="Slå på eller av de markerade IP-listorna."/>
+		<tip id="ID_SECURITY_LIST_REMOVE" message="Ta bort de markerade IP-listorna."/>
 		<tip id="ID_SECURITY_MOVE_DOWN" message="Flytta den valda säkerhetsreglen ned i företrädeslistan."/>
 		<tip id="ID_SECURITY_MOVE_UP" message="Flytta den valda säkerhetsreglen upp i företrädeslistan."/>
 		<tip id="ID_SECURITY_POLICY_ACCEPT" message="Sätt förvald säkerhetspolicy till att tillåta alla värdar."/>
 		<tip id="ID_SECURITY_POLICY_DENY" message="Sätt förvald säkerhetspolicy till att neka alla värdar."/>
-		<tip id="ID_SECURITY_REMOVE" message="Radera den valda säkerhetspolicyn."/>
+		<tip id="ID_SECURITY_REMOVE" message="Ta bort de markerade reglerna eller IP-listorna."/>
 		<tip id="ID_SECURITY_RESET" message="Återställ träffräknaren för de valda reglerna."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="Hämta de markerade IP-listorna nu, eller alla aktiverade listor om ingen är markerad."/>
 		<tip id="ID_SYSTEM_CLEAR" message="Rensa statusloggen."/>
 		<tip id="ID_SYSTEM_COPY" message="Copy selected line(s) of status log."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="Gör en tidsstämpel för varje rad."/>
@@ -3444,6 +3459,45 @@
 		<string id="20269" value="Spara tillfälliga ofullständiga nedladdningar här"/>
 		<string id="20270" value="Lagra torrents här"/>
 		<string id="20271" value="Lagra samlingar här"/>
+		<string id="20272" value="Cachad kopia oläslig; den hämtas igen."/>
+		<string id="20273" value="Cachad kopia oläslig; importera filen igen."/>
+		<string id="20274" value="Kapade och kriminella nätverk; få falsklarm. Data (c) The Spamhaus Project."/>
+		<string id="20275" value="Kända komprometterade värdar."/>
+		<string id="20276" value="Anti-P2P-företag; mycket stor (ungefär en femtedel av alla IPv4-adresser); blockerar hela leverantörer och CDN-intervall (innehåller Cloudflares 1.1.1.0-block)."/>
+		<string id="20277" value="Sammanställning av flera integritets- och missbrukslistor."/>
+		<string id="20278" value="Otilldelat adressutrymme; måste hållas uppdaterad, annars blockeras nya nätverk."/>
+		<string id="20279" value="Adressen börjar inte med https://."/>
+		<string id="20280" value="Hämtningen slutade inte på en https://-adress."/>
+		<string id="20281" value="Servern kunde inte nås."/>
+		<string id="20282" value="Servern svarade med HTTP-status %d."/>
+		<string id="20283" value="Hämtningen är större än 64 MB."/>
+		<string id="20284" value="Innehållet är större än 256 MB uppackat."/>
+		<string id="20285" value="Den komprimerade filen kunde inte läsas."/>
+		<string id="20286" value="Listan innehåller inget adressintervall."/>
+		<string id="20287" value="Listan innehåller fler än 2 000 000 intervall."/>
+		<string id="20288" value="Listan innehåller ett IPv4-intervall på halva adressutrymmet eller mer."/>
+		<string id="20289" value="Listans IPv4-intervall täcker mer än halva adressutrymmet."/>
+		<string id="20290" value="Listan innehåller ett IPv6-intervall som täcker hela 2000::/3."/>
+		<string id="20291" value="Listan kunde inte sparas."/>
+		<string id="20292" value="IP-lista %s uppdaterad: %lu rader godtagna, %lu avvisade, %lu intervall efter sammanslagning."/>
+		<string id="20293" value="IP-lista %s inte uppdaterad: %s"/>
+		<string id="20294" value="%s: %Iu intervall importerade, %Iu rader avvisade."/>
+		<string id="20295" value="%s kunde inte importeras."/>
+		<string id="20296" value="%s kunde inte skrivas."/>
+		<string id="20297" value="%s kunde inte importeras: %s"/>
+		<string id="20298" value="Filen är större än 64 MB."/>
+		<string id="20299" value="IP-listor hämtas bara över HTTPS: URL:en måste börja med https://."/>
+		<string id="20300" value="Ta bort de markerade IP-listorna? Deras hämtade kopior raderas också."/>
+		<string id="20301" value="Importerad"/>
+		<string id="20302" value="Misslyckades: %s"/>
+		<string id="20303" value="Inte hämtad än"/>
+		<string id="20304" value="IP-listor"/>
+		<string id="20305" value="Mina regler"/>
+		<string id="20306" value="Ange https://-adressen till din egen lista, eller töm dess namn."/>
+		<string id="20307" value="Inget lades till: listorna du valde finns redan bland dina IP-listor."/>
+		<string id="20308" value="Kryssa för en lista, eller ange adressen till din egen lista."/>
+		<string id="20309" value="Finns redan bland dina IP-listor, så de lades inte till igen: %s"/>
+		<string id="20310" value="Hämtningen avbröts innan den var klar."/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->
@@ -4284,6 +4338,27 @@
 			<control caption="OK"/>
 			<control caption="Avbryt"/>
 		</dialog>
+		<dialog name="CIPListAddDlg" cookie="StBuStBuStBuStBuStBuStBuStEdStEdStBuBu" caption="Lägg till IP-lista">
+			<control caption="Kryssa för listorna som ska läggas till. Var och en hämtas över HTTPS och uppdateras en gång om dagen; ingen läggs till om du inte kryssar för den."/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control caption="Din egen lista"/>
+			<control caption="_Namn:"/>
+			<control/>
+			<control caption="_URL:"/>
+			<control/>
+			<control caption="Godtagna format: PeerGuardian (.p2p), eMule (ipfilter.dat), Gnucleus (.net), CIDR, enkla adresser och Spamhaus DROP JSON, som text, gzip eller zip. URL:en måste börja med https://."/>
+			<control caption="Lägg till"/>
+			<control caption="Avbryt"/>
+		</dialog>
 		<dialog name="CShareManagerDlg" cookie="StSyBuBuBuBu" caption="Hanterare för utdelade filer">
 			<control caption="Detta är en lista över mappar i ditt bibliotek. Du kan lägga till och ta bort mappar med knapparna till vänster. När du lägger till en ny mapp delas den initialt ut till andra användare. Du kan dock sluta dela ut den från biblioteket om du vill."/>
 			<control/>
@@ -4632,6 +4707,12 @@
 			<column from="Precedence" to="Företräde"/>
 			<column from="Hits" to="Träffar"/>
 			<column from="Comment" to="Kommentar"/>
+		</list>
+		<list name="CSecurityWnd.Lists">
+			<column from="List" to="Lista"/>
+			<column from="Ranges" to="Intervall"/>
+			<column from="Updated" to="Uppdaterad"/>
+			<column from="Hits" to="Träffar"/>
 		</list>
 		<list name="CHostCacheWnd">
 			<column from="Address" to="Adress"/>

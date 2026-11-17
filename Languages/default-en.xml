@@ -392,10 +392,13 @@
 			<button id="ID_SECURITY_EDIT" text="Edit Rule"/>
 			<separator/>
 			<button id="ID_SECURITY_ADD" text="Add Rule"/>
-			<button id="ID_SECURITY_REMOVE" text="Remove Rule"/>
+			<button id="ID_SECURITY_REMOVE" text="Remove"/>
 			<separator/>
 			<button id="ID_SECURITY_MOVE_UP" text="Move Up"/>
 			<button id="ID_SECURITY_MOVE_DOWN" text="Move Down"/>
+			<separator/>
+			<button id="ID_SECURITY_ADD_LIST" text="Add List..."/>
+			<button id="ID_SECURITY_UPDATE_LISTS" text="Update Now"/>
 			<rightAlign/>
 			<button id="ID_SECURITY_RESET" text="Reset List"/>
 			<button id="ID_SECURITY_IMPORT" text="Import List"/>
@@ -1574,6 +1577,14 @@
 			<separator/>
 			<item id="ID_SECURITY_EDIT" text="_Properties"/>
 		</menu>
+		<menu name="CSecurityWnd.Lists">
+			<item id="ID_SECURITY_ADD_LIST" text="_Add List..."/>
+			<separator/>
+			<item id="ID_SECURITY_UPDATE_LISTS" text="_Update Now"/>
+			<item id="ID_SECURITY_LIST_ENABLE" text="_Enabled"/>
+			<separator/>
+			<item id="ID_SECURITY_LIST_REMOVE" text="_Remove"/>
+		</menu>
 		<!-- SCHEDULER WINDOW -->
 		<menu name="CSchedulerWnd">
 			<item id="ID_SCHEDULER_ADD" text="_Add Scheduled Task"/>
@@ -2610,16 +2621,20 @@
 		<tip id="ID_SEARCHMONITOR_CLEAR" message="Clear the search monitor buffer."/>
 		<tip id="ID_SEARCHMONITOR_PAUSE" message="Pause search monitoring."/>
 		<tip id="ID_SECURITY_ADD" message="Add a new rule to the security chain..."/>
+		<tip id="ID_SECURITY_ADD_LIST" message="Add IP block lists from the catalogue, or your own list from an https:// address..."/>
 		<tip id="ID_SECURITY_BAN" message="Ban the selected host for the duration of this session."/>
 		<tip id="ID_SECURITY_EDIT" message="Edit the selected security rule..."/>
 		<tip id="ID_SECURITY_EXPORT" message="Export the selected security rules to a file..."/>
 		<tip id="ID_SECURITY_IMPORT" message="Import security rules from a file..."/>
+		<tip id="ID_SECURITY_LIST_ENABLE" message="Turn the selected IP lists on or off."/>
+		<tip id="ID_SECURITY_LIST_REMOVE" message="Remove the selected IP lists."/>
 		<tip id="ID_SECURITY_MOVE_DOWN" message="Move the selected security rules down the precedence list."/>
 		<tip id="ID_SECURITY_MOVE_UP" message="Move the selected security rules up the precedence list."/>
 		<tip id="ID_SECURITY_POLICY_ACCEPT" message="Set the default security policy to allow all hosts."/>
 		<tip id="ID_SECURITY_POLICY_DENY" message="Set the default security policy to deny all hosts."/>
-		<tip id="ID_SECURITY_REMOVE" message="Remove the selected security rules."/>
+		<tip id="ID_SECURITY_REMOVE" message="Remove the selected rules or IP lists."/>
 		<tip id="ID_SECURITY_RESET" message="Reset the hit counts on the selected rules."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="Download the selected IP lists now, or every enabled list when none is selected."/>
 		<tip id="ID_SYSTEM_CLEAR" message="Clear the status log."/>
 		<tip id="ID_SYSTEM_COPY" message="Copy selected line(s) of status log."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="Record a timestamp for each line."/>
@@ -3484,6 +3499,45 @@
 		<string id="20269" value="Store Temporary Incomplete Files Here"/>
 		<string id="20270" value="Store Torrents Here"/>
 		<string id="20271" value="Store Collections Here"/>
+		<string id="20272" value="Cached copy unreadable; it will be downloaded again."/>
+		<string id="20273" value="Cached copy unreadable; import the file again."/>
+		<string id="20274" value="Hijacked and criminal networks; few false positives. Data (c) The Spamhaus Project."/>
+		<string id="20275" value="Known compromised hosts."/>
+		<string id="20276" value="Anti-P2P companies; very large (about a fifth of all IPv4 addresses); blocks whole providers and CDN ranges (it lists Cloudflare's 1.1.1.0 block)."/>
+		<string id="20277" value="Aggregate of several privacy and abuse lists."/>
+		<string id="20278" value="Unallocated space; must stay updated or it blocks new networks."/>
+		<string id="20279" value="The address does not start with https://."/>
+		<string id="20280" value="The download did not end at an https:// address."/>
+		<string id="20281" value="The server could not be reached."/>
+		<string id="20282" value="The server answered with HTTP status %d."/>
+		<string id="20283" value="The download is larger than 64 MB."/>
+		<string id="20284" value="The content is larger than 256 MB once decompressed."/>
+		<string id="20285" value="The compressed file could not be read."/>
+		<string id="20286" value="The list holds no address range."/>
+		<string id="20287" value="The list holds more than 2,000,000 ranges."/>
+		<string id="20288" value="The list holds an IPv4 range of half the address space or more."/>
+		<string id="20289" value="The list's IPv4 ranges cover more than half the address space."/>
+		<string id="20290" value="The list holds an IPv6 range that covers all of 2000::/3."/>
+		<string id="20291" value="The list could not be saved."/>
+		<string id="20292" value="IP list %s updated: %lu lines taken, %lu rejected, %lu ranges after merging."/>
+		<string id="20293" value="IP list %s not updated: %s"/>
+		<string id="20294" value="%s: %Iu ranges imported, %Iu lines rejected."/>
+		<string id="20295" value="%s could not be imported."/>
+		<string id="20296" value="%s could not be written."/>
+		<string id="20297" value="%s could not be imported: %s"/>
+		<string id="20298" value="The file is larger than 64 MB."/>
+		<string id="20299" value="IP lists are downloaded over HTTPS only: the URL must start with https://."/>
+		<string id="20300" value="Remove the selected IP lists? Their downloaded copies are deleted too."/>
+		<string id="20301" value="Imported"/>
+		<string id="20302" value="Failed: %s"/>
+		<string id="20303" value="Not downloaded yet"/>
+		<string id="20304" value="IP lists"/>
+		<string id="20305" value="My rules"/>
+		<string id="20306" value="Enter the https:// address of your own list, or clear its name."/>
+		<string id="20307" value="Nothing was added: the lists you chose are already in your IP lists."/>
+		<string id="20308" value="Tick a list, or enter the address of your own list."/>
+		<string id="20309" value="Already in your IP lists, so not added again: %s"/>
+		<string id="20310" value="The download was cut off before its end."/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->
@@ -4338,6 +4392,27 @@
 			<control caption="OK"/>
 			<control caption="Cancel"/>
 		</dialog>
+		<dialog name="CIPListAddDlg" cookie="StBuStBuStBuStBuStBuStBuStEdStEdStBuBu" caption="Add IP List">
+			<control caption="Tick the lists to add. Each one is downloaded over HTTPS and updated once a day; none is added unless you tick it."/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control caption="Your own list"/>
+			<control caption="_Name:"/>
+			<control/>
+			<control caption="_URL:"/>
+			<control/>
+			<control caption="Accepted formats: PeerGuardian (.p2p), eMule (ipfilter.dat), Gnucleus (.net), CIDR, plain addresses and Spamhaus DROP JSON, as text, gzip or zip. The URL must start with https://."/>
+			<control caption="_Add"/>
+			<control caption="Cancel"/>
+		</dialog>
 		<dialog name="CShareManagerDlg" cookie="StSyBuBuBuBu" caption="Shared Folder Manager">
 			<control caption="This is a list of folders in your library.  You can add and remove folders using the buttons on the left.  When you add a new folder it is initially shared with other users, however you can unshare it from the Shareaza library if you wish."/>
 			<control/>
@@ -4686,6 +4761,12 @@
 		<column from="Precedence" to=""/>
 		<column from="Hits" to=""/>
 		<column from="Comment" to=""/>
+		</list>
+		<list name="CSecurityWnd.Lists">
+		<column from="List" to=""/>
+		<column from="Ranges" to=""/>
+		<column from="Updated" to=""/>
+		<column from="Hits" to=""/>
 		</list>
 		<list name="CHostCacheWnd">
 		<column from="Address" to=""/>

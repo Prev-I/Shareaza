@@ -379,10 +379,13 @@
 			<button id="ID_SECURITY_EDIT" text="Kuralı Düzenle"/>
 			<separator/>
 			<button id="ID_SECURITY_ADD" text="Kural Ekle"/>
-			<button id="ID_SECURITY_REMOVE" text="Kuralı Kaldır"/>
+			<button id="ID_SECURITY_REMOVE" text="Kaldır"/>
 			<separator/>
 			<button id="ID_SECURITY_MOVE_UP" text="Yukarı Taşı"/>
 			<button id="ID_SECURITY_MOVE_DOWN" text="Aşağı Taşı"/>
+			<separator/>
+			<button id="ID_SECURITY_ADD_LIST" text="Liste Ekle..."/>
+			<button id="ID_SECURITY_UPDATE_LISTS" text="Şimdi Güncelle"/>
 			<rightAlign/>
 			<button id="ID_SECURITY_RESET" text="Listeyi Sıfırla"/>
 			<button id="ID_SECURITY_IMPORT" text="Listeyi İçe Aktar"/>
@@ -1561,6 +1564,14 @@
 			<separator/>
 			<item id="ID_SECURITY_EDIT" text="İ_leri Düzenleme..."/>
 		</menu>
+		<menu name="CSecurityWnd.Lists">
+			<item id="ID_SECURITY_ADD_LIST" text="_Liste Ekle..."/>
+			<separator/>
+			<item id="ID_SECURITY_UPDATE_LISTS" text="Şimdi _Güncelle"/>
+			<item id="ID_SECURITY_LIST_ENABLE" text="Etki_n"/>
+			<separator/>
+			<item id="ID_SECURITY_LIST_REMOVE" text="_Kaldır"/>
+		</menu>
 		<!-- SCHEDULER WINDOW -->
 		<menu name="CSchedulerWnd">
 			<item id="ID_SCHEDULER_ADD" text="Planlanmış Vazife _Ekle"/>
@@ -2579,16 +2590,20 @@
 		<tip id="ID_SEARCHMONITOR_CLEAR" message="Arama monitörü belleğini temizle."/>
 		<tip id="ID_SEARCHMONITOR_PAUSE" message="Arama monitörünü duraklat."/>
 		<tip id="ID_SECURITY_ADD" message="Güvenlik zincirine yeni kural ekle..."/>
+		<tip id="ID_SECURITY_ADD_LIST" message="Katalogdan IP engelleme listeleri ya da bir https:// adresinden kendi listenizi ekleyin..."/>
 		<tip id="ID_SECURITY_BAN" message="Seçilen makineyi bu oturum süresi için yasakla."/>
 		<tip id="ID_SECURITY_EDIT" message="Seçilen güvenlik kuralını düzenle..."/>
 		<tip id="ID_SECURITY_EXPORT" message="Seçilen güvenlik kurallarını bir dosyaya gönder..."/>
 		<tip id="ID_SECURITY_IMPORT" message="Dosyadan güvenlik kurallarını aktar..."/>
+		<tip id="ID_SECURITY_LIST_ENABLE" message="Seçili IP listelerini açın veya kapatın."/>
+		<tip id="ID_SECURITY_LIST_REMOVE" message="Seçili IP listelerini kaldırın."/>
 		<tip id="ID_SECURITY_MOVE_DOWN" message="Seçilen güvenlik kuralını öncelik listesinde aşağıya taşı."/>
 		<tip id="ID_SECURITY_MOVE_UP" message="Seçilen güvenlik kuralını öncelik listesinde yukarıya taşı."/>
 		<tip id="ID_SECURITY_POLICY_ACCEPT" message="Varsayılan güvenlik politikasını tüm makinelere izin verecek şekilde ayarla."/>
 		<tip id="ID_SECURITY_POLICY_DENY" message="Varsayılan güvenlik politikasını tüm makineleri reddedecek şekilde ayarla."/>
-		<tip id="ID_SECURITY_REMOVE" message="Seçilen güvenlik kurallarını kaldır."/>
+		<tip id="ID_SECURITY_REMOVE" message="Seçili kuralları veya IP listelerini kaldırın."/>
 		<tip id="ID_SECURITY_RESET" message="Seçilen güvenlik kurallarında ulaşılan sayıları sıfırla."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="Seçili IP listelerini şimdi indirin; hiçbiri seçili değilse etkin listelerin hepsini indirin."/>
 		<tip id="ID_SYSTEM_CLEAR" message="Durum günlüğünü temizle."/>
 		<tip id="ID_SYSTEM_COPY" message="Durum kütüğünün seçilen satırlarını kopyala."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="Her hat için zamanı kaydet."/>
@@ -3432,6 +3447,45 @@
 		<string id="20269" value="Geçici tamamlanmamış dosyaları burada depola"/>
 		<string id="20270" value="Torrentları burada sakla"/>
 		<string id="20271" value="Koleksiyonları Burada Sakla"/>
+		<string id="20272" value="Önbellekteki kopya okunamıyor; yeniden indirilecek."/>
+		<string id="20273" value="Önbellekteki kopya okunamıyor; dosyayı yeniden içe aktarın."/>
+		<string id="20274" value="Ele geçirilmiş ve suç ağları; az yanlış pozitif. Veriler (c) The Spamhaus Project."/>
+		<string id="20275" value="Bilinen ele geçirilmiş ana bilgisayarlar."/>
+		<string id="20276" value="P2P karşıtı şirketler; çok büyük (tüm IPv4 adreslerinin yaklaşık beşte biri); tüm sağlayıcıları ve CDN aralıklarını engeller (Cloudflare'in 1.1.1.0 bloğunu içerir)."/>
+		<string id="20277" value="Birkaç gizlilik ve kötüye kullanım listesinin birleşimi."/>
+		<string id="20278" value="Tahsis edilmemiş alan; güncel tutulmalıdır, yoksa yeni ağları engeller."/>
+		<string id="20279" value="Adres https:// ile başlamıyor."/>
+		<string id="20280" value="İndirme bir https:// adresinde sona ermedi."/>
+		<string id="20281" value="Sunucuya ulaşılamadı."/>
+		<string id="20282" value="Sunucu HTTP %d durumuyla yanıt verdi."/>
+		<string id="20283" value="İndirme 64 MB'tan büyük."/>
+		<string id="20284" value="İçerik açıldığında 256 MB'tan büyük."/>
+		<string id="20285" value="Sıkıştırılmış dosya okunamadı."/>
+		<string id="20286" value="Liste hiç adres aralığı içermiyor."/>
+		<string id="20287" value="Liste 2.000.000'dan fazla aralık içeriyor."/>
+		<string id="20288" value="Liste, adres alanının yarısı veya daha büyük bir IPv4 aralığı içeriyor."/>
+		<string id="20289" value="Listenin IPv4 aralıkları adres alanının yarısından fazlasını kapsıyor."/>
+		<string id="20290" value="Liste, 2000::/3'ün tamamını kapsayan bir IPv6 aralığı içeriyor."/>
+		<string id="20291" value="Liste kaydedilemedi."/>
+		<string id="20292" value="IP listesi %s güncellendi: %lu satır alındı, %lu reddedildi, birleştirme sonrası %lu aralık."/>
+		<string id="20293" value="IP listesi %s güncellenmedi: %s"/>
+		<string id="20294" value="%s: %Iu aralık içe aktarıldı, %Iu satır reddedildi."/>
+		<string id="20295" value="%s içe aktarılamadı."/>
+		<string id="20296" value="%s yazılamadı."/>
+		<string id="20297" value="%s içe aktarılamadı: %s"/>
+		<string id="20298" value="Dosya 64 MB'tan büyük."/>
+		<string id="20299" value="IP listeleri yalnızca HTTPS üzerinden indirilir: URL https:// ile başlamalıdır."/>
+		<string id="20300" value="Seçili IP listeleri kaldırılsın mı? İndirilmiş kopyaları da silinecek."/>
+		<string id="20301" value="İçe aktarıldı"/>
+		<string id="20302" value="Başarısız: %s"/>
+		<string id="20303" value="Henüz indirilmedi"/>
+		<string id="20304" value="IP listeleri"/>
+		<string id="20305" value="Kurallarım"/>
+		<string id="20306" value="Kendi listenizin https:// adresini girin veya adını temizleyin."/>
+		<string id="20307" value="Hiçbir şey eklenmedi: seçtiğiniz listeler zaten IP listelerinizde."/>
+		<string id="20308" value="Bir liste işaretleyin veya kendi listenizin adresini girin."/>
+		<string id="20309" value="Zaten IP listelerinizde olduğundan yeniden eklenmedi: %s"/>
+		<string id="20310" value="İndirme, sonuna gelmeden kesildi."/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->
@@ -4272,6 +4326,27 @@
 			<control caption="Tamam"/>
 			<control caption="İptal"/>
 		</dialog>
+		<dialog name="CIPListAddDlg" cookie="StBuStBuStBuStBuStBuStBuStEdStEdStBuBu" caption="IP Listesi Ekle">
+			<control caption="Eklenecek listeleri işaretleyin. Her biri HTTPS üzerinden indirilir ve günde bir kez güncellenir; işaretlemediğiniz hiçbir liste eklenmez."/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control/>
+			<control caption="Kendi listeniz"/>
+			<control caption="_Adı:"/>
+			<control/>
+			<control caption="_URL:"/>
+			<control/>
+			<control caption="Kabul edilen biçimler: PeerGuardian (.p2p), eMule (ipfilter.dat), Gnucleus (.net), CIDR, düz adresler ve Spamhaus DROP JSON; metin, gzip veya zip olarak. URL https:// ile başlamalıdır."/>
+			<control caption="_Ekle"/>
+			<control caption="İptal"/>
+		</dialog>
 		<dialog name="CShareManagerDlg" cookie="StSyBuBuBuBu" caption="Paylaşılan Klasör Yönetimi">
 			<control caption="Bu kütüphanenizdeki klasörlerin listesidir. Soldaki düğmeyi kullanarak klasör ekleyip kaldırabilirsiniz . Yeni bir klasör eklediğinizde diğer kullanıcılar ile paylaşılır, bununla birlikte isterseniz Shareaza kütüphanesinden bunu paylaşmayabilirsiniz."/>
 			<control/>
@@ -4620,6 +4695,12 @@
 			<column from="Precedence" to="Öncelik"/>
 			<column from="Hits" to="İsabetler"/>
 			<column from="Comment" to="Yorum"/>
+		</list>
+		<list name="CSecurityWnd.Lists">
+			<column from="List" to="Liste"/>
+			<column from="Ranges" to="Aralıklar"/>
+			<column from="Updated" to="Güncellendi"/>
+			<column from="Hits" to="İsabetler"/>
 		</list>
 		<list name="CHostCacheWnd">
 			<column from="Address" to="Adres"/>

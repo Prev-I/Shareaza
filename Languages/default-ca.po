@@ -387,9 +387,10 @@ msgstr "Edit Rule"
 msgid "Add Rule"
 msgstr "Add Rule"
 
-#: button;id_security_remove
-msgid "Remove Rule"
-msgstr "Remove Rule"
+#: button;id_security_remove button;id_hostcache_remove string;17021
+#: cfavouritesprofilepage;control;8
+msgid "Remove"
+msgstr "Esborra"
 
 #: button;id_security_move_up
 msgid "Move Up"
@@ -398,6 +399,14 @@ msgstr "Move Up"
 #: button;id_security_move_down
 msgid "Move Down"
 msgstr "Move Down"
+
+#: button;id_security_add_list
+msgid "Add List..."
+msgstr "Afegeix llista..."
+
+#: button;id_security_update_lists
+msgid "Update Now"
+msgstr "Actualitza ara"
 
 #: button;id_security_reset
 msgid "Reset List"
@@ -438,10 +447,6 @@ msgstr ""
 #: button;id_hitmonitor_search
 msgid "Requery"
 msgstr "Reaccedeix"
-
-#: button;id_hostcache_remove string;17021 cfavouritesprofilepage;control;8
-msgid "Remove"
-msgstr "Esborra"
 
 #: button;id_hostcache_g2_horizon
 msgid "G2 Cluster"
@@ -1476,6 +1481,7 @@ msgstr "_Explora"
 #: clibrarytree.physical.basic;item;id_library_remove
 #: clibrarytree.physical;item;id_library_remove
 #: cmedialist;item;id_media_remove csecuritywnd;item;id_security_remove
+#: csecuritywnd.lists;item;id_security_list_remove
 #: cschedulerwnd;item;id_scheduler_remove
 #: cdiscoverywnd;item;id_discovery_remove clibrarysettingspage;control;19
 #: clibrarysettingspage;control;23 cmediasettingspage;control;8
@@ -1890,6 +1896,18 @@ msgstr "_Permet"
 #: csecuritywnd;61;item;id_security_policy_deny
 msgid "_Deny"
 msgstr "_Denega"
+
+#: csecuritywnd.lists;item;id_security_add_list
+msgid "_Add List..."
+msgstr "Afegeix _llista..."
+
+#: csecuritywnd.lists;item;id_security_update_lists
+msgid "_Update Now"
+msgstr "Act_ualitza ara"
+
+#: csecuritywnd.lists;item;id_security_list_enable
+msgid "_Enabled"
+msgstr "_Activada"
 
 #: cschedulerwnd;item;id_scheduler_add
 msgid "_Add Scheduled Task"
@@ -4228,6 +4246,10 @@ msgstr "Posa en pausa al monitor de cerques."
 msgid "Add a new rule to the security chain..."
 msgstr "Afegeix una nova regla de seguretat."
 
+#: message;id_security_add_list
+msgid "Add IP block lists from the catalogue, or your own list from an https:// address..."
+msgstr "Afegeix llistes de bloqueig d'IP del catàleg, o la vostra pròpia llista des d'una adreça https://..."
+
 #: message;id_security_ban
 msgid "Ban the selected host for the duration of this session."
 msgstr "Bloqueja aquesta adreça IP per aquesta sessió."
@@ -4243,6 +4265,14 @@ msgstr "Exporta les normes de seguretat a un arxiu XML."
 #: message;id_security_import
 msgid "Import security rules from a file..."
 msgstr "Importa les normes de seguretat d'un arxiu XML."
+
+#: message;id_security_list_enable
+msgid "Turn the selected IP lists on or off."
+msgstr "Activa o desactiva les llistes d'IP seleccionades."
+
+#: message;id_security_list_remove
+msgid "Remove the selected IP lists."
+msgstr "Esborra les llistes d'IP seleccionades."
 
 #: message;id_security_move_down
 msgid "Move the selected security rules down the precedence list."
@@ -4261,12 +4291,16 @@ msgid "Set the default security policy to deny all hosts."
 msgstr "Canvia la política de seguretat per defecte a denegar totes les connexions."
 
 #: message;id_security_remove
-msgid "Remove the selected security rules."
-msgstr "Esborra aquesta norma de seguretat."
+msgid "Remove the selected rules or IP lists."
+msgstr "Esborra les normes o les llistes d'IP seleccionades."
 
 #: message;id_security_reset
 msgid "Reset the hit counts on the selected rules."
 msgstr "Reinicia els compadors de les regles de seguretat seleccionades."
+
+#: message;id_security_update_lists
+msgid "Download the selected IP lists now, or every enabled list when none is selected."
+msgstr "Baixa ara les llistes d'IP seleccionades, o totes les activades si no n'hi ha cap de seleccionada."
 
 #: message;id_system_clear
 msgid "Clear the status log."
@@ -7379,8 +7413,8 @@ msgstr "Accepta"
 #: cfilecopydlg;control;5 cfolderpropertiesdlg;control;8
 #: cgraphlistdlg;control;17 cgraphitemdlg;control;2
 #: cschemacolumnsdlg;control;4 csecureruledlg;control;34
-#: csharemanagerdlg;control;6 curlcopydlg;control;6 curlexportdlg;control;10
-#: curlactiondlg;control;11 cfilepreviewdlg;control;6
+#: ciplistadddlg;control;19 csharemanagerdlg;control;6 curlcopydlg;control;6
+#: curlexportdlg;control;10 curlactiondlg;control;11 cfilepreviewdlg;control;6
 #: cexistingfiledlg;control;2 cclosemodedlg;control;6
 #: cdonkeyserversdlg;control;5 cdeletefiledlg;control;5
 #: ctorrentseeddlg;control;4 cdownloadgroupdlg;control;2
@@ -7514,6 +7548,162 @@ msgstr "Desa els torrents aquí"
 #: string;20271 clibrarysettingspage;control;24
 msgid "Store Collections Here"
 msgstr "Desa les col·leccions aquí"
+
+#: string;20272
+msgid "Cached copy unreadable; it will be downloaded again."
+msgstr "Còpia de la memòria cau il·legible; es tornarà a baixar."
+
+#: string;20273
+msgid "Cached copy unreadable; import the file again."
+msgstr "Còpia de la memòria cau il·legible; torneu a importar el fitxer."
+
+#: string;20274
+msgid "Hijacked and criminal networks; few false positives. Data (c) The Spamhaus Project."
+msgstr "Xarxes segrestades i criminals; pocs falsos positius. Dades (c) The Spamhaus Project."
+
+#: string;20275
+msgid "Known compromised hosts."
+msgstr "Amfitrions compromesos coneguts."
+
+#: string;20276
+msgid "Anti-P2P companies; very large (about a fifth of all IPv4 addresses); blocks whole providers and CDN ranges (it lists Cloudflare's 1.1.1.0 block)."
+msgstr "Empreses anti-P2P; molt gran (prop d'una cinquena part de les adreces IPv4); bloqueja proveïdors sencers i rangs de CDN (inclou el bloc 1.1.1.0 de Cloudflare)."
+
+#: string;20277
+msgid "Aggregate of several privacy and abuse lists."
+msgstr "Agregat de diverses llistes de privadesa i d'abusos."
+
+#: string;20278
+msgid "Unallocated space; must stay updated or it blocks new networks."
+msgstr "Espai no assignat; s'ha de mantenir actualitzada o bloquejarà xarxes noves."
+
+#: string;20279
+msgid "The address does not start with https://."
+msgstr "L'adreça no comença per https://."
+
+#: string;20280
+msgid "The download did not end at an https:// address."
+msgstr "La baixada no ha acabat en una adreça https://."
+
+#: string;20281
+msgid "The server could not be reached."
+msgstr "No s'ha pogut contactar amb el servidor."
+
+#: string;20282
+msgid "The server answered with HTTP status %d."
+msgstr "El servidor ha respost amb l'estat HTTP %d."
+
+#: string;20283
+msgid "The download is larger than 64 MB."
+msgstr "La baixada supera els 64 MB."
+
+#: string;20284
+msgid "The content is larger than 256 MB once decompressed."
+msgstr "El contingut supera els 256 MB un cop descomprimit."
+
+#: string;20285
+msgid "The compressed file could not be read."
+msgstr "No s'ha pogut llegir el fitxer comprimit."
+
+#: string;20286
+msgid "The list holds no address range."
+msgstr "La llista no conté cap rang d'adreces."
+
+#: string;20287
+msgid "The list holds more than 2,000,000 ranges."
+msgstr "La llista conté més de 2.000.000 de rangs."
+
+#: string;20288
+msgid "The list holds an IPv4 range of half the address space or more."
+msgstr "La llista conté un rang IPv4 de la meitat de l'espai d'adreces o més."
+
+#: string;20289
+msgid "The list's IPv4 ranges cover more than half the address space."
+msgstr "Els rangs IPv4 de la llista cobreixen més de la meitat de l'espai d'adreces."
+
+#: string;20290
+msgid "The list holds an IPv6 range that covers all of 2000::/3."
+msgstr "La llista conté un rang IPv6 que cobreix tot 2000::/3."
+
+#: string;20291
+msgid "The list could not be saved."
+msgstr "No s'ha pogut desar la llista."
+
+#: string;20292
+msgid "IP list %s updated: %lu lines taken, %lu rejected, %lu ranges after merging."
+msgstr "Llista d'IP %s actualitzada: %lu línies acceptades, %lu rebutjades, %lu rangs després de fusionar."
+
+#: string;20293
+msgid "IP list %s not updated: %s"
+msgstr "Llista d'IP %s no actualitzada: %s"
+
+#: string;20294
+msgid "%s: %Iu ranges imported, %Iu lines rejected."
+msgstr "%s: %Iu rangs importats, %Iu línies rebutjades."
+
+#: string;20295
+msgid "%s could not be imported."
+msgstr "No s'ha pogut importar %s."
+
+#: string;20296
+msgid "%s could not be written."
+msgstr "No s'ha pogut escriure %s."
+
+#: string;20297
+msgid "%s could not be imported: %s"
+msgstr "No s'ha pogut importar %s: %s"
+
+#: string;20298
+msgid "The file is larger than 64 MB."
+msgstr "El fitxer supera els 64 MB."
+
+#: string;20299
+msgid "IP lists are downloaded over HTTPS only: the URL must start with https://."
+msgstr "Les llistes d'IP només es baixen per HTTPS: l'URL ha de començar per https://."
+
+#: string;20300
+msgid "Remove the selected IP lists? Their downloaded copies are deleted too."
+msgstr "Voleu esborrar les llistes d'IP seleccionades? També se n'eliminaran les còpies baixades."
+
+#: string;20301
+msgid "Imported"
+msgstr "Importada"
+
+#: string;20302
+msgid "Failed: %s"
+msgstr "Error: %s"
+
+#: string;20303
+msgid "Not downloaded yet"
+msgstr "Encara no baixada"
+
+#: string;20304
+msgid "IP lists"
+msgstr "Llistes d'IP"
+
+#: string;20305
+msgid "My rules"
+msgstr "Les meves normes"
+
+#: string;20306
+msgid "Enter the https:// address of your own list, or clear its name."
+msgstr "Introduïu l'adreça https:// de la vostra llista, o esborreu-ne el nom."
+
+#: string;20307
+msgid "Nothing was added: the lists you chose are already in your IP lists."
+msgstr "No s'ha afegit res: les llistes triades ja són a les vostres llistes d'IP."
+
+#: string;20308
+msgid "Tick a list, or enter the address of your own list."
+msgstr "Marqueu una llista, o introduïu l'adreça de la vostra pròpia llista."
+
+#: string;20309
+msgid "Already in your IP lists, so not added again: %s"
+msgstr "Ja són a les vostres llistes d'IP, no s'han tornat a afegir: %s"
+
+#: string;20310
+msgid "The download was cut off before its end."
+msgstr "La baixada s'ha interromput abans d'acabar."
 
 #: csettingsheet;control;4 cprofilemanagerdlg;control;4
 msgid "Apply"
@@ -7658,7 +7848,8 @@ msgstr "_Arxius segurs per a obrir:"
 
 #: clibrarysettingspage;control;18 clibrarysettingspage;control;22
 #: cmediasettingspage;control;7 cwebsettingspage;control;12
-#: cfilesourcespage;control;5 cdownloadgroupdlg;control;7
+#: cfilesourcespage;control;5 ciplistadddlg;control;18
+#: cdownloadgroupdlg;control;7
 msgid "_Add"
 msgstr "_Afegeix"
 
@@ -8357,7 +8548,7 @@ msgid "Upload Queue Properties"
 msgstr "Propietats de la cua de pujada"
 
 #: cqueuepropertiesdlg;control;1 cgraphlistdlg;control;14
-#: cdownloadgroupdlg;control;12
+#: ciplistadddlg;control;13 cdownloadgroupdlg;control;12
 msgid "_Name:"
 msgstr "_Nom:"
 
@@ -9254,6 +9445,26 @@ msgstr "h"
 msgid "m"
 msgstr "m"
 
+#: dialog;ciplistadddlg
+msgid "Add IP List"
+msgstr "Afegeix una llista d'IP"
+
+#: ciplistadddlg;control;1
+msgid "Tick the lists to add. Each one is downloaded over HTTPS and updated once a day; none is added unless you tick it."
+msgstr "Marqueu les llistes que voleu afegir. Cadascuna es baixa per HTTPS i s'actualitza un cop al dia; no se n'afegeix cap si no la marqueu."
+
+#: ciplistadddlg;control;12
+msgid "Your own list"
+msgstr "La vostra llista"
+
+#: ciplistadddlg;control;15
+msgid "_URL:"
+msgstr "_URL:"
+
+#: ciplistadddlg;control;17
+msgid "Accepted formats: PeerGuardian (.p2p), eMule (ipfilter.dat), Gnucleus (.net), CIDR, plain addresses and Spamhaus DROP JSON, as text, gzip or zip. The URL must start with https://."
+msgstr "Formats acceptats: PeerGuardian (.p2p), eMule (ipfilter.dat), Gnucleus (.net), CIDR, adreces simples i Spamhaus DROP JSON, com a text, gzip o zip. L'URL ha de començar per https://."
+
 #: dialog;csharemanagerdlg
 msgid "Shared Folder Manager"
 msgstr "Controlador de carpetes de la col·lecció"
@@ -9875,6 +10086,18 @@ msgstr "Procedència"
 msgid "Comment"
 msgstr "Comentari"
 
+#: column;list
+msgid "List"
+msgstr "Llista"
+
+#: column;ranges
+msgid "Ranges"
+msgstr "Rangs"
+
+#: column;updated
+msgid "Updated"
+msgstr "Actualitzada"
+
 #: column;lastseen
 msgid "LastSeen"
 msgstr "Última vegada vist"
@@ -10166,3 +10389,9 @@ msgstr "Següent"
 
 #~ msgid "Saturday"
 #~ msgstr "Dissabte"
+
+#~ msgid "Remove Rule"
+#~ msgstr "Remove Rule"
+
+#~ msgid "Remove the selected security rules."
+#~ msgstr "Esborra aquesta norma de seguretat."

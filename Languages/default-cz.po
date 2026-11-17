@@ -387,9 +387,10 @@ msgstr ""
 msgid "Add Rule"
 msgstr ""
 
-#: button;id_security_remove
-msgid "Remove Rule"
-msgstr ""
+#: button;id_security_remove button;id_hostcache_remove string;17021
+#: cfavouritesprofilepage;control;8
+msgid "Remove"
+msgstr "Odstranit"
 
 #: button;id_security_move_up
 msgid "Move Up"
@@ -398,6 +399,14 @@ msgstr ""
 #: button;id_security_move_down
 msgid "Move Down"
 msgstr ""
+
+#: button;id_security_add_list
+msgid "Add List..."
+msgstr "Přidat seznam..."
+
+#: button;id_security_update_lists
+msgid "Update Now"
+msgstr "Aktualizovat nyní"
 
 #: button;id_security_reset
 msgid "Reset List"
@@ -438,10 +447,6 @@ msgstr ""
 #: button;id_hitmonitor_search
 msgid "Requery"
 msgstr "Dotaz"
-
-#: button;id_hostcache_remove string;17021 cfavouritesprofilepage;control;8
-msgid "Remove"
-msgstr "Odstranit"
 
 #: button;id_hostcache_g2_horizon
 msgid "G2 Cluster"
@@ -1476,6 +1481,7 @@ msgstr "_Průzkumník"
 #: clibrarytree.physical.basic;item;id_library_remove
 #: clibrarytree.physical;item;id_library_remove
 #: cmedialist;item;id_media_remove csecuritywnd;item;id_security_remove
+#: csecuritywnd.lists;item;id_security_list_remove
 #: cschedulerwnd;item;id_scheduler_remove
 #: cdiscoverywnd;item;id_discovery_remove clibrarysettingspage;control;19
 #: clibrarysettingspage;control;23 cmediasettingspage;control;8
@@ -1890,6 +1896,18 @@ msgstr ""
 #: csecuritywnd;61;item;id_security_policy_deny
 msgid "_Deny"
 msgstr ""
+
+#: csecuritywnd.lists;item;id_security_add_list
+msgid "_Add List..."
+msgstr "Přidat _seznam..."
+
+#: csecuritywnd.lists;item;id_security_update_lists
+msgid "_Update Now"
+msgstr "_Aktualizovat nyní"
+
+#: csecuritywnd.lists;item;id_security_list_enable
+msgid "_Enabled"
+msgstr "_Povoleno"
 
 #: cschedulerwnd;item;id_scheduler_add
 msgid "_Add Scheduled Task"
@@ -4232,6 +4250,10 @@ msgstr "Pozastavit výpis při hledání."
 msgid "Add a new rule to the security chain..."
 msgstr "Přidat nové pravidlo k zabezpečení..."
 
+#: message;id_security_add_list
+msgid "Add IP block lists from the catalogue, or your own list from an https:// address..."
+msgstr "Přidat seznamy blokovaných IP z katalogu nebo vlastní seznam z adresy https://..."
+
 #: message;id_security_ban
 msgid "Ban the selected host for the duration of this session."
 msgstr "Zakázat označeného hosta po dobu tohoto sezení."
@@ -4247,6 +4269,14 @@ msgstr "Export vybraných pravidel zabezpečení u souboru..."
 #: message;id_security_import
 msgid "Import security rules from a file..."
 msgstr "Importovat pravidla zabezpečení ze souboru..."
+
+#: message;id_security_list_enable
+msgid "Turn the selected IP lists on or off."
+msgstr "Zapnout nebo vypnout vybrané seznamy IP."
+
+#: message;id_security_list_remove
+msgid "Remove the selected IP lists."
+msgstr "Odstranit vybrané seznamy IP."
 
 #: message;id_security_move_down
 msgid "Move the selected security rules down the precedence list."
@@ -4265,12 +4295,16 @@ msgid "Set the default security policy to deny all hosts."
 msgstr "Nastavit standardní zabezpečení odepření pro všechny hosty."
 
 #: message;id_security_remove
-msgid "Remove the selected security rules."
-msgstr "Odstranit označené pravidlo zabezpečení."
+msgid "Remove the selected rules or IP lists."
+msgstr "Odstranit vybraná pravidla nebo seznamy IP."
 
 #: message;id_security_reset
 msgid "Reset the hit counts on the selected rules."
 msgstr "Ihned resetovat a počítat s pravidly výběru."
+
+#: message;id_security_update_lists
+msgid "Download the selected IP lists now, or every enabled list when none is selected."
+msgstr "Stáhnout nyní vybrané seznamy IP, nebo všechny povolené, pokud není vybrán žádný."
 
 #: message;id_system_clear
 msgid "Clear the status log."
@@ -7382,8 +7416,8 @@ msgstr "OK"
 #: cfilecopydlg;control;5 cfolderpropertiesdlg;control;8
 #: cgraphlistdlg;control;17 cgraphitemdlg;control;2
 #: cschemacolumnsdlg;control;4 csecureruledlg;control;34
-#: csharemanagerdlg;control;6 curlcopydlg;control;6 curlexportdlg;control;10
-#: curlactiondlg;control;11 cfilepreviewdlg;control;6
+#: ciplistadddlg;control;19 csharemanagerdlg;control;6 curlcopydlg;control;6
+#: curlexportdlg;control;10 curlactiondlg;control;11 cfilepreviewdlg;control;6
 #: cexistingfiledlg;control;2 cclosemodedlg;control;6
 #: cdonkeyserversdlg;control;5 cdeletefiledlg;control;5
 #: ctorrentseeddlg;control;4 cdownloadgroupdlg;control;2
@@ -7517,6 +7551,162 @@ msgstr "Torrenty skladovat zde"
 #: string;20271 clibrarysettingspage;control;24
 msgid "Store Collections Here"
 msgstr "Sbírky ukládat do adresáře"
+
+#: string;20272
+msgid "Cached copy unreadable; it will be downloaded again."
+msgstr "Kopie v mezipaměti je nečitelná; bude stažena znovu."
+
+#: string;20273
+msgid "Cached copy unreadable; import the file again."
+msgstr "Kopie v mezipaměti je nečitelná; importujte soubor znovu."
+
+#: string;20274
+msgid "Hijacked and criminal networks; few false positives. Data (c) The Spamhaus Project."
+msgstr "Unesené a kriminální sítě; málo falešných poplachů. Data (c) The Spamhaus Project."
+
+#: string;20275
+msgid "Known compromised hosts."
+msgstr "Známé napadené počítače."
+
+#: string;20276
+msgid "Anti-P2P companies; very large (about a fifth of all IPv4 addresses); blocks whole providers and CDN ranges (it lists Cloudflare's 1.1.1.0 block)."
+msgstr "Anti-P2P firmy; velmi velký (asi pětina všech adres IPv4); blokuje celé poskytovatele a rozsahy CDN (obsahuje blok 1.1.1.0 společnosti Cloudflare)."
+
+#: string;20277
+msgid "Aggregate of several privacy and abuse lists."
+msgstr "Souhrn několika seznamů pro soukromí a proti zneužívání."
+
+#: string;20278
+msgid "Unallocated space; must stay updated or it blocks new networks."
+msgstr "Nepřidělený adresní prostor; musí zůstat aktuální, jinak blokuje nové sítě."
+
+#: string;20279
+msgid "The address does not start with https://."
+msgstr "Adresa nezačíná na https://."
+
+#: string;20280
+msgid "The download did not end at an https:// address."
+msgstr "Stahování neskončilo na adrese https://."
+
+#: string;20281
+msgid "The server could not be reached."
+msgstr "Server není dostupný."
+
+#: string;20282
+msgid "The server answered with HTTP status %d."
+msgstr "Server odpověděl stavem HTTP %d."
+
+#: string;20283
+msgid "The download is larger than 64 MB."
+msgstr "Stahovaný soubor je větší než 64 MB."
+
+#: string;20284
+msgid "The content is larger than 256 MB once decompressed."
+msgstr "Obsah je po rozbalení větší než 256 MB."
+
+#: string;20285
+msgid "The compressed file could not be read."
+msgstr "Komprimovaný soubor nelze přečíst."
+
+#: string;20286
+msgid "The list holds no address range."
+msgstr "Seznam neobsahuje žádný rozsah adres."
+
+#: string;20287
+msgid "The list holds more than 2,000,000 ranges."
+msgstr "Seznam obsahuje více než 2 000 000 rozsahů."
+
+#: string;20288
+msgid "The list holds an IPv4 range of half the address space or more."
+msgstr "Seznam obsahuje rozsah IPv4 o velikosti poloviny adresního prostoru nebo více."
+
+#: string;20289
+msgid "The list's IPv4 ranges cover more than half the address space."
+msgstr "Rozsahy IPv4 seznamu pokrývají více než polovinu adresního prostoru."
+
+#: string;20290
+msgid "The list holds an IPv6 range that covers all of 2000::/3."
+msgstr "Seznam obsahuje rozsah IPv6, který pokrývá celé 2000::/3."
+
+#: string;20291
+msgid "The list could not be saved."
+msgstr "Seznam nelze uložit."
+
+#: string;20292
+msgid "IP list %s updated: %lu lines taken, %lu rejected, %lu ranges after merging."
+msgstr "Seznam IP %s aktualizován: %lu řádků přijato, %lu odmítnuto, %lu rozsahů po sloučení."
+
+#: string;20293
+msgid "IP list %s not updated: %s"
+msgstr "Seznam IP %s nebyl aktualizován: %s"
+
+#: string;20294
+msgid "%s: %Iu ranges imported, %Iu lines rejected."
+msgstr "%s: %Iu rozsahů importováno, %Iu řádků odmítnuto."
+
+#: string;20295
+msgid "%s could not be imported."
+msgstr "%s nelze importovat."
+
+#: string;20296
+msgid "%s could not be written."
+msgstr "%s nelze zapsat."
+
+#: string;20297
+msgid "%s could not be imported: %s"
+msgstr "%s nelze importovat: %s"
+
+#: string;20298
+msgid "The file is larger than 64 MB."
+msgstr "Soubor je větší než 64 MB."
+
+#: string;20299
+msgid "IP lists are downloaded over HTTPS only: the URL must start with https://."
+msgstr "Seznamy IP se stahují pouze přes HTTPS: URL musí začínat na https://."
+
+#: string;20300
+msgid "Remove the selected IP lists? Their downloaded copies are deleted too."
+msgstr "Odstranit vybrané seznamy IP? Smažou se i jejich stažené kopie."
+
+#: string;20301
+msgid "Imported"
+msgstr "Importováno"
+
+#: string;20302
+msgid "Failed: %s"
+msgstr "Chyba: %s"
+
+#: string;20303
+msgid "Not downloaded yet"
+msgstr "Zatím nestaženo"
+
+#: string;20304
+msgid "IP lists"
+msgstr "Seznamy IP"
+
+#: string;20305
+msgid "My rules"
+msgstr "Moje pravidla"
+
+#: string;20306
+msgid "Enter the https:// address of your own list, or clear its name."
+msgstr "Zadejte adresu https:// vlastního seznamu, nebo vymažte jeho název."
+
+#: string;20307
+msgid "Nothing was added: the lists you chose are already in your IP lists."
+msgstr "Nic nebylo přidáno: vybrané seznamy už mezi vašimi seznamy IP jsou."
+
+#: string;20308
+msgid "Tick a list, or enter the address of your own list."
+msgstr "Zaškrtněte seznam, nebo zadejte adresu vlastního seznamu."
+
+#: string;20309
+msgid "Already in your IP lists, so not added again: %s"
+msgstr "Už mezi vašimi seznamy IP, proto znovu nepřidáno: %s"
+
+#: string;20310
+msgid "The download was cut off before its end."
+msgstr "Stahování bylo přerušeno před dokončením."
 
 #: csettingsheet;control;4 cprofilemanagerdlg;control;4
 msgid "Apply"
@@ -7661,7 +7851,8 @@ msgstr "Bezpečné soubory:"
 
 #: clibrarysettingspage;control;18 clibrarysettingspage;control;22
 #: cmediasettingspage;control;7 cwebsettingspage;control;12
-#: cfilesourcespage;control;5 cdownloadgroupdlg;control;7
+#: cfilesourcespage;control;5 ciplistadddlg;control;18
+#: cdownloadgroupdlg;control;7
 msgid "_Add"
 msgstr "Přid_at"
 
@@ -8360,7 +8551,7 @@ msgid "Upload Queue Properties"
 msgstr "Vlastnosti fronty pro odesílání"
 
 #: cqueuepropertiesdlg;control;1 cgraphlistdlg;control;14
-#: cdownloadgroupdlg;control;12
+#: ciplistadddlg;control;13 cdownloadgroupdlg;control;12
 msgid "_Name:"
 msgstr "_Název:"
 
@@ -9257,6 +9448,26 @@ msgstr "h"
 msgid "m"
 msgstr "m"
 
+#: dialog;ciplistadddlg
+msgid "Add IP List"
+msgstr "Přidat seznam IP"
+
+#: ciplistadddlg;control;1
+msgid "Tick the lists to add. Each one is downloaded over HTTPS and updated once a day; none is added unless you tick it."
+msgstr "Zaškrtněte seznamy k přidání. Každý se stahuje přes HTTPS a aktualizuje jednou denně; nic se nepřidá, pokud to nezaškrtnete."
+
+#: ciplistadddlg;control;12
+msgid "Your own list"
+msgstr "Vlastní seznam"
+
+#: ciplistadddlg;control;15
+msgid "_URL:"
+msgstr "_URL:"
+
+#: ciplistadddlg;control;17
+msgid "Accepted formats: PeerGuardian (.p2p), eMule (ipfilter.dat), Gnucleus (.net), CIDR, plain addresses and Spamhaus DROP JSON, as text, gzip or zip. The URL must start with https://."
+msgstr "Podporované formáty: PeerGuardian (.p2p), eMule (ipfilter.dat), Gnucleus (.net), CIDR, prosté adresy a Spamhaus DROP JSON, jako text, gzip nebo zip. URL musí začínat na https://."
+
 #: dialog;csharemanagerdlg
 msgid "Shared Folder Manager"
 msgstr "Správce sdílených složek"
@@ -9878,6 +10089,18 @@ msgstr "Přednost"
 msgid "Comment"
 msgstr "Poznámka"
 
+#: column;list
+msgid "List"
+msgstr "Seznam"
+
+#: column;ranges
+msgid "Ranges"
+msgstr "Rozsahy"
+
+#: column;updated
+msgid "Updated"
+msgstr "Aktualizováno"
+
 #: column;lastseen
 msgid "LastSeen"
 msgstr "Naposledy prohlédnut"
@@ -10142,3 +10365,6 @@ msgstr "Další"
 
 #~ msgid "Saturday"
 #~ msgstr "Sobota"
+
+#~ msgid "Remove the selected security rules."
+#~ msgstr "Odstranit označené pravidlo zabezpečení."

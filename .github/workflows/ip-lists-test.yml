@@ -1,0 +1,50 @@
+name: IP lists test
+
+on:
+    pull_request:
+      paths:
+        - shareaza/ReservedAddresses.h
+        - shareaza/IPRangeSet.h
+        - shareaza/IPListParser.h
+        - shareaza/ShippedRules.h
+        - Data/DefaultSecurity.dat
+        - tests/ip-lists/**
+        - .github/workflows/ip-lists-test.yml
+    push:
+      branches:
+        - main
+        - 'prev-i/previ10-*'
+      paths:
+        - shareaza/ReservedAddresses.h
+        - shareaza/IPRangeSet.h
+        - shareaza/IPListParser.h
+        - shareaza/ShippedRules.h
+        - Data/DefaultSecurity.dat
+        - tests/ip-lists/**
+        - .github/workflows/ip-lists-test.yml
+
+permissions:
+    contents: read
+
+jobs:
+    ip_lists:
+        runs-on: ubuntu-latest
+        steps:
+        -   name: Checkout GIT sources
+            uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+            with:
+                persist-credentials: false
+                # check_shipped_guids.py reads Data/DefaultSecurity.dat as of ec36d5849
+                fetch-depth: 0
+
+        -   name: Build and run the reserved-address test
+            run: g++ -std=c++14 -Wall -Wextra -Werror -include tests/ip-lists/minmax_trap.h -I shareaza -o /tmp/rsv tests/ip-lists/test_reserved.cpp && /tmp/rsv
+
+        -   name: Build and run the range-set test
+            run: g++ -std=c++14 -Wall -Wextra -Werror -include tests/ip-lists/minmax_trap.h -I shareaza -o /tmp/rset tests/ip-lists/test_range_set.cpp && /tmp/rset
+
+        -   name: Build and run the parser test
+            run: g++ -std=c++14 -Wall -Wextra -Werror -include tests/ip-lists/minmax_trap.h -I shareaza -o /tmp/parser tests/ip-lists/test_parser.cpp && /tmp/parser
+
+        -   name: Check the shipped-rule GUID table against the old rules file
+            run: python3 -I tests/ip-lists/check_shipped_guids.py
