@@ -4689,6 +4689,10 @@ msgstr "Nenhuma versão nova do shareaza detectada."
 msgid "Download Properties"
 msgstr "Propriedades do Download"
 
+#: string;8015
+msgid "Release notes"
+msgstr "Notas de versão"
+
 #: string;8060
 msgid "Hub/Ultrapeer mode with %lu neighbour(s). %s in local library."
 msgstr "Modo Hub/Ultrapeer com %lu vizinho(s). %s na sua biblioteca local."
@@ -5347,7 +5351,8 @@ msgid "Hub neighbour %s won't accept us as a hub, closing connection."
 msgstr "O Hub vizinho %s não nos aceitará como um hub, fechando conexão."
 
 #: string;16153
-msgid "Connecting neighbour %s falling back to shielded leaf mode."
+#, fuzzy
+msgid "Accepted neighbour %s as a shielded leaf."
 msgstr "O Vizinho conectando %s está voltando ao modo de leaf node protegido."
 
 #: string;16154

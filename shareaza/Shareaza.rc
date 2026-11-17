@@ -3509,6 +3509,7 @@ BEGIN
     IDS_VIEW_MODE_CONFIRM   "Changing view will close any windows you have open. Would you like to change now?"
     IDS_UPGRADE_NO_NEW      "No new Shareaza version detected."
     IDS_DOWNLOAD_PROPERTIES "Download Properties"
+    IDS_HOME_RELEASE_NOTES  "Release notes"
 END
 
 STRINGTABLE 
@@ -3777,7 +3778,7 @@ BEGIN
     IDS_HANDSHAKE_IAMLEAF   "Refusing connection from %s because this is a shielded leaf node."
     IDS_HANDSHAKE_CANTBEPEER 
                             "Hub neighbour %s won't accept us as a hub, closing connection."
-    IDS_HANDSHAKE_BACK2LEAF "Connecting neighbour %s falling back to shielded leaf mode."
+    IDS_HANDSHAKE_BACK2LEAF "Accepted neighbour %s as a shielded leaf."
     IDS_HANDSHAKE_GOTPEER   "Hub connection established, closing peer connections."
     IDS_HANDSHAKE_GOTLEAF   "Acting as a hub for leaf neighbour %s."
     IDS_HANDSHAKE_NOULTRAPEER 

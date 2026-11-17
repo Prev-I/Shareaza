@@ -4757,6 +4757,10 @@ msgstr "הגירסה החדשה Shareaza לא זוהה."
 msgid "Download Properties"
 msgstr "הורד נכסים"
 
+#: string;8015
+msgid "Release notes"
+msgstr "הערות מהדורה"
+
 #: string;8060
 msgid "Hub/Ultrapeer mode with %lu neighbour(s). %s in local library."
 msgstr "‪‏‪‏מצב‎ ULTRAPEER/‏מוקד‎ ‏עם‎ %lu ‏שכנים‎: , %s ‏מקומית‎ ‏בספריה"
@@ -5417,7 +5421,8 @@ msgid "Hub neighbour %s won't accept us as a hub, closing connection."
 msgstr "‪Hub neighbour %s won't accept us as a hub, closing connection."
 
 #: string;16153
-msgid "Connecting neighbour %s falling back to shielded leaf mode."
+#, fuzzy
+msgid "Accepted neighbour %s as a shielded leaf."
 msgstr "‪Connecting neighbour %s falling back to shielded leaf mode."
 
 #: string;16154

@@ -4762,6 +4762,10 @@ msgstr "Δεν βρέθηκε νεότερη έκδοση Shareaza."
 msgid "Download Properties"
 msgstr "Προχωρημένη Διόρθωση Λήψης"
 
+#: string;8015
+msgid "Release notes"
+msgstr "Σημειώσεις έκδοσης"
+
 #: string;8060
 msgid "Hub/Ultrapeer mode with %lu neighbour(s). %s in local library."
 msgstr "Λειτουργία Κόμβου/Ultrapeer με %lu γείτονες. %s στην τοπική Βιβλιοθήκη."
@@ -5422,7 +5426,8 @@ msgid "Hub neighbour %s won't accept us as a hub, closing connection."
 msgstr "Κλείσιμο σύνδεσης με γειτονικό κόμβο %s, επειδή δεν μας αποδέχεται ως κόμβο."
 
 #: string;16153
-msgid "Connecting neighbour %s falling back to shielded leaf mode."
+#, fuzzy
+msgid "Accepted neighbour %s as a shielded leaf."
 msgstr "Υπαναχώρηση σε θωρακισμένο του συνδεόμενου κόμβου %s."
 
 #: string;16154

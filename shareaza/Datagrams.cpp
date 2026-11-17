@@ -640,8 +640,8 @@ BOOL CDatagrams::Send(const SOCKADDR_IN6* pHost, CPacket* pPacket, BOOL bRelease
 #ifdef DEBUG_UDP
 	theApp.Message( MSG_DEBUG, _T("UDP: Queued SGP (#%i) x%i for %s:%lu"),
 		pDG->m_nSequence, pDG->m_nCount,
-		(LPCTSTR)CString( inet_ntoa( pDG->m_pHost.sin_addr ) ),
-		htons( pDG->m_pHost.sin_port ) );
+		(LPCTSTR)CString( IPv6ToString( &pDG->m_pHostIPv6.sin6_addr ) ),
+		htons( pDG->m_pHostIPv6.sin6_port ) );
 #endif
 
 	pPacket->SmartDump( pHost, TRUE, TRUE );
@@ -809,8 +809,10 @@ BOOL CDatagrams::TryWrite()
 				SGP_HEADER* pTemp = (SGP_HEADER*)pPacket;
 				theApp.Message( MSG_DEBUG, _T("UDP: Sending (#%i) %i of %i to %s:%lu"),
 					pDG->m_nSequence, pTemp->nPart, pTemp->nCount,
-					(LPCTSTR)CString( inet_ntoa( pDG->m_pHost.sin_addr ) ),
-					htons( pDG->m_pHost.sin_port ) );
+					(LPCTSTR)( pDG->IsIPv6DG()
+						? IPv6ToString( &pDG->m_pHostIPv6.sin6_addr )
+						: CString( inet_ntoa( pDG->m_pHost.sin_addr ) ) ),
+					htons( pDG->IsIPv6DG() ? pDG->m_pHostIPv6.sin6_port : pDG->m_pHost.sin_port ) );
 #endif
 				if( ! pDG->m_bAck ) Remove( pDG );
 
@@ -867,6 +869,10 @@ void CDatagrams::ManageOutput()
 
 void CDatagrams::Remove(CDatagramOut* pDG)
 {
+	// A datagram on the free list has no hash link (m_pPrevHash is NULL)
+	ASSERT( pDG->m_pPrevHash != NULL );
+	if ( pDG->m_pPrevHash == NULL ) return;
+
 	if ( pDG->m_pBuffer )
 	{
 		pDG->m_pBuffer->m_pNext = m_pBufferFree;
@@ -878,6 +884,7 @@ void CDatagrams::Remove(CDatagramOut* pDG)
 
 	if ( pDG->m_pNextHash ) pDG->m_pNextHash->m_pPrevHash = pDG->m_pPrevHash;
 	*(pDG->m_pPrevHash) = pDG->m_pNextHash;
+	pDG->m_pPrevHash = NULL;
 
 	if ( pDG->m_pNextTime )
 		pDG->m_pNextTime->m_pPrevTime = pDG->m_pPrevTime;
@@ -1404,7 +1411,7 @@ BOOL CDatagrams::OnReceiveSGP(const SOCKADDR_IN6* pHost, const SGP_HEADER* pHead
 #ifdef DEBUG_UDP
 	theApp.Message( MSG_DEBUG, _T("UDP: Received SGP (#%i) %i of %i from %s"),
 		pHeader->nSequence, pHeader->nPart, pHeader->nCount,
-		(LPCTSTR)CString( inet_ntoa( pHost->sin_addr ) ) );
+		(LPCTSTR)CString( IPv6ToString( &pHost->sin6_addr ) ) );
 #endif
 
 	m_nInFrags++;
@@ -1582,7 +1589,7 @@ BOOL CDatagrams::OnAcknowledgeSGP(const SOCKADDR_IN6* pHost, const SGP_HEADER* p
 {
 #ifdef DEBUG_UDP
 	theApp.Message( MSG_DEBUG, _T("UDP: Received SGP ack (#%i) %i from %s"),
-		pHeader->nSequence, pHeader->nPart, (LPCTSTR)CString( inet_ntoa( pHost->sin_addr ) ) );
+		pHeader->nSequence, pHeader->nPart, (LPCTSTR)CString( IPv6ToString( &pHost->sin6_addr ) ) );
 #endif
 
 	BYTE nHash	= BYTE( ( pHost->sin6_addr.u.Byte[0]

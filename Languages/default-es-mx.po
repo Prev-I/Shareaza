@@ -4747,6 +4747,10 @@ msgstr "No hay nueva versión de Shareaza detecta."
 msgid "Download Properties"
 msgstr "Descargar Propiedades"
 
+#: string;8015
+msgid "Release notes"
+msgstr "Notas de la versión"
+
 #: string;8060
 msgid "Hub/Ultrapeer mode with %lu neighbour(s). %s in local library."
 msgstr "Modo Hub %lu en red(s).  %s en Mi Colección."
@@ -5407,7 +5411,8 @@ msgid "Hub neighbour %s won't accept us as a hub, closing connection."
 msgstr "El Hub vecino %s no va a aceptarnos como hub, cerrando conexión."
 
 #: string;16153
-msgid "Connecting neighbour %s falling back to shielded leaf mode."
+#, fuzzy
+msgid "Accepted neighbour %s as a shielded leaf."
 msgstr "Conectando a vecino %s pero es un nodo leaf ."
 
 #: string;16154

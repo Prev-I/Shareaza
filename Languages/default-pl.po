@@ -4689,6 +4689,10 @@ msgstr "Brak nowszej wersji Shareazy."
 msgid "Download Properties"
 msgstr "Właściwości pobierania"
 
+#: string;8015
+msgid "Release notes"
+msgstr "Informacje o wydaniu"
+
 #: string;8060
 msgid "Hub/Ultrapeer mode with %lu neighbour(s). %s in local library."
 msgstr "Tryb Hub/Ultrapeer z %lu sąsiadem(ami). %s w lokalnej bibliotece."
@@ -5346,7 +5350,8 @@ msgid "Hub neighbour %s won't accept us as a hub, closing connection."
 msgstr "Hub neighbour %s won't accept us as a hub, closing connection."
 
 #: string;16153
-msgid "Connecting neighbour %s falling back to shielded leaf mode."
+#, fuzzy
+msgid "Accepted neighbour %s as a shielded leaf."
 msgstr "Connecting neighbour %s falling back to shielded leaf mode."
 
 #: string;16154

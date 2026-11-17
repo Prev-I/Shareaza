@@ -4764,6 +4764,10 @@ msgstr "Nuk diktohet asnjë verion i ri i Shareaza-s."
 msgid "Download Properties"
 msgstr "Vetitë e Shkarkimit"
 
+#: string;8015
+msgid "Release notes"
+msgstr "Shënime të botimit"
+
 #: string;8060
 msgid "Hub/Ultrapeer mode with %lu neighbour(s). %s in local library."
 msgstr "Mënyrë Nyjë/Ultrapikë me %lu hoste.  %s në librarinë lokale."
@@ -5424,7 +5428,8 @@ msgid "Hub neighbour %s won't accept us as a hub, closing connection."
 msgstr "Fqinji nyjë %s nuk na pranon si nyjë, mbyllje e lidhjes."
 
 #: string;16153
-msgid "Connecting neighbour %s falling back to shielded leaf mode."
+#, fuzzy
+msgid "Accepted neighbour %s as a shielded leaf."
 msgstr "Fqinji në lidhje %s kthehet pas në gjethe nyjë me mburojë."
 
 #: string;16154

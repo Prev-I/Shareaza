@@ -4759,6 +4759,10 @@ msgstr "ا Shareaza النسخة الجديدة المكتشفة"
 msgid "Download Properties"
 msgstr "خصائص التحميل"
 
+#: string;8015
+msgid "Release notes"
+msgstr "ملاحظات الإصدار"
+
 #: string;8060
 msgid "Hub/Ultrapeer mode with %lu neighbour(s). %s in local library."
 msgstr "نمط Hub/Ultrapeer مع جوار  %lu . %s في المكتبة المحلية"
@@ -5419,7 +5423,8 @@ msgid "Hub neighbour %s won't accept us as a hub, closing connection."
 msgstr "جوار المحور %s لن يقبلنا كمحور ، إغلاق الإتصال"
 
 #: string;16153
-msgid "Connecting neighbour %s falling back to shielded leaf mode."
+#, fuzzy
+msgid "Accepted neighbour %s as a shielded leaf."
 msgstr "الإتصال بالجوار %s تراجع إلى نمط التفرع المحمي"
 
 #: string;16154

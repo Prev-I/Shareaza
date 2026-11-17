@@ -4661,6 +4661,10 @@ msgstr "没有检测到 Shareaza 的新版本"
 msgid "Download Properties"
 msgstr "下载属性"
 
+#: string;8015
+msgid "Release notes"
+msgstr "发行说明"
+
 #: string;8060
 msgid "Hub/Ultrapeer mode with %lu neighbour(s). %s in local library."
 msgstr "集端/超对等模式有 %lu 个邻居。%s 处于本地收藏中。"
@@ -5319,7 +5323,8 @@ msgid "Hub neighbour %s won't accept us as a hub, closing connection."
 msgstr "集端网络的 %s 主机不认可我们为集端，正在关闭连接。"
 
 #: string;16153
-msgid "Connecting neighbour %s falling back to shielded leaf mode."
+#, fuzzy
+msgid "Accepted neighbour %s as a shielded leaf."
 msgstr "到邻居 %s 主机的连接失败使得退回到屏蔽子端模式。"
 
 #: string;16154

@@ -4753,6 +4753,10 @@ msgstr "Žádné nové Shareaza verze zjištěna."
 msgid "Download Properties"
 msgstr "Stáhnout Vlastnosti"
 
+#: string;8015
+msgid "Release notes"
+msgstr "Poznámky k vydání"
+
 #: string;8060
 msgid "Hub/Ultrapeer mode with %lu neighbour(s). %s in local library."
 msgstr "Režim Hub/Ultrapeer s uživatelem %lu. %s v místní knihovně."
@@ -5413,7 +5417,8 @@ msgid "Hub neighbour %s won't accept us as a hub, closing connection."
 msgstr "Sousední uzel %s nás nebude akceptovat jako uzel, spojení ukonečno."
 
 #: string;16153
-msgid "Connecting neighbour %s falling back to shielded leaf mode."
+#, fuzzy
+msgid "Accepted neighbour %s as a shielded leaf."
 msgstr "Sousední spojení %s vypadlo zpět do chráněného režimu."
 
 #: string;16154

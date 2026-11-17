@@ -165,7 +165,7 @@ void CHomeViewCtrl::UpdateReleaseNotesLink()
 	m_pDocument.GetNext( posAfter );	// now the element after the upgrade link, or NULL
 
 	m_peUpgradeNotesBreak = m_pDocument.Add( retNewline, pBreakBefore ? (LPCTSTR)pBreakBefore->m_sText : _T("6"), NULL, 0, GROUP_UPGRADE, posAfter );
-	m_peUpgradeNotes = m_pDocument.Add( retLink, _T("Release notes"), strURL, 0, GROUP_UPGRADE, posAfter );
+	m_peUpgradeNotes = m_pDocument.Add( retLink, LoadString( IDS_HOME_RELEASE_NOTES ), strURL, 0, GROUP_UPGRADE, posAfter );
 }
 
 void CHomeViewCtrl::Update()

@@ -71,6 +71,7 @@ void CDatagramOut::Create(const SOCKADDR_IN* pHost, CG2Packet* pPacket, WORD nSe
 	ASSERT( m_pBuffer == NULL );
 
 	m_pHost		= *pHost;
+	ZeroMemory( &m_pHostIPv6, sizeof( m_pHostIPv6 ) );
 	m_nSequence	= nSequence;
 	m_pBuffer	= pBuffer;
 
@@ -119,6 +120,7 @@ void CDatagramOut::Create(const SOCKADDR_IN6* pHost, CG2Packet* pPacket, WORD nS
 	ASSERT( m_pBuffer == NULL );
 
 	m_pHostIPv6	= *pHost;
+	ZeroMemory( &m_pHost, sizeof( m_pHost ) );
 	m_nSequence	= nSequence;
 	m_pBuffer	= pBuffer;
 
