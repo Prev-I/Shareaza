@@ -31,6 +31,11 @@ jobs:
       with:
         fetch-depth: 0
 
+    - name: Check resource and installer encoding
+      # Both files are compiled as Windows-1252. Re-saving one as UTF-8 turns
+      # the copyright sign and non-breaking spaces into U+FFFD.
+      run: python tests/encoding/check-cp1252.py shareaza/Shareaza.rc setup/scripts/main.iss
+
     - name: Install GitVersion
       uses: gittools/actions/gitversion/setup@v1
       with:

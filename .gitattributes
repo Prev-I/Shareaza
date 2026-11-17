@@ -20,3 +20,7 @@
 *.PDF	 diff=astextplain
 *.rtf	 diff=astextplain
 *.RTF	 diff=astextplain
+
+# Compiled as Windows-1252: tells gitk and git gui how to show them
+shareaza/Shareaza.rc   encoding=cp1252
+setup/scripts/main.iss encoding=cp1252

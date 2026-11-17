@@ -1,4 +1,6 @@
 // Microsoft Visual C++ generated resource script.
+// Encoding: Windows-1252, no BOM (#pragma code_page(1252)). Save it in that encoding; an editor
+// that converts it to UTF-8 destroys the non-ASCII characters (CI checks).
 //
 #include "resource.h"
 
@@ -290,7 +292,7 @@ BEGIN
             VALUE "FileDescription", "Shareaza Ultimate File Sharing"
             VALUE "FileVersion", "2.7.11.4"
             VALUE "InternalName", "Shareaza"
-            VALUE "LegalCopyright", "Copyright ï¿½ Shareaza Development Team, 2002-2017. All rights reserved.\\nCopyright ï¿½ Salvatore Ansani, 2023-2024. All rights reserved."
+            VALUE "LegalCopyright", "Copyright © Shareaza Development Team 2002-2017, ivan386 2013-2019, Salvatore Ansani 2022-2024, Claudio Previtali (Prev-I) 2026"
             VALUE "OriginalFilename", "Shareaza.exe"
             VALUE "ProductName", "Shareaza"
             VALUE "ProductVersion", "2.7.11.4"
@@ -614,19 +616,21 @@ BEGIN
     COMBOBOX        IDC_TRAY_MINIMISE,180,192,85,55,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
 END
 
-IDD_ABOUT DIALOGEX 0, 0, 293, 161
+IDD_ABOUT DIALOGEX 0, 0, 293, 179
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "About Shareaza"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
     LTEXT           "Shareaza File Sharing Client ",IDC_TITLE,7,15,279,10,SS_CENTERIMAGE
-    LTEXT           "Copyright ï¿½ Shareaza Development Team, 2002-",IDC_COPYRIGHT,7,25,279,12
-    LTEXT           "Copyright ï¿½ Salvatore Ansani, 2022-2023",IDC_COPYRIGHT, 7, 33, 279, 12
-    LTEXT           "Shareaza is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.",IDC_STATIC,7,45,279,24
-    LTEXT           "Logo by Kid at pakkeimak.com",IDC_STATIC,7,75,279,12
-    LTEXT           "http://github.com/ansani/shareaza",IDC_WEB,7,112,279,10
-    DEFPUSHBUTTON   "OK",IDOK,226,138,60,16
-    LTEXT           "This product includes GeoLite data created by MaxMind, available from http://maxmind.com/",IDC_STATIC,7,90,279,18
+    LTEXT           "Copyright © Shareaza Development Team, 2002-2017",IDC_STATIC,7,27,279,10
+    LTEXT           "Copyright © ivan386, 2013-2019",IDC_STATIC,7,37,279,10
+    LTEXT           "Copyright © Salvatore Ansani, 2022-2024",IDC_STATIC,7,47,279,10
+    LTEXT           "Copyright © Claudio Previtali (Prev-I), 2026",IDC_STATIC,7,57,279,10
+    LTEXT           "Shareaza is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.",IDC_STATIC,7,71,279,28
+    LTEXT           "Logo by Kid at pakkeimak.com",IDC_STATIC,7,103,279,10
+    LTEXT           "This product includes GeoLite data created by MaxMind, available from http://maxmind.com/",IDC_STATIC,7,116,279,20
+    LTEXT           "https://github.com/Prev-I/Shareaza",IDC_WEB,7,139,279,10
+    DEFPUSHBUTTON   "OK",IDOK,226,156,60,16
 END
 
 IDD_GRAPH_LIST DIALOGEX 0, 0, 247, 230
@@ -3596,7 +3600,7 @@ BEGIN
     IDS_SEARCH_PAD_TYPE     "What type of file is it?"
     IDS_SEARCH_PAD_CLEAR_HISTORY "(Clear Search History)"
     IDS_SEARCH_PANEL_INPUT_4 "File size must be"
-    IDS_SEARCH_PANEL_INPUT_5 "ï¿½to"
+    IDS_SEARCH_PANEL_INPUT_5 " to"
 END
 
 STRINGTABLE 
@@ -4238,7 +4242,7 @@ BEGIN
     IDS_MEDIA_PARTIAL_RENDER 
                             "Part of this file could not be played, you may need to download additional codecs."
     IDS_MEDIA_EMPTY         "There is no file playing. Double-click a media file in your library to play it."
-    IDS_MEDIA_TITLE         "S ï¿½ ï¿½ H ï¿½ ï¿½ A ï¿½ ï¿½ R ï¿½ ï¿½ E ï¿½ ï¿½ A ï¿½ ï¿½ Z ï¿½ ï¿½ A ï¿½ ï¿½ ï¿½ ï¿½ ï¿½ M ï¿½ ï¿½ E ï¿½ ï¿½ D ï¿½ ï¿½ I ï¿½ ï¿½ A ï¿½ ï¿½ ï¿½ ï¿½ ï¿½ S ï¿½ ï¿½ Y ï¿½ ï¿½ S ï¿½ ï¿½ T ï¿½ ï¿½ E ï¿½ ï¿½ M"
+    IDS_MEDIA_TITLE         "S     H     A     R     E     A     Z     A           M     E     D     I     A           S     Y     S     T     E     M"
     IDS_MEDIA_PLAYLIST      "P L A Y L I S T"
 END
 
