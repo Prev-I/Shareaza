@@ -4272,8 +4272,8 @@ msgid "Reset the hit counts on the selected rules."
 msgstr "A kiválasztott biztonsági szabály számlálójának nullázása."
 
 #: message;id_security_update_lists
-msgid "Download the selected IP lists now, or all of them when none is selected."
-msgstr "A kijelölt IP-listák letöltése most, vagy mindegyiké, ha egy sincs kijelölve."
+msgid "Download the selected IP lists now, or every enabled list when none is selected."
+msgstr "A kijelölt IP-listák letöltése most, vagy az összes engedélyezett listáé, ha egy sincs kijelölve."
 
 #: message;id_system_clear
 msgid "Clear the status log."
@@ -7673,6 +7673,10 @@ msgstr "Jelölj be egy listát, vagy add meg a saját listád címét."
 #: string;20309
 msgid "Already in your IP lists, so not added again: %s"
 msgstr "Már szerepel az IP-listáid között, ezért nem lett újra hozzáadva: %s"
+
+#: string;20310
+msgid "The download was cut off before its end."
+msgstr "A letöltés megszakadt, mielőtt véget ért volna."
 
 #: csettingsheet;control;4 cprofilemanagerdlg;control;4
 msgid "Apply"

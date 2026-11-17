@@ -2595,7 +2595,7 @@
 		<tip id="ID_SECURITY_POLICY_DENY" message="使用默认的安全策略拒绝主机。"/>
 		<tip id="ID_SECURITY_REMOVE" message="移除选中的规则或 IP 列表。"/>
 		<tip id="ID_SECURITY_RESET" message="重置选定规则的命中计数器。"/>
-		<tip id="ID_SECURITY_UPDATE_LISTS" message="立即下载选中的 IP 列表；未选中任何列表时下载全部。"/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="立即下载选中的 IP 列表；未选中任何列表时下载所有已启用的列表。"/>
 		<tip id="ID_SYSTEM_CLEAR" message="清除状态日志。"/>
 		<tip id="ID_SYSTEM_COPY" message="复制选中的状态日志。"/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="记录每行的时间戳。"/>
@@ -3477,6 +3477,7 @@
 		<string id="20307" value="未添加任何列表：所选列表已在你的 IP 列表中。"/>
 		<string id="20308" value="请勾选一个列表，或输入你自己列表的地址。"/>
 		<string id="20309" value="已在你的 IP 列表中，因此未重复添加：%s"/>
+		<string id="20310" value="下载在完成前被中断。"/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->

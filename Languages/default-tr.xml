@@ -2603,7 +2603,7 @@
 		<tip id="ID_SECURITY_POLICY_DENY" message="Varsayılan güvenlik politikasını tüm makineleri reddedecek şekilde ayarla."/>
 		<tip id="ID_SECURITY_REMOVE" message="Seçili kuralları veya IP listelerini kaldırın."/>
 		<tip id="ID_SECURITY_RESET" message="Seçilen güvenlik kurallarında ulaşılan sayıları sıfırla."/>
-		<tip id="ID_SECURITY_UPDATE_LISTS" message="Seçili IP listelerini şimdi indirin; hiçbiri seçili değilse hepsini indirin."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="Seçili IP listelerini şimdi indirin; hiçbiri seçili değilse etkin listelerin hepsini indirin."/>
 		<tip id="ID_SYSTEM_CLEAR" message="Durum günlüğünü temizle."/>
 		<tip id="ID_SYSTEM_COPY" message="Durum kütüğünün seçilen satırlarını kopyala."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="Her hat için zamanı kaydet."/>
@@ -3485,6 +3485,7 @@
 		<string id="20307" value="Hiçbir şey eklenmedi: seçtiğiniz listeler zaten IP listelerinizde."/>
 		<string id="20308" value="Bir liste işaretleyin veya kendi listenizin adresini girin."/>
 		<string id="20309" value="Zaten IP listelerinizde olduğundan yeniden eklenmedi: %s"/>
+		<string id="20310" value="İndirme, sonuna gelmeden kesildi."/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->

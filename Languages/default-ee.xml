@@ -2616,7 +2616,7 @@
 		<tip id="ID_SECURITY_POLICY_DENY" message="Keela vaikimisi reeglina kõik serverid."/>
 		<tip id="ID_SECURITY_REMOVE" message="Eemalda valitud reeglid või IP-loendid."/>
 		<tip id="ID_SECURITY_RESET" message="Nulli löögilugeja valitud reeglil."/>
-		<tip id="ID_SECURITY_UPDATE_LISTS" message="Laadi valitud IP-loendid kohe alla või kõik, kui ühtki pole valitud."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="Laadi valitud IP-loendid kohe alla või kõik lubatud loendid, kui ühtki pole valitud."/>
 		<tip id="ID_SYSTEM_CLEAR" message="Puhasta oleku logi."/>
 		<tip id="ID_SYSTEM_COPY" message="Copy selected line(s) of status log."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="Salvesta iga rea jaoks ajamärk."/>
@@ -3498,6 +3498,7 @@
 		<string id="20307" value="Midagi ei lisatud: valitud loendid on juba sinu IP-loendites."/>
 		<string id="20308" value="Märgi loend või sisesta oma loendi aadress."/>
 		<string id="20309" value="Juba sinu IP-loendites, seega uuesti ei lisatud: %s"/>
+		<string id="20310" value="Allalaadimine katkes enne lõppu."/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->

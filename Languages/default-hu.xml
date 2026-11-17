@@ -2615,7 +2615,7 @@
 		<tip id="ID_SECURITY_POLICY_DENY" message="Beállítja az alapértelmezett biztonsági szabályt, ami mindenhol tiltva van."/>
 		<tip id="ID_SECURITY_REMOVE" message="A kijelölt szabályok vagy IP-listák eltávolítása."/>
 		<tip id="ID_SECURITY_RESET" message="A kiválasztott biztonsági szabály számlálójának nullázása."/>
-		<tip id="ID_SECURITY_UPDATE_LISTS" message="A kijelölt IP-listák letöltése most, vagy mindegyiké, ha egy sincs kijelölve."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="A kijelölt IP-listák letöltése most, vagy az összes engedélyezett listáé, ha egy sincs kijelölve."/>
 		<tip id="ID_SYSTEM_CLEAR" message="A napló törlése."/>
 		<tip id="ID_SYSTEM_COPY" message="Copy selected line(s) of status log."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="Minden sorhoz időbélyeget ad."/>
@@ -3497,6 +3497,7 @@
 		<string id="20307" value="Semmi sem került hozzáadásra: a választott listák már szerepelnek az IP-listáid között."/>
 		<string id="20308" value="Jelölj be egy listát, vagy add meg a saját listád címét."/>
 		<string id="20309" value="Már szerepel az IP-listáid között, ezért nem lett újra hozzáadva: %s"/>
+		<string id="20310" value="A letöltés megszakadt, mielőtt véget ért volna."/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->

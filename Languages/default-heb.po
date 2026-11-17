@@ -4306,8 +4306,8 @@ msgid "Reset the hit counts on the selected rules."
 msgstr "אפס את המונה לחוקי אבטחה הנבחרים"
 
 #: message;id_security_update_lists
-msgid "Download the selected IP lists now, or all of them when none is selected."
-msgstr "הורד עכשיו את רשימות ה-IP שנבחרו, או את כולן אם לא נבחרה אף אחת."
+msgid "Download the selected IP lists now, or every enabled list when none is selected."
+msgstr "הורד עכשיו את רשימות ה-IP שנבחרו, או את כל הרשימות הפעילות אם לא נבחרה אף אחת."
 
 #: message;id_system_clear
 msgid "Clear the status log."
@@ -7707,6 +7707,10 @@ msgstr "סמן רשימה, או הזן את הכתובת של רשימה משל�
 #: string;20309
 msgid "Already in your IP lists, so not added again: %s"
 msgstr "כבר נמצאות ברשימות ה-IP שלך, ולכן לא נוספו שוב: %s"
+
+#: string;20310
+msgid "The download was cut off before its end."
+msgstr "ההורדה נקטעה לפני סופה."
 
 #: csettingsheet;control;4 cprofilemanagerdlg;control;4
 msgid "Apply"

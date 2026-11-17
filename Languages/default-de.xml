@@ -2610,7 +2610,7 @@
 		<tip id="ID_SECURITY_POLICY_DENY" message="Standardverhalten auf &quot;Alle Hosts abweisen&quot; setzen."/>
 		<tip id="ID_SECURITY_REMOVE" message="Die markierten Regeln oder IP-Listen entfernen."/>
 		<tip id="ID_SECURITY_RESET" message="Die Trefferzähler der markierte(n) Sicherheitsregel(n) zurücksetzen."/>
-		<tip id="ID_SECURITY_UPDATE_LISTS" message="Die markierten IP-Listen jetzt herunterladen, oder alle, wenn keine markiert ist."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="Die markierten IP-Listen jetzt herunterladen, oder alle aktivierten, wenn keine markiert ist."/>
 		<tip id="ID_SYSTEM_CLEAR" message="Den Konsolenpuffer leeren."/>
 		<tip id="ID_SYSTEM_COPY" message="Die kopierte(n) Zeile(n) des Status Logs kopieren."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="Für jede Zeile einen Zeitstempel anzeigen."/>
@@ -3492,6 +3492,7 @@
 		<string id="20307" value="Nichts hinzugefügt: Die gewählten Listen sind bereits in Ihren IP-Listen."/>
 		<string id="20308" value="Kreuzen Sie eine Liste an oder geben Sie die Adresse Ihrer eigenen Liste ein."/>
 		<string id="20309" value="Bereits in Ihren IP-Listen, daher nicht erneut hinzugefügt: %s"/>
+		<string id="20310" value="Der Download wurde vor seinem Ende abgebrochen."/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->

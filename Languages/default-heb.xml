@@ -2616,7 +2616,7 @@
 		<tip id="ID_SECURITY_POLICY_DENY" message="Set the default security policy to deny all hosts."/>
 		<tip id="ID_SECURITY_REMOVE" message="הסר את החוקים או רשימות ה-IP שנבחרו."/>
 		<tip id="ID_SECURITY_RESET" message="אפס את המונה לחוקי אבטחה הנבחרים"/>
-		<tip id="ID_SECURITY_UPDATE_LISTS" message="הורד עכשיו את רשימות ה-IP שנבחרו, או את כולן אם לא נבחרה אף אחת."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="הורד עכשיו את רשימות ה-IP שנבחרו, או את כל הרשימות הפעילות אם לא נבחרה אף אחת."/>
 		<tip id="ID_SYSTEM_CLEAR" message="נקה את רישום המצב"/>
 		<tip id="ID_SYSTEM_COPY" message="Copy selected line(s) of status log."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="הצג זמן/שעה לכל שורה"/>
@@ -3498,6 +3498,7 @@
 		<string id="20307" value="לא נוסף דבר: הרשימות שבחרת כבר נמצאות ברשימות ה-IP שלך."/>
 		<string id="20308" value="סמן רשימה, או הזן את הכתובת של רשימה משלך."/>
 		<string id="20309" value="כבר נמצאות ברשימות ה-IP שלך, ולכן לא נוספו שוב: %s"/>
+		<string id="20310" value="ההורדה נקטעה לפני סופה."/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->

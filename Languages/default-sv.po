@@ -4301,8 +4301,8 @@ msgid "Reset the hit counts on the selected rules."
 msgstr "Återställ träffräknaren för de valda reglerna."
 
 #: message;id_security_update_lists
-msgid "Download the selected IP lists now, or all of them when none is selected."
-msgstr "Hämta de markerade IP-listorna nu, eller alla om ingen är markerad."
+msgid "Download the selected IP lists now, or every enabled list when none is selected."
+msgstr "Hämta de markerade IP-listorna nu, eller alla aktiverade listor om ingen är markerad."
 
 #: message;id_system_clear
 msgid "Clear the status log."
@@ -7702,6 +7702,10 @@ msgstr "Kryssa för en lista, eller ange adressen till din egen lista."
 #: string;20309
 msgid "Already in your IP lists, so not added again: %s"
 msgstr "Finns redan bland dina IP-listor, så de lades inte till igen: %s"
+
+#: string;20310
+msgid "The download was cut off before its end."
+msgstr "Hämtningen avbröts innan den var klar."
 
 #: csettingsheet;control;4 cprofilemanagerdlg;control;4
 msgid "Apply"

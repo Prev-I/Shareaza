@@ -2615,7 +2615,7 @@
 		<tip id="ID_SECURITY_POLICY_DENY" message="Ρύθμιση προεπιλεγμένης πολιτικής ασφαλείας σε άρνηση όλων των hosts."/>
 		<tip id="ID_SECURITY_REMOVE" message="Αφαίρεση των επιλεγμένων κανόνων ή λιστών IP."/>
 		<tip id="ID_SECURITY_RESET" message="Μηδενισμός των μετρητών εφαρμογής των επιλεγμένων κανόνων."/>
-		<tip id="ID_SECURITY_UPDATE_LISTS" message="Λήψη των επιλεγμένων λιστών IP τώρα, ή όλων αν δεν έχει επιλεγεί καμία."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="Λήψη των επιλεγμένων λιστών IP τώρα, ή όλων των ενεργών λιστών αν δεν έχει επιλεγεί καμία."/>
 		<tip id="ID_SYSTEM_CLEAR" message="Καθαρισμός του ιστορικού κατάστασης."/>
 		<tip id="ID_SYSTEM_COPY" message="Copy selected line(s) of status log."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="Καταγραφή χρονικής επισήμανσης σε κάθε γραμμή."/>
@@ -3497,6 +3497,7 @@
 		<string id="20307" value="Δεν προστέθηκε τίποτα: οι λίστες που επιλέξατε υπάρχουν ήδη στις λίστες IP σας."/>
 		<string id="20308" value="Επιλέξτε μια λίστα, ή εισαγάγετε τη διεύθυνση της δικής σας λίστας."/>
 		<string id="20309" value="Υπάρχουν ήδη στις λίστες IP σας, οπότε δεν προστέθηκαν ξανά: %s"/>
+		<string id="20310" value="Η λήψη διακόπηκε πριν ολοκληρωθεί."/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->

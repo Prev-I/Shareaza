@@ -2615,7 +2615,7 @@
 		<tip id="ID_SECURITY_POLICY_DENY" message="Ustaw domyślnie domyślnie politykę bezpieczeństwa, aby zabraniać łączenia z wszystkimi hostami."/>
 		<tip id="ID_SECURITY_REMOVE" message="Usuń zaznaczone reguły lub listy IP."/>
 		<tip id="ID_SECURITY_RESET" message="Resetuj licznik użycia zaznaczonej reguły."/>
-		<tip id="ID_SECURITY_UPDATE_LISTS" message="Pobierz teraz zaznaczone listy IP lub wszystkie, gdy żadna nie jest zaznaczona."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="Pobierz teraz zaznaczone listy IP lub wszystkie włączone listy, gdy żadna nie jest zaznaczona."/>
 		<tip id="ID_SYSTEM_CLEAR" message="Wyczyść dziennik statusu."/>
 		<tip id="ID_SYSTEM_COPY" message="Kopij zaznaczoną linię statusu."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="Zapisuj znacznik czasu dla każdego wiersza."/>
@@ -3497,6 +3497,7 @@
 		<string id="20307" value="Nic nie dodano: wybrane listy są już na twoich listach IP."/>
 		<string id="20308" value="Zaznacz listę lub wpisz adres własnej listy."/>
 		<string id="20309" value="Już na twoich listach IP, więc nie dodano ponownie: %s"/>
+		<string id="20310" value="Pobieranie zostało przerwane przed końcem."/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->

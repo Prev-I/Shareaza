@@ -2612,7 +2612,7 @@
 		<tip id="ID_SECURITY_POLICY_DENY" message="Установить политику безопасности по умочанию на отказ допуска всем хостам."/>
 		<tip id="ID_SECURITY_REMOVE" message="Удалить выбранные правила или списки IP."/>
 		<tip id="ID_SECURITY_RESET" message="Сбросить счетчики хитов для помеченных правил."/>
-		<tip id="ID_SECURITY_UPDATE_LISTS" message="Загрузить выбранные списки IP сейчас или все, если ни один не выбран."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="Загрузить выбранные списки IP сейчас или все включённые списки, если ни один не выбран."/>
 		<tip id="ID_SYSTEM_CLEAR" message="Очистить журнал статуса."/>
 		<tip id="ID_SYSTEM_COPY" message="Копировать выделенные строки."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="Добавлять штамп времени в каждую строчку."/>
@@ -3494,6 +3494,7 @@
 		<string id="20307" value="Ничего не добавлено: выбранные списки уже есть в ваших списках IP."/>
 		<string id="20308" value="Отметьте список или введите адрес своего списка."/>
 		<string id="20309" value="Уже есть в ваших списках IP, поэтому не добавлены повторно: %s"/>
+		<string id="20310" value="Загрузка прервалась, не дойдя до конца."/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->

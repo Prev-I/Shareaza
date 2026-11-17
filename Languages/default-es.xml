@@ -2611,7 +2611,7 @@ puede comenzar a transferir en cualquier momento.</text>
 		<tip id="ID_SECURITY_POLICY_DENY" message="Negar todas las conexiones."/>
 		<tip id="ID_SECURITY_REMOVE" message="Eliminar las reglas o listas de IP seleccionadas."/>
 		<tip id="ID_SECURITY_RESET" message="Reiniciar contadores."/>
-		<tip id="ID_SECURITY_UPDATE_LISTS" message="Descargar ahora las listas de IP seleccionadas, o todas si no hay ninguna seleccionada."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="Descargar ahora las listas de IP seleccionadas, o todas las activadas si no hay ninguna seleccionada."/>
 		<tip id="ID_SYSTEM_CLEAR" message="Borra la historia de estado."/>
 		<tip id="ID_SYSTEM_COPY" message="Copy selected line(s) of status log."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="Dejar una marca temporal en cada linea."/>
@@ -3493,6 +3493,7 @@ puede comenzar a transferir en cualquier momento.</text>
 		<string id="20307" value="No se añadió nada: las listas elegidas ya están en tus listas de IP."/>
 		<string id="20308" value="Marca una lista, o introduce la dirección de tu propia lista."/>
 		<string id="20309" value="Ya están en tus listas de IP, así que no se añaden de nuevo: %s"/>
+		<string id="20310" value="La descarga se interrumpió antes de terminar."/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->

@@ -2615,7 +2615,7 @@
 		<tip id="ID_SECURITY_POLICY_DENY" message="Canvia la política de seguretat per defecte a denegar totes les connexions."/>
 		<tip id="ID_SECURITY_REMOVE" message="Esborra les normes o les llistes d'IP seleccionades."/>
 		<tip id="ID_SECURITY_RESET" message="Reinicia els compadors de les regles de seguretat seleccionades."/>
-		<tip id="ID_SECURITY_UPDATE_LISTS" message="Baixa ara les llistes d'IP seleccionades, o totes si no n'hi ha cap de seleccionada."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="Baixa ara les llistes d'IP seleccionades, o totes les activades si no n'hi ha cap de seleccionada."/>
 		<tip id="ID_SYSTEM_CLEAR" message="Esborra la història d'estat."/>
 		<tip id="ID_SYSTEM_COPY" message="Copy selected line(s) of status log."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="Enregistra el temps a cada línia."/>
@@ -3497,6 +3497,7 @@
 		<string id="20307" value="No s'ha afegit res: les llistes triades ja són a les vostres llistes d'IP."/>
 		<string id="20308" value="Marqueu una llista, o introduïu l'adreça de la vostra pròpia llista."/>
 		<string id="20309" value="Ja són a les vostres llistes d'IP, no s'han tornat a afegir: %s"/>
+		<string id="20310" value="La baixada s'ha interromput abans d'acabar."/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->

@@ -2611,7 +2611,7 @@
 		<tip id="ID_SECURITY_POLICY_DENY" message="De beveiliging instellen zodat standaard alle bronnen worden geweigerd."/>
 		<tip id="ID_SECURITY_REMOVE" message="De geselecteerde regels of IP-lijsten verwijderen."/>
 		<tip id="ID_SECURITY_RESET" message="De tellers terugzetten voor de geselecteerde regels."/>
-		<tip id="ID_SECURITY_UPDATE_LISTS" message="De geselecteerde IP-lijsten nu downloaden, of allemaal als er geen geselecteerd is."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="De geselecteerde IP-lijsten nu downloaden, of alle ingeschakelde lijsten als er geen geselecteerd is."/>
 		<tip id="ID_SYSTEM_CLEAR" message="De statuslog wissen."/>
 		<tip id="ID_SYSTEM_COPY" message="Kopieer de geselecteerde regel(s) van de statuslog."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="Geef elke regel een tijdstempel."/>
@@ -3493,6 +3493,7 @@
 		<string id="20307" value="Niets toegevoegd: de gekozen lijsten staan al bij je IP-lijsten."/>
 		<string id="20308" value="Vink een lijst aan, of voer het adres van je eigen lijst in."/>
 		<string id="20309" value="Staat al bij je IP-lijsten, dus niet opnieuw toegevoegd: %s"/>
+		<string id="20310" value="De download werd afgebroken voordat hij klaar was."/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->

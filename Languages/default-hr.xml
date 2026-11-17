@@ -2616,7 +2616,7 @@
 		<tip id="ID_SECURITY_POLICY_DENY" message="Set the default security policy to deny all hosts."/>
 		<tip id="ID_SECURITY_REMOVE" message="Makni odabrana pravila ili IP popise."/>
 		<tip id="ID_SECURITY_RESET" message="Reset the hit counts on the selected rules."/>
-		<tip id="ID_SECURITY_UPDATE_LISTS" message="Preuzmi odabrane IP popise sada, ili sve ako nijedan nije odabran."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="Preuzmi odabrane IP popise sada, ili sve omogućene popise ako nijedan nije odabran."/>
 		<tip id="ID_SYSTEM_CLEAR" message="Clear the status log."/>
 		<tip id="ID_SYSTEM_COPY" message="Copy selected line(s) of status log."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="Record a timestamp for each line."/>
@@ -3498,6 +3498,7 @@
 		<string id="20307" value="Ništa nije dodano: odabrani popisi već su među vašim IP popisima."/>
 		<string id="20308" value="Označite popis ili unesite adresu vlastitog popisa."/>
 		<string id="20309" value="Već među vašim IP popisima, pa nisu ponovno dodani: %s"/>
+		<string id="20310" value="Preuzimanje je prekinuto prije kraja."/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->

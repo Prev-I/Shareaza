@@ -2618,7 +2618,7 @@
 		<tip id="ID_SECURITY_POLICY_DENY" message="Nastavit standardní zabezpečení odepření pro všechny hosty."/>
 		<tip id="ID_SECURITY_REMOVE" message="Odstranit vybraná pravidla nebo seznamy IP."/>
 		<tip id="ID_SECURITY_RESET" message="Ihned resetovat a počítat s pravidly výběru."/>
-		<tip id="ID_SECURITY_UPDATE_LISTS" message="Stáhnout nyní vybrané seznamy IP, nebo všechny, pokud není vybrán žádný."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="Stáhnout nyní vybrané seznamy IP, nebo všechny povolené, pokud není vybrán žádný."/>
 		<tip id="ID_SYSTEM_CLEAR" message="Vymazat stav záznamu."/>
 		<tip id="ID_SYSTEM_COPY" message="Copy selected line(s) of status log."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="Zaznamenat časovou značku pro každou linku."/>
@@ -3500,6 +3500,7 @@
 		<string id="20307" value="Nic nebylo přidáno: vybrané seznamy už mezi vašimi seznamy IP jsou."/>
 		<string id="20308" value="Zaškrtněte seznam, nebo zadejte adresu vlastního seznamu."/>
 		<string id="20309" value="Už mezi vašimi seznamy IP, proto znovu nepřidáno: %s"/>
+		<string id="20310" value="Stahování bylo přerušeno před dokončením."/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->

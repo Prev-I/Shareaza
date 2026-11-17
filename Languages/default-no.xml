@@ -2615,7 +2615,7 @@
 		<tip id="ID_SECURITY_POLICY_DENY" message="Velg at normal sikkerhet skal nekte alle verter."/>
 		<tip id="ID_SECURITY_REMOVE" message="Fjern de valgte reglene eller IP-listene."/>
 		<tip id="ID_SECURITY_RESET" message="Fjern treffresultat til valgte regler."/>
-		<tip id="ID_SECURITY_UPDATE_LISTS" message="Last ned de valgte IP-listene nå, eller alle når ingen er valgt."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="Last ned de valgte IP-listene nå, eller alle aktiverte lister når ingen er valgt."/>
 		<tip id="ID_SYSTEM_CLEAR" message="Oppdater stausloggen."/>
 		<tip id="ID_SYSTEM_COPY" message="Copy selected line(s) of status log."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="Lag tidsstempel for hver linje."/>
@@ -3497,6 +3497,7 @@
 		<string id="20307" value="Ingenting ble lagt til: listene du valgte, finnes allerede i IP-listene dine."/>
 		<string id="20308" value="Kryss av en liste, eller skriv inn adressen til din egen liste."/>
 		<string id="20309" value="Finnes allerede i IP-listene dine, så de ble ikke lagt til igjen: %s"/>
+		<string id="20310" value="Nedlastingen ble avbrutt før den var ferdig."/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->

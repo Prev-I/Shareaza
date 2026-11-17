@@ -2617,7 +2617,7 @@
 		<tip id="ID_SECURITY_POLICY_DENY" message="Nastavi privzeto varnostno politiko tako, da zavrne vse gostitelje."/>
 		<tip id="ID_SECURITY_REMOVE" message="Odstrani izbrana pravila ali sezname IP."/>
 		<tip id="ID_SECURITY_RESET" message="Ponastavi števce zadetkov na izbrana pravila."/>
-		<tip id="ID_SECURITY_UPDATE_LISTS" message="Prenesi izbrane sezname IP zdaj ali vse, če ni izbran noben."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="Prenesi izbrane sezname IP zdaj ali vse omogočene sezname, če ni izbran noben."/>
 		<tip id="ID_SYSTEM_CLEAR" message="Pobriši statusni dnevnik (log)."/>
 		<tip id="ID_SYSTEM_COPY" message="Copy selected line(s) of status log."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="Zapiši časovni žig za vsako vrstico."/>
@@ -3499,6 +3499,7 @@
 		<string id="20307" value="Nič ni bilo dodano: izbrani seznami so že med vašimi seznami IP."/>
 		<string id="20308" value="Označite seznam ali vnesite naslov lastnega seznama."/>
 		<string id="20309" value="Že med vašimi seznami IP, zato niso bili znova dodani: %s"/>
+		<string id="20310" value="Prenos je bil prekinjen pred koncem."/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->

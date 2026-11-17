@@ -2613,7 +2613,7 @@
 		<tip id="ID_SECURITY_POLICY_DENY" message="Régler la politique de sécurité par défaut pour refuser tous les hôtes."/>
 		<tip id="ID_SECURITY_REMOVE" message="Enlever les règles ou les listes IP sélectionnées."/>
 		<tip id="ID_SECURITY_RESET" message="Remettre le compteur d'accès à zéro pour cette sélection de règles."/>
-		<tip id="ID_SECURITY_UPDATE_LISTS" message="Télécharger maintenant les listes IP sélectionnées, ou toutes si aucune n'est sélectionnée."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="Télécharger maintenant les listes IP sélectionnées, ou toutes les listes activées si aucune n'est sélectionnée."/>
 		<tip id="ID_SYSTEM_CLEAR" message="Nettoyer le journal de statut."/>
 		<tip id="ID_SYSTEM_COPY" message="Copier les lignes sélectionnées du journal d'état"/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="Enregistrer l'horodatage pour chaque ligne."/>
@@ -3495,6 +3495,7 @@
 		<string id="20307" value="Rien n'a été ajouté : les listes choisies figurent déjà dans vos listes IP."/>
 		<string id="20308" value="Cochez une liste, ou saisissez l'adresse de votre propre liste."/>
 		<string id="20309" value="Déjà dans vos listes IP, donc non ajoutées à nouveau : %s"/>
+		<string id="20310" value="Le téléchargement a été interrompu avant la fin."/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->

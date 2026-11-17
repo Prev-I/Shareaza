@@ -3497,6 +3497,7 @@
 		<string id="20307" value="Non è stato aggiunto nulla: le liste scelte sono già tra le tue liste IP."/>
 		<string id="20308" value="Spunta una lista, o inserisci l'indirizzo di una tua lista."/>
 		<string id="20309" value="Già presenti tra le tue liste IP, quindi non aggiunte di nuovo: %s"/>
+		<string id="20310" value="Il download si è interrotto prima della fine."/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->

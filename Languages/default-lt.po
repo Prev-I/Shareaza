@@ -4303,8 +4303,8 @@ msgid "Reset the hit counts on the selected rules."
 msgstr "Apnulinti pasirinktų saugos taisyklių kreipinių skaitliukus."
 
 #: message;id_security_update_lists
-msgid "Download the selected IP lists now, or all of them when none is selected."
-msgstr "Atsisiųsti pažymėtus IP sąrašus dabar arba visus, jei nė vienas nepažymėtas."
+msgid "Download the selected IP lists now, or every enabled list when none is selected."
+msgstr "Atsisiųsti pažymėtus IP sąrašus dabar arba visus įjungtus sąrašus, jei nė vienas nepažymėtas."
 
 #: message;id_system_clear
 msgid "Clear the status log."
@@ -7704,6 +7704,10 @@ msgstr "Pažymėkite sąrašą arba įveskite savo sąrašo adresą."
 #: string;20309
 msgid "Already in your IP lists, so not added again: %s"
 msgstr "Jau yra jūsų IP sąrašuose, todėl nepridėti dar kartą: %s"
+
+#: string;20310
+msgid "The download was cut off before its end."
+msgstr "Atsisiuntimas nutrūko nepasibaigęs."
 
 #: csettingsheet;control;4 cprofilemanagerdlg;control;4
 msgid "Apply"

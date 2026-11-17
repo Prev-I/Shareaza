@@ -2616,7 +2616,7 @@
 		<tip id="ID_SECURITY_POLICY_DENY" message="デフォルトセキュリティ方針を全てのホストで許可しないように設定します"/>
 		<tip id="ID_SECURITY_REMOVE" message="選択した規則または IP リストを削除します。"/>
 		<tip id="ID_SECURITY_RESET" message="選択した規則のヒット数をリセットします"/>
-		<tip id="ID_SECURITY_UPDATE_LISTS" message="選択した IP リストを今すぐダウンロードします。何も選択していない場合はすべてをダウンロードします。"/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="選択した IP リストを今すぐダウンロードします。何も選択していない場合は、有効なリストをすべてダウンロードします。"/>
 		<tip id="ID_SYSTEM_CLEAR" message="ステータスログをクリアします"/>
 		<tip id="ID_SYSTEM_COPY" message="Copy selected line(s) of status log."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="各行のタイムスタンプを記録します"/>
@@ -3498,6 +3498,7 @@
 		<string id="20307" value="何も追加されませんでした: 選択したリストはすでに IP リストにあります。"/>
 		<string id="20308" value="リストにチェックを入れるか、独自リストのアドレスを入力してください。"/>
 		<string id="20309" value="すでに IP リストにあるため、再追加しませんでした: %s"/>
+		<string id="20310" value="ダウンロードが最後まで完了する前に途切れました。"/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->

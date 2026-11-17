@@ -4296,8 +4296,8 @@ msgid "Reset the hit counts on the selected rules."
 msgstr "Nulli löögilugeja valitud reeglil."
 
 #: message;id_security_update_lists
-msgid "Download the selected IP lists now, or all of them when none is selected."
-msgstr "Laadi valitud IP-loendid kohe alla või kõik, kui ühtki pole valitud."
+msgid "Download the selected IP lists now, or every enabled list when none is selected."
+msgstr "Laadi valitud IP-loendid kohe alla või kõik lubatud loendid, kui ühtki pole valitud."
 
 #: message;id_system_clear
 msgid "Clear the status log."
@@ -7696,6 +7696,10 @@ msgstr "Märgi loend või sisesta oma loendi aadress."
 #: string;20309
 msgid "Already in your IP lists, so not added again: %s"
 msgstr "Juba sinu IP-loendites, seega uuesti ei lisatud: %s"
+
+#: string;20310
+msgid "The download was cut off before its end."
+msgstr "Allalaadimine katkes enne lõppu."
 
 #: csettingsheet;control;4 cprofilemanagerdlg;control;4
 msgid "Apply"

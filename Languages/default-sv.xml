@@ -2615,7 +2615,7 @@
 		<tip id="ID_SECURITY_POLICY_DENY" message="Sätt förvald säkerhetspolicy till att neka alla värdar."/>
 		<tip id="ID_SECURITY_REMOVE" message="Ta bort de markerade reglerna eller IP-listorna."/>
 		<tip id="ID_SECURITY_RESET" message="Återställ träffräknaren för de valda reglerna."/>
-		<tip id="ID_SECURITY_UPDATE_LISTS" message="Hämta de markerade IP-listorna nu, eller alla om ingen är markerad."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="Hämta de markerade IP-listorna nu, eller alla aktiverade listor om ingen är markerad."/>
 		<tip id="ID_SYSTEM_CLEAR" message="Rensa statusloggen."/>
 		<tip id="ID_SYSTEM_COPY" message="Copy selected line(s) of status log."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="Gör en tidsstämpel för varje rad."/>
@@ -3497,6 +3497,7 @@
 		<string id="20307" value="Inget lades till: listorna du valde finns redan bland dina IP-listor."/>
 		<string id="20308" value="Kryssa för en lista, eller ange adressen till din egen lista."/>
 		<string id="20309" value="Finns redan bland dina IP-listor, så de lades inte till igen: %s"/>
+		<string id="20310" value="Hämtningen avbröts innan den var klar."/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->

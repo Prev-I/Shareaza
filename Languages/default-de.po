@@ -4235,8 +4235,8 @@ msgid "Reset the hit counts on the selected rules."
 msgstr "Die Trefferzähler der markierte(n) Sicherheitsregel(n) zurücksetzen."
 
 #: message;id_security_update_lists
-msgid "Download the selected IP lists now, or all of them when none is selected."
-msgstr "Die markierten IP-Listen jetzt herunterladen, oder alle, wenn keine markiert ist."
+msgid "Download the selected IP lists now, or every enabled list when none is selected."
+msgstr "Die markierten IP-Listen jetzt herunterladen, oder alle aktivierten, wenn keine markiert ist."
 
 #: message;id_system_clear
 msgid "Clear the status log."
@@ -7612,6 +7612,10 @@ msgstr "Kreuzen Sie eine Liste an oder geben Sie die Adresse Ihrer eigenen Liste
 #: string;20309
 msgid "Already in your IP lists, so not added again: %s"
 msgstr "Bereits in Ihren IP-Listen, daher nicht erneut hinzugefügt: %s"
+
+#: string;20310
+msgid "The download was cut off before its end."
+msgstr "Der Download wurde vor seinem Ende abgebrochen."
 
 #: csettingsheet;control;4 cprofilemanagerdlg;control;4
 msgid "Apply"

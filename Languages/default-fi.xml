@@ -2615,7 +2615,7 @@
 		<tip id="ID_SECURITY_POLICY_DENY" message="Set the default security policy to deny all hosts."/>
 		<tip id="ID_SECURITY_REMOVE" message="Poista valitut säännöt tai IP-listat."/>
 		<tip id="ID_SECURITY_RESET" message="Reset the hit counts on the selected rules."/>
-		<tip id="ID_SECURITY_UPDATE_LISTS" message="Lataa valitut IP-listat nyt, tai kaikki, jos mitään ei ole valittu."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="Lataa valitut IP-listat nyt, tai kaikki käytössä olevat, jos mitään ei ole valittu."/>
 		<tip id="ID_SYSTEM_CLEAR" message="Clear the status log."/>
 		<tip id="ID_SYSTEM_COPY" message="Copy selected line(s) of status log."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="Record a timestamp for each line."/>
@@ -3497,6 +3497,7 @@
 		<string id="20307" value="Mitään ei lisätty: valitsemasi listat ovat jo IP-listoissasi."/>
 		<string id="20308" value="Valitse lista tai anna oman listasi osoite."/>
 		<string id="20309" value="Jo IP-listoissasi, joten niitä ei lisätty uudelleen: %s"/>
+		<string id="20310" value="Lataus katkesi ennen loppuaan."/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->

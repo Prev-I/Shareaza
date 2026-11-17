@@ -2568,7 +2568,7 @@ Shareaza 在搜尋時忽略標點符號與萬用字元，只使用您鍵入的�
 		<tip id="ID_SECURITY_POLICY_DENY" message="將預設的安全性方針設定成拒絕所有的主機。"/>
 		<tip id="ID_SECURITY_REMOVE" message="移除選取的規則或 IP 清單。"/>
 		<tip id="ID_SECURITY_RESET" message="重置選取規則的計數。"/>
-		<tip id="ID_SECURITY_UPDATE_LISTS" message="立即下載選取的 IP 清單；若未選取任何清單則下載全部。"/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="立即下載選取的 IP 清單；若未選取任何清單則下載所有已啟用的清單。"/>
 		<tip id="ID_SYSTEM_CLEAR" message="清除狀態記錄。"/>
 		<tip id="ID_SYSTEM_COPY" message="複製這項狀態日誌。"/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="為每一列附上時間郵戳。"/>
@@ -3450,6 +3450,7 @@ Shareaza 在搜尋時忽略標點符號與萬用字元，只使用您鍵入的�
 		<string id="20307" value="未新增任何清單：所選清單已在您的 IP 清單中。"/>
 		<string id="20308" value="請勾選一份清單，或輸入您自己清單的位址。"/>
 		<string id="20309" value="已在您的 IP 清單中，因此未重複新增：%s"/>
+		<string id="20310" value="下載在完成前遭到中斷。"/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->

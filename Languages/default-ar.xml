@@ -2615,7 +2615,7 @@
 		<tip id="ID_SECURITY_POLICY_DENY" message="وضع نهج الأمان الإفتراضي لحظر كافة المضيفين"/>
 		<tip id="ID_SECURITY_REMOVE" message="إزالة القواعد أو قوائم IP المحددة."/>
 		<tip id="ID_SECURITY_RESET" message="إستعادة عدد الضربات مع القواعد المحددة"/>
-		<tip id="ID_SECURITY_UPDATE_LISTS" message="تنزيل قوائم IP المحددة الآن، أو جميعها إذا لم يُحدَّد أي منها."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="تنزيل قوائم IP المحددة الآن، أو كل القوائم المفعّلة إذا لم يُحدَّد أي منها."/>
 		<tip id="ID_SYSTEM_CLEAR" message="مسح سجل الحالة"/>
 		<tip id="ID_SYSTEM_COPY" message="Copy selected line(s) of status log."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="تسجيل طابع الوقت لكل سطر"/>
@@ -3497,6 +3497,7 @@
 		<string id="20307" value="لم تُضَف أي قائمة: القوائم التي اخترتها موجودة بالفعل في قوائم IP لديك."/>
 		<string id="20308" value="حدّد قائمة، أو أدخل عنوان قائمتك الخاصة."/>
 		<string id="20309" value="موجودة بالفعل في قوائم IP لديك، فلم تُضَف مرة أخرى: %s"/>
+		<string id="20310" value="انقطع التنزيل قبل اكتماله."/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->

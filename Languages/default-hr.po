@@ -4296,8 +4296,8 @@ msgid "Reset the hit counts on the selected rules."
 msgstr "Reset the hit counts on the selected rules."
 
 #: message;id_security_update_lists
-msgid "Download the selected IP lists now, or all of them when none is selected."
-msgstr "Preuzmi odabrane IP popise sada, ili sve ako nijedan nije odabran."
+msgid "Download the selected IP lists now, or every enabled list when none is selected."
+msgstr "Preuzmi odabrane IP popise sada, ili sve omogućene popise ako nijedan nije odabran."
 
 #: message;id_system_clear
 msgid "Clear the status log."
@@ -7695,6 +7695,10 @@ msgstr "Označite popis ili unesite adresu vlastitog popisa."
 #: string;20309
 msgid "Already in your IP lists, so not added again: %s"
 msgstr "Već među vašim IP popisima, pa nisu ponovno dodani: %s"
+
+#: string;20310
+msgid "The download was cut off before its end."
+msgstr "Preuzimanje je prekinuto prije kraja."
 
 #: csettingsheet;control;4 cprofilemanagerdlg;control;4
 msgid "Apply"

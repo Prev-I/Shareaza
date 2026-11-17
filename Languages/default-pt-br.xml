@@ -2615,7 +2615,7 @@ t		Alternativamente, você pode manualmente iniciar este download com o comando 
 		<tip id="ID_SECURITY_POLICY_DENY" message="Definir política padrão pra negar todos os hosts."/>
 		<tip id="ID_SECURITY_REMOVE" message="Remover as regras ou listas de IP selecionadas."/>
 		<tip id="ID_SECURITY_RESET" message="Reiniciar as contagens de acerto das regras de segurança selecionadas."/>
-		<tip id="ID_SECURITY_UPDATE_LISTS" message="Baixar agora as listas de IP selecionadas, ou todas quando nenhuma estiver selecionada."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="Baixar agora as listas de IP selecionadas, ou todas as listas ativadas quando nenhuma estiver selecionada."/>
 		<tip id="ID_SYSTEM_CLEAR" message="Limpar o log do status."/>
 		<tip id="ID_SYSTEM_COPY" message="Copiar a(s) linha(s) selecionada(s) do log do status."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="Registra um horário para cada linha."/>
@@ -3501,6 +3501,7 @@ pasta dos arquivos baixados a sua biblioteca agora?"/>
 		<string id="20307" value="Nada foi adicionado: as listas escolhidas já estão nas suas listas de IP."/>
 		<string id="20308" value="Marque uma lista, ou digite o endereço da sua própria lista."/>
 		<string id="20309" value="Já estão nas suas listas de IP, por isso não foram adicionadas de novo: %s"/>
+		<string id="20310" value="O download foi interrompido antes do fim."/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->

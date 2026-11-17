@@ -2615,7 +2615,7 @@
 		<tip id="ID_SECURITY_POLICY_DENY" message="Stel die standaard sekuriteitsbeleid in sodat alle gashere geweier word."/>
 		<tip id="ID_SECURITY_REMOVE" message="Verwyder die gekose reëls of IP-lyste."/>
 		<tip id="ID_SECURITY_RESET" message="Herstel die trefteller van die geselekteerde reëls."/>
-		<tip id="ID_SECURITY_UPDATE_LISTS" message="Laai die gekose IP-lyste nou af, of almal as niks gekies is nie."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="Laai die gekose IP-lyste nou af, of elke geaktiveerde lys as niks gekies is nie."/>
 		<tip id="ID_SYSTEM_CLEAR" message="Maak die statuslog skoon."/>
 		<tip id="ID_SYSTEM_COPY" message="Copy selected line(s) of status log."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="Hou rekord van die tyd van elke lyn."/>
@@ -3497,6 +3497,7 @@
 		<string id="20307" value="Niks is bygevoeg nie: die lyste wat jy gekies het, is reeds in jou IP-lyste."/>
 		<string id="20308" value="Merk 'n lys, of voer die adres van jou eie lys in."/>
 		<string id="20309" value="Reeds in jou IP-lyste, dus nie weer bygevoeg nie: %s"/>
+		<string id="20310" value="Die aflaai is afgesny voordat dit klaar was."/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->

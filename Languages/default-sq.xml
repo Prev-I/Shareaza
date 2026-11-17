@@ -2615,7 +2615,7 @@
 		<tip id="ID_SECURITY_POLICY_DENY" message="Vendos dëftesën e sigurisë tipike për të mohuar tërë hostet."/>
 		<tip id="ID_SECURITY_REMOVE" message="Hiq rregullat ose listat IP të zgjedhura."/>
 		<tip id="ID_SECURITY_RESET" message="Rivendos numërimin e hiteve në rregullin e zgjedhur."/>
-		<tip id="ID_SECURITY_UPDATE_LISTS" message="Shkarko tani listat IP të zgjedhura, ose të gjitha kur nuk është zgjedhur asnjë."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="Shkarko tani listat IP të zgjedhura, ose të gjitha listat e aktivizuara kur nuk është zgjedhur asnjë."/>
 		<tip id="ID_SYSTEM_CLEAR" message="Pastron ditarin e statusit."/>
 		<tip id="ID_SYSTEM_COPY" message="Copy selected line(s) of status log."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="Regjistron shtypjen e kohës për secilën vijë."/>
@@ -3497,6 +3497,7 @@
 		<string id="20307" value="S'u shtua asgjë: listat që zgjodhe janë tashmë te listat e tua IP."/>
 		<string id="20308" value="Zgjidh një listë, ose jep adresën e listës tënde."/>
 		<string id="20309" value="Tashmë te listat e tua IP, prandaj nuk u shtuan sërish: %s"/>
+		<string id="20310" value="Shkarkimi u ndërpre para se të përfundonte."/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->

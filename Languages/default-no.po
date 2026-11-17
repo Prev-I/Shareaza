@@ -4296,8 +4296,8 @@ msgid "Reset the hit counts on the selected rules."
 msgstr "Fjern treffresultat til valgte regler."
 
 #: message;id_security_update_lists
-msgid "Download the selected IP lists now, or all of them when none is selected."
-msgstr "Last ned de valgte IP-listene nå, eller alle når ingen er valgt."
+msgid "Download the selected IP lists now, or every enabled list when none is selected."
+msgstr "Last ned de valgte IP-listene nå, eller alle aktiverte lister når ingen er valgt."
 
 #: message;id_system_clear
 msgid "Clear the status log."
@@ -7695,6 +7695,10 @@ msgstr "Kryss av en liste, eller skriv inn adressen til din egen liste."
 #: string;20309
 msgid "Already in your IP lists, so not added again: %s"
 msgstr "Finnes allerede i IP-listene dine, så de ble ikke lagt til igjen: %s"
+
+#: string;20310
+msgid "The download was cut off before its end."
+msgstr "Nedlastingen ble avbrutt før den var ferdig."
 
 #: csettingsheet;control;4 cprofilemanagerdlg;control;4
 msgid "Apply"

@@ -2616,7 +2616,7 @@
 		<tip id="ID_SECURITY_POLICY_DENY" message="Nustatyti, kad saugos politika, draudžianti visų adresatų prieigą, būtų numatytąja."/>
 		<tip id="ID_SECURITY_REMOVE" message="Šalinti pažymėtas taisykles arba IP sąrašus."/>
 		<tip id="ID_SECURITY_RESET" message="Apnulinti pasirinktų saugos taisyklių kreipinių skaitliukus."/>
-		<tip id="ID_SECURITY_UPDATE_LISTS" message="Atsisiųsti pažymėtus IP sąrašus dabar arba visus, jei nė vienas nepažymėtas."/>
+		<tip id="ID_SECURITY_UPDATE_LISTS" message="Atsisiųsti pažymėtus IP sąrašus dabar arba visus įjungtus sąrašus, jei nė vienas nepažymėtas."/>
 		<tip id="ID_SYSTEM_CLEAR" message="Valyti būsenos žurnalą."/>
 		<tip id="ID_SYSTEM_COPY" message="Copy selected line(s) of status log."/>
 		<tip id="ID_SYSTEM_TIMESTAMP" message="Registruoti laiką kiekvienoje eilutėje."/>
@@ -3498,6 +3498,7 @@
 		<string id="20307" value="Nieko nepridėta: pasirinkti sąrašai jau yra jūsų IP sąrašuose."/>
 		<string id="20308" value="Pažymėkite sąrašą arba įveskite savo sąrašo adresą."/>
 		<string id="20309" value="Jau yra jūsų IP sąrašuose, todėl nepridėti dar kartą: %s"/>
+		<string id="20310" value="Atsisiuntimas nutrūko nepasibaigęs."/>
 	</strings>
 	<!-- Localised Dialog Text, the "cookie" verifies that the dialog matches the skin -->
 	<!-- Don't edit dialogs manualy! Use DialogScan feature instead -->
