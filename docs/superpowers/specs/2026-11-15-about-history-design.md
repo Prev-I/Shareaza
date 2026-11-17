@@ -1,6 +1,6 @@
 # About dialog: full history and restored characters: design
 
-Date: 2026-11-15. Status: approved by the owner on 2026-11-15, for previ.10. The credits, the
+Date: 2026-11-15. Status: approved by the owner on 2026-11-15; shipped in `v2.7.11.5-previ.10` (#47). The credits, the
 owner's own line, approach A and the release were decided by the owner; items marked
 *(designer's call)* were settled while writing.
 

@@ -1,6 +1,6 @@
 # Current country data: DB-IP via Debian, libGeoIP 1.6.12: design
 
-Date: 2026-11-15. Status: approved by the owner on 2026-11-16, for previ.10. The data source (DB-IP, taken from
+Date: 2026-11-15. Status: approved by the owner on 2026-11-16; shipped in `v2.7.11.5-previ.10` (#48). The data source (DB-IP, taken from
 Debian's `geoip-database` package), the library update to 1.6.12 and the IPv4-only scope were
 decided by the owner; items marked *(designer's call)* were settled while writing.
 
