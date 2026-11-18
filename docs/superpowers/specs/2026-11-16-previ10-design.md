@@ -1,8 +1,8 @@
 # previ.10: subscribable IP lists, current bogon checks, deferred fixes, and version 2.7.11.5: design
 
-Date: 2026-11-16. Status: approved by the owner on 2026-11-16. The scope and the decisions marked
-*(owner)* were settled with the owner on 2026-11-15/16; items marked *(designer's call)* were
-settled while writing.
+Date: 2026-11-16. Status: approved by the owner on 2026-11-16; shipped in `v2.7.11.5-previ.10`
+(#49, #50, #51). The scope and the decisions marked *(owner)* were settled with the owner on
+2026-11-15/16; items marked *(designer's call)* were settled while writing.
 
 ## Intent
 
