@@ -37,13 +37,13 @@ installation was set up with another user path.
   new one is started.
 
 A dump holds the stacks of all threads and part of the program's memory. It can contain peer
-addresses, search terms, and the names and paths of files the client has open (downloads, shared files). Look at a dump before sending it to anyone, and send it only to someone
-you trust with that.
+addresses, search terms, and the names and paths of files the client has open (downloads, shared
+files). Look at a dump before sending it to anyone, and send it only to someone you trust with that.
 
-The folder is user data like the rest of `Data\`. The uninstaller deletes `{app}\Data` and `%APPDATA%\Shareaza\Data`,
-so the dumps go with it when the user path is the default (`%APPDATA%\Shareaza`) or the install
-folder. With any other user path they stay until you delete them. To remove them earlier, delete the files
-in the folder.
+The folder is user data like the rest of `Data\`. The uninstaller deletes the `Data` folder in the
+installation folder and `%APPDATA%\Shareaza\Data`, so the dumps go with it when the user path is
+the default (`%APPDATA%\Shareaza`) or the installation folder. With any other user path they stay
+until you delete them. To remove them earlier, delete the files in the folder.
 
 ## Taking a dump by hand
 
