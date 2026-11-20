@@ -30,6 +30,7 @@
 #include "Transfer.h"
 #include "VersionChecker.h"
 #include "ReleaseNotes.h"
+#include "UpgradeAsset.h"
 // Boost.JSON is compiled here, from the headers, in this one translation unit:
 // the project defines BOOST_ALL_NO_LIB, so no prebuilt Boost library is linked.
 #include <boost/json/src.hpp>
@@ -275,7 +276,8 @@ CString FindAssetURI(const CStringIMap& map, const CString platform, const CStri
 		CString key, value;
 		map.GetNextAssoc(pos, key, value);
 
-		if (key.Find(_T("asset")) == 0 && key.Find(_T("browser_download_url")) != -1 && value.Find(platform) != -1 && value.Find(buildtype) != -1) {
+		// Only an .exe can be the update: never a symbols zip or any other asset
+		if ( UpgradeAsset::IsInstaller( (LPCTSTR)key, (LPCTSTR)value, (LPCTSTR)platform, (LPCTSTR)buildtype ) ) {
 			return value;
 		}
 	}

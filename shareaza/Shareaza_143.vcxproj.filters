@@ -1725,6 +1725,9 @@
     <ClInclude Include="ReleaseNotes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="UpgradeAsset.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="VersionChecker.h">
       <Filter>Header Files</Filter>
     </ClInclude>
