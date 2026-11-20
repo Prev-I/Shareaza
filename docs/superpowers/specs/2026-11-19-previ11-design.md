@@ -55,18 +55,39 @@ The same release carries every small item left over from previ.9 and previ.10 *(
 
 ## The exemption (approach A)
 
-- **Which download.** `CDownload::m_bRequireValidCert` is set only by `CUpgradeDlg::OnOK`
-  (`DlgUpgrade.cpp`) and is saved with the download, so it survives a restart. It is the marker;
-  no new one is added. An update source is always HTTPS (`CDownloadSource::IsAllowedForDownload`
-  refuses others), so `CDownloadTransferHTTP` and `CDownloadTransferFTP` are not touched.
+- **Which sources.** `CDownload::m_bRequireValidCert`, set only by `CUpgradeDlg::OnOK`
+  (`DlgUpgrade.cpp`) and saved with the download, marks the update download, but it only
+  restricts (HTTPS only, strict certificate) and never grants the exemption on its own: it is
+  saved state, and a saved download can come from elsewhere. The exemption belongs to sources:
+  `CDownloadSource::m_bUpdateExempt`, runtime-only, never saved, written in one place,
+  `CDownloadWithSources::AddSourceURL`, on the source it has just built from a URL in this
+  process. It is passed down for three URLs only: the update check's own URL from
+  `CUpgradeDlg::OnOK`; a redirect target, when the source that redirected was exempt, the
+  download has `m_bRequireValidCert` and the TLS was validated; and the URLs
+  `CDownloads::ReseedUpdate` gives back at load (below). A source read from a saved download,
+  found on the network or added by the user is never exempt. An update source is always HTTPS
+  (`CDownloadSource::IsAllowedForDownload` refuses others), so `CDownloadTransferHTTP` and
+  `CDownloadTransferFTP` are not touched. *(Revised 2026-11-20 after the final review and an
+  expert consultation; the owner chose this binding. An earlier draft used
+  `m_bRequireValidCert` itself as the marker.)*
 - **Redirects.** GitHub redirects the asset URL to another host. The redirect target becomes a new
-  source of the same download, so it is exempt too; the existing limits (five redirects, HTTPS
-  only, certificate valid for the URL's host) still apply.
-- **Where.** `CDownloadTransferHTTPS` sets the flag before `ConnectTls()` when
-  `m_pDownload->m_bRequireValidCert` is set. Both `CConnection::ConnectTo` overloads skip the
-  `Security.IsDenied` check when the flag is set. Every other check in `ConnectTo` (null or zero
-  address, port 0) stays. The flag's name and whether it is reset on `Close` are the builder's
-  call; it must not leak into a later use of the same object for a non-update connection.
+  source of the same download and inherits the mark from the redirecting source; the existing
+  limits (five redirects, HTTPS only, certificate valid for the URL's host) still apply.
+- **After a restart.** The redirecting source is removed once it redirects, and neither the
+  redirect count nor failed sources are saved, so a saved update download holds only the
+  redirect target, whose signed URL expires and which is no longer exempt. At load,
+  `CDownloads::ReseedUpdate` replaces its sources with the update check's URL when it is still
+  the update the check found: the file name equals `Settings.VersionCheck.UpgradeFile` exactly,
+  `CVersionChecker::IsVersionNewer` holds, and the sizes match when both are known. Otherwise it
+  is left filtered like any download. The GitHub response carries no size, so in practice the
+  file name, which carries the version, is what keeps two releases' bytes apart: every release
+  must change the version. The update download is not renamed by `Content-Disposition`, so the
+  name keeps matching.
+- **Where.** `CDownloadTransferHTTPS::Initiate` sets the `CConnection` flag `m_bSkipSecurity` to
+  `m_bRequireValidCert && m_pSource->m_bUpdateExempt`, both ways, every time. Both
+  `CConnection::ConnectTo` overloads skip the `Security.IsDenied` check when the flag is set.
+  Every other check in `ConnectTo` (null or zero address, port 0) stays. A connection opened
+  with the flag is never handed to another download (`GiveConnectionToNext`).
 - **What protects the update instead.** HTTPS with a certificate valid for the URL's host, on
   every hop of the redirect. There is no hash check: since previ.5 the update download carries no
   hash (the GitHub release response has none), and the client never offers to run the file; the
