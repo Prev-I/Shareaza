@@ -67,10 +67,13 @@ The same release carries every small item left over from previ.9 and previ.10 *(
   `Security.IsDenied` check when the flag is set. Every other check in `ConnectTo` (null or zero
   address, port 0) stays. The flag's name and whether it is reset on `Close` are the builder's
   call; it must not leak into a later use of the same object for a non-update connection.
-- **What protects the update instead.** HTTPS with a certificate valid for the host, and
-  `CVersionChecker::CheckUpgradeHash`: the client offers to run the file only if its SHA-1 and
-  size match the release and it is an `.exe`. IP filtering is not an integrity check, so skipping
-  it does not weaken what decides whether the file runs.
+- **What protects the update instead.** HTTPS with a certificate valid for the URL's host, on
+  every hop of the redirect. There is no hash check: since previ.5 the update download carries no
+  hash (the GitHub release response has none), and the client never offers to run the file; the
+  user runs the installer. *(Corrected 2026-11-20 after the final review: an earlier draft claimed
+  a SHA-1 and size check through `CVersionChecker::CheckUpgradeHash`, which never fires in this
+  configuration.)* IP filtering is not an integrity check, so skipping it does not weaken what
+  the user later runs.
 - **Visibility.** When the flag is set and `Security.IsDenied` *would* have denied the address,
   the client logs one line naming the address and that the update download is exempt from IP
   filtering *(designer's call)*, so a user reading the log sees why the connection went through.

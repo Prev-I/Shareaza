@@ -96,7 +96,8 @@ BOOL CDownloadTransferHTTPS::Initiate()
 	m_pSource->m_sTlsWaitingFingerprint.Empty();
 
 	// The client's own update download (m_bRequireValidCert) is exempt from IP lists and
-	// security rules: HTTPS and the release's hash check it instead. Set both ways, every time.
+	// security rules: it relies on HTTPS with a certificate valid for its host instead.
+	// Set both ways, every time.
 	m_bSkipSecurity = m_pDownload->m_bRequireValidCert;
 	
 	if ( m_pDownload->IsCompleted() )
@@ -217,6 +218,11 @@ void CDownloadTransferHTTPS::GiveConnectionToNext()
 	if ( ! IsTlsValidated() && nPolicy != static_cast< DWORD >( TLS_CERT_IGNORE ) &&
 		! ( nPolicy == static_cast< DWORD >( TLS_CERT_ASK ) &&
 			TlsTrust.IsAccepted( std::wstring( (LPCWSTR)GetTlsHostName() ), std::wstring( (LPCWSTR)GetTlsFingerprint() ) ) ) )
+		return;
+
+	// A connection opened past the security check (the update download's) serves no other
+	// download: that download's own connect would have been checked
+	if ( m_bSkipSecurity )
 		return;
 
 	for ( POSITION pos = Downloads.GetIterator() ; pos != NULL ; )

@@ -270,7 +270,7 @@ BOOL CConnection::ConnectTo(const IN_ADDR* pAddress, WORD nPort)
 	// The IP address is in the security list of government and corporate addresses we want to avoid
 	if ( Security.IsDenied( pAddress ) )
 	{
-		// The update download is checked by HTTPS and its hash instead: say so, and connect
+		// The update download relies on HTTPS with a certificate valid for its host instead: say so, and connect
 		if ( m_bSkipSecurity )
 		{
 			theApp.Message( MSG_INFO, IDS_SECURITY_UPDATE_EXEMPT, (LPCTSTR)CString( inet_ntoa( *pAddress ) ) );
@@ -400,7 +400,7 @@ BOOL CConnection::ConnectTo(const IN6_ADDR* pAddress, WORD nPort)
 	// The IP address is in the security list of government and corporate addresses we want to avoid
 	if ( Security.IsDenied( pAddress ) )
 	{
-		// The update download is checked by HTTPS and its hash instead: say so, and connect
+		// The update download relies on HTTPS with a certificate valid for its host instead: say so, and connect
 		if ( m_bSkipSecurity )
 		{
 			theApp.Message( MSG_INFO, IDS_SECURITY_UPDATE_EXEMPT, (LPCTSTR)IPv6ToString( pAddress ) );
