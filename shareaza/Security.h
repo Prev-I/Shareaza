@@ -149,6 +149,9 @@ public:
 
 protected:
 	CSecureRule*	GetGUID(const GUID& oGUID) const;
+	// File a single-address rule (IPv4 /32, IPv6 /128) in its address map, deleting any other
+	// rule filed at that address. Returns false, doing nothing, for any other rule. Hold m_pSection.
+	bool			FileSingleAddress(CSecureRule* pRule);
 	CXMLElement*	ToXML(BOOL bRules = TRUE);
 	BOOL			FromXML(CXMLElement* pXML);
 	void			Serialize(CArchive& ar);

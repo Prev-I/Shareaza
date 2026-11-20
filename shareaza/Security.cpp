@@ -74,7 +74,49 @@ CSecureRule* CSecurity::GetNext(POSITION& pos) const
 
 INT_PTR CSecurity::GetCount() const
 {
-	return m_pRules.GetCount() + m_pIPRules.size();
+	// Serialize writes all three containers after this count, so it must cover all three
+	return m_pRules.GetCount() + m_pIPRules.size() + m_pIPv6Rules.size();
+}
+
+bool CSecurity::FileSingleAddress(CSecureRule* pRule)
+{
+	if ( pRule->m_nType == CSecureRule::srAddress &&
+		*(DWORD*)pRule->m_nMask == 0xffffffff )
+	{
+		CAddressRuleMap::iterator i = m_pIPRules.find( *(DWORD*)pRule->m_nIP );
+		if ( i == m_pIPRules.end() )
+		{
+			m_pIPRules[ *(DWORD*)pRule->m_nIP ] = pRule;
+		}
+		else if ( (*i).second != pRule )
+		{
+			// replace old rule with new one.
+			CSecureRule* pOldRule = (*i).second;
+			(*i).second = pRule;
+			delete pOldRule;
+		}
+		return true;
+	}
+
+	if ( pRule->m_nType == CSecureRule::srAddressIPv6 &&
+		pRule->m_nIPv6PrefixLen == 128 )
+	{
+		CAddressIPv6RuleMap::iterator i = m_pIPv6Rules.find( pRule->m_nIPv6 );
+		if ( i == m_pIPv6Rules.end() )
+		{
+			m_pIPv6Rules[ pRule->m_nIPv6 ] = pRule;
+		}
+		else if ( (*i).second != pRule )
+		{
+			// replace old rule with new one.
+			CSecureRule* pOldRule = (*i).second;
+			(*i).second = pRule;
+			delete pOldRule;
+		}
+		return true;
+	}
+
+	return false;
 }
 
 BOOL CSecurity::Check(CSecureRule* pRule) const
@@ -158,40 +200,8 @@ void CSecurity::Add(CSecureRule* pRule)
 			}
 		}
 
-		// special treatment for single IP security rules
-		if ( pRule->m_nType == CSecureRule::srAddress &&
-			*(DWORD*)pRule->m_nMask == 0xffffffff )
-		{
-			CAddressRuleMap::iterator i = m_pIPRules.find( *(DWORD*)pRule->m_nIP );
-			if ( i == m_pIPRules.end() )
-			{
-				m_pIPRules[ *(DWORD*)pRule->m_nIP ] = pRule;
-			}
-			else if ( (*i).second != pRule )
-			{
-				// replace old rule with new one.
-				CSecureRule* pOldRule = (*i).second;
-				(*i).second = pRule;
-				delete pOldRule;
-			}
-		}
-		else if ( pRule->m_nType == CSecureRule::srAddressIPv6 &&
-			pRule->m_nIPv6PrefixLen == 128 )
-		{
-			CAddressIPv6RuleMap::iterator i = m_pIPv6Rules.find( pRule->m_nIPv6 );
-			if ( i == m_pIPv6Rules.end() )
-			{
-				m_pIPv6Rules[ pRule->m_nIPv6 ] = pRule;
-			}
-			else if ( (*i).second != pRule )
-			{
-				// replace old rule with new one.
-				CSecureRule* pOldRule = (*i).second;
-				(*i).second = pRule;
-				delete pOldRule;
-			}
-		}
-		else // default procedure for everything else
+		// special treatment for single IP security rules; default procedure for everything else
+		if ( ! FileSingleAddress( pRule ) )
 		{
 			CSecureRule* pExistingRule = GetGUID( pRule->m_pGUID );
 			if ( pExistingRule == NULL )
@@ -1169,17 +1179,7 @@ void CSecurity::Serialize(CArchive& ar)
 				pRule->MaskFix();
 
 				// special treatment for single IP security rules
-				if ( pRule->m_nType == CSecureRule::srAddress &&
-					*(DWORD*)pRule->m_nMask == 0xffffffff )
-				{
-					m_pIPRules[ *(DWORD*)pRule->m_nIP ] = pRule;
-				}
-				else if( pRule->m_nType == CSecureRule::srAddressIPv6 &&
-					pRule->m_nIPv6PrefixLen == 128 )
-				{
-					m_pIPv6Rules[ pRule->m_nIPv6 ] = pRule;
-				}
-				else
+				if ( ! FileSingleAddress( pRule ) )
 				{
 					m_pRules.AddTail( pRule );
 				}
@@ -1250,8 +1250,11 @@ BOOL CSecurity::FromXML(CXMLElement* pXML)
 			{
 				pRule->MaskFix();
 
-				const bool bSingleIP = pRule->m_nType == CSecureRule::srAddress &&
-					*(DWORD*)pRule->m_nMask == 0xffffffff;
+				const bool bSingleAddress =
+					( pRule->m_nType == CSecureRule::srAddress &&
+					  *(DWORD*)pRule->m_nMask == 0xffffffff ) ||
+					( pRule->m_nType == CSecureRule::srAddressIPv6 &&
+					  pRule->m_nIPv6PrefixLen == 128 );
 
 				if ( pExisting )
 				{
@@ -1260,7 +1263,7 @@ BOOL CSecurity::FromXML(CXMLElement* pXML)
 					pRule->m_nEver	= pExisting->m_nEver;
 				}
 
-				if ( pExisting && ! bSingleIP && m_pRules.Find( pExisting ) )
+				if ( pExisting && ! bSingleAddress && m_pRules.Find( pExisting ) )
 				{
 					// Overwrite in place, so the rule keeps its position.
 					*pExisting = *pRule;
@@ -1270,12 +1273,9 @@ BOOL CSecurity::FromXML(CXMLElement* pXML)
 				{
 					if ( pExisting ) Remove( pExisting );
 
-					// special treatment for single IP security rules
-					if ( bSingleIP )
-					{
-						m_pIPRules[ *(DWORD*)pRule->m_nIP ] = pRule;
-					}
-					else
+					// special treatment for single IP security rules: a rule
+					// already filed at the address is replaced and freed
+					if ( ! FileSingleAddress( pRule ) )
 					{
 						m_pRules.AddTail( pRule );
 					}
