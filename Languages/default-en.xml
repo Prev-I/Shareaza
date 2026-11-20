@@ -3118,6 +3118,7 @@
 		<string id="16378" value="Host &quot;%s&quot; sent a 416, without providing available ranges. Closing connection."/>
 		<string id="16379" value="Library Files"/>
 		<string id="16380" value="DC++ Guard"/>
+		<string id="16381" value="IP lists and security rules do not apply to the update download: connecting to %s."/>
 		<string id="16384" value="Are you sure you want to launch the file &quot;%s&quot; ?\n\nSome files can be harmful to your computer. Ensure you know what the file is before launching it."/>
 		<string id="16385" value="You are about to modify the metadata of %i files, are you sure you want to continue?"/>
 		<string id="16386" value="Editing metadata of %i files."/>

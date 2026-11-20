@@ -68,6 +68,7 @@ protected:
 	typedef CLocked< CBuffer*, CCriticalSectionPtr > CLockedBuffer;
 
 	BOOL		m_bAutoDelete;				// Delete this object in Close() method
+	BOOL		m_bSkipSecurity;			// Connect without the security check: set only for the client's own update download
 
 private:
 	CCriticalSectionPtr	m_pInputSection;

@@ -94,6 +94,10 @@ BOOL CDownloadTransferHTTPS::Initiate()
 	// Only this attempt's certificate verification may make the source wait again
 	m_pSource->m_bTlsWaiting = false;
 	m_pSource->m_sTlsWaitingFingerprint.Empty();
+
+	// The client's own update download (m_bRequireValidCert) is exempt from IP lists and
+	// security rules: HTTPS and the release's hash check it instead. Set both ways, every time.
+	m_bSkipSecurity = m_pDownload->m_bRequireValidCert;
 	
 	if ( m_pDownload->IsCompleted() )
 	{

@@ -129,6 +129,7 @@ CConnection::CConnection(PROTOCOLID nProtocol)
 	, m_nProtocol			( nProtocol )
 	, m_nDelayCloseReason	( 0 )
 	, m_bAutoDelete			( FALSE )
+	, m_bSkipSecurity		( FALSE )
 	, m_nTlsPhase			( tlsNone )
 	, m_bTlsValidated		( false )
 {
@@ -269,9 +270,17 @@ BOOL CConnection::ConnectTo(const IN_ADDR* pAddress, WORD nPort)
 	// The IP address is in the security list of government and corporate addresses we want to avoid
 	if ( Security.IsDenied( pAddress ) )
 	{
-		// Report that we aren't connecting to this IP address and return false
-		theApp.Message( MSG_ERROR, IDS_SECURITY_OUTGOING, (LPCTSTR)CString( inet_ntoa( *pAddress ) ) );
-		return FALSE;
+		// The update download is checked by HTTPS and its hash instead: say so, and connect
+		if ( m_bSkipSecurity )
+		{
+			theApp.Message( MSG_INFO, IDS_SECURITY_UPDATE_EXEMPT, (LPCTSTR)CString( inet_ntoa( *pAddress ) ) );
+		}
+		else
+		{
+			// Report that we aren't connecting to this IP address and return false
+			theApp.Message( MSG_ERROR, IDS_SECURITY_OUTGOING, (LPCTSTR)CString( inet_ntoa( *pAddress ) ) );
+			return FALSE;
+		}
 	}
 
 	// The IN_ADDR structure we just got passed isn't the same as the one already stored in this object
@@ -391,9 +400,17 @@ BOOL CConnection::ConnectTo(const IN6_ADDR* pAddress, WORD nPort)
 	// The IP address is in the security list of government and corporate addresses we want to avoid
 	if ( Security.IsDenied( pAddress ) )
 	{
-		// Report that we aren't connecting to this IP address and return false
-		theApp.Message( MSG_ERROR, IDS_SECURITY_OUTGOING, (LPCTSTR)IPv6ToString( pAddress ) );
-		return FALSE;
+		// The update download is checked by HTTPS and its hash instead: say so, and connect
+		if ( m_bSkipSecurity )
+		{
+			theApp.Message( MSG_INFO, IDS_SECURITY_UPDATE_EXEMPT, (LPCTSTR)IPv6ToString( pAddress ) );
+		}
+		else
+		{
+			// Report that we aren't connecting to this IP address and return false
+			theApp.Message( MSG_ERROR, IDS_SECURITY_OUTGOING, (LPCTSTR)IPv6ToString( pAddress ) );
+			return FALSE;
+		}
 	}
 
 	// The IN_ADDR structure we just got passed isn't the same as the one already stored in this object

@@ -3079,6 +3079,7 @@
 		<string id="16378" value="Host &quot;%s&quot; sent a 416, without providing available ranges. Closing connection."/>
 		<string id="16379" value="File della libreria"/>
 		<string id="16380" value="DC++ Guard"/>
+		<string id="16381" value="Le liste IP e le regole di sicurezza non si applicano al download dell'aggiornamento: connessione a %s."/>
 		<string id="16384" value="Desideri eseguire il file &quot;%s&quot; ?\n\nAlcuni file potrebbero essere pericolosi per il tuo computer. Assicurati di conoscere la natura del file prima di eseguirlo."/>
 		<string id="16385" value="Stai per modificare i metadata di %i file, desideri continuare?"/>
 		<string id="16386" value="Modifica dei metadata di %i file."/>
