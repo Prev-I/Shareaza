@@ -451,7 +451,7 @@ BOOL CDownloadWithSources::AddSourceHit(const CMatchFile* pMatchFile, BOOL bForc
 	return bRet;
 }
 
-BOOL CDownloadWithSources::AddSourceHit(const CShareazaURL& oURL, BOOL bForce, int nRedirectionCount)
+BOOL CDownloadWithSources::AddSourceHit(const CShareazaURL& oURL, BOOL bForce, int nRedirectionCount, BOOL bUpdateExempt)
 {
 	CQuickLock oLock( Transfers.m_pSection );
 
@@ -470,7 +470,7 @@ BOOL CDownloadWithSources::AddSourceHit(const CShareazaURL& oURL, BOOL bForce, i
 		sURL.Trim();
 		if ( sURL.GetLength() )
 		{
-			if ( ! AddSourceURL( sURL, NULL, nRedirectionCount, FALSE, bForce ) )
+			if ( ! AddSourceURL( sURL, NULL, nRedirectionCount, FALSE, bForce, FALSE, bUpdateExempt ) )
 			{
 				return FALSE;
 			}
@@ -509,7 +509,7 @@ BOOL CDownloadWithSources::AddSourceBT(const Hashes::BtGuid& oGUID, const IN6_AD
 //////////////////////////////////////////////////////////////////////
 // CDownloadWithSources add a single URL source
 
-BOOL CDownloadWithSources::AddSourceURL(LPCTSTR pszURL, FILETIME* pLastSeen, int nRedirectionCount, BOOL bFailed, BOOL bForce, BOOL bPartialSame )
+BOOL CDownloadWithSources::AddSourceURL(LPCTSTR pszURL, FILETIME* pLastSeen, int nRedirectionCount, BOOL bFailed, BOOL bForce, BOOL bPartialSame, BOOL bUpdateExempt )
 {
 	if ( pszURL == NULL || *pszURL == 0 )
 		return FALSE;
@@ -579,7 +579,13 @@ BOOL CDownloadWithSources::AddSourceURL(LPCTSTR pszURL, FILETIME* pLastSeen, int
 		// Not match
 		return FALSE;
 
-	return AddSourceInternal( new CDownloadSource( static_cast< const CDownload* >( this ), pszURL, bHashAuth, pLastSeen, nRedirectionCount ) );
+	CDownloadSource* pSource = new CDownloadSource( static_cast< const CDownload* >( this ), pszURL, bHashAuth, pLastSeen, nRedirectionCount );
+
+	// The only place a source is marked as the update's own: its address was just resolved
+	// from this URL, in this process, never read from a saved download
+	pSource->m_bUpdateExempt = ( bUpdateExempt != FALSE );
+
+	return AddSourceInternal( pSource );
 }
 
 //////////////////////////////////////////////////////////////////////

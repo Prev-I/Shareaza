@@ -70,7 +70,7 @@ public:
 	CDownload*	Add(BOOL bAddToHead = FALSE);
 	CDownload*	Add(CQueryHit* pHit, BOOL bAddToHead = FALSE);
 	CDownload*	Add(CMatchFile* pFile, BOOL bAddToHead = FALSE);
-	CDownload*	Add(const CShareazaURL& oURL, BOOL bAddToHead = FALSE);
+	CDownload*	Add(const CShareazaURL& oURL, BOOL bAddToHead = FALSE, BOOL bUpdateExempt = FALSE);
 	void		PauseAll();
 	void		ClearCompleted();
 	void		ClearPaused();
@@ -141,6 +141,7 @@ private:
 	BOOL		LoadFromTimePair();
 	void		SerializeCompound(CArchive& ar);
 	void		PurgePreviews();
+	void		ReseedUpdate(CDownload* pDownload);
 
 	CDownloads(const CDownloads&);
 	CDownloads& operator=(const CDownloads&);

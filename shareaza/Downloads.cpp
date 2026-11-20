@@ -38,6 +38,8 @@
 #include "QueryHit.h"
 #include "MatchObjects.h"
 #include "ShareazaURL.h"
+#include "UpgradeAsset.h"
+#include "VersionChecker.h"
 
 #include "WndMain.h"
 
@@ -246,7 +248,7 @@ CDownload* CDownloads::Add(CMatchFile* pFile, BOOL bAddToHead)
 //////////////////////////////////////////////////////////////////////
 // CDownloads add download from a URL
 
-CDownload* CDownloads::Add(const CShareazaURL& oURL, BOOL bAddToHead)
+CDownload* CDownloads::Add(const CShareazaURL& oURL, BOOL bAddToHead, BOOL bUpdateExempt)
 {
 	if ( oURL.m_nAction != CShareazaURL::uriDownload &&
 		 oURL.m_nAction != CShareazaURL::uriSource ) return NULL;
@@ -280,7 +282,7 @@ CDownload* CDownloads::Add(const CShareazaURL& oURL, BOOL bAddToHead)
 			return NULL;
 	}
 
-	pDownload->AddSourceHit( oURL, bNew );
+	pDownload->AddSourceHit( oURL, bNew, 0, bUpdateExempt );
 
 	if ( bNew )
 	{
@@ -300,6 +302,46 @@ CDownload* CDownloads::Add(const CShareazaURL& oURL, BOOL bAddToHead)
 		pDownload->Resume();
 
 	return pDownload;
+}
+
+//////////////////////////////////////////////////////////////////////
+// CDownloads resumed update download
+
+// A saved update download holds only the redirect its official source returned, whose URL
+// expires and which is not exempt from IP filtering once reloaded. If it is still the update
+// the version check found, its sources are replaced with the check's own URL, which redirects
+// afresh. Otherwise, or if that URL does not parse, it is left as it is.
+void CDownloads::ReseedUpdate(CDownload* pDownload)
+{
+	ASSUME_LOCK( Transfers.m_pSection );
+
+	if ( ! pDownload->m_bRequireValidCert || pDownload->IsCompleted() || pDownload->IsSeeding() )
+		return;
+
+	QWORD nUpgradeSize = 0;
+	if ( Settings.VersionCheck.UpgradeSize.GetLength() &&
+		 _stscanf( Settings.VersionCheck.UpgradeSize.GetString(), _T("%I64u"), &nUpgradeSize ) != 1 )
+		nUpgradeSize = 0;
+
+	const std::vector< std::wstring > oURLs = UpgradeAsset::ReseedURLs(
+		std::wstring( (LPCTSTR)pDownload->m_sName ), pDownload->m_nSize,
+		std::wstring( (LPCTSTR)Settings.VersionCheck.UpgradeFile ),
+		std::wstring( (LPCTSTR)Settings.VersionCheck.UpgradeSources ),
+		nUpgradeSize, CVersionChecker::IsVersionNewer() != FALSE );
+
+	// Syntax only: resolving here would add a blocking lookup, and AddSourceURL resolves anyway
+	bool bValid = false;
+	for ( size_t i = 0 ; i < oURLs.size() && ! bValid ; ++i )
+	{
+		CShareazaURL oURL;
+		bValid = ( oURL.Parse( oURLs[ i ].c_str(), FALSE ) != FALSE );
+	}
+	if ( ! bValid )
+		return;
+
+	pDownload->ClearSources();
+	for ( size_t i = 0 ; i < oURLs.size() ; ++i )
+		pDownload->AddSourceURL( oURLs[ i ].c_str(), NULL, 0, FALSE, TRUE, FALSE, TRUE );
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1289,6 +1331,7 @@ CDownload* CDownloads::Load(const CString& strPath)
 			pDownload->m_bVerify = TRI_TRUE;
 		}
 		m_pList.AddTail( pDownload );
+		ReseedUpdate( pDownload );
 		return pDownload.Detach();
 	}
 	else
