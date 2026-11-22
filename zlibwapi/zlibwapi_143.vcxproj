@@ -256,6 +256,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="zlib\win32\zlib.def" />
+    <None Include="zlibvc.def" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="zlib\crc32.h" />

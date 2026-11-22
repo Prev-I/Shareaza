@@ -46,7 +46,7 @@ BEGIN
             VALUE "FileDescription", "zlib data compression library"
             VALUE "FileVersion", "1.4.0.0"
             VALUE "InternalName", "zlib"
-            VALUE "LegalCopyright", "Copyright � Jean-loup Gailly & Mark Adler, 1995-2013. All rights reserved."
+            VALUE "LegalCopyright", "Copyright � Jean-loup Gailly & Mark Adler, 1995-2026. All rights reserved."
             VALUE "OriginalFilename", "zlib.dll"
             VALUE "ProductName", "Shareaza"
             VALUE "ProductVersion", "2.7.10.2"
