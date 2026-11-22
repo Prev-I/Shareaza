@@ -33,8 +33,9 @@ The text below is the audit as written, apart from the dated bullets under **Dis
 **Fixed** lines under findings 1 to 5, the new item in the Medium list, the **Fixed** lines of
 2026-11-07 under the Medium item on MiniUPnPc, under "Other third-party prebuilt packages" and
 under the Low items on Sentry and the update check, the **Fixed** lines of 2026-11-08 under the
-Medium item on the global IPv6 address and the Low item on BugSplat, the sentence on miniupnpc 2.3.3 under "Checked
-and clean", the dated lines of 2026-11-22 on the third-party libraries updated for previ.11, the heading of the first addendum's "Still open" list, and the notes under
+Medium item on the global IPv6 address and the Low item on BugSplat, the sentence on miniupnpc
+2.3.3 under "Checked and clean", the dated lines of 2026-11-22 on the third-party libraries
+updated for previ.11, the heading of the first addendum's "Still open" list, and the notes under
 "Consequences for the oracle". What changed on 2026-10-26 is in the
 [first addendum](#addendum-2026-10-26-fixes-for-findings-3-4-and-5).
 
@@ -239,7 +240,8 @@ went to the provenance pass instead.
   - BitTorrent peer-ID prefix `iS`.
 - **IDE caches** committed in `640fd8caf` under `zlibwapi/zlib/contrib/vstudio/vc14/.vs/` include
   the developer's Windows user name (`C:\Users\salva`) and their PATH. Privacy and hygiene only.
-  - **Fixed** on 2026-11-22, for previ.11: removed with the old zlib tree.
+  - **Removed from the tree** on 2026-11-22, for previ.11, with the old zlib tree; they remain in
+    the history.
 - **Commit signatures:** all 62 signed commits verify (61 GitHub web-flow, 1 Ansani's key), and the
   rest are unsigned. No author or committer metadata looks spoofed. The author/commit date gaps on
   ivan386 commits are SVN-sync replays.
@@ -258,7 +260,9 @@ went to the provenance pass instead.
   - no base64 or XOR blobs, and no host names assembled from pieces.
 - **Vendored zlib** matches the official 1.2.12 tarball, apart from two harmless patches taken from
   1.2.13 (`crc32.c` `ZEXPORT`, and the `zlib.h` 64-bit combine declarations). Since 2026-11-22, for
-  previ.11, `zlibwapi/zlib` is the zlib 1.4 release tarball, unchanged, and bzip2 is 1.0.8.
+  previ.11, `zlibwapi/zlib` is the zlib 1.4 release tarball, unchanged.
+- **Vendored bzip2** is, since 2026-11-22, for previ.11, the 1.0.8 release, changed only by the
+  `_setmode` renames its `HowToUpdate.txt` lists.
 - **`plugins/RARBuilder/unrar.h`** matches RARLab's `dll.hpp`.
 - **MiniUPnPc's** `src/` and `include/` trees matched official 2.2.4, though they weren't what was
   compiled (see Medium). Both trees have since been replaced by miniupnpc 2.3.3, and since

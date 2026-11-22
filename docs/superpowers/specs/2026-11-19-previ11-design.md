@@ -142,13 +142,23 @@ is its own commit.
 
 | Library | From | To | Why |
 |---|---|---|---|
-| bzip2 (`bzlib/`) | 1.0.6 | 1.0.8 | Out-of-bounds write in `BZ2_decompress` (CVE-2019-12900); `CBuffer::UnBZip` decompresses network data. |
+| bzip2 (`bzlib/`) | 1.0.6 | 1.0.8 | Out-of-bounds write in `BZ2_decompress` (CVE-2019-12900); the client decompresses bzip2 data with it. |
 | miniupnpc (`MiniUPnPc/`) | 2.3.3 + 3 patches | 2.3.5 | Ships the three `minixml.c` fixes applied by hand; bounded header parsing in `miniwget.c`. |
 | zlib (`zlibwapi/zlib`) | 1.2.12 | 1.4 | Memory-safety fixes in inflate, deflate, the gz functions and minizip, which `zlibwapi.dll` exports and DocumentReader, SkinScanSKS, ZIPBuilder and the IP-list import use. |
 | 7-Zip Extra (`7zxa*.dll`) | 17.01 beta | 26.06 | Nine years of parser fixes; the DLLs become verifiable against the release. |
-| UnRAR.dll | 6.11 | 7.23 | RAR5 recovery-volume fix (CVE-2026-14191) and later parser fixes. |
+| UnRAR.dll | 6.11 | 7.23 | Four years of RARLab updates to the library. Its RAR5 recovery-volume fix (CVE-2026-14191) is not reachable through the plugin, which only lists archives. |
 | Inno Setup (CI) | 6.7.3 | 6.7.4 | Last 6.x; fixes RedirectionGuard inheritance by processes Setup starts. 7.x stays a change of its own. |
 | GitTools actions (CI) | v4.7.0 / v1 | v4.7.2 | Maintenance and an `overrideConfig` fix; `msbuild.yml` moves off v1 and GitVersion 5. |
+| Other CI actions | `@v2`/`@v4` tags | `release.yml`'s pins | `msbuild.yml` and `tls-test.yml` take the commit-pinned checkout, setup-msbuild and upload-artifact versions `release.yml` uses. |
+
+Sources for the reasons: each project's release notes or changelog (zlib `ChangeLog`, miniupnpc
+`Changelog.txt`, UnRAR `whatsnew.txt`, Inno Setup `whatsnew.htm`, the GitTools v4.7.0...v4.7.2
+compare), and the Debian security tracker for CVE-2026-14191.
+
+`unrar.h` 7.23 puts its new pointer fields in reserved space sized for 64-bit pointers: on x64
+the structures keep their sizes, on x86 `RARHeaderDataEx` and `RAROpenArchiveDataEx` shrink by 8
+and 4 bytes. The x86 DLL is built from the same header, so caller and DLL agree; an older x86
+`unrar.dll` would not.
 
 Behaviour kept *(designer's call)*: UnRAR 7.2x opens archives unshared by default, so the RAR
 plugin asks for the shared mode every earlier version used; zlib's export list moves out of the

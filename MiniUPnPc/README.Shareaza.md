@@ -13,8 +13,8 @@ in this folder (`MiniUPnPc_143.vcxproj`, `dlldata.c`, `MiniUPnPc.rc`,
 | Tag | `miniupnpc_2_3_5` = commit `e1db7c47295d38b2b416c892779dae9afa434016` |
 | Copied from | the tag's `miniupnpc/` directory |
 
-2.3.4 (2026-11-15) was withdrawn by upstream for a packaging error; 2.3.5 is
-the same code. The `LICENSE` file is a symbolic link to `../LICENSE` in the
+2.3.5 followed 2.3.4 (2026-11-15) by a day; its `Changelog.txt` entry reads
+"there was a packaging error with miniupnpc-2.3.4.tar.gz". The `LICENSE` file is a symbolic link to `../LICENSE` in the
 upstream repository; it is stored here as a regular file with the same content
 as the release tarball's `LICENSE`. Git line-ending normalisation
 (`* text=auto`) stores `testdesc/new_LiveBox_desc.xml`, which upstream keeps
