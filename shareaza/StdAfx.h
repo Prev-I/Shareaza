@@ -214,7 +214,7 @@
 
 #define BZ_NO_STDIO
 #include "../bzlib/bzlib.h"
-#include "../zlib/zlib.h"
+#include "../zlibwapi/zlib/zlib.h"
 
 #pragma warning ( pop )
 
