@@ -1,4 +1,4 @@
-1. Download latest "LZMA SDK" (lzmaXXX.tar.bz2) file here: https://sourceforge.net/projects/sevenzip/files/LZMA%20SDK/
-2. Unpack replacing files from "C\", "CPP\Common\", "CPP\7zip\" to "7zxr\C\", "7zxr\CPP\Common\" and "7zxr\CPP\7Zip\"
-3. Download latest "7-Zip Extra" (7zXXX_extra.7z) here: http://sourceforge.net/projects/sevenzip/files/7-Zip/
-4. Unpack renaming and replacing next files: "x64\7zxa.dll" to "7zxa64.dll".
+1. Download the latest "LZMA SDK" (lzmaXXXX.7z) from https://www.7-zip.org/sdk.html (the files are on github.com/ip7z/7zip releases; check the asset digest GitHub shows)
+2. Copy IArchive.h and every header it includes, directly or not, from "C\", "CPP\Common\" and "CPP\7zip\" to "7zxr\C\", "7zxr\CPP\Common\" and "7zxr\CPP\7zip\"
+3. Download the matching "7-Zip Extra" (7zXXXX-extra.7z) from https://www.7-zip.org/download.html
+4. Copy "7zxa.dll" to "7zxa.dll", "x64\7zxa.dll" to "7zxa64.dll", and "License.txt" to "7zxa license.txt"
