@@ -25,6 +25,7 @@ The same release carries every small item left over from previ.9 and previ.10 *(
    lists and the security rules exactly as today *(owner)*.
 2. The deferred fixes listed under *Deferred fixes*.
 3. Version 2.7.11.6, released as `v2.7.11.6-previ.11`.
+4. The third-party libraries updated, as listed under *Dependency updates* *(owner, 2026-11-22)*.
 
 ## Non-goals
 
@@ -131,6 +132,32 @@ check below still applies.
    call.
 7. **`docs/DIAGNOSTICS.md`**: replace the Inno Setup placeholder `{app}\Data` with words a user
    understands (the installation folder's `Data`), and re-read the section for other wording nits.
+
+## Dependency updates
+
+Added on 2026-11-22 *(owner)*: every bundled third-party library with a newer release that fixes
+a defect the client can reach, or that is useful to take, is updated on this branch. Each comes
+from its official release, checked by signature or by the release's published digest, and each
+is its own commit.
+
+| Library | From | To | Why |
+|---|---|---|---|
+| bzip2 (`bzlib/`) | 1.0.6 | 1.0.8 | Out-of-bounds write in `BZ2_decompress` (CVE-2019-12900); `CBuffer::UnBZip` decompresses network data. |
+| miniupnpc (`MiniUPnPc/`) | 2.3.3 + 3 patches | 2.3.5 | Ships the three `minixml.c` fixes applied by hand; bounded header parsing in `miniwget.c`. |
+| zlib (`zlibwapi/zlib`) | 1.2.12 | 1.4 | Memory-safety fixes in inflate, deflate, the gz functions and minizip, which `zlibwapi.dll` exports and DocumentReader, SkinScanSKS, ZIPBuilder and the IP-list import use. |
+| 7-Zip Extra (`7zxa*.dll`) | 17.01 beta | 26.06 | Nine years of parser fixes; the DLLs become verifiable against the release. |
+| UnRAR.dll | 6.11 | 7.23 | RAR5 recovery-volume fix (CVE-2026-14191) and later parser fixes. |
+| Inno Setup (CI) | 6.7.3 | 6.7.4 | Last 6.x; fixes RedirectionGuard inheritance by processes Setup starts. 7.x stays a change of its own. |
+| GitTools actions (CI) | v4.7.0 / v1 | v4.7.2 | Maintenance and an `overrideConfig` fix; `msbuild.yml` moves off v1 and GitVersion 5. |
+
+Behaviour kept *(designer's call)*: UnRAR 7.2x opens archives unshared by default, so the RAR
+plugin asks for the shared mode every earlier version used; zlib's export list moves out of the
+tree zlib no longer ships it in.
+
+Not updated: SQLite 3.20.1 (fixed SQL on a local file; no reachable fix), Boost 1.84 (the NuGet
+feed stops at 1.87; no fix in the parts used), the GFL SDK 3.40 (no newer release exists), and
+GitVersion 7 (breaking). The unused copy of zlib 1.2.12 in the root `zlib/` folder is left as it
+is.
 
 ## Release
 

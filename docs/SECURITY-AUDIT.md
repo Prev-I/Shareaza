@@ -34,7 +34,7 @@ The text below is the audit as written, apart from the dated bullets under **Dis
 2026-11-07 under the Medium item on MiniUPnPc, under "Other third-party prebuilt packages" and
 under the Low items on Sentry and the update check, the **Fixed** lines of 2026-11-08 under the
 Medium item on the global IPv6 address and the Low item on BugSplat, the sentence on miniupnpc 2.3.3 under "Checked
-and clean", the heading of the first addendum's "Still open" list, and the notes under
+and clean", the dated lines of 2026-11-22 on the third-party libraries updated for previ.11, the heading of the first addendum's "Still open" list, and the notes under
 "Consequences for the oracle". What changed on 2026-10-26 is in the
 [first addendum](#addendum-2026-10-26-fixes-for-findings-3-4-and-5).
 
@@ -176,6 +176,8 @@ went to the provenance pass instead.
   - **Fixed** on 2026-11-07: the project now builds miniupnpc 2.3.3, verified against upstream's
     signed release, with upstream's three minixml out-of-bounds read fixes applied
     (CVE-2026-110655, CVE-2026-110656 and one without a CVE); see `MiniUPnPc/README.Shareaza.md`.
+  - **Updated** on 2026-11-22, for previ.11: miniupnpc 2.3.5, which ships those three fixes, so
+    no local patch remains.
 - **Weaker G2 hit anti-spoofing.** `G2Packet.cpp:1030-1040` now accepts hits whose node address
   differs from the UDP sender, provided the sender is in the host cache.
 - **Global IPv6 address advertised.** It goes out in G2 search replies (`LocalSearch.cpp:959-963`),
@@ -214,7 +216,11 @@ went to the provenance pass instead.
     reporting.
 - **UnRAR 6.11.0 DLLs** are authentic (win.rar GmbH signature, chain verified to the GlobalSign
   intermediate) but old.
+  - **Updated** on 2026-11-22, for previ.11: UnRAR.dll 7.23, the latest stable release, with a
+    valid win.rar GmbH signature on the package and both DLLs.
 - **The 7-Zip extraction DLLs** (`7zxa*.dll`) are unchanged since the baseline and unverified.
+  - **Updated** on 2026-11-22, for previ.11: 7-Zip Extra 26.06, matching the digest of the asset on
+    the official release. 7-Zip does not sign its DLLs.
 - **Sentry 4.4.0** is the official .NET SDK but nothing in the source uses it. Its `Sentry.targets`
   is still imported at build time and does nothing unless upload properties are set.
   - **Fixed** on 2026-11-07: the Sentry package and its import are removed.
@@ -233,6 +239,7 @@ went to the provenance pass instead.
   - BitTorrent peer-ID prefix `iS`.
 - **IDE caches** committed in `640fd8caf` under `zlibwapi/zlib/contrib/vstudio/vc14/.vs/` include
   the developer's Windows user name (`C:\Users\salva`) and their PATH. Privacy and hygiene only.
+  - **Fixed** on 2026-11-22, for previ.11: removed with the old zlib tree.
 - **Commit signatures:** all 62 signed commits verify (61 GitHub web-flow, 1 Ansani's key), and the
   rest are unsigned. No author or committer metadata looks spoofed. The author/commit date gaps on
   ivan386 commits are SVN-sync replays.
@@ -250,10 +257,12 @@ went to the provenance pass instead.
   - no hardcoded credentials;
   - no base64 or XOR blobs, and no host names assembled from pieces.
 - **Vendored zlib** matches the official 1.2.12 tarball, apart from two harmless patches taken from
-  1.2.13 (`crc32.c` `ZEXPORT`, and the `zlib.h` 64-bit combine declarations).
+  1.2.13 (`crc32.c` `ZEXPORT`, and the `zlib.h` 64-bit combine declarations). Since 2026-11-22, for
+  previ.11, `zlibwapi/zlib` is the zlib 1.4 release tarball, unchanged, and bzip2 is 1.0.8.
 - **`plugins/RARBuilder/unrar.h`** matches RARLab's `dll.hpp`.
 - **MiniUPnPc's** `src/` and `include/` trees matched official 2.2.4, though they weren't what was
-  compiled (see Medium). Both trees have since been replaced by miniupnpc 2.3.3.
+  compiled (see Medium). Both trees have since been replaced by miniupnpc 2.3.3, and since
+  2026-11-22, for previ.11, by 2.3.5.
 - **`gvmat32.asm` and `gvmat32c.c`** match zlib 1.2.3's `contrib/masmx86` and are not built.
 - **The installer** downloads only `VC_redist` from go.microsoft.com, which predates the fork, and
   writes nothing outside `{app}` and `{userappdata}\Shareaza` beyond what it already did.
