@@ -28,7 +28,7 @@ The same release carries every small item left over from previ.9 and previ.10 *(
 
 ## Non-goals
 
-- Exempting user-chosen web downloads *(owner)*: no per-source "from a URL" marker is added.
+- Exempting user-chosen web downloads *(owner)*: no marker for sources the user adds from a URL; the only per-source marker is the update's own (*Which sources*).
 - Changing what IP lists or security rules do to P2P traffic.
 - Helping previ.10 installs: the exemption ships in previ.11, so a previ.10 client with the
   eMule-Security list still cannot download previ.11 through the updater. The known-issue note on
@@ -85,7 +85,8 @@ The same release carries every small item left over from previ.9 and previ.10 *(
   name keeps matching.
 - **Where.** `CDownloadTransferHTTPS::Initiate` sets the `CConnection` flag `m_bSkipSecurity` to
   `m_bRequireValidCert && m_pSource->m_bUpdateExempt`, both ways, every time. Both
-  `CConnection::ConnectTo` overloads skip the `Security.IsDenied` check when the flag is set.
+  `CConnection::ConnectTo` overloads connect even when `Security.IsDenied` refuses the address
+  when the flag is set (it is still evaluated, for the log line under *Visibility*).
   Every other check in `ConnectTo` (null or zero address, port 0) stays. A connection opened
   with the flag is never handed to another download (`GiveConnectionToNext`).
 - **What protects the update instead.** HTTPS with a certificate valid for the URL's host, on
