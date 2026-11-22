@@ -166,8 +166,8 @@ tree zlib no longer ships it in.
 
 Not updated: SQLite 3.20.1 (fixed SQL on a local file; no reachable fix), Boost 1.84 (the NuGet
 feed stops at 1.87; no fix in the parts used), the GFL SDK 3.40 (no newer release exists), and
-GitVersion 7 (breaking). The unused copy of zlib 1.2.12 in the root `zlib/` folder is left as it
-is.
+GitVersion 7 (breaking). The root `zlib/` folder, an unused copy of zlib 1.2.12 that no project
+built, is removed *(owner, 2026-11-22)*: the build uses `zlibwapi/zlib` only.
 
 ## Parser and rendering fixes (added 2026-11-22)
 
