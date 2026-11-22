@@ -335,3 +335,7 @@ pip-log.txt
 
 #Resources
 /shareaza/Res/*.gz
+
+#Local work: git worktrees (one per session or task) and agent scratch
+/.worktrees/
+.superpowers/
