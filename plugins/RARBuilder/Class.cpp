@@ -105,6 +105,9 @@ STDMETHODIMP CRARBuilder::Process (
 	oad.CmtBuf = szCmtBuf;
 	oad.CmtBufSize = sizeof( szCmtBuf );
 	oad.OpenMode = RAR_OM_LIST;
+	// UnRAR 7.2x opens archives unshared by default; keep the shared mode
+	// earlier versions always used.
+	oad.OpFlags = ROADOF_SHARED;
 
 	CRarHandler oArchive( &oad );
 	CAtlMap< CString, CString > oFolderList;
