@@ -27,7 +27,7 @@ jobs:
         type: [ Release, Debug ]
     steps:
     - name: Checkout GIT sources
-      uses: actions/checkout@v4
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         fetch-depth: 0
 
@@ -37,28 +37,23 @@ jobs:
       run: python tests/encoding/check-cp1252.py shareaza/Shareaza.rc setup/scripts/main.iss
 
     - name: Install GitVersion
-      uses: gittools/actions/gitversion/setup@v1
+      uses: gittools/actions/gitversion/setup@220647997b450f3e9364b6cf6a357197f17d924b # v4.7.2
       with:
-        versionSpec: '5.x'
-
-    - name: Install GitVersion
-      uses: gittools/actions/gitversion/setup@v1
-      with:
-        versionSpec: '5.x'
+        versionSpec: '6.8.2'
 
     - name: Add MSBuild to PATH
-      uses: microsoft/setup-msbuild@v2
+      uses: microsoft/setup-msbuild@30375c66a4eea26614e0d39710365f22f8b0af57 # v3.0.0
 
-    - name: Install Inno Setup 6.7.3
+    - name: Install Inno Setup 6.7.4
       # setup/Installer_143.vcxproj calls ISCC by a fixed path, under "Inno Setup 6".
       # The runner image ships whatever 6.x it was built with, so the build installs
       # the last 6.x release over it, from the official release, hash-pinned.
       # Moving to 7.x would be a change of its own.
       shell: pwsh
       run: |
-          $version = '6.7.3'
-          $url = 'https://github.com/jrsoftware/issrc/releases/download/is-6_7_3/innosetup-6.7.3.exe'
-          $sha256 = '9C73C3BAE7ED48D44112A0F48E66742C00090BDB5BEF71D9D3C056C66E97B732'
+          $version = '6.7.4'
+          $url = 'https://github.com/jrsoftware/issrc/releases/download/is-6_7_4/innosetup-6.7.4.exe'
+          $sha256 = 'A549929319F9120716677C685535CA4671E4B937B5FDC87E2585F32D8EB30E8C'
           $dir = Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6'
           $exe = Join-Path $env:RUNNER_TEMP "innosetup-$version.exe"
           $log = Join-Path $env:RUNNER_TEMP "innosetup-$version.log"
@@ -82,7 +77,7 @@ jobs:
 
     - name: Determine Version
       id:   gitversion
-      uses: gittools/actions/gitversion/execute@v1
+      uses: gittools/actions/gitversion/execute@220647997b450f3e9364b6cf6a357197f17d924b # v4.7.2
 
     - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
@@ -95,7 +90,7 @@ jobs:
           CL: /D_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING /DRELEASE_BUILD=1
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
-      run: msbuild ${{env.SOLUTION_FILE_PATH}} /nologo /v:m /t:Rebuild /p:Configuration=${{ matrix.type }} /p:Platform=${{ matrix.platform }} /p:DefineConstants=BUILDFROMMSBUILD /p:RevisionSHA=${{ steps.gitversion.outputs.ShortSha }} /p:RevisionDate=${{ steps.gitversion.outputs.commitDate }} /fl /flp:Summary
+      run: msbuild ${{env.SOLUTION_FILE_PATH}} /nologo /v:m /t:Rebuild /p:Configuration=${{ matrix.type }} /p:Platform=${{ matrix.platform }} /p:DefineConstants=BUILDFROMMSBUILD /p:RevisionSHA=${{ steps.gitversion.outputs.shortSha }} /p:RevisionDate=${{ steps.gitversion.outputs.commitDate }} /fl /flp:Summary
 
     - name: Check the GeoIP DLL's exports
       # The client resolves these by name (Shareaza.cpp, LoadCountry). libGeoIP 1.6.12 exports
@@ -203,7 +198,7 @@ jobs:
           exit 0
 
     - name: Archive Shareaza Release
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       with:
         name: Shareaza Windows ${{ matrix.platform }} ${{ matrix.type }}
         path: setup/builds/*.exe

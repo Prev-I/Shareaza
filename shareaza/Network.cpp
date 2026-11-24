@@ -452,6 +452,9 @@ void CNetwork::Disconnect()
 	pLock.Unlock();
 
 	CloseThread();
+
+	// A network thread ended by force never reaches its own reset of this id
+	InterlockedExchange( &m_nRunningThreadId, 0 );
 }
 
 //////////////////////////////////////////////////////////////////////

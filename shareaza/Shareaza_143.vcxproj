@@ -945,6 +945,7 @@
     <ClInclude Include="UPnPNAT.h" />
     <ClInclude Include="VendorCache.h" />
     <ClInclude Include="ReleaseNotes.h" />
+    <ClInclude Include="UpgradeAsset.h" />
     <ClInclude Include="VersionChecker.h" />
     <ClInclude Include="WindowManager.h" />
     <ClInclude Include="WndPrivateChat.h" />

@@ -1,4 +1,4 @@
-/* Shareaza's copy of miniupnpc/miniupnpcstrings.h.in (miniupnpc 2.3.3),
+/* Shareaza's copy of miniupnpc/miniupnpcstrings.h.in (miniupnpc 2.3.5),
  * filled in by hand: upstream generates this file at build time, the
  * Shareaza project compiles it from here instead. */
 /* Project: miniupnp
@@ -11,7 +11,7 @@
 #define MINIUPNPCSTRINGS_H_INCLUDED
 
 #define OS_STRING "Shareaza/2.7"
-#define MINIUPNPC_VERSION_STRING "2.3.3"
+#define MINIUPNPC_VERSION_STRING "2.3.5"
 
 #if 0
 /* according to "UPnP Device Architecture 1.0" */

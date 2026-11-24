@@ -1,3 +1,4 @@
-1. Download latest file "zlib-*.zip" from here: http://www.zlib.net/
-2. Unpack all files to "zlib" sub-folder
+1. Download the latest "zlib-*.tar.gz" and its ".asc" signature from https://zlib.net/ and check the signature (Mark Adler, key 5ED4 6A67 21D3 6558 7791  E2AA 783F CD8E 58BC AFBA)
+2. Replace the "zlib" sub-folder with the tarball contents, unchanged
 3. Update version information inside "zlibwapi.rc"
+4. "zlibvc.def" (the export list, formerly zlib\contrib\vstudio\vc14\zlibvc.def, which zlib no longer ships) lives here, outside "zlib": check every name it exports still exists in the new release

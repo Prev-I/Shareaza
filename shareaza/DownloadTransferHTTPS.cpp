@@ -38,6 +38,7 @@
 #include "Transfers.h"
 #include "Security.h"
 #include "TlsPolicy.h"
+#include "UpgradeAsset.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -94,6 +95,12 @@ BOOL CDownloadTransferHTTPS::Initiate()
 	// Only this attempt's certificate verification may make the source wait again
 	m_pSource->m_bTlsWaiting = false;
 	m_pSource->m_sTlsWaitingFingerprint.Empty();
+
+	// The client's own update download is exempt from IP lists and security rules: it relies
+	// on HTTPS with a certificate valid for its host instead. Only its own sources are: the
+	// update check's URL and the redirects it returns, marked in this process, never a saved
+	// or added source. Set both ways, every time.
+	m_bSkipSecurity = m_pDownload->m_bRequireValidCert && m_pSource->m_bUpdateExempt;
 	
 	if ( m_pDownload->IsCompleted() )
 	{
@@ -213,6 +220,11 @@ void CDownloadTransferHTTPS::GiveConnectionToNext()
 	if ( ! IsTlsValidated() && nPolicy != static_cast< DWORD >( TLS_CERT_IGNORE ) &&
 		! ( nPolicy == static_cast< DWORD >( TLS_CERT_ASK ) &&
 			TlsTrust.IsAccepted( std::wstring( (LPCWSTR)GetTlsHostName() ), std::wstring( (LPCWSTR)GetTlsFingerprint() ) ) ) )
+		return;
+
+	// A connection opened past the security check (the update download's) serves no other
+	// download: that download's own connect would have been checked
+	if ( m_bSkipSecurity )
 		return;
 
 	for ( POSITION pos = Downloads.GetIterator() ; pos != NULL ; )
@@ -1142,7 +1154,9 @@ BOOL CDownloadTransferHTTPS::OnHeaderLine(CString& strHeader, CString& strValue)
 	}
 	else if ( strHeader.CompareNoCase( _T("Content-Disposition") ) == 0 )
 	{
-		if ( ! m_pDownload->HasStableName() )
+		// The update download keeps the name the update check gave it, which a resumed
+		// update is matched against
+		if ( ! m_pDownload->HasStableName() && ! m_pDownload->m_bRequireValidCert )
 		{ 
 			const int nPos = strValue.Find( _T("filename=") );
 			if ( nPos >= 0 )
@@ -1189,7 +1203,9 @@ BOOL CDownloadTransferHTTPS::OnHeadersComplete()
 	else if ( m_bRedirect )
 	{
 		CShareazaURL pURL( m_sRedirectionURL );
-		m_pDownload->AddSourceHit( pURL, TRUE, m_pSource->m_nRedirectionCount + 1 );
+		m_pDownload->AddSourceHit( pURL, TRUE, m_pSource->m_nRedirectionCount + 1,
+			UpgradeAsset::RedirectStaysExempt( m_pSource->m_bUpdateExempt,
+				m_pDownload->m_bRequireValidCert != FALSE, IsTls() && IsTlsValidated() ) );
 		Close( TRI_FALSE );
 		return FALSE;
 	}

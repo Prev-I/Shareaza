@@ -3805,6 +3805,8 @@ BEGIN
     IDS_NETWORK_RESOLVE_FAIL "Unable to resolve host ""%s""."
     IDS_SECURITY_DENIED     "Security manager denied connection from %s."
     IDS_SECURITY_OUTGOING   "Security manager barred a connection to %s."
+    IDS_SECURITY_UPDATE_EXEMPT 
+                            "IP lists and security rules do not apply to the update download: connecting to %s."
     IDS_SECURITY_ALREADY_BLOCKED 
                             "The address %s is already blocked by your security rules."
     IDS_SECURITY_BLOCKED    "Added a security rule to block %s."

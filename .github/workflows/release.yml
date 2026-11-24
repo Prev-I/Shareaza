@@ -32,23 +32,23 @@ jobs:
                 fetch-depth: 0
 
         -   name: Install GitVersion
-            uses: gittools/actions/gitversion/setup@7417b1089e2c7de93510f1901d656ddf60bb024f # v4.7.0
+            uses: gittools/actions/gitversion/setup@220647997b450f3e9364b6cf6a357197f17d924b # v4.7.2
             with:
                 versionSpec: '6.8.2'
 
         -   name: Add MSBuild to PATH
             uses: microsoft/setup-msbuild@30375c66a4eea26614e0d39710365f22f8b0af57 # v3.0.0
 
-        -   name: Install Inno Setup 6.7.3
+        -   name: Install Inno Setup 6.7.4
             # setup/Installer_143.vcxproj calls ISCC by a fixed path, under "Inno Setup 6".
             # The runner image ships whatever 6.x it was built with, so the build installs
             # the last 6.x release over it, from the official release, hash-pinned.
             # Moving to 7.x would be a change of its own.
             shell: pwsh
             run: |
-                $version = '6.7.3'
-                $url = 'https://github.com/jrsoftware/issrc/releases/download/is-6_7_3/innosetup-6.7.3.exe'
-                $sha256 = '9C73C3BAE7ED48D44112A0F48E66742C00090BDB5BEF71D9D3C056C66E97B732'
+                $version = '6.7.4'
+                $url = 'https://github.com/jrsoftware/issrc/releases/download/is-6_7_4/innosetup-6.7.4.exe'
+                $sha256 = 'A549929319F9120716677C685535CA4671E4B937B5FDC87E2585F32D8EB30E8C'
                 $dir = Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6'
                 $exe = Join-Path $env:RUNNER_TEMP "innosetup-$version.exe"
                 $log = Join-Path $env:RUNNER_TEMP "innosetup-$version.log"
@@ -72,7 +72,7 @@ jobs:
 
         -   name: Determine Version
             id:   gitversion
-            uses: gittools/actions/gitversion/execute@7417b1089e2c7de93510f1901d656ddf60bb024f # v4.7.0
+            uses: gittools/actions/gitversion/execute@220647997b450f3e9364b6cf6a357197f17d924b # v4.7.2
 
         -   name: Build
             working-directory: ${{env.GITHUB_WORKSPACE}}

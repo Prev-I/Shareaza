@@ -287,6 +287,7 @@ void CDownloadSource::Construct(const CDownload* pDownload)
 	m_bPreviewRequestSent	= FALSE;
 	m_bMetaIgnore			= FALSE;
 	m_bTlsWaiting			= false;
+	m_bUpdateExempt			= false;
 }
 
 CDownloadSource::~CDownloadSource()

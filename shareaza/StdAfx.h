@@ -214,7 +214,7 @@
 
 #define BZ_NO_STDIO
 #include "../bzlib/bzlib.h"
-#include "../zlib/zlib.h"
+#include "../zlibwapi/zlib/zlib.h"
 
 #pragma warning ( pop )
 
@@ -546,7 +546,16 @@ public:
 
 	virtual BOOL Lock(DWORD dwTimeout = INFINITE)
 	{
-		if ( CMutex::Lock( dwTimeout ) )
+		// Wait here rather than in CMutex::Lock, which reports an abandoned mutex as a plain TRUE
+		const DWORD dwRet = ::WaitForSingleObject( m_hObject, dwTimeout );
+		if ( dwRet == WAIT_ABANDONED )
+		{
+			// The owner thread ended holding the mutex: its counts are void, and the
+			// kernel has given the mutex to this thread with a recursion count of one
+			InterlockedExchange( &m_nEnterCount, 0 );
+			InterlockedExchange( &m_nThreadId, 0 );
+		}
+		if ( dwRet == WAIT_OBJECT_0 || dwRet == WAIT_ABANDONED )
 		{
 			if ( InterlockedIncrement( &m_nEnterCount ) == 1 )
 				InterlockedIncrement( &m_nAcquisitions );	// Outermost acquisition only

@@ -11,11 +11,11 @@
 #define WIN32_LEAN_AND_MEAN
 #include <winsock2.h>
 #include <ws2tcpip.h>
-#if !defined(_MSC_VER)
+#if !defined(_MSC_VER) || (_MSC_VER >= 1600)
 #include <stdint.h>
-#else /* !defined(_MSC_VER) */
+#else /* !defined(_MSC_VER) || (_MSC_VER >= 1600) */
 typedef unsigned long uint32_t;
-#endif /* !defined(_MSC_VER) */
+#endif /* !defined(_MSC_VER) || (_MSC_VER >= 1600) */
 #if !defined(_WIN32_WINNT_VISTA)
 #define _WIN32_WINNT_VISTA 0x0600
 #endif
@@ -30,7 +30,7 @@ typedef unsigned long uint32_t;
 #endif
 
 /* List of IP address blocks which are private / reserved and therefore not suitable for public external IP addresses */
-#define IP(a, b, c, d) (((a) << 24) + ((b) << 16) + ((c) << 8) + (d))
+#define IP(a, b, c, d) ((uint32_t)(((a) << 24) + ((b) << 16) + ((c) << 8) + (d)))
 #define MSK(m) (32-(m))
 static const struct { uint32_t address; uint32_t rmask; } reserved[] = {
 	{ IP(  0,   0,   0, 0), MSK( 8) }, /* RFC1122 "This host on this network" */

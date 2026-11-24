@@ -111,7 +111,7 @@
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <ModuleDefinitionFile>zlib\contrib\vstudio\vc14\zlibvc.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>zlibvc.def</ModuleDefinitionFile>
       <TargetMachine>MachineX86</TargetMachine>
       <SubSystem>Windows</SubSystem>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
@@ -144,7 +144,7 @@
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <ModuleDefinitionFile>zlib\contrib\vstudio\vc14\zlibvc.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>zlibvc.def</ModuleDefinitionFile>
       <TargetMachine>MachineX64</TargetMachine>
       <SubSystem>Windows</SubSystem>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
@@ -182,7 +182,7 @@
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <ModuleDefinitionFile>zlib\contrib\vstudio\vc14\zlibvc.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>zlibvc.def</ModuleDefinitionFile>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <SetChecksum>true</SetChecksum>
@@ -220,7 +220,7 @@
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <ModuleDefinitionFile>zlib\contrib\vstudio\vc14\zlibvc.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>zlibvc.def</ModuleDefinitionFile>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <SetChecksum>true</SetChecksum>
@@ -256,6 +256,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="zlib\win32\zlib.def" />
+    <None Include="zlibvc.def" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="zlib\crc32.h" />

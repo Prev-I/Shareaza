@@ -4,6 +4,7 @@ on:
     pull_request:
       paths:
         - shareaza/ReleaseNotes.h
+        - shareaza/UpgradeAsset.h
         - tests/release-notes/**
         - .github/workflows/release-notes-test.yml
     push:
@@ -11,6 +12,7 @@ on:
         - main
       paths:
         - shareaza/ReleaseNotes.h
+        - shareaza/UpgradeAsset.h
         - tests/release-notes/**
         - .github/workflows/release-notes-test.yml
 
@@ -28,3 +30,6 @@ jobs:
 
         -   name: Build and run the release-notes test
             run: g++ -std=c++17 -Wall -Wextra -Werror -I shareaza -o /tmp/rn tests/release-notes/test_release_notes.cpp && /tmp/rn
+
+        -   name: Build and run the update-asset test
+            run: g++ -std=c++17 -Wall -Wextra -Werror -I shareaza -o /tmp/ua tests/release-notes/test_upgrade_asset.cpp && /tmp/ua

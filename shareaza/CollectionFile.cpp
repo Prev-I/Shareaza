@@ -82,6 +82,9 @@ BOOL CCollectionFile::Open(LPCTSTR lpszFileName)
 		if ( LoadDC( lpszFileName ) )
 			return TRUE;
 	}
+
+	// Nothing a failed parse kept may join the text entries
+	Close();
 	return LoadText( lpszFileName );
 }
 
@@ -301,17 +304,22 @@ BOOL CCollectionFile::LoadEMule(LPCTSTR pszFile)
 				for ( DWORD i = 0; i < nFileCount; ++i )
 				{
 					auto_ptr< File > pCollectionFile( new File( this ) );
-					if ( pCollectionFile.get() && pCollectionFile->Parse( pFile ) )
-					{
+					bool bReadAll = false;
+					const BOOL bValid = pCollectionFile->Parse( pFile, bReadAll );
+
+					// An entry without a name, hash or size is skipped
+					if ( bValid )
 						m_pFiles.AddTail( pCollectionFile.release() );
-					}
-					else
+
+					// An entry not read to its end leaves the rest of the file unreadable:
+					// keep what was read before it
+					if ( ! bReadAll )
 						break;
 				}
 			}
 		}
 	}
-	return nFileCount && ( (DWORD)m_pFiles.GetCount() == nFileCount );
+	return ! m_pFiles.IsEmpty();
 }
 
 BOOL CCollectionFile::LoadDC(LPCTSTR pszFile)
@@ -479,12 +487,13 @@ void CCollectionFile::Render(CBuffer& strBuffer) const
 {
 	strBuffer.EnsureBuffer( GetFileCount() * 128 + 256 );
 
+	// Every value is escaped: the collection's own text must stay text in the XML
 	CString sHead;
 
 	sHead.Format(	_T("<?xml-stylesheet type=\"text/xsl\" href=\"shareaza_filelist_style.xsl\"?>\n")
 					_T("<FileList title=\"%s\" font=\"%s\" fontSize=\"%u\">\n"),
-		(LPCTSTR)GetTitle(),
-		(LPCTSTR)Settings.Fonts.DefaultFont, Settings.Fonts.FontSize);
+		(LPCTSTR)Escape( GetTitle() ),
+		(LPCTSTR)Escape( Settings.Fonts.DefaultFont ), Settings.Fonts.FontSize);
 	strBuffer.Print(sHead, CP_UTF8);
 
 	DWORD i = 1;
@@ -516,8 +525,8 @@ void CCollectionFile::Render(CBuffer& strBuffer) const
 
 		CString strTemp;
 		strTemp.Format( _T("<File index=\"%u\" urn=\"%s\" path=\"%s\" name=\"%s\" size=\"%s\" />\n"),
-			i, (LPCTSTR)strURN, (LPCTSTR) pFile->m_sPath, (LPCTSTR)pFile->m_sName,
-			(LPCTSTR)Settings.SmartVolume( pFile->m_nSize ) );
+			i, (LPCTSTR)Escape( strURN ), (LPCTSTR)Escape( pFile->m_sPath ), (LPCTSTR)Escape( pFile->m_sName ),
+			(LPCTSTR)Escape( Settings.SmartVolume( pFile->m_nSize ) ) );
 
 		strBuffer.Print(strTemp, CP_UTF8);
 	}
@@ -597,13 +606,16 @@ BOOL CCollectionFile::File::Parse(CXMLElement* pRoot)
 	return HasHash();
 }
 
-BOOL CCollectionFile::File::Parse(CFile& pFile)
+BOOL CCollectionFile::File::Parse(CFile& pFile, bool& bReadAll)
 {
+	bReadAll = false;
+
 	DWORD nCount;
 	if ( pFile.Read( &nCount, sizeof( nCount ) ) == sizeof( nCount ) &&
-		nCount > 0 && nCount < 10 )
+		nCount < 10 )
 	{
-		for ( DWORD i = 0; i < nCount; ++i )
+		DWORD i = 0;
+		for ( ; i < nCount; ++i )
 		{
 			CEDTag pTag;
 			if ( ! pTag.Read( &pFile ) )
@@ -634,6 +646,7 @@ BOOL CCollectionFile::File::Parse(CFile& pFile)
 				// TODO: ED2K_FT_FILERATING
 			}
 		}
+		bReadAll = ( i == nCount );
 	}
 	return ! m_sName.IsEmpty() && m_oED2K && m_nSize != SIZE_UNKNOWN;
 }

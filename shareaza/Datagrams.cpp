@@ -1426,7 +1426,7 @@ BOOL CDatagrams::OnReceiveSGP(const SOCKADDR_IN6* pHost, const SGP_HEADER* pHead
 		pAck.nPart		= pHeader->nPart;
 		pAck.nCount		= 0;
 
-		CNetwork::SendTo( m_hSocket[ 0 ], (LPCSTR)&pAck, sizeof(pAck), pHost );
+		CNetwork::SendTo( m_hSocketIPv6, (LPCSTR)&pAck, sizeof(pAck), pHost );
 	}
 
 	BYTE nHash	= BYTE( ( pHost->sin6_addr.u.Byte[0]

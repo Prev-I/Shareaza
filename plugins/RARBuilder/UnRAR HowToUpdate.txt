@@ -1,2 +1,4 @@
-1. Download this file: http://www.rarlab.com/rar/UnRARDLL.exe
-2. Unpack next files to Shareaza sources: unrar.h, unrar.dll and x64\unrar64.dll
+1. Download the latest stable "UnRAR.dll" package (unrardll-XXX.exe) from https://www.rarlab.com/rar_add.htm; if that page lists only a beta, the stable one is at https://www.rarlab.com/rar/unrardll-XXX.exe
+2. Check that the package and both DLLs carry a valid win.rar GmbH Authenticode signature
+3. Unpack it and copy: unrar.h, UnRAR.dll as unrar.dll, x64\UnRAR64.dll as unrar64.dll, license.txt as "UnRAR License.txt"
+4. Read whatsnew.txt for API changes since the previous version

@@ -105,7 +105,8 @@ void CUpgradeDlg::OnOK()
 
 	CSingleLock pLock( &Transfers.m_pSection, TRUE );
 
-	if ( CDownload* pDownload = Downloads.Add( pURL ) )
+	// The update check's own URL: its sources are the only ones exempt from IP filtering
+	if ( CDownload* pDownload = Downloads.Add( pURL, FALSE, TRUE ) )
 	{
 		// An upgrade is fetched only from servers with a valid certificate, whatever the
 		// certificate policy. The transfers lock is still held, so the sources just added

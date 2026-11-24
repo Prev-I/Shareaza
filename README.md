@@ -60,7 +60,7 @@ which builds both installers on a `windows-2022` runner. To build by hand you ne
   `windows-2025`) ship the v143 compiler without v143 ATL and MFC, and cannot build this solution.
 - **Inno Setup 6**, version 6.3 or later, installed in its default folder,
   `C:\Program Files (x86)\Inno Setup 6`: the installer project calls `ISCC.exe` by that path.
-  CI uses 6.7.3; Inno Setup 7 would need a project change.
+  CI uses 6.7.4; Inno Setup 7 would need a project change.
 - **NuGet**, to restore the packages the solution uses.
 
 Then, from a Developer Command Prompt for VS 2022:

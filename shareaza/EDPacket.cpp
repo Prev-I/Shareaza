@@ -1487,6 +1487,10 @@ BOOL CEDTag::Read(CFile* pFile)
 			DWORD nBlolbLen;
 			if ( pFile->Read( &nBlolbLen, sizeof(nBlolbLen) ) != sizeof(nBlolbLen) )
 				return FALSE;
+			// No longer than what is left of the file, as Read(CEDPacket*) checks, and
+			// short of the size that the copy below cannot hold
+			if ( nBlolbLen > pFile->GetLength() - pFile->GetPosition() || nBlolbLen == 0xFFFFFFFF )
+				return FALSE;
 			auto_array< CHAR > psz( new CHAR[ nBlolbLen ] );
 			if ( ! psz.get() )
 				return FALSE;
