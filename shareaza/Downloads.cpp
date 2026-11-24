@@ -310,7 +310,7 @@ CDownload* CDownloads::Add(const CShareazaURL& oURL, BOOL bAddToHead, BOOL bUpda
 // A saved update download holds only the redirect its official source returned, whose URL
 // expires and which is not exempt from IP filtering once reloaded. If it is still the update
 // the version check found, its sources are replaced with the check's own URL, which redirects
-// afresh. Otherwise, or if that URL does not parse, it is left as it is.
+// afresh. Otherwise, or if no such URL parses and resolves, it is left as it is.
 void CDownloads::ReseedUpdate(CDownload* pDownload)
 {
 	ASSUME_LOCK( Transfers.m_pSection );
@@ -329,12 +329,14 @@ void CDownloads::ReseedUpdate(CDownload* pDownload)
 		std::wstring( (LPCTSTR)Settings.VersionCheck.UpgradeSources ),
 		nUpgradeSize, CVersionChecker::IsVersionNewer() != FALSE );
 
-	// Syntax only: resolving here would add a blocking lookup, and AddSourceURL resolves anyway
+	// Resolve before clearing: AddSourceURL resolves each URL again and fails when the host
+	// cannot be resolved, as at a start before the network is up, which would leave the download
+	// with no sources at all. The second lookup is normally answered from the resolver's cache.
 	bool bValid = false;
 	for ( size_t i = 0 ; i < oURLs.size() && ! bValid ; ++i )
 	{
 		CShareazaURL oURL;
-		bValid = ( oURL.Parse( oURLs[ i ].c_str(), FALSE ) != FALSE );
+		bValid = ( oURL.Parse( oURLs[ i ].c_str(), TRUE ) != FALSE );
 	}
 	if ( ! bValid )
 		return;
