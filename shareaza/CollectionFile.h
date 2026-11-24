@@ -56,7 +56,7 @@ public:
 	// Operations
 	public:
 		BOOL	Parse(CXMLElement* pXML);	// Load from XML
-		BOOL	Parse(CFile& pFile);		// Load from .emulecollection-file
+		BOOL	Parse(CFile& pFile, bool& bReadAll);	// Load from .emulecollection-file; bReadAll: the entry was read to its end
 		BOOL	Parse(LPCTSTR szText);		// Load from text line
 		BOOL	IsComplete() const;
 		BOOL	IsDownloading() const;

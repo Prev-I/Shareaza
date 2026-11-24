@@ -169,6 +169,24 @@ feed stops at 1.87; no fix in the parts used), the GFL SDK 3.40 (no newer releas
 GitVersion 7 (breaking). The unused copy of zlib 1.2.12 in the root `zlib/` folder is left as it
 is.
 
+## Parser and rendering fixes (added 2026-11-22)
+
+Found by reading the code on 2026-11-20 and first deferred; the owner added them to previ.11 on
+2026-11-22, before its pull request. Class and function only, as for every fix.
+
+8. **`CEDTag::Read(CFile*)`** allocates a length it reads before checking it against what is
+   left of the file. Check it first, as `CEDTag::Read(CEDPacket*)` already does.
+9. **`CCollectionFile::Render`** writes values into XML attributes without escaping. Escape each
+   with `Escape` (`Strings.cpp`).
+10. **`CCollectionFile::LoadEMule`** and **`CCollectionFile::File::Parse(CFile&)`**: one entry
+    without a name, hash or size made the whole collection fail. Skip such an entry. At an entry
+    that cannot be read to its end, stop and keep the entries read so far. A collection with no
+    usable entry fails.
+11. **`CCollectionFile::Open`** falls back to `LoadText` after a failed binary parse without
+    clearing what that parse kept. Clear it first.
+
+Further hardening is deferred.
+
 ## Release
 
 - One pull request for the exemption and one for the deferred fixes, or a single one: the
