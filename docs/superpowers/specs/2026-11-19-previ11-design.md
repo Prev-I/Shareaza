@@ -106,8 +106,7 @@ The same release carries every small item left over from previ.9 and previ.10 *(
 
 ## Deferred fixes
 
-Each is described by class and function. None concerns a withheld trigger, but the disclosure
-check below still applies.
+Each is described by class and function.
 
 1. **`CSecurity::GetCount`** returns the rule list plus the single-address IPv4 map, but
    `CSecurity::Serialize` then also writes the single-address IPv6 map. On load the count is
@@ -169,13 +168,18 @@ feed stops at 1.87; no fix in the parts used), the GFL SDK 3.40 (no newer releas
 GitVersion 7 (breaking). The root `zlib/` folder, an unused copy of zlib 1.2.12 that no project
 built, is removed *(owner, 2026-11-22)*: the build uses `zlibwapi/zlib` only.
 
-## Parser and rendering fixes (added 2026-11-22)
+## Fixes added 2026-11-22
 
 Found by reading the code on 2026-11-20 and first deferred; the owner added them to previ.11 on
 2026-11-22, before its pull request. Class and function only, as for every fix.
 
+### `CEDTag`
+
 8. **`CEDTag::Read(CFile*)`** allocates a length it reads before checking it against what is
    left of the file. Check it first, as `CEDTag::Read(CEDPacket*)` already does.
+
+### `CCollectionFile`
+
 9. **`CCollectionFile::Render`** writes values into XML attributes without escaping. Escape each
    with `Escape` (`Strings.cpp`).
 10. **`CCollectionFile::LoadEMule`** and **`CCollectionFile::File::Parse(CFile&)`**: one entry
@@ -184,8 +188,6 @@ Found by reading the code on 2026-11-20 and first deferred; the owner added them
     usable entry fails.
 11. **`CCollectionFile::Open`** falls back to `LoadText` after a failed binary parse without
     clearing what that parse kept. Clear it first.
-
-Further hardening is deferred.
 
 ## Release
 
