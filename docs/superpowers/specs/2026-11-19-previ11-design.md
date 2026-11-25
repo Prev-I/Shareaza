@@ -1,8 +1,8 @@
 # previ.11: the update download bypasses IP filtering, deferred fixes, and version 2.7.11.6: design
 
-Date: 2026-11-19. Status: approved by the owner on 2026-11-20. The scope and the decisions marked
-*(owner)* were settled with the owner on 2026-11-18/19; items marked *(designer's call)* were
-settled while writing.
+Date: 2026-11-19. Status: approved by the owner on 2026-11-20; shipped in `v2.7.11.6-previ.11`
+(#54, #55). The scope and the decisions marked *(owner)* were settled with the owner on
+2026-11-18/19; items marked *(designer's call)* were settled while writing.
 
 ## Intent
 
